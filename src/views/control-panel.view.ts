@@ -6,9 +6,11 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Control Panel - Quản Trị Hệ Thống Phiếu Yêu Cầu Kỹ Thuật</title>
-  <link rel="icon" type="image/png" href="/images/favicon.png?v=2" />
-  <link rel="shortcut icon" href="/images/favicon.ico?v=2" />
+  <title>Control Panel - Checkpoint Systems Technical Request & Maintenance Platform</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png?v=3" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png?v=3" />
+  <link rel="shortcut icon" href="/images/favicon.ico?v=3" />
+  <link rel="apple-touch-icon" href="/images/favicon.png?v=3" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,7 +156,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         <!-- Logo Button -->
         <a href="/control-panel" class="flex items-center gap-2.5 text-inherit font-extrabold text-sm tracking-tight text-decoration-none">
           <div class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-1 shadow-inner overflow-hidden">
-            <img src="/images/logo-navbar.png?v=2" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png?v=2';};" class="w-full h-full object-contain rounded-lg" alt="Checkpoint Systems Logo" />
+            <img src="/images/logo-navbar.png?v=3" onerror="this.onerror=null; this.src='/images/logo-login.png?v=3'; this.onerror=function(){this.src='/images/favicon.png?v=3';};" class="w-full h-full object-contain rounded-lg" alt="Checkpoint Systems Logo" />
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
@@ -439,7 +441,11 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         <div class="pt-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 space-y-1">
           <div class="flex justify-between">
             <span>Dự án:</span>
-            <span class="font-bold text-slate-700 dark:text-slate-200">Checkpoint Tech</span>
+            <span class="font-bold text-slate-700 dark:text-slate-200">Checkpoint Systems</span>
+          </div>
+          <div class="flex justify-between">
+            <span>Hệ thống:</span>
+            <span class="font-semibold text-sky-500">Technical Ops</span>
           </div>
           <div class="flex justify-between">
             <span>Core:</span>

@@ -25,6 +25,23 @@ export class AppController {
     }
     return res.status(404).end();
   }
+
+  @Get('favicon.png')
+  @ApiExcludeEndpoint()
+  getFaviconPng(@Res() res: Response) {
+    const candidatePaths = [
+      path.join(process.cwd(), 'public', 'favicon.png'),
+      path.join(process.cwd(), 'public', 'images', 'favicon.png'),
+      path.join(__dirname, 'public', 'favicon.png'),
+      path.join(__dirname, '..', 'public', 'favicon.png'),
+      path.join(__dirname, '..', 'public', 'images', 'favicon.png'),
+    ];
+    const faviconPath = candidatePaths.find((p) => fs.existsSync(p));
+    if (faviconPath) {
+      return res.sendFile(faviconPath);
+    }
+    return res.status(404).end();
+  }
   private setNoCacheHeaders(res: Response) {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
