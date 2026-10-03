@@ -7,8 +7,8 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Dashboard - Nhập Liệu Phiếu Yêu Cầu Kỹ Thuật</title>
-  <link rel="icon" type="image/png" href="/images/favicon.png" />
-  <link rel="shortcut icon" href="/images/favicon.png" />
+  <link rel="icon" type="image/png" href="/images/favicon.png?v=2" />
+  <link rel="shortcut icon" href="/images/favicon.ico?v=2" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -380,7 +380,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <div class="flex items-center gap-3">
         <a href="/dashboard" class="flex items-center gap-2.5 text-inherit font-extrabold text-sm tracking-tight text-decoration-none">
           <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-0.5 shadow-inner overflow-hidden">
-            <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-md" alt="Checkpoint Systems Logo" />
+            <img src="/images/logo-navbar.png?v=2" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png?v=2';};" class="w-full h-full object-contain rounded-md" alt="Checkpoint Systems Logo" />
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
@@ -1765,7 +1765,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
           const a = document.createElement('a');
           a.href = URL.createObjectURL(blob);
-          a.download = (form.value.docNo || 'TechPrint') + '_Backup.json';
+          a.download = (form.value.docNo || 'Checkpoint') + '_Backup.json';
           document.body.appendChild(a);
           a.click();
           document.body.removeChild(a);
@@ -2000,7 +2000,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
               });
             }
 
-            const cleanDoc = (form.value.docNo || 'TechPrint').replace(/[/\\\\?%*:|"<>]/g, '-');
+            const cleanDoc = (form.value.docNo || 'Checkpoint').replace(/[/\\\\?%*:|"<>]/g, '-');
             pdf.save(cleanDoc + '.pdf');
             showToast('Xuất PDF thành công!');
           } catch (err) {

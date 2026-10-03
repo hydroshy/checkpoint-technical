@@ -7,8 +7,8 @@ export const LOGIN_HTML = `<!DOCTYPE html>
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Đăng Nhập - Hệ Thống Phiếu Yêu Cầu Kỹ Thuật</title>
-  <link rel="icon" type="image/png" href="/images/favicon.png" />
-  <link rel="shortcut icon" href="/images/favicon.png" />
+  <link rel="icon" type="image/png" href="/images/favicon.png?v=2" />
+  <link rel="shortcut icon" href="/images/favicon.ico?v=2" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -45,7 +45,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
       <!-- Logo Header -->
       <div class="text-center space-y-2">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-500/10 border border-sky-500/30 p-2 shadow-inner mb-1 overflow-hidden">
-          <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-xl" alt="Checkpoint Systems Logo" />
+          <img src="/images/logo-login.png?v=2" onerror="this.onerror=null; this.src='/images/logo-navbar.png?v=2'; this.onerror=function(){this.src='/images/logo-full.png';};" class="w-full h-full object-contain rounded-xl" alt="Checkpoint Systems Logo" />
         </div>
         <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center justify-center gap-1.5">
           <span class="text-sky-400">CHECKPOINT</span> Systems

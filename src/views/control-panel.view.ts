@@ -7,8 +7,8 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
   <title>Control Panel - Quản Trị Hệ Thống Phiếu Yêu Cầu Kỹ Thuật</title>
-  <link rel="icon" type="image/png" href="/images/favicon.png" />
-  <link rel="shortcut icon" href="/images/favicon.png" />
+  <link rel="icon" type="image/png" href="/images/favicon.png?v=2" />
+  <link rel="shortcut icon" href="/images/favicon.ico?v=2" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -154,7 +154,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         <!-- Logo Button -->
         <a href="/control-panel" class="flex items-center gap-2.5 text-inherit font-extrabold text-sm tracking-tight text-decoration-none">
           <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-0.5 shadow-inner overflow-hidden">
-            <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-md" alt="Checkpoint Systems Logo" />
+            <img src="/images/logo-navbar.png?v=2" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png?v=2';};" class="w-full h-full object-contain rounded-md" alt="Checkpoint Systems Logo" />
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
@@ -1520,7 +1520,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           const ws = XLSX.utils.json_to_sheet(rows);
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, 'DanhSachPhieu');
-          XLSX.writeFile(wb, 'TechPrint_PhieuYeuCau_' + new Date().toISOString().split('T')[0] + '.xlsx');
+          XLSX.writeFile(wb, 'Checkpoint_PhieuYeuCau_' + new Date().toISOString().split('T')[0] + '.xlsx');
           showToast('Đã xuất file Excel danh sách phiếu');
         };
 
@@ -1536,7 +1536,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           const ws = XLSX.utils.json_to_sheet(rows);
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, 'NhanSu');
-          XLSX.writeFile(wb, 'TechPrint_DanhSachNhanSu.xlsx');
+          XLSX.writeFile(wb, 'Checkpoint_DanhSachNhanSu.xlsx');
           showToast('Đã xuất file Excel nhân sự');
         };
 

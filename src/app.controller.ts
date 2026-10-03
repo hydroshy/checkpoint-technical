@@ -1,12 +1,30 @@
 import { Controller, Get, Post, Req, Res } from '@nestjs/common';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Request, Response } from 'express';
+import * as path from 'path';
+import * as fs from 'fs';
 import { LOGIN_HTML } from './views/login.view';
 import { DASHBOARD_HTML } from './views/dashboard.view';
 import { CONTROL_PANEL_HTML } from './views/control-panel.view';
 
 @Controller()
 export class AppController {
+  @Get('favicon.ico')
+  @ApiExcludeEndpoint()
+  getFavicon(@Res() res: Response) {
+    const candidatePaths = [
+      path.join(process.cwd(), 'public', 'favicon.ico'),
+      path.join(process.cwd(), 'public', 'images', 'favicon.ico'),
+      path.join(__dirname, 'public', 'favicon.ico'),
+      path.join(__dirname, '..', 'public', 'favicon.ico'),
+      path.join(__dirname, '..', 'public', 'images', 'favicon.ico'),
+    ];
+    const faviconPath = candidatePaths.find((p) => fs.existsSync(p));
+    if (faviconPath) {
+      return res.sendFile(faviconPath);
+    }
+    return res.status(404).end();
+  }
   private setNoCacheHeaders(res: Response) {
     res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0');
     res.setHeader('Pragma', 'no-cache');
