@@ -8,7 +8,7 @@
     "rootCauseCategory": "Machine",
     "specificIssue": "eqwoeioqweiqowieo1111",
     "affectedProduct": "abcxyzcbczxcb",
-    "downtimeMinutes": null,
+    "downtimeMinutes": "",
     "recurringIssue": "No",
     "eightDRequired": "No"
   },
@@ -21,7 +21,7 @@
     "rootCauseCategory": "System",
     "specificIssue": "231231qweqweqweqweqwe1",
     "affectedProduct": "iwueuqiwoeuoiqwe",
-    "downtimeMinutes": null,
+    "downtimeMinutes": "",
     "recurringIssue": "Yes",
     "eightDRequired": "Yes"
   },
@@ -34,14 +34,14 @@
     "rootCauseCategory": "Machine",
     "specificIssue": "đâsd",
     "affectedProduct": "eqweqwsjapldjp",
-    "downtimeMinutes": null,
+    "downtimeMinutes": "",
     "recurringIssue": "Yes",
     "eightDRequired": "No"
   },
   {
     "id": "defect-4",
     "defectId": 4,
-    "defectDate": "10/02/2026\\",
+    "defectDate": "10/02/2026",
     "facility": "RFID",
     "source": "External (Customer complaint)",
     "rootCauseCategory": "Method",

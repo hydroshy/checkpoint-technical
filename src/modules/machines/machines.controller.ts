@@ -16,8 +16,6 @@ import { Roles } from '../../common/decorators/roles.decorator';
 
 @ApiTags('Machines & Printing Tech')
 @Controller('api/machines')
-@UseGuards(JwtAuthGuard)
-@ApiBearerAuth()
 export class MachinesController {
   constructor(private readonly machinesService: MachinesService) {}
 
@@ -34,7 +32,8 @@ export class MachinesController {
   }
 
   @Post()
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('ADMIN', 'TECHNICIAN')
   @ApiOperation({ summary: 'Add machine to technology category' })
   addMachine(@Body() body: { tech: string; name: string; code?: string; note?: string }) {
@@ -42,7 +41,8 @@ export class MachinesController {
   }
 
   @Put(':id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('ADMIN', 'TECHNICIAN')
   @ApiOperation({ summary: 'Update machine' })
   updateMachine(@Param('id') id: string, @Body() body: any) {
@@ -50,7 +50,8 @@ export class MachinesController {
   }
 
   @Delete(':id')
-  @UseGuards(RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
   @Roles('ADMIN')
   @ApiOperation({ summary: 'Delete machine' })
   deleteMachine(@Param('id') id: string) {

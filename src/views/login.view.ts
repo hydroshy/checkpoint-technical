@@ -6,7 +6,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Đăng Nhập - Hệ Thống Phiếu Yêu Cầu Kỹ Thuật</title>
+  <title>Đăng Nhập - Checkpoint Systems Weekly Technical Dashboard</title>
   <link rel="icon" type="image/png" href="/images/favicon.png?v=2" />
   <link rel="shortcut icon" href="/images/favicon.ico?v=2" />
   <script src="https://cdn.tailwindcss.com"></script>
@@ -50,7 +50,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
         <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center justify-center gap-1.5">
           <span class="text-sky-400">CHECKPOINT</span> Systems
         </h1>
-        <p class="text-xs text-slate-400 font-medium">Hệ Thống Phiếu Yêu Cầu Kỹ Thuật</p>
+        <p class="text-xs text-slate-400 font-medium">Weekly Technical Dashboard & Maintenance</p>
       </div>
 
       <!-- Alert -->

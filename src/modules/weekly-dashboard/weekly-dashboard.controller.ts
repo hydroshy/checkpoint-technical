@@ -17,8 +17,23 @@ export class WeeklyDashboardController {
   @Post('requesters')
   @ApiOperation({ summary: 'Thêm mới hoặc cập nhật người yêu cầu' })
   addRequester(@Body() body: RequesterRecord) {
+    if (!body.id) body.id = 'req-' + Date.now();
     this.dbService.addRequester(body);
     return { success: true, data: body };
+  }
+
+  @Put('requesters/:id')
+  @ApiOperation({ summary: 'Cập nhật người yêu cầu' })
+  updateRequester(@Param('id') id: string, @Body() body: Partial<RequesterRecord>) {
+    const updated = this.dbService.updateRequester(id, body);
+    return { success: !!updated, data: updated };
+  }
+
+  @Delete('requesters/:id')
+  @ApiOperation({ summary: 'Xóa người yêu cầu' })
+  deleteRequester(@Param('id') id: string) {
+    const deleted = this.dbService.deleteRequester(id);
+    return { success: deleted };
   }
 
   // 2. Weekly Technical Requests (Weekly_Technical_Dashboard_Database.xlsx -> Sheet 1_Technical_Requests)

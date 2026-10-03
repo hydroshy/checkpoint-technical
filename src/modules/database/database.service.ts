@@ -734,9 +734,9 @@ export class DatabaseService implements OnModuleInit {
       }
     }
 
-    // 3. If PostgreSQL is connected and machines table is empty, seed from JSON
-    if (this.isPgConnected && this.pgPool && this.machinesCache.length === 0) {
-      const jsonMachines = this.readJson<MachineRecord[]>('machines.json', []);
+    // 3. If PostgreSQL is connected and machines table is empty or missing records, seed from JSON
+    const jsonMachines = this.readJson<MachineRecord[]>('machines.json', []);
+    if (this.isPgConnected && this.pgPool && this.machinesCache.length < jsonMachines.length) {
       for (const m of jsonMachines) {
         this.addMachine(m);
       }

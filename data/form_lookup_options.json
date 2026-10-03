@@ -1078,5 +1078,261 @@
     "itemLabel": "Woven 4",
     "sortOrder": 105,
     "isActive": true
+  },
+  {
+    "id": "opt-136",
+    "category": "Item_Equipment",
+    "itemValue": "Woven 5",
+    "itemLabel": "Woven 5",
+    "sortOrder": 106,
+    "isActive": true
+  },
+  {
+    "id": "opt-137",
+    "category": "Item_Equipment",
+    "itemValue": "Woven 6",
+    "itemLabel": "Woven 6",
+    "sortOrder": 107,
+    "isActive": true
+  },
+  {
+    "id": "opt-138",
+    "category": "Item_Equipment",
+    "itemValue": "Auto Lamination Machine",
+    "itemLabel": "Auto Lamination Machine",
+    "sortOrder": 108,
+    "isActive": true
+  },
+  {
+    "id": "opt-139",
+    "category": "Severity",
+    "itemValue": "Critical",
+    "itemLabel": "Critical",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-140",
+    "category": "Severity",
+    "itemValue": "High",
+    "itemLabel": "High",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-141",
+    "category": "Severity",
+    "itemValue": "Medium",
+    "itemLabel": "Medium",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-142",
+    "category": "Severity",
+    "itemValue": "Low",
+    "itemLabel": "Low",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-143",
+    "category": "Status_Req",
+    "itemValue": "Open",
+    "itemLabel": "Open",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-144",
+    "category": "Status_Req",
+    "itemValue": "In Progress",
+    "itemLabel": "In Progress",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-145",
+    "category": "Status_Req",
+    "itemValue": "Closed",
+    "itemLabel": "Closed",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-146",
+    "category": "Status_Req",
+    "itemValue": "Overdue",
+    "itemLabel": "Overdue",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-147",
+    "category": "Yes_No",
+    "itemValue": "Yes",
+    "itemLabel": "Yes",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-148",
+    "category": "Yes_No",
+    "itemValue": "No",
+    "itemLabel": "No",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-149",
+    "category": "Source",
+    "itemValue": "Internal",
+    "itemLabel": "Internal",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-150",
+    "category": "Source",
+    "itemValue": "External (Customer complaint)",
+    "itemLabel": "External (Customer complaint)",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-151",
+    "category": "Root_Cause",
+    "itemValue": "Machine",
+    "itemLabel": "Machine",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-152",
+    "category": "Root_Cause",
+    "itemValue": "Material",
+    "itemLabel": "Material",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-153",
+    "category": "Root_Cause",
+    "itemValue": "Method",
+    "itemLabel": "Method",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-154",
+    "category": "Root_Cause",
+    "itemValue": "Man",
+    "itemLabel": "Man",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-155",
+    "category": "Root_Cause",
+    "itemValue": "System",
+    "itemLabel": "System",
+    "sortOrder": 5,
+    "isActive": true
+  },
+  {
+    "id": "opt-156",
+    "category": "Root_Cause",
+    "itemValue": "Other",
+    "itemLabel": "Other",
+    "sortOrder": 6,
+    "isActive": true
+  },
+  {
+    "id": "opt-157",
+    "category": "Fix_Type",
+    "itemValue": "Short-term fix",
+    "itemLabel": "Short-term fix",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-158",
+    "category": "Fix_Type",
+    "itemValue": "Long-term preventive",
+    "itemLabel": "Long-term preventive",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-159",
+    "category": "Fix_Type",
+    "itemValue": "8D Report",
+    "itemLabel": "8D Report",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-160",
+    "category": "Fix_Type",
+    "itemValue": "Process Update",
+    "itemLabel": "Process Update",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-161",
+    "category": "Status_Act",
+    "itemValue": "Pending",
+    "itemLabel": "Pending",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-162",
+    "category": "Status_Act",
+    "itemValue": "In Progress",
+    "itemLabel": "In Progress",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-163",
+    "category": "Status_Act",
+    "itemValue": "Completed",
+    "itemLabel": "Completed",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-164",
+    "category": "Resource_Needed",
+    "itemValue": "Training",
+    "itemLabel": "Training",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-165",
+    "category": "Resource_Needed",
+    "itemValue": "Spare Parts",
+    "itemLabel": "Spare Parts",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-166",
+    "category": "Resource_Needed",
+    "itemValue": "Software Update",
+    "itemLabel": "Software Update",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-167",
+    "category": "Resource_Needed",
+    "itemValue": "Other",
+    "itemLabel": "Other",
+    "sortOrder": 4,
+    "isActive": true
   }
 ]
