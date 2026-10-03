@@ -59,7 +59,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT || 3000;
+  const port = process.env.PORT || 3001;
   await app.listen(port);
   logger.log(`🚀 Checkpoint Technical Server is running on: http://localhost:${port}`);
   logger.log(`📱 User Dashboard available at: http://localhost:${port}/dashboard`);

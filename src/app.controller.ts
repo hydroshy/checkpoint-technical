@@ -33,7 +33,7 @@ export class AppController {
   }
 
   private clearAllCookies(res: Response) {
-    const cookieNames = ['access_token', 'lorawan_token', 'session_id', 'connect.sid'];
+    const cookieNames = ['access_token', 'checkpoint_token', 'lorawan_token', 'session_id', 'connect.sid'];
     cookieNames.forEach((name) => {
       res.clearCookie(name, { path: '/', sameSite: 'lax', httpOnly: false });
       res.clearCookie(name, { path: '/', sameSite: 'lax', httpOnly: true });
@@ -51,7 +51,7 @@ export class AppController {
       this.clearAllCookies(res);
       return res.redirect('/login?cleared=1');
     }
-    const token = req.cookies?.['access_token'] || req.cookies?.['lorawan_token'];
+    const token = req.cookies?.['access_token'] || req.cookies?.['checkpoint_token'];
     if (token && token !== 'undefined' && token !== 'null' && token.length > 20) {
       return res.redirect('/dashboard');
     }
@@ -80,7 +80,7 @@ export class AppController {
   @ApiExcludeEndpoint()
   getDashboardPage(@Req() req: Request, @Res() res: Response) {
     this.setNoCacheHeaders(res);
-    const token = req.cookies?.['access_token'] || req.cookies?.['lorawan_token'];
+    const token = req.cookies?.['access_token'] || req.cookies?.['checkpoint_token'];
     if (!token || token === 'undefined' || token === 'null' || token.length < 20) {
       return res.redirect('/login');
     }
@@ -92,7 +92,7 @@ export class AppController {
   @ApiExcludeEndpoint()
   getControlPanelPage(@Req() req: Request, @Res() res: Response) {
     this.setNoCacheHeaders(res);
-    const token = req.cookies?.['access_token'] || req.cookies?.['lorawan_token'];
+    const token = req.cookies?.['access_token'] || req.cookies?.['checkpoint_token'];
     if (!token || token === 'undefined' || token === 'null' || token.length < 20) {
       return res.redirect('/login');
     }

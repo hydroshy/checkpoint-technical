@@ -290,17 +290,25 @@ export class DatabaseService implements OnModuleInit {
         -- 3. Machines Table (Từ Sheet Machine list trong Name of reqester.xlsx)
         CREATE TABLE IF NOT EXISTS machines (
           id VARCHAR(255) PRIMARY KEY,
-          stt INT,
-          area VARCHAR(255) NOT NULL,
-          machine_name VARCHAR(255) NOT NULL,
+          stt INT DEFAULT 0,
+          tech VARCHAR(255),
+          name VARCHAR(255),
+          area VARCHAR(255),
+          machine_name VARCHAR(255),
           code VARCHAR(100),
           note TEXT,
           is_active BOOLEAN NOT NULL DEFAULT true,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         );
-        CREATE INDEX IF NOT EXISTS idx_machines_area ON machines(area);
-        CREATE INDEX IF NOT EXISTS idx_machines_name ON machines(machine_name);
+        ALTER TABLE machines ADD COLUMN IF NOT EXISTS stt INT DEFAULT 0;
+        ALTER TABLE machines ADD COLUMN IF NOT EXISTS tech VARCHAR(255);
+        ALTER TABLE machines ADD COLUMN IF NOT EXISTS name VARCHAR(255);
+        ALTER TABLE machines ADD COLUMN IF NOT EXISTS area VARCHAR(255);
+        ALTER TABLE machines ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+        UPDATE machines SET tech = COALESCE(tech, area, ''), name = COALESCE(name, machine_name, ''), area = COALESCE(area, tech, ''), machine_name = COALESCE(machine_name, name, '') WHERE tech IS NULL OR name IS NULL OR area IS NULL OR machine_name IS NULL;
+        CREATE INDEX IF NOT EXISTS idx_machines_tech ON machines(tech);
+        CREATE INDEX IF NOT EXISTS idx_machines_name ON machines(name);
 
         -- 4. Weekly Technical Requests (Từ Sheet 1_Technical_Requests trong Weekly_Technical_Dashboard_Database.xlsx)
         CREATE TABLE IF NOT EXISTS weekly_technical_requests (
@@ -478,14 +486,14 @@ export class DatabaseService implements OnModuleInit {
       }));
 
       // 3. Machines
-      const machinesRes = await this.pgPool.query('SELECT * FROM machines ORDER BY stt ASC, id ASC');
+      const machinesRes = await this.pgPool.query('SELECT * FROM machines ORDER BY id ASC');
       this.machinesCache = machinesRes.rows.map(r => ({
         id: r.id,
-        tech: r.area || '',
-        name: r.machine_name || '',
+        tech: r.tech || r.area || '',
+        name: r.name || r.machine_name || '',
         code: r.code || undefined,
         note: r.note || undefined,
-        isActive: r.is_active,
+        isActive: r.is_active !== undefined ? r.is_active : true,
       }));
 
       // 4. Weekly Requests
@@ -934,7 +942,11 @@ export class DatabaseService implements OnModuleInit {
   saveMachines(): void { this.writeJson('machines.json', this.machinesCache); }
 
   addMachine(machine: MachineRecord): void {
-    const idx = this.machinesCache.findIndex(m => m.id === machine.id || (m.name.toLowerCase() === machine.name.toLowerCase() && m.tech.toLowerCase() === machine.tech.toLowerCase()));
+    const idx = this.machinesCache.findIndex(
+      m => m.id === machine.id ||
+      ((m.name || '').toLowerCase() === (machine.name || '').toLowerCase() &&
+       (m.tech || '').toLowerCase() === (machine.tech || '').toLowerCase())
+    );
     if (idx !== -1) {
       this.machinesCache[idx] = machine;
     } else {
@@ -944,9 +956,11 @@ export class DatabaseService implements OnModuleInit {
 
     if (this.isPgConnected && this.pgPool) {
       this.pgPool.query(
-        `INSERT INTO machines (id, stt, area, machine_name, code, note, is_active)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)
+        `INSERT INTO machines (id, stt, tech, name, area, machine_name, code, note, is_active)
+         VALUES ($1, $2, $3, $4, $3, $4, $5, $6, $7)
          ON CONFLICT (id) DO UPDATE SET
+           tech = EXCLUDED.tech,
+           name = EXCLUDED.name,
            area = EXCLUDED.area,
            machine_name = EXCLUDED.machine_name,
            code = EXCLUDED.code,

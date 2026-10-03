@@ -7,7 +7,7 @@ import { DatabaseService } from '../database/database.service';
 const cookieOrHeaderExtractor = (req: Request): string | null => {
   let token: string | null = null;
   if (req && req.cookies) {
-    token = req.cookies['access_token'] || req.cookies['lorawan_token'];
+    token = req.cookies['access_token'] || req.cookies['checkpoint_token'] || req.cookies['lorawan_token'];
   }
   if (!token && req && req.headers && req.headers.authorization) {
     const parts = req.headers.authorization.split(' ');

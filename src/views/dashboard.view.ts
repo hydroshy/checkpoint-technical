@@ -23,7 +23,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
   <script>
     (function() {
       try {
-        var saved = localStorage.getItem('checkpoint_theme') || localStorage.getItem('dvt_theme');
+        var saved = localStorage.getItem('checkpoint_theme');
         var theme = (saved === 'dark') ? 'dark' : 'light';
         document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
       } catch(e) {
@@ -1593,7 +1593,6 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         const setTheme = (theme) => {
           currentTheme.value = theme;
           localStorage.setItem('checkpoint_theme', theme);
-          localStorage.setItem('dvt_theme', theme);
           document.documentElement.classList.remove('theme-light', 'theme-dark');
           document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
         };
@@ -2101,7 +2100,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           loadEmployees();
           loadHistory();
 
-          const savedTheme = localStorage.getItem('checkpoint_theme') || localStorage.getItem('dvt_theme') || 'light';
+          const savedTheme = localStorage.getItem('checkpoint_theme') || 'light';
           currentTheme.value = savedTheme;
         });
 

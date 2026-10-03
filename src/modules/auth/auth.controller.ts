@@ -25,7 +25,7 @@ export class AuthController {
       sameSite: 'lax',
       maxAge: 30 * 24 * 3600 * 1000,
     });
-    res.cookie('lorawan_token', result.access_token, {
+    res.cookie('checkpoint_token', result.access_token, {
       path: '/',
       httpOnly: false,
       sameSite: 'lax',
@@ -38,7 +38,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Logout and clear session cookies' })
   async logout(@Req() req: Request, @Res() res: Response) {
-    const cookieNames = ['access_token', 'lorawan_token', 'session_id', 'connect.sid'];
+    const cookieNames = ['access_token', 'checkpoint_token', 'lorawan_token', 'session_id', 'connect.sid'];
     cookieNames.forEach((name) => {
       res.clearCookie(name, { path: '/', sameSite: 'lax', httpOnly: false });
       res.clearCookie(name, { path: '/', sameSite: 'lax', httpOnly: true });

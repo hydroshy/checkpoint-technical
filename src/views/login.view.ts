@@ -139,7 +139,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
     createApp({
       setup() {
         const username = ref('admin');
-        const password = ref('Dvt@123');
+        const password = ref('Checkpoint@123');
         const showPassword = ref(false);
         const rememberMe = ref(true);
         const loading = ref(false);
@@ -176,10 +176,10 @@ export const LOGIN_HTML = `<!DOCTYPE html>
             if (data.access_token) {
               localStorage.setItem('checkpoint_token', data.access_token);
               document.cookie = "access_token=" + encodeURIComponent(data.access_token) + "; Path=/; Max-Age=" + (30*24*3600) + "; SameSite=Lax";
+              document.cookie = "checkpoint_token=" + encodeURIComponent(data.access_token) + "; Path=/; Max-Age=" + (30*24*3600) + "; SameSite=Lax";
             }
             if (data.user) {
               localStorage.setItem('checkpoint_user', JSON.stringify(data.user));
-              localStorage.setItem('lorawan_user', JSON.stringify(data.user));
             }
 
             showAlert("Đăng nhập thành công! Đang chuyển hướng...", "success");
