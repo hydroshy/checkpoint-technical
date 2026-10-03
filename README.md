@@ -39,49 +39,81 @@ Mặc định server sẽ lắng nghe trên cổng `PORT=3001` (có thể cấu 
 
 ---
 
-## 🐘 Cấu Hình Kết Nối PostgreSQL & Biến Môi Trường
+## 🐳 Cấu Hình Docker Compose & Biến Môi Trường
 
-Hệ thống hỗ trợ kết nối trực tiếp với **container PostgreSQL có sẵn** của bạn (ví dụ stack `iot_postgres` trên mạng Docker `internal_net`) hoặc PostgreSQL cài cục bộ, thông qua biến môi trường cấu hình trong file `.env` hoặc truyền vào `docker-compose.yml`:
+Hệ thống kết nối trực tiếp với **container PostgreSQL có sẵn** thông qua 2 external networks: `iot_postgres_internal_net` và `dockge_default`:
 
-### 1. Bảng Biến Môi Trường (Environment Variables)
+### 1. File `docker-compose.yml` Chuẩn
 
-| Tên Biến | Mặc Định | Mô Tả |
-| :--- | :--- | :--- |
-| `PORT` | `3001` | Cổng HTTP lắng nghe của máy chủ NestJS |
-| `NODE_ENV` | `development` | Môi trường chạy (`development` / `production`) |
-| `JWT_SECRET` | `Daviteq_...` | Chuỗi khóa bí mật ký cấp JWT Auth token |
-| `DB_HOST` | `postgres` / `localhost` | Hostname của PostgreSQL (`postgres` hoặc `iot_postgres` khi chạy Docker, `localhost` khi chạy dev) |
-| `DB_PORT` | `5432` | Cổng kết nối PostgreSQL (hoặc `POSTGRES_PORT`) |
-| `DB_USERNAME` | `admin` | Tên đăng nhập cơ sở dữ liệu (hỗ trợ cả `POSTGRES_USER`) |
-| `DB_PASSWORD` | `mason` | Mật khẩu truy cập PostgreSQL (hỗ trợ cả `POSTGRES_PASSWORD`) |
-| `DB_NAME` | `checkpoint_technical` | Tên cơ sở dữ liệu PostgreSQL (hỗ trợ cả `POSTGRES_DB` / `dvt`) |
-| `DB_SSL` | `false` | Bật/tắt SSL khi kết nối PostgreSQL (`true`/`false`) |
-| `DB_AUTO_INIT` | `true` | **Tự động tạo database nếu chưa có, khởi tạo bảng DDL & nạp dữ liệu mẫu** khi kết nối DB |
-| `DATA_DIR` | `./data` | Thư mục lưu file JSON backup hoặc dự phòng khi DB offline |
+```yaml
+version: "3.8"
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: checkpoint_technical_app
+    restart: unless-stopped
+    ports:
+      - ${PORT:-3001}:3001
+    environment:
+      - PORT=3001
+      - NODE_ENV=production
+      - JWT_SECRET=${JWT_SECRET:-Daviteq_Checkpoint_Technical_Key_2026_Secure!}
+      # PostgreSQL Server Connection Variables (Kết nối container PostgreSQL có sẵn)
+      - DB_HOST=${POSTGRES_HOST}
+      - DB_PORT=${POSTGRES_PORT}
+      - DB_USERNAME=${DB_USERNAME:-${POSTGRES_USER}}
+      - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD}}
+      - DB_NAME=${DB_NAME:-${POSTGRES_DB}}
+      - DB_AUTO_INIT=${DB_AUTO_INIT}
+    volumes:
+      - ./data:/app/data
+    networks:
+      - iot_postgres_internal_net
+      - dockge_default
 
-> 💡 **Khả Năng Chống Lỗi (Resilience Fallback)**: Khi khởi động, hệ thống sẽ tự động kiểm tra kết nối PostgreSQL:
-> 1. Nếu database `DB_NAME` chưa tồn tại, hệ thống tự động chạy lệnh `CREATE DATABASE` để khởi tạo.
-> 2. Nếu `DB_AUTO_INIT=true`, hệ thống tự động chạy DDL tạo đầy đủ các bảng (`users`, `machines`, `employees`, `technical_requests`) và nạp dữ liệu mặc định.
-> 3. Nếu PostgreSQL tạm thời chưa sẵn sàng, hệ thống sẽ ghi log cảnh báo và tự động chuyển về cơ chế file JSON dự phòng mà không làm sập server.
-
-### 2. Khởi Chạy Nhanh Với Docker Compose (Dùng Chung Container PostgreSQL Có Sẵn)
-
-File `docker-compose.yml` được cấu hình để kết nối trực tiếp vào mạng nội bộ `internal_net` của container PostgreSQL hiện có:
-
-```bash
-# 1. Đảm bảo stack PostgreSQL & Metabase của bạn đang chạy và có mạng 'internal_net'
-# (Nếu mạng có tiền tố theo thư mục, có thể đặt tên mạng rõ ràng là internal_net)
-
-# 2. Khởi chạy Checkpoint Technical App
-cd checkpoint_technical
-docker compose up -d --build
-
-# Xem log hoạt động
-docker compose logs -f app
-
-# Dừng hệ thống
-docker compose down
+networks:
+  iot_postgres_internal_net:
+    external: true
+  dockge_default:
+    external: true
 ```
+
+### 2. Danh Mục Các Bảng Dữ Liệu Khởi Tạo (Từ 2 File Excel)
+
+Hệ thống tự động khởi tạo và nạp đầy đủ dữ liệu từ 2 file Excel vào các bảng PostgreSQL và tệp JSON dự phòng:
+
+| Tên Bảng (SQL) | Nguồn File Excel | Tên Sheet | Số Lượng Bản Ghi | Mô Tả & Các Cột Chính |
+| :--- | :--- | :--- | :--- | :--- |
+| **`requesters`** | `Name of reqester.xlsx` | `Requester` | 30 | Danh sách người yêu cầu: `stt`, `department`, `area`, `mnv`, `full_name`, `position`. |
+| **`machines`** | `Name of reqester.xlsx` | `Machine list` | 121 | Danh mục thiết bị & máy in: `stt`, `area`, `machine_name`, `code`, `note`, `is_active`. |
+| **`weekly_technical_requests`** | `Weekly_Technical_Dashboard_Database.xlsx` | `1_Technical_Requests` | 28 | Danh sách phiếu yêu cầu: `request_id`, `request_date`, `request_type`, `item_equipment`, `severity`, `status`, `sla_target_hours`, `actual_hours`, `met_sla`, `reported_by`, `resolved_by`. |
+| **`defect_logs`** | `Weekly_Technical_Dashboard_Database.xlsx` | `2_Defect_Log` | 4 | Nhật ký sự cố kỹ thuật: `defect_id`, `defect_date`, `facility`, `source`, `root_cause_category`, `specific_issue`, `affected_product`, `downtime_minutes`, `recurring_issue`, `eight_d_required`. |
+| **`action_plans`** | `Weekly_Technical_Dashboard_Database.xlsx` | `3_Action_Plan` | 5 | Kế hoạch hành động khắc phục: `action_id`, `date_logged`, `facility`, `related_defect_id`, `fix_type`, `description`, `pic`, `deadline`, `status`, `resource_needed`, `remarks`. |
+| **`form_lookup_options`** | `Weekly_Technical_Dashboard_Database.xlsx` | `Lists_DO_NOT_DELETE` | 167 | Danh mục tùy chọn dropdown form: `category`, `item_value`, `item_label`, `sort_order`, `is_active`. |
+| **`sheet_lists_do_not_delete`** | `Weekly_Technical_Dashboard_Database.xlsx` | `Lists_DO_NOT_DELETE` | 109 | Bảng nguyên mẫu 11 cột từ sheet: `row_index`, `request_id`, `request_type`, `item_equipment`, `severity`, `status_req`, `yes_no`, `source`, `root_cause`, `fix_type`, `status_act`, `resource_needed`. |
+| **`technical_requests`** | Hệ thống Web Form | Form V4.1 | Động | Phiếu bảo trì đầy đủ: 4M, downtime, waste %, ảnh trước/sau, ký số. |
+| **`users`** | Hệ thống Xác thực | RBAC | 3 | Tài khoản đăng nhập hệ thống: `admin`, `tech01`, `user01`. |
+
+### 3. Các API Endpoints Truy Vấn Dữ Liệu
+
+- `GET /api/requesters`: Xem danh sách người yêu cầu
+- `POST /api/requesters`: Thêm/cập nhật người yêu cầu
+- `GET /api/weekly-requests`: Xem danh sách phiếu yêu cầu kỹ thuật
+- `POST /api/weekly-requests`: Thêm mới phiếu yêu cầu
+- `PUT /api/weekly-requests/:id`: Sửa phiếu yêu cầu
+- `DELETE /api/weekly-requests/:id`: Xóa phiếu yêu cầu
+- `GET /api/defect-logs`: Xem danh mục lỗi Defect Log
+- `POST /api/defect-logs`: Thêm lỗi mới
+- `PUT /api/defect-logs/:id`: Cập nhật lỗi
+- `DELETE /api/defect-logs/:id`: Xóa lỗi
+- `GET /api/action-plans`: Xem danh sách Action Plan
+- `POST /api/action-plans`: Thêm Action Plan mới
+- `PUT /api/action-plans/:id`: Cập nhật Action Plan
+- `DELETE /api/action-plans/:id`: Xóa Action Plan
+- `GET /api/lookup-options?category=...`: Lấy danh sách dropdown theo loại (Request_Type, Severity, Status_Req, Root_Cause, Fix_Type, Status_Act, Resource_Needed, etc.)
+- `GET /api/sheet-lists`: Xem dữ liệu nguyên dạng của sheet Lists_DO_NOT_DELETE
 
 ---
 

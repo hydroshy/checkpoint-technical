@@ -1,0 +1,272 @@
+[
+  {
+    "id": "req-VN5117",
+    "stt": 1,
+    "department": "Production",
+    "area": "Production",
+    "mnv": "VN5117",
+    "fullName": "Lê Minh Hoàng",
+    "position": "Assistant Production Manager"
+  },
+  {
+    "id": "req-VN5898",
+    "stt": 2,
+    "department": "Production",
+    "area": "Production",
+    "mnv": "VN5898",
+    "fullName": "Phạm Hùng Sơn",
+    "position": "Supervisor Production"
+  },
+  {
+    "id": "req-VN5207",
+    "stt": 3,
+    "department": "Production",
+    "area": "PFL",
+    "mnv": "VN5207",
+    "fullName": "Lục Xuân Trường",
+    "position": "PFL Leader"
+  },
+  {
+    "id": "req-VN5430",
+    "stt": 4,
+    "department": "Production",
+    "area": "PFL",
+    "mnv": "VN5430",
+    "fullName": "Trần Công Hậu",
+    "position": "PFL Leader"
+  },
+  {
+    "id": "req-VN5356",
+    "stt": 5,
+    "department": "Production",
+    "area": "RFID",
+    "mnv": "VN5356",
+    "fullName": "Phan Thị Thêm",
+    "position": "RFID Leader"
+  },
+  {
+    "id": "req-VN5855",
+    "stt": 6,
+    "department": "Production",
+    "area": "RFID",
+    "mnv": "VN5855",
+    "fullName": "Đỗ Văn Vẹn",
+    "position": "RFID Leader"
+  },
+  {
+    "id": "req-VN6024",
+    "stt": 7,
+    "department": "Production",
+    "area": "Woven",
+    "mnv": "VN6024",
+    "fullName": "Phạm Văn Tuấn",
+    "position": "Woven Leader"
+  },
+  {
+    "id": "req-VN6173",
+    "stt": 8,
+    "department": "Production",
+    "area": "HTL",
+    "mnv": "VN6173",
+    "fullName": "Lâm Hữu Phước",
+    "position": "HTL Leader"
+  },
+  {
+    "id": "req-VN5805",
+    "stt": 9,
+    "department": "Production",
+    "area": "Ink mix",
+    "mnv": "VN5805",
+    "fullName": "Nguyễn Quốc Cường",
+    "position": "Inkmix Leader"
+  },
+  {
+    "id": "req-VN5454",
+    "stt": 10,
+    "department": "Production",
+    "area": "OFFSET",
+    "mnv": "VN5454",
+    "fullName": "Quách Tiến Dũng",
+    "position": "OFFSET Leader"
+  },
+  {
+    "id": "req-VN5571",
+    "stt": 11,
+    "department": "Production",
+    "area": "Packing",
+    "mnv": "VN5571",
+    "fullName": "Trần Thị Loan",
+    "position": "Packing Leader"
+  },
+  {
+    "id": "req-VN5456",
+    "stt": 12,
+    "department": "Production",
+    "area": "QA",
+    "mnv": "VN5456",
+    "fullName": "Nguyễn Ngọc Mỹ",
+    "position": "QC Team Leader"
+  },
+  {
+    "id": "req-VN5381",
+    "stt": 13,
+    "department": "Production",
+    "area": "SnP",
+    "mnv": "VN5381",
+    "fullName": "Nguyễn Thị Thanh Hồng",
+    "position": "SnP Leader"
+  },
+  {
+    "id": "req-VN5741",
+    "stt": 14,
+    "department": "Production",
+    "area": "SnP",
+    "mnv": "VN5741",
+    "fullName": "Huỳnh Thị Thanh Lên",
+    "position": "SnP Leader"
+  },
+  {
+    "id": "req-VN5634",
+    "stt": 15,
+    "department": "Production",
+    "area": "Digital",
+    "mnv": "VN5634",
+    "fullName": "Nguyễn Văn Khỏe",
+    "position": "Digital Leader"
+  },
+  {
+    "id": "req-VN5663",
+    "stt": 16,
+    "department": "Production",
+    "area": "Diecut",
+    "mnv": "VN5663",
+    "fullName": "Nguyễn Văn Thể",
+    "position": "Diecut Leader"
+  },
+  {
+    "id": "req-VN6048",
+    "stt": 17,
+    "department": "Production",
+    "area": "HTL",
+    "mnv": "VN6048",
+    "fullName": "Nguyễn Thành Sang",
+    "position": "HTL Leader"
+  },
+  {
+    "id": "req-VN5944",
+    "stt": 18,
+    "department": "Production",
+    "area": "Process",
+    "mnv": "VN5944",
+    "fullName": "Đỗ Đức Nhật",
+    "position": "Process Eng"
+  },
+  {
+    "id": "req-VN5830",
+    "stt": 19,
+    "department": "QA",
+    "area": "QA",
+    "mnv": "VN5830",
+    "fullName": "Lê Đình Bình",
+    "position": "QC Team Leader"
+  },
+  {
+    "id": "req-VN5900",
+    "stt": 20,
+    "department": "QA",
+    "area": "QA",
+    "mnv": "VN5900",
+    "fullName": "Mai Nhật Tân",
+    "position": "QC Team Leader"
+  },
+  {
+    "id": "req-VN5696",
+    "stt": 21,
+    "department": "QA",
+    "area": "QA",
+    "mnv": "VN5696",
+    "fullName": "TRẦN QUANG HẢI",
+    "position": "QA  Assistant Manager"
+  },
+  {
+    "id": "req-VN5793",
+    "stt": 22,
+    "department": "QA",
+    "area": "QA",
+    "mnv": "VN5793",
+    "fullName": "PHẠM VIỆT KHÁI",
+    "position": "QA Leader"
+  },
+  {
+    "id": "req-VN5899",
+    "stt": 23,
+    "department": "QA",
+    "area": "QA",
+    "mnv": "VN5899",
+    "fullName": "CAO ĐĂNG KHOA",
+    "position": "QA Leader"
+  },
+  {
+    "id": "req-VN5831",
+    "stt": 24,
+    "department": "Maintenance",
+    "area": "Maintenance",
+    "mnv": "VN5831",
+    "fullName": "Trương Hoàng Anh",
+    "position": "Maintenance Manager"
+  },
+  {
+    "id": "req-VN5789",
+    "stt": 25,
+    "department": "Maintenance",
+    "area": "Maintenance",
+    "mnv": "VN5789",
+    "fullName": "Trần Thanh Hóa",
+    "position": "Maintenance"
+  },
+  {
+    "id": "req-VN5995",
+    "stt": 26,
+    "department": "Maintenance",
+    "area": "Maintenance",
+    "mnv": "VN5995",
+    "fullName": "Phùng Thanh Vũ",
+    "position": "Maintenance"
+  },
+  {
+    "id": "req-VN5813",
+    "stt": 27,
+    "department": "EHS",
+    "area": "EHS",
+    "mnv": "VN5813",
+    "fullName": "Nguyễn Thị Xuân",
+    "position": "EHS Specialist"
+  },
+  {
+    "id": "req-VN5901",
+    "stt": 28,
+    "department": "HR",
+    "area": "HR",
+    "mnv": "VN5901",
+    "fullName": "Nguyễn Thị Thoa",
+    "position": "HR Executive"
+  },
+  {
+    "id": "req-VN5875",
+    "stt": 29,
+    "department": "IT",
+    "area": "HR",
+    "mnv": "VN5875",
+    "fullName": "Lê Trường",
+    "position": "IT Specialist"
+  },
+  {
+    "id": "req-VN5810",
+    "stt": 30,
+    "department": "Warehouse",
+    "area": "Warehouse",
+    "mnv": "VN5810",
+    "fullName": "Nông Ích Nam",
+    "position": "Warehouse Team Leader"
+  }
+]

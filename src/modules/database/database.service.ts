@@ -16,10 +16,20 @@ export interface UserRecord {
   updatedAt: string;
 }
 
+export interface RequesterRecord {
+  id: string;
+  stt: number;
+  department: string;
+  area: string;
+  mnv: string;
+  fullName: string;
+  position: string;
+}
+
 export interface MachineRecord {
   id: string;
-  tech: string;
-  name: string;
+  tech: string; // Khu vực / Công nghệ (PFL, OFFSET, DIGITAL, etc.)
+  name: string; // Tên máy
   code?: string;
   note?: string;
   isActive: boolean;
@@ -34,6 +44,75 @@ export interface EmployeeRecord {
   role: string;
   phone?: string;
   email?: string;
+}
+
+export interface WeeklyTechnicalRequestRecord {
+  id: string;
+  requestId: string;
+  requestDate?: string;
+  requestType: string;
+  itemEquipment: string;
+  severity: string;
+  status: string;
+  slaTargetHours?: number | null;
+  actualHours?: number | null;
+  metSla?: string;
+  reportedBy: string;
+  resolvedBy?: string;
+}
+
+export interface DefectLogRecord {
+  id: string;
+  defectId: number;
+  defectDate: string;
+  facility: string;
+  source: string;
+  rootCauseCategory: string;
+  specificIssue: string;
+  affectedProduct: string;
+  downtimeMinutes?: string | null;
+  recurringIssue: string;
+  eightDRequired: string;
+}
+
+export interface ActionPlanRecord {
+  id: string;
+  actionId: string;
+  dateLogged: string;
+  facility: string;
+  relatedDefectId?: string | null;
+  fixType: string;
+  description: string;
+  pic: string;
+  deadline: string;
+  status: string;
+  resourceNeeded: string;
+  remarks?: string | null;
+}
+
+export interface FormLookupOptionRecord {
+  id: string;
+  category: string;
+  itemValue: string;
+  itemLabel: string;
+  sortOrder: number;
+  isActive: boolean;
+}
+
+export interface SheetListsRowRecord {
+  id: string;
+  rowIndex: number;
+  requestId?: string | null;
+  requestType?: string | null;
+  itemEquipment?: string | null;
+  severity?: string | null;
+  statusReq?: string | null;
+  yesNo?: string | null;
+  source?: string | null;
+  rootCause?: string | null;
+  fixType?: string | null;
+  statusAct?: string | null;
+  resourceNeeded?: string | null;
 }
 
 export interface TechnicalRequestRecord {
@@ -81,8 +160,14 @@ export class DatabaseService implements OnModuleInit {
   private isPgConnected = false;
 
   private usersCache: UserRecord[] = [];
+  private requestersCache: RequesterRecord[] = [];
   private machinesCache: MachineRecord[] = [];
   private employeesCache: EmployeeRecord[] = [];
+  private weeklyRequestsCache: WeeklyTechnicalRequestRecord[] = [];
+  private defectLogsCache: DefectLogRecord[] = [];
+  private actionPlansCache: ActionPlanRecord[] = [];
+  private formLookupOptionsCache: FormLookupOptionRecord[] = [];
+  private sheetListsCache: SheetListsRowRecord[] = [];
   private requestsCache: TechnicalRequestRecord[] = [];
 
   constructor() {
@@ -107,24 +192,22 @@ export class DatabaseService implements OnModuleInit {
   private async initDatabaseConnection() {
     const dbHost = process.env.DB_HOST || process.env.POSTGRES_HOST;
     const dbPort = parseInt(process.env.DB_PORT || process.env.POSTGRES_PORT || '5432', 10);
-    const dbUser = process.env.DB_USERNAME || process.env.DB_USER || process.env.POSTGRES_USER || 'admin';
-    const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (process.env.POSTGRES_PASSWORD !== undefined ? process.env.POSTGRES_PASSWORD : 'mason');
+    const dbUser = process.env.DB_USERNAME || process.env.DB_USER || process.env.POSTGRES_USER || 'postgres';
+    const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (process.env.POSTGRES_PASSWORD !== undefined ? process.env.POSTGRES_PASSWORD : 'postgres');
     const dbName = process.env.DB_NAME || process.env.DB_DATABASE || process.env.POSTGRES_DB || 'checkpoint_technical';
     const dbSsl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
     const autoInit = process.env.DB_AUTO_INIT !== 'false';
 
-    // Build candidate hosts if running inside or outside Docker
     const candidateHosts: string[] = [];
     if (dbHost) candidateHosts.push(dbHost);
-    const defaults = ['postgres', 'iot_postgres', 'localhost', '127.0.0.1', 'postgres_db'];
+    const defaults = ['localhost', '127.0.0.1', 'postgres_db'];
     for (const h of defaults) {
       if (!candidateHosts.includes(h)) candidateHosts.push(h);
     }
 
     let connected = false;
 
-    // Only attempt PostgreSQL connection if DB_HOST is explicitly provided or we have postgres environment configured
-    if (dbHost || process.env.DB_NAME || process.env.POSTGRES_DB || process.env.POSTGRES_USER) {
+    if (dbHost || process.env.DB_NAME || process.env.POSTGRES_DB) {
       for (const host of candidateHosts) {
         try {
           const poolConfig: PoolConfig = {
@@ -134,43 +217,12 @@ export class DatabaseService implements OnModuleInit {
             password: dbPassword,
             database: dbName,
             ssl: dbSsl,
-            connectionTimeoutMillis: 2500,
+            connectionTimeoutMillis: 2000,
             max: 10,
           };
 
-          let pool = new Pool(poolConfig);
-          try {
-            await pool.query('SELECT 1');
-          } catch (connErr: any) {
-            // If target database does not exist (PostgreSQL code 3D000), try auto-creating it
-            if (connErr.code === '3D000' || (connErr.message && connErr.message.includes('does not exist'))) {
-              this.logger.log(`Database "${dbName}" does not exist on ${host}. Attempting auto-creation...`);
-              const maintenanceDb = ['postgres', 'template1'].includes(dbName) ? 'template1' : 'postgres';
-              const adminPool = new Pool({
-                host,
-                port: dbPort,
-                user: dbUser,
-                password: dbPassword,
-                database: maintenanceDb,
-                ssl: dbSsl,
-                connectionTimeoutMillis: 2500,
-              });
-              try {
-                await adminPool.query(`CREATE DATABASE "${dbName}"`);
-                this.logger.log(`✅ Successfully auto-created PostgreSQL database: "${dbName}"`);
-                await adminPool.end();
-                // Reconnect to newly created database
-                pool = new Pool(poolConfig);
-                await pool.query('SELECT 1');
-              } catch (createErr: any) {
-                await adminPool.end().catch(() => {});
-                throw createErr;
-              }
-            } else {
-              throw connErr;
-            }
-          }
-
+          const pool = new Pool(poolConfig);
+          await pool.query('SELECT 1');
           this.pgPool = pool;
           this.isPgConnected = true;
           connected = true;
@@ -203,6 +255,10 @@ export class DatabaseService implements OnModuleInit {
 
     try {
       await this.pgPool.query(`
+        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+        CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+
+        -- 1. Users Table
         CREATE TABLE IF NOT EXISTS users (
           id VARCHAR(255) PRIMARY KEY,
           username VARCHAR(255) UNIQUE NOT NULL,
@@ -214,31 +270,126 @@ export class DatabaseService implements OnModuleInit {
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         );
+        CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
 
+        -- 2. Requesters Table (Từ Sheet Requester trong Name of reqester.xlsx)
+        CREATE TABLE IF NOT EXISTS requesters (
+          id VARCHAR(255) PRIMARY KEY,
+          stt INT,
+          department VARCHAR(255),
+          area VARCHAR(255),
+          mnv VARCHAR(100) UNIQUE NOT NULL,
+          full_name VARCHAR(255) NOT NULL,
+          position VARCHAR(255),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        );
+        CREATE INDEX IF NOT EXISTS idx_requesters_mnv ON requesters(mnv);
+        CREATE INDEX IF NOT EXISTS idx_requesters_area ON requesters(area);
+
+        -- 3. Machines Table (Từ Sheet Machine list trong Name of reqester.xlsx)
         CREATE TABLE IF NOT EXISTS machines (
           id VARCHAR(255) PRIMARY KEY,
-          tech VARCHAR(255) NOT NULL,
-          name VARCHAR(255) NOT NULL,
-          code VARCHAR(255),
+          stt INT,
+          area VARCHAR(255) NOT NULL,
+          machine_name VARCHAR(255) NOT NULL,
+          code VARCHAR(100),
           note TEXT,
           is_active BOOLEAN NOT NULL DEFAULT true,
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         );
+        CREATE INDEX IF NOT EXISTS idx_machines_area ON machines(area);
+        CREATE INDEX IF NOT EXISTS idx_machines_name ON machines(machine_name);
 
-        CREATE TABLE IF NOT EXISTS employees (
+        -- 4. Weekly Technical Requests (Từ Sheet 1_Technical_Requests trong Weekly_Technical_Dashboard_Database.xlsx)
+        CREATE TABLE IF NOT EXISTS weekly_technical_requests (
           id VARCHAR(255) PRIMARY KEY,
-          mnv VARCHAR(100) UNIQUE NOT NULL,
-          name VARCHAR(255) NOT NULL,
-          dept VARCHAR(255) NOT NULL,
-          area VARCHAR(255) NOT NULL,
-          role VARCHAR(255) NOT NULL,
-          phone VARCHAR(100),
-          email VARCHAR(255),
+          request_id VARCHAR(255) NOT NULL,
+          request_date VARCHAR(50),
+          request_type VARCHAR(255),
+          item_equipment VARCHAR(255),
+          severity VARCHAR(100),
+          status VARCHAR(100),
+          sla_target_hours NUMERIC,
+          actual_hours NUMERIC,
+          met_sla VARCHAR(50),
+          reported_by VARCHAR(255),
+          resolved_by VARCHAR(255),
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         );
+        CREATE INDEX IF NOT EXISTS idx_wtr_req_id ON weekly_technical_requests(request_id);
+        CREATE INDEX IF NOT EXISTS idx_wtr_status ON weekly_technical_requests(status);
 
+        -- 5. Defect Log (Từ Sheet 2_Defect_Log trong Weekly_Technical_Dashboard_Database.xlsx)
+        CREATE TABLE IF NOT EXISTS defect_logs (
+          id VARCHAR(255) PRIMARY KEY,
+          defect_id INT NOT NULL,
+          defect_date VARCHAR(50),
+          facility VARCHAR(255),
+          source VARCHAR(255),
+          root_cause_category VARCHAR(255),
+          specific_issue TEXT,
+          affected_product TEXT,
+          downtime_minutes VARCHAR(100),
+          recurring_issue VARCHAR(50),
+          eight_d_required VARCHAR(50),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        );
+        CREATE INDEX IF NOT EXISTS idx_defect_logs_defect_id ON defect_logs(defect_id);
+
+        -- 6. Action Plan (Từ Sheet 3_Action_Plan trong Weekly_Technical_Dashboard_Database.xlsx)
+        CREATE TABLE IF NOT EXISTS action_plans (
+          id VARCHAR(255) PRIMARY KEY,
+          action_id VARCHAR(100) NOT NULL,
+          date_logged VARCHAR(50),
+          facility VARCHAR(255),
+          related_defect_id VARCHAR(100),
+          fix_type VARCHAR(255),
+          description TEXT,
+          pic VARCHAR(255),
+          deadline VARCHAR(50),
+          status VARCHAR(100),
+          resource_needed VARCHAR(255),
+          remarks TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        );
+        CREATE INDEX IF NOT EXISTS idx_action_plans_action_id ON action_plans(action_id);
+
+        -- 7. Form Lookup Options (Từ Sheet Lists_DO_NOT_DELETE)
+        CREATE TABLE IF NOT EXISTS form_lookup_options (
+          id VARCHAR(255) PRIMARY KEY,
+          category VARCHAR(100) NOT NULL,
+          item_value VARCHAR(255) NOT NULL,
+          item_label VARCHAR(255),
+          sort_order INT DEFAULT 0,
+          is_active BOOLEAN NOT NULL DEFAULT true,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        );
+        CREATE INDEX IF NOT EXISTS idx_lookup_category ON form_lookup_options(category);
+
+        -- 8. Sheet Lists DO NOT DELETE (Lưu trực tiếp dòng bảng từ Excel)
+        CREATE TABLE IF NOT EXISTS sheet_lists_do_not_delete (
+          id VARCHAR(255) PRIMARY KEY,
+          row_index INT,
+          request_id VARCHAR(255),
+          request_type VARCHAR(255),
+          item_equipment VARCHAR(255),
+          severity VARCHAR(100),
+          status_req VARCHAR(100),
+          yes_no VARCHAR(50),
+          source VARCHAR(255),
+          root_cause VARCHAR(255),
+          fix_type VARCHAR(255),
+          status_act VARCHAR(100),
+          resource_needed VARCHAR(255),
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+        );
+
+        -- 9. Technical Requests (Phiếu Yêu Cầu Kỹ Thuật Chi Tiết Form V4.1)
         CREATE TABLE IF NOT EXISTS technical_requests (
           id VARCHAR(255) PRIMARY KEY,
           doc_no VARCHAR(255) UNIQUE NOT NULL,
@@ -275,15 +426,16 @@ export class DatabaseService implements OnModuleInit {
           created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
           updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
         );
+        CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
       `);
-      this.logger.log('✅ PostgreSQL Schema verified / initialized (users, machines, employees, technical_requests)');
+      this.logger.log('✅ PostgreSQL Schema verified / initialized (users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests)');
     } catch (e: any) {
       this.logger.error(`Failed to initialize PostgreSQL schema: ${e.message}`);
     }
   }
 
   /**
-   * Load data from PostgreSQL into cache.
+   * Load all tables from PostgreSQL into cache.
    */
   private async loadFromPg() {
     if (!this.pgPool) return;
@@ -303,33 +455,121 @@ export class DatabaseService implements OnModuleInit {
         updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
       }));
 
-      // 2. Machines
-      const machinesRes = await this.pgPool.query('SELECT * FROM machines ORDER BY tech, name');
+      // 2. Requesters
+      const requestersRes = await this.pgPool.query('SELECT * FROM requesters ORDER BY stt ASC, id ASC');
+      this.requestersCache = requestersRes.rows.map(r => ({
+        id: r.id,
+        stt: r.stt || 0,
+        department: r.department || '',
+        area: r.area || '',
+        mnv: r.mnv || '',
+        fullName: r.full_name || '',
+        position: r.position || '',
+      }));
+
+      // Synchronize employeesCache from requesters
+      this.employeesCache = this.requestersCache.map(r => ({
+        id: r.id,
+        mnv: r.mnv,
+        name: r.fullName,
+        dept: r.department,
+        area: r.area,
+        role: r.position,
+      }));
+
+      // 3. Machines
+      const machinesRes = await this.pgPool.query('SELECT * FROM machines ORDER BY stt ASC, id ASC');
       this.machinesCache = machinesRes.rows.map(r => ({
         id: r.id,
-        tech: r.tech,
-        name: r.name,
+        tech: r.area || '',
+        name: r.machine_name || '',
         code: r.code || undefined,
         note: r.note || undefined,
         isActive: r.is_active,
       }));
 
-      // 3. Employees
-      const empRes = await this.pgPool.query('SELECT * FROM employees ORDER BY dept, name');
-      this.employeesCache = empRes.rows.map(r => ({
+      // 4. Weekly Requests
+      const weeklyRes = await this.pgPool.query('SELECT * FROM weekly_technical_requests ORDER BY id ASC');
+      this.weeklyRequestsCache = weeklyRes.rows.map(r => ({
         id: r.id,
-        mnv: r.mnv,
-        name: r.name,
-        dept: r.dept,
-        area: r.area,
-        role: r.role,
-        phone: r.phone || undefined,
-        email: r.email || undefined,
+        requestId: r.request_id || '',
+        requestDate: r.request_date || undefined,
+        requestType: r.request_type || '',
+        itemEquipment: r.item_equipment || '',
+        severity: r.severity || '',
+        status: r.status || '',
+        slaTargetHours: r.sla_target_hours !== null ? Number(r.sla_target_hours) : null,
+        actualHours: r.actual_hours !== null ? Number(r.actual_hours) : null,
+        metSla: r.met_sla || undefined,
+        reportedBy: r.reported_by || '',
+        resolvedBy: r.resolved_by || undefined,
       }));
 
-      // 4. Requests
-      const reqRes = await this.pgPool.query('SELECT * FROM technical_requests ORDER BY created_at DESC');
-      this.requestsCache = reqRes.rows.map(r => ({
+      // 5. Defect Logs
+      const defectRes = await this.pgPool.query('SELECT * FROM defect_logs ORDER BY defect_id ASC');
+      this.defectLogsCache = defectRes.rows.map(r => ({
+        id: r.id,
+        defectId: r.defect_id,
+        defectDate: r.defect_date || '',
+        facility: r.facility || '',
+        source: r.source || '',
+        rootCauseCategory: r.root_cause_category || '',
+        specificIssue: r.specific_issue || '',
+        affectedProduct: r.affected_product || '',
+        downtimeMinutes: r.downtime_minutes || null,
+        recurringIssue: r.recurring_issue || '',
+        eightDRequired: r.eight_d_required || '',
+      }));
+
+      // 6. Action Plans
+      const actionRes = await this.pgPool.query('SELECT * FROM action_plans ORDER BY id ASC');
+      this.actionPlansCache = actionRes.rows.map(r => ({
+        id: r.id,
+        actionId: r.action_id || '',
+        dateLogged: r.date_logged || '',
+        facility: r.facility || '',
+        relatedDefectId: r.related_defect_id || null,
+        fixType: r.fix_type || '',
+        description: r.description || '',
+        pic: r.pic || '',
+        deadline: r.deadline || '',
+        status: r.status || '',
+        resourceNeeded: r.resource_needed || '',
+        remarks: r.remarks || null,
+      }));
+
+      // 7. Form Lookup Options
+      const lookupRes = await this.pgPool.query('SELECT * FROM form_lookup_options ORDER BY category, sort_order ASC');
+      this.formLookupOptionsCache = lookupRes.rows.map(r => ({
+        id: r.id,
+        category: r.category,
+        itemValue: r.item_value,
+        itemLabel: r.item_label || r.item_value,
+        sortOrder: r.sort_order || 0,
+        isActive: r.is_active,
+      }));
+
+      // 8. Sheet Lists DO NOT DELETE
+      const sheetListsRes = await this.pgPool.query('SELECT * FROM sheet_lists_do_not_delete ORDER BY row_index ASC');
+      this.sheetListsCache = sheetListsRes.rows.map(r => ({
+        id: r.id,
+        rowIndex: r.row_index,
+        requestId: r.request_id,
+        requestType: r.request_type,
+        itemEquipment: r.item_equipment,
+        severity: r.severity,
+        statusReq: r.status_req,
+        yesNo: r.yes_no,
+        source: r.source,
+        rootCause: r.root_cause,
+        fixType: r.fix_type,
+        statusAct: r.status_act,
+        resourceNeeded: r.resource_needed,
+      }));
+
+      // 9. Technical Requests Form V4.1
+      const techReqRes = await this.pgPool.query('SELECT * FROM technical_requests ORDER BY created_at DESC');
+      this.requestsCache = techReqRes.rows.map(r => ({
         id: r.id,
         docNo: r.doc_no,
         reqDate: r.req_date || '',
@@ -366,7 +606,7 @@ export class DatabaseService implements OnModuleInit {
         updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
       }));
 
-      this.logger.log(`📦 PostgreSQL Database loaded: ${this.usersCache.length} users, ${this.machinesCache.length} machines, ${this.employeesCache.length} employees, ${this.requestsCache.length} requests.`);
+      this.logger.log(`📦 PostgreSQL Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.requestsCache.length} v4 requests.`);
     } catch (e: any) {
       this.logger.error(`Error loading data from PostgreSQL: ${e.message}`);
     }
@@ -405,14 +645,34 @@ export class DatabaseService implements OnModuleInit {
 
   public loadAll() {
     this.usersCache = this.readJson<UserRecord[]>('users.json', []);
+    this.requestersCache = this.readJson<RequesterRecord[]>('requesters.json', []);
     this.machinesCache = this.readJson<MachineRecord[]>('machines.json', []);
-    this.employeesCache = this.readJson<EmployeeRecord[]>('employees.json', []);
+    this.weeklyRequestsCache = this.readJson<WeeklyTechnicalRequestRecord[]>('weekly_technical_requests.json', []);
+    this.defectLogsCache = this.readJson<DefectLogRecord[]>('defect_logs.json', []);
+    this.actionPlansCache = this.readJson<ActionPlanRecord[]>('action_plans.json', []);
+    this.formLookupOptionsCache = this.readJson<FormLookupOptionRecord[]>('form_lookup_options.json', []);
+    this.sheetListsCache = this.readJson<SheetListsRowRecord[]>('sheet_lists_do_not_delete.json', []);
     this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', []);
-    this.logger.log(`📦 Local Database loaded: ${this.usersCache.length} users, ${this.machinesCache.length} machines, ${this.employeesCache.length} employees, ${this.requestsCache.length} requests.`);
+
+    // Sync employeesCache from requesters
+    if (this.requestersCache.length > 0) {
+      this.employeesCache = this.requestersCache.map(r => ({
+        id: r.id,
+        mnv: r.mnv,
+        name: r.fullName,
+        dept: r.department,
+        area: r.area,
+        role: r.position,
+      }));
+    } else {
+      this.employeesCache = this.readJson<EmployeeRecord[]>('employees.json', []);
+    }
+
+    this.logger.log(`📦 Local Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.requestsCache.length} requests.`);
   }
 
   public async seedDefaults() {
-    // 1. Seed Default Users
+    // 1. Seed Users
     if (this.usersCache.length === 0) {
       const defaultPasswordHash = await bcrypt.hash('Dvt@123', 10);
       const now = new Date().toISOString();
@@ -458,72 +718,56 @@ export class DatabaseService implements OnModuleInit {
       this.logger.log('✅ Default users seeded (admin, tech01, user01 / Dvt@123)');
     }
 
-    // 2. Seed Default Machines
-    if (this.machinesCache.length === 0) {
-      const defaultMachines: Record<string, string[]> = {
-        'RFID/Thermal/Laser': [
-          'Laser printer 1', 'Laser printer 2', 'Laser cut', 'CLS P2P 1', 'CLS P2P 2',
-          'CLS R2R', 'Care Label Feeder', 'Ecopet G1', 'Ecopet G2', 'RFID1', 'RFID2',
-          'RFID3', 'RFID4', 'RFID5', 'RFID6', 'RFID7', 'AFINA', 'ITD (ETUN)', 'TOSHIBA',
-          'Epson 1', 'Epson 2', 'Fan Folding',
-        ],
-        'OFFSET': [
-          'Máy co nhiệt', 'LAMINATION FBK 800', 'SM 52', 'SX 52', 'Polar',
-          'CLS Labeling', 'GWS Cutting', 'Water base coating', 'Auto Lamination',
-        ],
-        'Digital': [
-          'IR Coating', 'HP Indigo 7K', 'HP 7K chiller 1', 'HP 7K chiller 2',
-          'UV Coating', 'Gluing Machine', 'PDM labeling',
-        ],
-        'HTL': [
-          'ATMA', 'GSF Powder dusting', 'Automatic Flat Conveyor', 'Automatic Sheet Stacker',
-          'Chiller HTL', 'Heat Press', 'Lò sấy bảng', 'Máy chụp Bảng', 'Wash-Out Booth',
-          'Sheet label cutter', 'HTL R2R', 'Rewinding', 'Slitting',
-        ],
-        'PFL': [
-          'PFL1', 'PFL2', 'PFL3', 'PFL4', 'PFL5', 'PFL6', 'C&F1', 'C&F2', 'C&F3', 'C&F4',
-          'C&F5', 'C&F6', 'C&F7', 'C&F8', 'C&F9', 'C&F10', 'C&F11', 'C&F12', 'C&F14',
-          'Inspection System', 'EAS-1', 'Máy sấy Focus', 'Máy sấy PFL',
-        ],
-        'WOVEN': ['WOVEN 1', 'WOVEN 2', 'WOVEN 3', 'WOVEN 4', 'WOVEN 5', 'WOVEN 6'],
-        'DIECUT': ['DIECUT 1', 'DIECUT 2', 'Máy Cán Màng'],
-      };
-
-      let count = 1;
-      for (const [tech, machines] of Object.entries(defaultMachines)) {
-        for (const name of machines) {
-          this.addMachine({
-            id: `mach-${count++}`,
-            tech,
-            name,
-            isActive: true,
-          });
-        }
+    // 2. If PostgreSQL is connected and requesters table is empty, seed from JSON
+    if (this.isPgConnected && this.pgPool && this.requestersCache.length === 0) {
+      const jsonRequesters = this.readJson<RequesterRecord[]>('requesters.json', []);
+      for (const r of jsonRequesters) {
+        this.addRequester(r);
       }
-      this.logger.log(`✅ Default machines seeded (${this.machinesCache.length} machines)`);
     }
 
-    // 3. Seed Default Employees
-    if (this.employeesCache.length === 0) {
-      const defaultEmps: EmployeeRecord[] = [
-        { id: 'emp-1', mnv: 'NV001', name: 'Nguyễn Văn An', dept: 'Sản Xuất', area: 'OFFSET', role: 'Operator' },
-        { id: 'emp-2', mnv: 'NV002', name: 'Trần Thị Bình', dept: 'Sản Xuất', area: 'Digital', role: 'Operator' },
-        { id: 'emp-3', mnv: 'NV003', name: 'Lê Hoàng Cường', dept: 'Sản Xuất', area: 'RFID', role: 'Leader' },
-        { id: 'emp-4', mnv: 'NV004', name: 'Phạm Minh Đức', dept: 'Kỹ Thuật In', area: 'Press', role: 'Technician' },
-        { id: 'emp-5', mnv: 'NV005', name: 'Võ Thành Đạt', dept: 'Kỹ Thuật In', area: 'Prepress', role: 'Supervisor' },
-        { id: 'emp-6', mnv: 'NV006', name: 'Đặng Quốc Huy', dept: 'Kỹ Thuật In', area: 'PostPress', role: 'Technician' },
-        { id: 'emp-7', mnv: 'NV007', name: 'Hoàng Kim Loan', dept: 'QA / QC', area: 'QA', role: 'Inspector' },
-        { id: 'emp-8', mnv: 'NV008', name: 'Ngô Trọng Nghĩa', dept: 'Sản Xuất', area: 'HTL', role: 'Manager' },
-      ];
-
-      for (const emp of defaultEmps) {
-        this.addEmployee(emp);
+    // 3. If PostgreSQL is connected and machines table is empty, seed from JSON
+    if (this.isPgConnected && this.pgPool && this.machinesCache.length === 0) {
+      const jsonMachines = this.readJson<MachineRecord[]>('machines.json', []);
+      for (const m of jsonMachines) {
+        this.addMachine(m);
       }
-      this.logger.log(`✅ Default employees seeded (${this.employeesCache.length} employees)`);
+    }
+
+    // 4. If PostgreSQL is connected and weekly_requests table is empty, seed from JSON
+    if (this.isPgConnected && this.pgPool && this.weeklyRequestsCache.length === 0) {
+      const jsonWeekly = this.readJson<WeeklyTechnicalRequestRecord[]>('weekly_technical_requests.json', []);
+      for (const w of jsonWeekly) {
+        this.addWeeklyRequest(w);
+      }
+    }
+
+    // 5. If PostgreSQL is connected and defect_logs table is empty, seed from JSON
+    if (this.isPgConnected && this.pgPool && this.defectLogsCache.length === 0) {
+      const jsonDefects = this.readJson<DefectLogRecord[]>('defect_logs.json', []);
+      for (const d of jsonDefects) {
+        this.addDefectLog(d);
+      }
+    }
+
+    // 6. If PostgreSQL is connected and action_plans table is empty, seed from JSON
+    if (this.isPgConnected && this.pgPool && this.actionPlansCache.length === 0) {
+      const jsonActions = this.readJson<ActionPlanRecord[]>('action_plans.json', []);
+      for (const a of jsonActions) {
+        this.addActionPlan(a);
+      }
+    }
+
+    // 7. If PostgreSQL is connected and form_lookup_options table is empty, seed from JSON
+    if (this.isPgConnected && this.pgPool && this.formLookupOptionsCache.length === 0) {
+      const jsonOpts = this.readJson<FormLookupOptionRecord[]>('form_lookup_options.json', []);
+      for (const o of jsonOpts) {
+        this.addLookupOption(o);
+      }
     }
   }
 
-  // --- Users Accessors ---
+  // ==================== USERS ACCESSORS ====================
   getUsers(): UserRecord[] { return this.usersCache; }
   getUserById(id: string): UserRecord | undefined { return this.usersCache.find(u => u.id === id); }
   getUserByUsername(username: string): UserRecord | undefined {
@@ -602,12 +846,95 @@ export class DatabaseService implements OnModuleInit {
     return false;
   }
 
-  // --- Machines Accessors ---
+  // ==================== REQUESTERS (Name of reqester.xlsx) ====================
+  getRequesters(): RequesterRecord[] { return this.requestersCache; }
+  getRequesterById(id: string): RequesterRecord | undefined { return this.requestersCache.find(r => r.id === id); }
+  getRequesterByMnv(mnv: string): RequesterRecord | undefined {
+    return this.requestersCache.find(r => r.mnv.toLowerCase() === mnv.toLowerCase().trim());
+  }
+  saveRequesters(): void { this.writeJson('requesters.json', this.requestersCache); }
+
+  addRequester(r: RequesterRecord): void {
+    const idx = this.requestersCache.findIndex(x => x.id === r.id || x.mnv === r.mnv);
+    if (idx !== -1) {
+      this.requestersCache[idx] = r;
+    } else {
+      this.requestersCache.push(r);
+    }
+    this.saveRequesters();
+
+    // Mirror to employeesCache
+    this.addEmployee({
+      id: r.id,
+      mnv: r.mnv,
+      name: r.fullName,
+      dept: r.department,
+      area: r.area,
+      role: r.position,
+    });
+
+    if (this.isPgConnected && this.pgPool) {
+      this.pgPool.query(
+        `INSERT INTO requesters (id, stt, department, area, mnv, full_name, position)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (mnv) DO UPDATE SET
+           department = EXCLUDED.department,
+           area = EXCLUDED.area,
+           full_name = EXCLUDED.full_name,
+           position = EXCLUDED.position,
+           updated_at = now()`,
+        [r.id, r.stt, r.department, r.area, r.mnv, r.fullName, r.position],
+      ).catch(err => this.logger.error(`PG Error inserting requester: ${err.message}`));
+    }
+  }
+
+  updateRequester(id: string, updates: Partial<RequesterRecord>): RequesterRecord | undefined {
+    const idx = this.requestersCache.findIndex(r => r.id === id);
+    if (idx !== -1) {
+      this.requestersCache[idx] = { ...this.requestersCache[idx], ...updates };
+      this.saveRequesters();
+      const updated = this.requestersCache[idx];
+
+      if (this.isPgConnected && this.pgPool) {
+        this.pgPool.query(
+          `UPDATE requesters SET
+             department = COALESCE($2, department),
+             area = COALESCE($3, area),
+             full_name = COALESCE($4, full_name),
+             position = COALESCE($5, position),
+             updated_at = now()
+           WHERE id = $1`,
+          [id, updates.department, updates.area, updates.fullName, updates.position],
+        ).catch(err => this.logger.error(`PG Error updating requester: ${err.message}`));
+      }
+
+      return updated;
+    }
+    return undefined;
+  }
+
+  deleteRequester(id: string): boolean {
+    const initialLen = this.requestersCache.length;
+    this.requestersCache = this.requestersCache.filter(r => r.id !== id);
+    if (this.requestersCache.length !== initialLen) {
+      this.saveRequesters();
+      this.deleteEmployee(id);
+      if (this.isPgConnected && this.pgPool) {
+        this.pgPool.query('DELETE FROM requesters WHERE id = $1', [id])
+          .catch(err => this.logger.error(`PG Error deleting requester: ${err.message}`));
+      }
+      return true;
+    }
+    return false;
+  }
+
+  // ==================== MACHINES (Name of reqester.xlsx) ====================
   getMachines(): MachineRecord[] { return this.machinesCache; }
+  getMachineById(id: string): MachineRecord | undefined { return this.machinesCache.find(m => m.id === id); }
   saveMachines(): void { this.writeJson('machines.json', this.machinesCache); }
 
   addMachine(machine: MachineRecord): void {
-    const idx = this.machinesCache.findIndex(m => m.id === machine.id);
+    const idx = this.machinesCache.findIndex(m => m.id === machine.id || (m.name.toLowerCase() === machine.name.toLowerCase() && m.tech.toLowerCase() === machine.tech.toLowerCase()));
     if (idx !== -1) {
       this.machinesCache[idx] = machine;
     } else {
@@ -617,16 +944,16 @@ export class DatabaseService implements OnModuleInit {
 
     if (this.isPgConnected && this.pgPool) {
       this.pgPool.query(
-        `INSERT INTO machines (id, tech, name, code, note, is_active)
-         VALUES ($1, $2, $3, $4, $5, $6)
+        `INSERT INTO machines (id, stt, area, machine_name, code, note, is_active)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
          ON CONFLICT (id) DO UPDATE SET
-           tech = EXCLUDED.tech,
-           name = EXCLUDED.name,
+           area = EXCLUDED.area,
+           machine_name = EXCLUDED.machine_name,
            code = EXCLUDED.code,
            note = EXCLUDED.note,
            is_active = EXCLUDED.is_active,
            updated_at = now()`,
-        [machine.id, machine.tech, machine.name, machine.code || null, machine.note || null, machine.isActive],
+        [machine.id, 0, machine.tech, machine.name, machine.code || null, machine.note || null, machine.isActive],
       ).catch(err => this.logger.error(`PG Error inserting machine: ${err.message}`));
     }
   }
@@ -641,8 +968,8 @@ export class DatabaseService implements OnModuleInit {
       if (this.isPgConnected && this.pgPool) {
         this.pgPool.query(
           `UPDATE machines SET
-             tech = COALESCE($2, tech),
-             name = COALESCE($3, name),
+             area = COALESCE($2, area),
+             machine_name = COALESCE($3, machine_name),
              code = COALESCE($4, code),
              note = COALESCE($5, note),
              is_active = COALESCE($6, is_active),
@@ -671,19 +998,15 @@ export class DatabaseService implements OnModuleInit {
     return false;
   }
 
-  // --- Employees Accessors ---
+  // ==================== EMPLOYEES ====================
   getEmployees(): EmployeeRecord[] { return this.employeesCache; }
   saveEmployees(): void { this.writeJson('employees.json', this.employeesCache); }
 
   setEmployees(list: EmployeeRecord[]): void {
     this.employeesCache = list;
     this.saveEmployees();
-
-    if (this.isPgConnected && this.pgPool) {
-      // Bulk insert/replace
-      for (const emp of list) {
-        this.addEmployee(emp);
-      }
+    for (const emp of list) {
+      this.addEmployee(emp);
     }
   }
 
@@ -698,19 +1021,16 @@ export class DatabaseService implements OnModuleInit {
 
     if (this.isPgConnected && this.pgPool) {
       this.pgPool.query(
-        `INSERT INTO employees (id, mnv, name, dept, area, role, phone, email)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         ON CONFLICT (id) DO UPDATE SET
-           mnv = EXCLUDED.mnv,
-           name = EXCLUDED.name,
-           dept = EXCLUDED.dept,
+        `INSERT INTO requesters (id, stt, department, area, mnv, full_name, position)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)
+         ON CONFLICT (mnv) DO UPDATE SET
+           department = EXCLUDED.department,
            area = EXCLUDED.area,
-           role = EXCLUDED.role,
-           phone = EXCLUDED.phone,
-           email = EXCLUDED.email,
+           full_name = EXCLUDED.full_name,
+           position = EXCLUDED.position,
            updated_at = now()`,
-        [emp.id, emp.mnv, emp.name, emp.dept, emp.area, emp.role, emp.phone || null, emp.email || null],
-      ).catch(err => this.logger.error(`PG Error inserting employee: ${err.message}`));
+        [emp.id, 0, emp.dept, emp.area, emp.mnv, emp.name, emp.role],
+      ).catch(() => {});
     }
   }
 
@@ -719,25 +1039,7 @@ export class DatabaseService implements OnModuleInit {
     if (idx !== -1) {
       this.employeesCache[idx] = { ...this.employeesCache[idx], ...updates };
       this.saveEmployees();
-      const updated = this.employeesCache[idx];
-
-      if (this.isPgConnected && this.pgPool) {
-        this.pgPool.query(
-          `UPDATE employees SET
-             mnv = COALESCE($2, mnv),
-             name = COALESCE($3, name),
-             dept = COALESCE($4, dept),
-             area = COALESCE($5, area),
-             role = COALESCE($6, role),
-             phone = COALESCE($7, phone),
-             email = COALESCE($8, email),
-             updated_at = now()
-           WHERE id = $1`,
-          [id, updates.mnv, updates.name, updates.dept, updates.area, updates.role, updates.phone, updates.email],
-        ).catch(err => this.logger.error(`PG Error updating employee: ${err.message}`));
-      }
-
-      return updated;
+      return this.employeesCache[idx];
     }
     return undefined;
   }
@@ -747,16 +1049,251 @@ export class DatabaseService implements OnModuleInit {
     this.employeesCache = this.employeesCache.filter(e => e.id !== id);
     if (this.employeesCache.length !== initialLen) {
       this.saveEmployees();
+      return true;
+    }
+    return false;
+  }
+
+  // ==================== WEEKLY TECHNICAL REQUESTS (1_Technical_Requests) ====================
+  getWeeklyRequests(): WeeklyTechnicalRequestRecord[] { return this.weeklyRequestsCache; }
+  getWeeklyRequestById(id: string): WeeklyTechnicalRequestRecord | undefined {
+    return this.weeklyRequestsCache.find(w => w.id === id || w.requestId === id);
+  }
+  saveWeeklyRequests(): void { this.writeJson('weekly_technical_requests.json', this.weeklyRequestsCache); }
+
+  addWeeklyRequest(w: WeeklyTechnicalRequestRecord): void {
+    const idx = this.weeklyRequestsCache.findIndex(x => x.id === w.id);
+    if (idx !== -1) {
+      this.weeklyRequestsCache[idx] = w;
+    } else {
+      this.weeklyRequestsCache.unshift(w);
+    }
+    this.saveWeeklyRequests();
+
+    if (this.isPgConnected && this.pgPool) {
+      this.pgPool.query(
+        `INSERT INTO weekly_technical_requests (
+           id, request_id, request_date, request_type, item_equipment, severity, status,
+           sla_target_hours, actual_hours, met_sla, reported_by, resolved_by
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         ON CONFLICT (id) DO UPDATE SET
+           request_id = EXCLUDED.request_id,
+           request_date = EXCLUDED.request_date,
+           request_type = EXCLUDED.request_type,
+           item_equipment = EXCLUDED.item_equipment,
+           severity = EXCLUDED.severity,
+           status = EXCLUDED.status,
+           sla_target_hours = EXCLUDED.sla_target_hours,
+           actual_hours = EXCLUDED.actual_hours,
+           met_sla = EXCLUDED.met_sla,
+           reported_by = EXCLUDED.reported_by,
+           resolved_by = EXCLUDED.resolved_by,
+           updated_at = now()`,
+        [w.id, w.requestId, w.requestDate || null, w.requestType, w.itemEquipment, w.severity, w.status, w.slaTargetHours, w.actualHours, w.metSla || null, w.reportedBy, w.resolvedBy || null],
+      ).catch(err => this.logger.error(`PG Error inserting weekly request: ${err.message}`));
+    }
+  }
+
+  updateWeeklyRequest(id: string, updates: Partial<WeeklyTechnicalRequestRecord>): WeeklyTechnicalRequestRecord | undefined {
+    const idx = this.weeklyRequestsCache.findIndex(w => w.id === id);
+    if (idx !== -1) {
+      this.weeklyRequestsCache[idx] = { ...this.weeklyRequestsCache[idx], ...updates };
+      this.saveWeeklyRequests();
+      const updated = this.weeklyRequestsCache[idx];
+
       if (this.isPgConnected && this.pgPool) {
-        this.pgPool.query('DELETE FROM employees WHERE id = $1', [id])
-          .catch(err => this.logger.error(`PG Error deleting employee: ${err.message}`));
+        this.addWeeklyRequest(updated);
+      }
+      return updated;
+    }
+    return undefined;
+  }
+
+  deleteWeeklyRequest(id: string): boolean {
+    const initialLen = this.weeklyRequestsCache.length;
+    this.weeklyRequestsCache = this.weeklyRequestsCache.filter(w => w.id !== id);
+    if (this.weeklyRequestsCache.length !== initialLen) {
+      this.saveWeeklyRequests();
+      if (this.isPgConnected && this.pgPool) {
+        this.pgPool.query('DELETE FROM weekly_technical_requests WHERE id = $1', [id])
+          .catch(err => this.logger.error(`PG Error deleting weekly request: ${err.message}`));
       }
       return true;
     }
     return false;
   }
 
-  // --- Technical Requests Accessors ---
+  // ==================== DEFECT LOGS (2_Defect_Log) ====================
+  getDefectLogs(): DefectLogRecord[] { return this.defectLogsCache; }
+  getDefectLogById(id: string | number): DefectLogRecord | undefined {
+    return this.defectLogsCache.find(d => d.id === String(id) || d.defectId === Number(id));
+  }
+  saveDefectLogs(): void { this.writeJson('defect_logs.json', this.defectLogsCache); }
+
+  addDefectLog(d: DefectLogRecord): void {
+    const idx = this.defectLogsCache.findIndex(x => x.id === d.id || x.defectId === d.defectId);
+    if (idx !== -1) {
+      this.defectLogsCache[idx] = d;
+    } else {
+      this.defectLogsCache.unshift(d);
+    }
+    this.saveDefectLogs();
+
+    if (this.isPgConnected && this.pgPool) {
+      this.pgPool.query(
+        `INSERT INTO defect_logs (
+           id, defect_id, defect_date, facility, source, root_cause_category,
+           specific_issue, affected_product, downtime_minutes, recurring_issue, eight_d_required
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+         ON CONFLICT (id) DO UPDATE SET
+           defect_date = EXCLUDED.defect_date,
+           facility = EXCLUDED.facility,
+           source = EXCLUDED.source,
+           root_cause_category = EXCLUDED.root_cause_category,
+           specific_issue = EXCLUDED.specific_issue,
+           affected_product = EXCLUDED.affected_product,
+           downtime_minutes = EXCLUDED.downtime_minutes,
+           recurring_issue = EXCLUDED.recurring_issue,
+           eight_d_required = EXCLUDED.eight_d_required,
+           updated_at = now()`,
+        [d.id, d.defectId, d.defectDate, d.facility, d.source, d.rootCauseCategory, d.specificIssue, d.affectedProduct, d.downtimeMinutes || null, d.recurringIssue, d.eightDRequired],
+      ).catch(err => this.logger.error(`PG Error inserting defect log: ${err.message}`));
+    }
+  }
+
+  updateDefectLog(id: string, updates: Partial<DefectLogRecord>): DefectLogRecord | undefined {
+    const idx = this.defectLogsCache.findIndex(d => d.id === id || String(d.defectId) === id);
+    if (idx !== -1) {
+      this.defectLogsCache[idx] = { ...this.defectLogsCache[idx], ...updates };
+      this.saveDefectLogs();
+      const updated = this.defectLogsCache[idx];
+
+      if (this.isPgConnected && this.pgPool) {
+        this.addDefectLog(updated);
+      }
+      return updated;
+    }
+    return undefined;
+  }
+
+  deleteDefectLog(id: string): boolean {
+    const initialLen = this.defectLogsCache.length;
+    this.defectLogsCache = this.defectLogsCache.filter(d => d.id !== id && String(d.defectId) !== id);
+    if (this.defectLogsCache.length !== initialLen) {
+      this.saveDefectLogs();
+      if (this.isPgConnected && this.pgPool) {
+        this.pgPool.query('DELETE FROM defect_logs WHERE id = $1', [id])
+          .catch(err => this.logger.error(`PG Error deleting defect log: ${err.message}`));
+      }
+      return true;
+    }
+    return false;
+  }
+
+  // ==================== ACTION PLANS (3_Action_Plan) ====================
+  getActionPlans(): ActionPlanRecord[] { return this.actionPlansCache; }
+  getActionPlanById(id: string): ActionPlanRecord | undefined {
+    return this.actionPlansCache.find(a => a.id === id || a.actionId === id);
+  }
+  saveActionPlans(): void { this.writeJson('action_plans.json', this.actionPlansCache); }
+
+  addActionPlan(a: ActionPlanRecord): void {
+    const idx = this.actionPlansCache.findIndex(x => x.id === a.id || x.actionId === a.actionId);
+    if (idx !== -1) {
+      this.actionPlansCache[idx] = a;
+    } else {
+      this.actionPlansCache.unshift(a);
+    }
+    this.saveActionPlans();
+
+    if (this.isPgConnected && this.pgPool) {
+      this.pgPool.query(
+        `INSERT INTO action_plans (
+           id, action_id, date_logged, facility, related_defect_id, fix_type,
+           description, pic, deadline, status, resource_needed, remarks
+         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+         ON CONFLICT (id) DO UPDATE SET
+           action_id = EXCLUDED.action_id,
+           date_logged = EXCLUDED.date_logged,
+           facility = EXCLUDED.facility,
+           related_defect_id = EXCLUDED.related_defect_id,
+           fix_type = EXCLUDED.fix_type,
+           description = EXCLUDED.description,
+           pic = EXCLUDED.pic,
+           deadline = EXCLUDED.deadline,
+           status = EXCLUDED.status,
+           resource_needed = EXCLUDED.resource_needed,
+           remarks = EXCLUDED.remarks,
+           updated_at = now()`,
+        [a.id, a.actionId, a.dateLogged, a.facility, a.relatedDefectId || null, a.fixType, a.description, a.pic, a.deadline, a.status, a.resourceNeeded, a.remarks || null],
+      ).catch(err => this.logger.error(`PG Error inserting action plan: ${err.message}`));
+    }
+  }
+
+  updateActionPlan(id: string, updates: Partial<ActionPlanRecord>): ActionPlanRecord | undefined {
+    const idx = this.actionPlansCache.findIndex(a => a.id === id || a.actionId === id);
+    if (idx !== -1) {
+      this.actionPlansCache[idx] = { ...this.actionPlansCache[idx], ...updates };
+      this.saveActionPlans();
+      const updated = this.actionPlansCache[idx];
+
+      if (this.isPgConnected && this.pgPool) {
+        this.addActionPlan(updated);
+      }
+      return updated;
+    }
+    return undefined;
+  }
+
+  deleteActionPlan(id: string): boolean {
+    const initialLen = this.actionPlansCache.length;
+    this.actionPlansCache = this.actionPlansCache.filter(a => a.id !== id && a.actionId !== id);
+    if (this.actionPlansCache.length !== initialLen) {
+      this.saveActionPlans();
+      if (this.isPgConnected && this.pgPool) {
+        this.pgPool.query('DELETE FROM action_plans WHERE id = $1', [id])
+          .catch(err => this.logger.error(`PG Error deleting action plan: ${err.message}`));
+      }
+      return true;
+    }
+    return false;
+  }
+
+  // ==================== FORM LOOKUP OPTIONS (Lists_DO_NOT_DELETE) ====================
+  getLookupOptions(category?: string): FormLookupOptionRecord[] {
+    if (category) {
+      return this.formLookupOptionsCache.filter(o => o.category.toLowerCase() === category.toLowerCase());
+    }
+    return this.formLookupOptionsCache;
+  }
+  saveLookupOptions(): void { this.writeJson('form_lookup_options.json', this.formLookupOptionsCache); }
+
+  addLookupOption(opt: FormLookupOptionRecord): void {
+    const idx = this.formLookupOptionsCache.findIndex(o => o.id === opt.id || (o.category === opt.category && o.itemValue === opt.itemValue));
+    if (idx !== -1) {
+      this.formLookupOptionsCache[idx] = opt;
+    } else {
+      this.formLookupOptionsCache.push(opt);
+    }
+    this.saveLookupOptions();
+
+    if (this.isPgConnected && this.pgPool) {
+      this.pgPool.query(
+        `INSERT INTO form_lookup_options (id, category, item_value, item_label, sort_order, is_active)
+         VALUES ($1, $2, $3, $4, $5, $6)
+         ON CONFLICT (id) DO UPDATE SET
+           item_value = EXCLUDED.item_value,
+           item_label = EXCLUDED.item_label,
+           sort_order = EXCLUDED.sort_order,
+           is_active = EXCLUDED.is_active`,
+        [opt.id, opt.category, opt.itemValue, opt.itemLabel || opt.itemValue, opt.sortOrder || 0, opt.isActive ?? true],
+      ).catch(err => this.logger.error(`PG Error inserting lookup option: ${err.message}`));
+    }
+  }
+
+  getSheetLists(): SheetListsRowRecord[] { return this.sheetListsCache; }
+
+  // ==================== TECHNICAL REQUESTS FORM V4.1 ====================
   getRequests(): TechnicalRequestRecord[] { return this.requestsCache; }
 
   getRequestById(id: string): TechnicalRequestRecord | undefined {

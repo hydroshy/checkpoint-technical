@@ -1,0 +1,1338 @@
+[
+  {
+    "id": "opt-1",
+    "category": "Request_ID",
+    "itemValue": "VN5117 - Lê Minh Hoàng",
+    "itemLabel": "VN5117 - Lê Minh Hoàng",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-2",
+    "category": "Request_ID",
+    "itemValue": "VN5898 - Phạm Hùng Sơn",
+    "itemLabel": "VN5898 - Phạm Hùng Sơn",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-3",
+    "category": "Request_ID",
+    "itemValue": "VN5207 - Lục Xuân Trường",
+    "itemLabel": "VN5207 - Lục Xuân Trường",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-4",
+    "category": "Request_ID",
+    "itemValue": "VN5430 - Trần Công Hậu",
+    "itemLabel": "VN5430 - Trần Công Hậu",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-5",
+    "category": "Request_ID",
+    "itemValue": "VN5356 - Phan Thị Thêm",
+    "itemLabel": "VN5356 - Phan Thị Thêm",
+    "sortOrder": 5,
+    "isActive": true
+  },
+  {
+    "id": "opt-6",
+    "category": "Request_ID",
+    "itemValue": "VN5855 - Đỗ Văn Vẹn",
+    "itemLabel": "VN5855 - Đỗ Văn Vẹn",
+    "sortOrder": 6,
+    "isActive": true
+  },
+  {
+    "id": "opt-7",
+    "category": "Request_ID",
+    "itemValue": "VN6024 - Phạm Văn Tuấn",
+    "itemLabel": "VN6024 - Phạm Văn Tuấn",
+    "sortOrder": 7,
+    "isActive": true
+  },
+  {
+    "id": "opt-8",
+    "category": "Request_ID",
+    "itemValue": "VN6173 - Lâm Hữu Phước",
+    "itemLabel": "VN6173 - Lâm Hữu Phước",
+    "sortOrder": 8,
+    "isActive": true
+  },
+  {
+    "id": "opt-9",
+    "category": "Request_ID",
+    "itemValue": "VN5805 - Nguyễn Quốc Cường",
+    "itemLabel": "VN5805 - Nguyễn Quốc Cường",
+    "sortOrder": 9,
+    "isActive": true
+  },
+  {
+    "id": "opt-10",
+    "category": "Request_ID",
+    "itemValue": "VN5454 - Quách Tiến Dũng",
+    "itemLabel": "VN5454 - Quách Tiến Dũng",
+    "sortOrder": 10,
+    "isActive": true
+  },
+  {
+    "id": "opt-11",
+    "category": "Request_ID",
+    "itemValue": "VN5571 - Trần Thị Loan",
+    "itemLabel": "VN5571 - Trần Thị Loan",
+    "sortOrder": 11,
+    "isActive": true
+  },
+  {
+    "id": "opt-12",
+    "category": "Request_ID",
+    "itemValue": "VN5456 - Nguyễn Ngọc Mỹ",
+    "itemLabel": "VN5456 - Nguyễn Ngọc Mỹ",
+    "sortOrder": 12,
+    "isActive": true
+  },
+  {
+    "id": "opt-13",
+    "category": "Request_ID",
+    "itemValue": "VN5381 - Nguyễn Thị Thanh Hồng",
+    "itemLabel": "VN5381 - Nguyễn Thị Thanh Hồng",
+    "sortOrder": 13,
+    "isActive": true
+  },
+  {
+    "id": "opt-14",
+    "category": "Request_ID",
+    "itemValue": "VN5741 - Huỳnh Thị Thanh Lên",
+    "itemLabel": "VN5741 - Huỳnh Thị Thanh Lên",
+    "sortOrder": 14,
+    "isActive": true
+  },
+  {
+    "id": "opt-15",
+    "category": "Request_ID",
+    "itemValue": "VN5634 - Nguyễn Văn Khỏe",
+    "itemLabel": "VN5634 - Nguyễn Văn Khỏe",
+    "sortOrder": 15,
+    "isActive": true
+  },
+  {
+    "id": "opt-16",
+    "category": "Request_ID",
+    "itemValue": "VN5663 - Nguyễn Văn Thể",
+    "itemLabel": "VN5663 - Nguyễn Văn Thể",
+    "sortOrder": 16,
+    "isActive": true
+  },
+  {
+    "id": "opt-17",
+    "category": "Request_ID",
+    "itemValue": "VN5944 - Đỗ Đức Nhật",
+    "itemLabel": "VN5944 - Đỗ Đức Nhật",
+    "sortOrder": 17,
+    "isActive": true
+  },
+  {
+    "id": "opt-18",
+    "category": "Request_ID",
+    "itemValue": "VN5830 - Lê Đình Bình",
+    "itemLabel": "VN5830 - Lê Đình Bình",
+    "sortOrder": 18,
+    "isActive": true
+  },
+  {
+    "id": "opt-19",
+    "category": "Request_ID",
+    "itemValue": "VN5696 - Trần Quang Hải",
+    "itemLabel": "VN5696 - Trần Quang Hải",
+    "sortOrder": 19,
+    "isActive": true
+  },
+  {
+    "id": "opt-20",
+    "category": "Request_ID",
+    "itemValue": "VN5793 - Phạm Việt Khái",
+    "itemLabel": "VN5793 - Phạm Việt Khái",
+    "sortOrder": 20,
+    "isActive": true
+  },
+  {
+    "id": "opt-21",
+    "category": "Request_ID",
+    "itemValue": "VN5899 - Cao Đăng Khoa",
+    "itemLabel": "VN5899 - Cao Đăng Khoa",
+    "sortOrder": 21,
+    "isActive": true
+  },
+  {
+    "id": "opt-22",
+    "category": "Request_ID",
+    "itemValue": "VN5831 - Trương Hoàng Anh",
+    "itemLabel": "VN5831 - Trương Hoàng Anh",
+    "sortOrder": 22,
+    "isActive": true
+  },
+  {
+    "id": "opt-23",
+    "category": "Request_ID",
+    "itemValue": "VN5789 - Trần Thanh Hóa",
+    "itemLabel": "VN5789 - Trần Thanh Hóa",
+    "sortOrder": 23,
+    "isActive": true
+  },
+  {
+    "id": "opt-24",
+    "category": "Request_ID",
+    "itemValue": "VN5995 - Phùng Thanh Vũ",
+    "itemLabel": "VN5995 - Phùng Thanh Vũ",
+    "sortOrder": 24,
+    "isActive": true
+  },
+  {
+    "id": "opt-25",
+    "category": "Request_ID",
+    "itemValue": "VN5813 - Nguyễn Thị Xuân",
+    "itemLabel": "VN5813 - Nguyễn Thị Xuân",
+    "sortOrder": 25,
+    "isActive": true
+  },
+  {
+    "id": "opt-26",
+    "category": "Request_ID",
+    "itemValue": "VN5901 - Nguyễn Thị Thoa",
+    "itemLabel": "VN5901 - Nguyễn Thị Thoa",
+    "sortOrder": 26,
+    "isActive": true
+  },
+  {
+    "id": "opt-27",
+    "category": "Request_ID",
+    "itemValue": "VN5875 - Lê Trường",
+    "itemLabel": "VN5875 - Lê Trường",
+    "sortOrder": 27,
+    "isActive": true
+  },
+  {
+    "id": "opt-28",
+    "category": "Request_ID",
+    "itemValue": "VN5810 - Nông Ích Nam",
+    "itemLabel": "VN5810 - Nông Ích Nam",
+    "sortOrder": 28,
+    "isActive": true
+  },
+  {
+    "id": "opt-29",
+    "category": "Request_Type",
+    "itemValue": "Machine Running",
+    "itemLabel": "Machine Running",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-30",
+    "category": "Request_Type",
+    "itemValue": "Machine Set up",
+    "itemLabel": "Machine Set up",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-31",
+    "category": "Item_Equipment",
+    "itemValue": "PFL1",
+    "itemLabel": "PFL1",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-32",
+    "category": "Item_Equipment",
+    "itemValue": "PFL2",
+    "itemLabel": "PFL2",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-33",
+    "category": "Item_Equipment",
+    "itemValue": "PFL3",
+    "itemLabel": "PFL3",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-34",
+    "category": "Item_Equipment",
+    "itemValue": "PFL4",
+    "itemLabel": "PFL4",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-35",
+    "category": "Item_Equipment",
+    "itemValue": "PFL5",
+    "itemLabel": "PFL5",
+    "sortOrder": 5,
+    "isActive": true
+  },
+  {
+    "id": "opt-36",
+    "category": "Item_Equipment",
+    "itemValue": "PFL6",
+    "itemLabel": "PFL6",
+    "sortOrder": 6,
+    "isActive": true
+  },
+  {
+    "id": "opt-37",
+    "category": "Item_Equipment",
+    "itemValue": "C&F1",
+    "itemLabel": "C&F1",
+    "sortOrder": 7,
+    "isActive": true
+  },
+  {
+    "id": "opt-38",
+    "category": "Item_Equipment",
+    "itemValue": "C&F2",
+    "itemLabel": "C&F2",
+    "sortOrder": 8,
+    "isActive": true
+  },
+  {
+    "id": "opt-39",
+    "category": "Item_Equipment",
+    "itemValue": "C&F3",
+    "itemLabel": "C&F3",
+    "sortOrder": 9,
+    "isActive": true
+  },
+  {
+    "id": "opt-40",
+    "category": "Item_Equipment",
+    "itemValue": "C&F4",
+    "itemLabel": "C&F4",
+    "sortOrder": 10,
+    "isActive": true
+  },
+  {
+    "id": "opt-41",
+    "category": "Item_Equipment",
+    "itemValue": "C&F5",
+    "itemLabel": "C&F5",
+    "sortOrder": 11,
+    "isActive": true
+  },
+  {
+    "id": "opt-42",
+    "category": "Item_Equipment",
+    "itemValue": "C&F6",
+    "itemLabel": "C&F6",
+    "sortOrder": 12,
+    "isActive": true
+  },
+  {
+    "id": "opt-43",
+    "category": "Item_Equipment",
+    "itemValue": "C&F7",
+    "itemLabel": "C&F7",
+    "sortOrder": 13,
+    "isActive": true
+  },
+  {
+    "id": "opt-44",
+    "category": "Item_Equipment",
+    "itemValue": "C&F8",
+    "itemLabel": "C&F8",
+    "sortOrder": 14,
+    "isActive": true
+  },
+  {
+    "id": "opt-45",
+    "category": "Item_Equipment",
+    "itemValue": "C&F9",
+    "itemLabel": "C&F9",
+    "sortOrder": 15,
+    "isActive": true
+  },
+  {
+    "id": "opt-46",
+    "category": "Item_Equipment",
+    "itemValue": "C&F10",
+    "itemLabel": "C&F10",
+    "sortOrder": 16,
+    "isActive": true
+  },
+  {
+    "id": "opt-47",
+    "category": "Item_Equipment",
+    "itemValue": "C&F11",
+    "itemLabel": "C&F11",
+    "sortOrder": 17,
+    "isActive": true
+  },
+  {
+    "id": "opt-48",
+    "category": "Item_Equipment",
+    "itemValue": "C&F12",
+    "itemLabel": "C&F12",
+    "sortOrder": 18,
+    "isActive": true
+  },
+  {
+    "id": "opt-49",
+    "category": "Item_Equipment",
+    "itemValue": "C&F13",
+    "itemLabel": "C&F13",
+    "sortOrder": 19,
+    "isActive": true
+  },
+  {
+    "id": "opt-50",
+    "category": "Item_Equipment",
+    "itemValue": "C&F14",
+    "itemLabel": "C&F14",
+    "sortOrder": 20,
+    "isActive": true
+  },
+  {
+    "id": "opt-51",
+    "category": "Item_Equipment",
+    "itemValue": "C&F15",
+    "itemLabel": "C&F15",
+    "sortOrder": 21,
+    "isActive": true
+  },
+  {
+    "id": "opt-52",
+    "category": "Item_Equipment",
+    "itemValue": "C&F16",
+    "itemLabel": "C&F16",
+    "sortOrder": 22,
+    "isActive": true
+  },
+  {
+    "id": "opt-53",
+    "category": "Item_Equipment",
+    "itemValue": "C&F17",
+    "itemLabel": "C&F17",
+    "sortOrder": 23,
+    "isActive": true
+  },
+  {
+    "id": "opt-54",
+    "category": "Item_Equipment",
+    "itemValue": "C&F18",
+    "itemLabel": "C&F18",
+    "sortOrder": 24,
+    "isActive": true
+  },
+  {
+    "id": "opt-55",
+    "category": "Item_Equipment",
+    "itemValue": "C&F19",
+    "itemLabel": "C&F19",
+    "sortOrder": 25,
+    "isActive": true
+  },
+  {
+    "id": "opt-56",
+    "category": "Item_Equipment",
+    "itemValue": "C&F20",
+    "itemLabel": "C&F20",
+    "sortOrder": 26,
+    "isActive": true
+  },
+  {
+    "id": "opt-57",
+    "category": "Item_Equipment",
+    "itemValue": "Inspection System",
+    "itemLabel": "Inspection System",
+    "sortOrder": 27,
+    "isActive": true
+  },
+  {
+    "id": "opt-58",
+    "category": "Item_Equipment",
+    "itemValue": "EAS-1",
+    "itemLabel": "EAS-1",
+    "sortOrder": 28,
+    "isActive": true
+  },
+  {
+    "id": "opt-59",
+    "category": "Item_Equipment",
+    "itemValue": "Máy sấy Focus",
+    "itemLabel": "Máy sấy Focus",
+    "sortOrder": 29,
+    "isActive": true
+  },
+  {
+    "id": "opt-60",
+    "category": "Item_Equipment",
+    "itemValue": "Máy sấy PFL",
+    "itemLabel": "Máy sấy PFL",
+    "sortOrder": 30,
+    "isActive": true
+  },
+  {
+    "id": "opt-61",
+    "category": "Item_Equipment",
+    "itemValue": "Máy co nhiệt",
+    "itemLabel": "Máy co nhiệt",
+    "sortOrder": 31,
+    "isActive": true
+  },
+  {
+    "id": "opt-62",
+    "category": "Item_Equipment",
+    "itemValue": "LAMINATION FBK 800",
+    "itemLabel": "LAMINATION FBK 800",
+    "sortOrder": 32,
+    "isActive": true
+  },
+  {
+    "id": "opt-63",
+    "category": "Item_Equipment",
+    "itemValue": "SM 52 - 5 colors",
+    "itemLabel": "SM 52 - 5 colors",
+    "sortOrder": 33,
+    "isActive": true
+  },
+  {
+    "id": "opt-64",
+    "category": "Item_Equipment",
+    "itemValue": "SX 52 - 6 colors",
+    "itemLabel": "SX 52 - 6 colors",
+    "sortOrder": 34,
+    "isActive": true
+  },
+  {
+    "id": "opt-65",
+    "category": "Item_Equipment",
+    "itemValue": "Laser printer 1",
+    "itemLabel": "Laser printer 1",
+    "sortOrder": 35,
+    "isActive": true
+  },
+  {
+    "id": "opt-66",
+    "category": "Item_Equipment",
+    "itemValue": "Laser printer 2",
+    "itemLabel": "Laser printer 2",
+    "sortOrder": 36,
+    "isActive": true
+  },
+  {
+    "id": "opt-67",
+    "category": "Item_Equipment",
+    "itemValue": "Laser cut",
+    "itemLabel": "Laser cut",
+    "sortOrder": 37,
+    "isActive": true
+  },
+  {
+    "id": "opt-68",
+    "category": "Item_Equipment",
+    "itemValue": "ATMA",
+    "itemLabel": "ATMA",
+    "sortOrder": 38,
+    "isActive": true
+  },
+  {
+    "id": "opt-69",
+    "category": "Item_Equipment",
+    "itemValue": "GSF Powder dusting\nHTL",
+    "itemLabel": "GSF Powder dusting\nHTL",
+    "sortOrder": 39,
+    "isActive": true
+  },
+  {
+    "id": "opt-70",
+    "category": "Item_Equipment",
+    "itemValue": "Automatic Flat Conveyor\nHTL",
+    "itemLabel": "Automatic Flat Conveyor\nHTL",
+    "sortOrder": 40,
+    "isActive": true
+  },
+  {
+    "id": "opt-71",
+    "category": "Item_Equipment",
+    "itemValue": "Automatic Sheet Stacker\nHTL",
+    "itemLabel": "Automatic Sheet Stacker\nHTL",
+    "sortOrder": 41,
+    "isActive": true
+  },
+  {
+    "id": "opt-72",
+    "category": "Item_Equipment",
+    "itemValue": "Chiller HTL",
+    "itemLabel": "Chiller HTL",
+    "sortOrder": 42,
+    "isActive": true
+  },
+  {
+    "id": "opt-73",
+    "category": "Item_Equipment",
+    "itemValue": "HT760",
+    "itemLabel": "HT760",
+    "sortOrder": 43,
+    "isActive": true
+  },
+  {
+    "id": "opt-74",
+    "category": "Item_Equipment",
+    "itemValue": "HT760T",
+    "itemLabel": "HT760T",
+    "sortOrder": 44,
+    "isActive": true
+  },
+  {
+    "id": "opt-75",
+    "category": "Item_Equipment",
+    "itemValue": "IR Coating",
+    "itemLabel": "IR Coating",
+    "sortOrder": 45,
+    "isActive": true
+  },
+  {
+    "id": "opt-76",
+    "category": "Item_Equipment",
+    "itemValue": "Polar_(PO L0)",
+    "itemLabel": "Polar_(PO L0)",
+    "sortOrder": 46,
+    "isActive": true
+  },
+  {
+    "id": "opt-77",
+    "category": "Item_Equipment",
+    "itemValue": "CLS P2P 1",
+    "itemLabel": "CLS P2P 1",
+    "sortOrder": 47,
+    "isActive": true
+  },
+  {
+    "id": "opt-78",
+    "category": "Item_Equipment",
+    "itemValue": "CLS P2P 2",
+    "itemLabel": "CLS P2P 2",
+    "sortOrder": 48,
+    "isActive": true
+  },
+  {
+    "id": "opt-79",
+    "category": "Item_Equipment",
+    "itemValue": "CLS R2R",
+    "itemLabel": "CLS R2R",
+    "sortOrder": 49,
+    "isActive": true
+  },
+  {
+    "id": "opt-80",
+    "category": "Item_Equipment",
+    "itemValue": "Rotary cutting machine(CLS)",
+    "itemLabel": "Rotary cutting machine(CLS)",
+    "sortOrder": 50,
+    "isActive": true
+  },
+  {
+    "id": "opt-81",
+    "category": "Item_Equipment",
+    "itemValue": "CLS Labeling",
+    "itemLabel": "CLS Labeling",
+    "sortOrder": 51,
+    "isActive": true
+  },
+  {
+    "id": "opt-82",
+    "category": "Item_Equipment",
+    "itemValue": "Care Label Feeder",
+    "itemLabel": "Care Label Feeder",
+    "sortOrder": 52,
+    "isActive": true
+  },
+  {
+    "id": "opt-83",
+    "category": "Item_Equipment",
+    "itemValue": "Ecopet G1",
+    "itemLabel": "Ecopet G1",
+    "sortOrder": 53,
+    "isActive": true
+  },
+  {
+    "id": "opt-84",
+    "category": "Item_Equipment",
+    "itemValue": "Ecopet G2",
+    "itemLabel": "Ecopet G2",
+    "sortOrder": 54,
+    "isActive": true
+  },
+  {
+    "id": "opt-85",
+    "category": "Item_Equipment",
+    "itemValue": "HP 7K chiller 1_Origin",
+    "itemLabel": "HP 7K chiller 1_Origin",
+    "sortOrder": 55,
+    "isActive": true
+  },
+  {
+    "id": "opt-86",
+    "category": "Item_Equipment",
+    "itemValue": "HP Indigo 7K digital press",
+    "itemLabel": "HP Indigo 7K digital press",
+    "sortOrder": 56,
+    "isActive": true
+  },
+  {
+    "id": "opt-87",
+    "category": "Item_Equipment",
+    "itemValue": "RFID1",
+    "itemLabel": "RFID1",
+    "sortOrder": 57,
+    "isActive": true
+  },
+  {
+    "id": "opt-88",
+    "category": "Item_Equipment",
+    "itemValue": "RFID2",
+    "itemLabel": "RFID2",
+    "sortOrder": 58,
+    "isActive": true
+  },
+  {
+    "id": "opt-89",
+    "category": "Item_Equipment",
+    "itemValue": "RFID3",
+    "itemLabel": "RFID3",
+    "sortOrder": 59,
+    "isActive": true
+  },
+  {
+    "id": "opt-90",
+    "category": "Item_Equipment",
+    "itemValue": "RFID4",
+    "itemLabel": "RFID4",
+    "sortOrder": 60,
+    "isActive": true
+  },
+  {
+    "id": "opt-91",
+    "category": "Item_Equipment",
+    "itemValue": "RFID5",
+    "itemLabel": "RFID5",
+    "sortOrder": 61,
+    "isActive": true
+  },
+  {
+    "id": "opt-92",
+    "category": "Item_Equipment",
+    "itemValue": "RFID6",
+    "itemLabel": "RFID6",
+    "sortOrder": 62,
+    "isActive": true
+  },
+  {
+    "id": "opt-93",
+    "category": "Item_Equipment",
+    "itemValue": "RFID7",
+    "itemLabel": "RFID7",
+    "sortOrder": 63,
+    "isActive": true
+  },
+  {
+    "id": "opt-94",
+    "category": "Item_Equipment",
+    "itemValue": "AFINA",
+    "itemLabel": "AFINA",
+    "sortOrder": 64,
+    "isActive": true
+  },
+  {
+    "id": "opt-95",
+    "category": "Item_Equipment",
+    "itemValue": "ITD (ETUN)",
+    "itemLabel": "ITD (ETUN)",
+    "sortOrder": 65,
+    "isActive": true
+  },
+  {
+    "id": "opt-96",
+    "category": "Item_Equipment",
+    "itemValue": "TOSHIBA",
+    "itemLabel": "TOSHIBA",
+    "sortOrder": 66,
+    "isActive": true
+  },
+  {
+    "id": "opt-97",
+    "category": "Item_Equipment",
+    "itemValue": "Epson 1",
+    "itemLabel": "Epson 1",
+    "sortOrder": 67,
+    "isActive": true
+  },
+  {
+    "id": "opt-98",
+    "category": "Item_Equipment",
+    "itemValue": "Epson 2",
+    "itemLabel": "Epson 2",
+    "sortOrder": 68,
+    "isActive": true
+  },
+  {
+    "id": "opt-99",
+    "category": "Item_Equipment",
+    "itemValue": "Epson 3 C8",
+    "itemLabel": "Epson 3 C8",
+    "sortOrder": 69,
+    "isActive": true
+  },
+  {
+    "id": "opt-100",
+    "category": "Item_Equipment",
+    "itemValue": "Forklift",
+    "itemLabel": "Forklift",
+    "sortOrder": 70,
+    "isActive": true
+  },
+  {
+    "id": "opt-101",
+    "category": "Item_Equipment",
+    "itemValue": "Taping  Machine 1",
+    "itemLabel": "Taping  Machine 1",
+    "sortOrder": 71,
+    "isActive": true
+  },
+  {
+    "id": "opt-102",
+    "category": "Item_Equipment",
+    "itemValue": "Taping  Machine 2",
+    "itemLabel": "Taping  Machine 2",
+    "sortOrder": 72,
+    "isActive": true
+  },
+  {
+    "id": "opt-103",
+    "category": "Item_Equipment",
+    "itemValue": "Taping  Machine 3",
+    "itemLabel": "Taping  Machine 3",
+    "sortOrder": 73,
+    "isActive": true
+  },
+  {
+    "id": "opt-104",
+    "category": "Item_Equipment",
+    "itemValue": "Heat Press Machine",
+    "itemLabel": "Heat Press Machine",
+    "sortOrder": 74,
+    "isActive": true
+  },
+  {
+    "id": "opt-105",
+    "category": "Item_Equipment",
+    "itemValue": "Spectrophotometer",
+    "itemLabel": "Spectrophotometer",
+    "sortOrder": 75,
+    "isActive": true
+  },
+  {
+    "id": "opt-106",
+    "category": "Item_Equipment",
+    "itemValue": "Washing machine 1",
+    "itemLabel": "Washing machine 1",
+    "sortOrder": 76,
+    "isActive": true
+  },
+  {
+    "id": "opt-107",
+    "category": "Item_Equipment",
+    "itemValue": "Washing machine 2",
+    "itemLabel": "Washing machine 2",
+    "sortOrder": 77,
+    "isActive": true
+  },
+  {
+    "id": "opt-108",
+    "category": "Item_Equipment",
+    "itemValue": "Enviroment chamber",
+    "itemLabel": "Enviroment chamber",
+    "sortOrder": 78,
+    "isActive": true
+  },
+  {
+    "id": "opt-109",
+    "category": "Item_Equipment",
+    "itemValue": "Drying machine 1",
+    "itemLabel": "Drying machine 1",
+    "sortOrder": 79,
+    "isActive": true
+  },
+  {
+    "id": "opt-110",
+    "category": "Item_Equipment",
+    "itemValue": "Drying machine 2",
+    "itemLabel": "Drying machine 2",
+    "sortOrder": 80,
+    "isActive": true
+  },
+  {
+    "id": "opt-111",
+    "category": "Item_Equipment",
+    "itemValue": "Water boiler 1",
+    "itemLabel": "Water boiler 1",
+    "sortOrder": 81,
+    "isActive": true
+  },
+  {
+    "id": "opt-112",
+    "category": "Item_Equipment",
+    "itemValue": "Water boiller 2",
+    "itemLabel": "Water boiller 2",
+    "sortOrder": 82,
+    "isActive": true
+  },
+  {
+    "id": "opt-113",
+    "category": "Item_Equipment",
+    "itemValue": "UV Coating",
+    "itemLabel": "UV Coating",
+    "sortOrder": 83,
+    "isActive": true
+  },
+  {
+    "id": "opt-114",
+    "category": "Item_Equipment",
+    "itemValue": "GWS Cutting machine",
+    "itemLabel": "GWS Cutting machine",
+    "sortOrder": 84,
+    "isActive": true
+  },
+  {
+    "id": "opt-115",
+    "category": "Item_Equipment",
+    "itemValue": "Gluing Machine (Máy bồi tay)",
+    "itemLabel": "Gluing Machine (Máy bồi tay)",
+    "sortOrder": 85,
+    "isActive": true
+  },
+  {
+    "id": "opt-116",
+    "category": "Item_Equipment",
+    "itemValue": "PDM labeling",
+    "itemLabel": "PDM labeling",
+    "sortOrder": 86,
+    "isActive": true
+  },
+  {
+    "id": "opt-117",
+    "category": "Item_Equipment",
+    "itemValue": "Lò sấy bảng",
+    "itemLabel": "Lò sấy bảng",
+    "sortOrder": 87,
+    "isActive": true
+  },
+  {
+    "id": "opt-118",
+    "category": "Item_Equipment",
+    "itemValue": "Máy chụp Bảng",
+    "itemLabel": "Máy chụp Bảng",
+    "sortOrder": 88,
+    "isActive": true
+  },
+  {
+    "id": "opt-119",
+    "category": "Item_Equipment",
+    "itemValue": "Wash-Out Booth",
+    "itemLabel": "Wash-Out Booth",
+    "sortOrder": 89,
+    "isActive": true
+  },
+  {
+    "id": "opt-120",
+    "category": "Item_Equipment",
+    "itemValue": "Dehumidity machine",
+    "itemLabel": "Dehumidity machine",
+    "sortOrder": 90,
+    "isActive": true
+  },
+  {
+    "id": "opt-121",
+    "category": "Item_Equipment",
+    "itemValue": "HP 7K chiller 2_Back up",
+    "itemLabel": "HP 7K chiller 2_Back up",
+    "sortOrder": 91,
+    "isActive": true
+  },
+  {
+    "id": "opt-122",
+    "category": "Item_Equipment",
+    "itemValue": "Sheet label cutter",
+    "itemLabel": "Sheet label cutter",
+    "sortOrder": 92,
+    "isActive": true
+  },
+  {
+    "id": "opt-123",
+    "category": "Item_Equipment",
+    "itemValue": "HTL R2R",
+    "itemLabel": "HTL R2R",
+    "sortOrder": 93,
+    "isActive": true
+  },
+  {
+    "id": "opt-124",
+    "category": "Item_Equipment",
+    "itemValue": "Rewinding Machine HTL",
+    "itemLabel": "Rewinding Machine HTL",
+    "sortOrder": 94,
+    "isActive": true
+  },
+  {
+    "id": "opt-125",
+    "category": "Item_Equipment",
+    "itemValue": "Slitting machine HTL",
+    "itemLabel": "Slitting machine HTL",
+    "sortOrder": 95,
+    "isActive": true
+  },
+  {
+    "id": "opt-126",
+    "category": "Item_Equipment",
+    "itemValue": "Rotary Die Cut",
+    "itemLabel": "Rotary Die Cut",
+    "sortOrder": 96,
+    "isActive": true
+  },
+  {
+    "id": "opt-127",
+    "category": "Item_Equipment",
+    "itemValue": "Auto Stripping Handtag",
+    "itemLabel": "Auto Stripping Handtag",
+    "sortOrder": 97,
+    "isActive": true
+  },
+  {
+    "id": "opt-128",
+    "category": "Item_Equipment",
+    "itemValue": "Water base coating",
+    "itemLabel": "Water base coating",
+    "sortOrder": 98,
+    "isActive": true
+  },
+  {
+    "id": "opt-129",
+    "category": "Item_Equipment",
+    "itemValue": "Fan Folding",
+    "itemLabel": "Fan Folding",
+    "sortOrder": 99,
+    "isActive": true
+  },
+  {
+    "id": "opt-130",
+    "category": "Item_Equipment",
+    "itemValue": "Woven Auto Coating Starching",
+    "itemLabel": "Woven Auto Coating Starching",
+    "sortOrder": 100,
+    "isActive": true
+  },
+  {
+    "id": "opt-131",
+    "category": "Item_Equipment",
+    "itemValue": "Musonic",
+    "itemLabel": "Musonic",
+    "sortOrder": 101,
+    "isActive": true
+  },
+  {
+    "id": "opt-132",
+    "category": "Item_Equipment",
+    "itemValue": "Woven 1",
+    "itemLabel": "Woven 1",
+    "sortOrder": 102,
+    "isActive": true
+  },
+  {
+    "id": "opt-133",
+    "category": "Item_Equipment",
+    "itemValue": "Woven 2",
+    "itemLabel": "Woven 2",
+    "sortOrder": 103,
+    "isActive": true
+  },
+  {
+    "id": "opt-134",
+    "category": "Item_Equipment",
+    "itemValue": "Woven 3",
+    "itemLabel": "Woven 3",
+    "sortOrder": 104,
+    "isActive": true
+  },
+  {
+    "id": "opt-135",
+    "category": "Item_Equipment",
+    "itemValue": "Woven 4",
+    "itemLabel": "Woven 4",
+    "sortOrder": 105,
+    "isActive": true
+  },
+  {
+    "id": "opt-136",
+    "category": "Item_Equipment",
+    "itemValue": "Woven 5",
+    "itemLabel": "Woven 5",
+    "sortOrder": 106,
+    "isActive": true
+  },
+  {
+    "id": "opt-137",
+    "category": "Item_Equipment",
+    "itemValue": "Woven 6",
+    "itemLabel": "Woven 6",
+    "sortOrder": 107,
+    "isActive": true
+  },
+  {
+    "id": "opt-138",
+    "category": "Item_Equipment",
+    "itemValue": "Auto Lamination Machine",
+    "itemLabel": "Auto Lamination Machine",
+    "sortOrder": 108,
+    "isActive": true
+  },
+  {
+    "id": "opt-139",
+    "category": "Severity",
+    "itemValue": "Critical",
+    "itemLabel": "Critical",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-140",
+    "category": "Severity",
+    "itemValue": "High",
+    "itemLabel": "High",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-141",
+    "category": "Severity",
+    "itemValue": "Medium",
+    "itemLabel": "Medium",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-142",
+    "category": "Severity",
+    "itemValue": "Low",
+    "itemLabel": "Low",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-143",
+    "category": "Status_Req",
+    "itemValue": "Open",
+    "itemLabel": "Open",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-144",
+    "category": "Status_Req",
+    "itemValue": "In Progress",
+    "itemLabel": "In Progress",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-145",
+    "category": "Status_Req",
+    "itemValue": "Closed",
+    "itemLabel": "Closed",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-146",
+    "category": "Status_Req",
+    "itemValue": "Overdue",
+    "itemLabel": "Overdue",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-147",
+    "category": "Yes_No",
+    "itemValue": "Yes",
+    "itemLabel": "Yes",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-148",
+    "category": "Yes_No",
+    "itemValue": "No",
+    "itemLabel": "No",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-149",
+    "category": "Source",
+    "itemValue": "Internal",
+    "itemLabel": "Internal",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-150",
+    "category": "Source",
+    "itemValue": "External (Customer complaint)",
+    "itemLabel": "External (Customer complaint)",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-151",
+    "category": "Root_Cause",
+    "itemValue": "Machine",
+    "itemLabel": "Machine",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-152",
+    "category": "Root_Cause",
+    "itemValue": "Material",
+    "itemLabel": "Material",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-153",
+    "category": "Root_Cause",
+    "itemValue": "Method",
+    "itemLabel": "Method",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-154",
+    "category": "Root_Cause",
+    "itemValue": "Man",
+    "itemLabel": "Man",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-155",
+    "category": "Root_Cause",
+    "itemValue": "System",
+    "itemLabel": "System",
+    "sortOrder": 5,
+    "isActive": true
+  },
+  {
+    "id": "opt-156",
+    "category": "Root_Cause",
+    "itemValue": "Other",
+    "itemLabel": "Other",
+    "sortOrder": 6,
+    "isActive": true
+  },
+  {
+    "id": "opt-157",
+    "category": "Fix_Type",
+    "itemValue": "Short-term fix",
+    "itemLabel": "Short-term fix",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-158",
+    "category": "Fix_Type",
+    "itemValue": "Long-term preventive",
+    "itemLabel": "Long-term preventive",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-159",
+    "category": "Fix_Type",
+    "itemValue": "8D Report",
+    "itemLabel": "8D Report",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-160",
+    "category": "Fix_Type",
+    "itemValue": "Process Update",
+    "itemLabel": "Process Update",
+    "sortOrder": 4,
+    "isActive": true
+  },
+  {
+    "id": "opt-161",
+    "category": "Status_Act",
+    "itemValue": "Pending",
+    "itemLabel": "Pending",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-162",
+    "category": "Status_Act",
+    "itemValue": "In Progress",
+    "itemLabel": "In Progress",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-163",
+    "category": "Status_Act",
+    "itemValue": "Completed",
+    "itemLabel": "Completed",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-164",
+    "category": "Resource_Needed",
+    "itemValue": "Training",
+    "itemLabel": "Training",
+    "sortOrder": 1,
+    "isActive": true
+  },
+  {
+    "id": "opt-165",
+    "category": "Resource_Needed",
+    "itemValue": "Spare Parts",
+    "itemLabel": "Spare Parts",
+    "sortOrder": 2,
+    "isActive": true
+  },
+  {
+    "id": "opt-166",
+    "category": "Resource_Needed",
+    "itemValue": "Software Update",
+    "itemLabel": "Software Update",
+    "sortOrder": 3,
+    "isActive": true
+  },
+  {
+    "id": "opt-167",
+    "category": "Resource_Needed",
+    "itemValue": "Other",
+    "itemLabel": "Other",
+    "sortOrder": 4,
+    "isActive": true
+  }
+]

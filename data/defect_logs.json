@@ -1,0 +1,54 @@
+[
+  {
+    "id": "defect-1",
+    "defectId": 1,
+    "defectDate": "17/09/2026",
+    "facility": "RFID",
+    "source": "Internal",
+    "rootCauseCategory": "Machine",
+    "specificIssue": "eqwoeioqweiqowieo1111",
+    "affectedProduct": "abcxyzcbczxcb",
+    "downtimeMinutes": null,
+    "recurringIssue": "No",
+    "eightDRequired": "No"
+  },
+  {
+    "id": "defect-2",
+    "defectId": 2,
+    "defectDate": "18/09/2026",
+    "facility": "WOVEN",
+    "source": "Internal",
+    "rootCauseCategory": "System",
+    "specificIssue": "231231qweqweqweqweqwe1",
+    "affectedProduct": "iwueuqiwoeuoiqwe",
+    "downtimeMinutes": null,
+    "recurringIssue": "Yes",
+    "eightDRequired": "Yes"
+  },
+  {
+    "id": "defect-3",
+    "defectId": 3,
+    "defectDate": "19/09/2026",
+    "facility": "LASER",
+    "source": "Internal",
+    "rootCauseCategory": "Machine",
+    "specificIssue": "đâsd",
+    "affectedProduct": "eqweqwsjapldjp",
+    "downtimeMinutes": null,
+    "recurringIssue": "Yes",
+    "eightDRequired": "No"
+  },
+  {
+    "id": "defect-4",
+    "defectId": 4,
+    "defectDate": "10/02/2026\\",
+    "facility": "RFID",
+    "source": "External (Customer complaint)",
+    "rootCauseCategory": "Method",
+    "specificIssue": "đasa",
+    "affectedProduct": "dá",
+    "downtimeMinutes": "sdaas",
+    "recurringIssue": "Yes",
+    "eightDRequired": "Yes"
+  }
+]

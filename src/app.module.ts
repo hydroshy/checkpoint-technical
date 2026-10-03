@@ -7,6 +7,7 @@ import { TechnicalRequestsModule } from './modules/technical-requests/technical-
 import { MachinesModule } from './modules/machines/machines.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { UsersModule } from './modules/users/users.module';
+import { WeeklyDashboardModule } from './modules/weekly-dashboard/weekly-dashboard.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { UsersModule } from './modules/users/users.module';
     MachinesModule,
     EmployeesModule,
     UsersModule,
+    WeeklyDashboardModule,
   ],
   controllers: [AppController],
 })
