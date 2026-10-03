@@ -1,0 +1,66 @@
+[
+  {
+    "id": "emp-1",
+    "mnv": "NV001",
+    "name": "Nguyễn Văn An",
+    "dept": "Sản Xuất",
+    "area": "OFFSET",
+    "role": "Operator"
+  },
+  {
+    "id": "emp-2",
+    "mnv": "NV002",
+    "name": "Trần Thị Bình",
+    "dept": "Sản Xuất",
+    "area": "Digital",
+    "role": "Operator"
+  },
+  {
+    "id": "emp-3",
+    "mnv": "NV003",
+    "name": "Lê Hoàng Cường",
+    "dept": "Sản Xuất",
+    "area": "RFID",
+    "role": "Leader"
+  },
+  {
+    "id": "emp-4",
+    "mnv": "NV004",
+    "name": "Phạm Minh Đức",
+    "dept": "Kỹ Thuật In",
+    "area": "Press",
+    "role": "Technician"
+  },
+  {
+    "id": "emp-5",
+    "mnv": "NV005",
+    "name": "Võ Thành Đạt",
+    "dept": "Kỹ Thuật In",
+    "area": "Prepress",
+    "role": "Supervisor"
+  },
+  {
+    "id": "emp-6",
+    "mnv": "NV006",
+    "name": "Đặng Quốc Huy",
+    "dept": "Kỹ Thuật In",
+    "area": "PostPress",
+    "role": "Technician"
+  },
+  {
+    "id": "emp-7",
+    "mnv": "NV007",
+    "name": "Hoàng Kim Loan",
+    "dept": "QA / QC",
+    "area": "QA",
+    "role": "Inspector"
+  },
+  {
+    "id": "emp-8",
+    "mnv": "NV008",
+    "name": "Ngô Trọng Nghĩa",
+    "dept": "Sản Xuất",
+    "area": "HTL",
+    "role": "Manager"
+  }
+]

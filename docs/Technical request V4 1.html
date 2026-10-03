@@ -1,0 +1,1237 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Phiếu Yêu cầu hỗ trợ Kỹ Thuật</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        primary: '#2563eb',
+                        'primary-dark': '#1d4ed8',
+                        secondary: '#64748b',
+                        success: '#059669',
+                        warning: '#d97706',
+                        danger: '#dc2626',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'inner-soft': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.02)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+        }
+        
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .toggle-label {
+            transition: all 0.2s ease;
+            user-select: none;
+            min-height: 44px; 
+        }
+        .toggle-radio:checked + label {
+            background-color: #eff6ff;
+            border-color: #3b82f6;
+            color: #1d4ed8;
+            box-shadow: 0 0 0 1px #3b82f6;
+        }
+        .toggle-radio-success:checked + label {
+            background-color: #f0fdf4;
+            border-color: #22c55e;
+            color: #166534;
+            box-shadow: 0 0 0 1px #22c55e;
+        }
+        .toggle-radio-danger:checked + label {
+            background-color: #fef2f2;
+            border-color: #ef4444;
+            color: #b91c1c;
+            box-shadow: 0 0 0 1px #ef4444;
+        }
+        .toggle-radio-warning:checked + label {
+            background-color: #fffbeb;
+            border-color: #f59e0b;
+            color: #b45309;
+            box-shadow: 0 0 0 1px #f59e0b;
+        }
+        .toggle-radio-purple:checked + label {
+            background-color: #f5f3ff;
+            border-color: #8b5cf6;
+            color: #5b21b6;
+            box-shadow: 0 0 0 1px #8b5cf6;
+        }
+
+        input[type="text"], input[type="date"], input[type="number"], select, textarea {
+            min-height: 44px;
+            font-size: 16px;
+        }
+
+        .modal-overlay {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .modal-content {
+            transform: translateY(20px) scale(0.95);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .modal-overlay.show .modal-content { transform: translateY(0) scale(1); }
+
+        .toast-enter { transform: translateY(100%); opacity: 0; }
+        .toast-enter-active { transform: translateY(0); opacity: 1; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .toast-exit { transform: translateY(0); opacity: 1; }
+        .toast-exit-active { transform: translateY(100%); opacity: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+
+        .wheel-container { scroll-snap-type: y mandatory; }
+        .wheel-item {
+            scroll-snap-align: center;
+            height: 44px;
+            line-height: 44px;
+            transition: all 0.15s ease;
+        }
+        
+        @media print {
+            body { background: white; padding: 0; margin: 0; }
+            #app-container, .modal-overlay, #toast-container, .fixed { display: none !important; }
+            #pdf-template { display: block !important; position: static !important; }
+        }
+
+        #pdf-template {
+            position: absolute; left: -9999px; top: 0; width: 794px; background: white;
+            font-family: Arial, Helvetica, sans-serif; font-size: 11px; color: black; z-index: -1000;
+            text-rendering: optimizeLegibility;
+            -webkit-font-smoothing: antialiased;
+        }
+        .pdf-page {
+            width: 794px; height: 1123px; /* ÉP BUỘC CHIỀU CAO CHUẨN A4 để form không bao giờ bị ngắn */
+            padding: 25px 30px; box-sizing: border-box; background: white;
+            position: relative; overflow: hidden;
+        }
+        .pdf-border { border: 1.5px solid black; height: 100%; display: flex; flex-direction: column; }
+        .pdf-header { display: flex; border-bottom: 1.5px solid black; flex-shrink: 0; }
+        .pdf-meta { width: 140px; padding: 8px; border-right: 1.5px solid black; font-size: 9px; line-height: 1.6; }
+        .pdf-title-box { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px; }
+        .pdf-title { font-size: 18px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .pdf-subtitle { font-size: 12px; margin-top: 4px; }
+        .pdf-section-title { background-color: #e5e7eb; padding: 6px 10px; font-weight: bold; border-top: 1.5px solid black; border-bottom: 1.5px solid black; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;}
+        
+        /* Đã thiết lập lại lề và đường kẻ chấm để chữ bám sát trên dòng kẻ */
+        .pdf-row { display: flex; flex-wrap: wrap; padding: 6px 10px; border-bottom: 1px solid #e5e7eb; gap: 8px 12px; align-items: flex-end; flex-shrink: 0; }
+        .pdf-field { display: inline-flex; align-items: flex-end; gap: 6px; }
+        .pdf-label { white-space: nowrap; color: #111827; margin-bottom: 1px; }
+        .pdf-value { 
+            font-weight: bold; 
+            border-bottom: 1.5px dotted #374151; 
+            min-width: 40px; 
+            min-height: 18px; /* Giữ 1 dòng chuẩn khi không có text */
+            white-space: pre-wrap; 
+            word-break: break-word; 
+            line-height: 1.3; 
+            display: block; 
+            color: #000;
+            padding-bottom: 1px;
+        }
+        
+        .pdf-checkbox { width: 12px; height: 12px; border: 1px solid black; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; box-sizing: border-box; flex-shrink: 0; margin-bottom: 2px;}
+        .pdf-checkbox.checked::after { content: ''; width: 4px; height: 8px; border: solid black; border-width: 0 1.5px 1.5px 0; transform: rotate(45deg); margin-bottom: 2px; }
+        .pdf-radio { width: 12px; height: 12px; border-radius: 50%; border: 1px solid black; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; box-sizing: border-box; flex-shrink: 0; margin-bottom: 2px;}
+        .pdf-radio.checked::after { content: ''; width: 6px; height: 6px; background: black; border-radius: 50%; }
+        .pdf-footer { position: absolute; bottom: 15px; left: 30px; right: 30px; display: flex; justify-content: space-between; font-size: 9px; color: #6b7280; border-top: 1px solid #d1d5db; padding-top: 5px;}
+        .pdf-signature-box { display: flex; justify-content: space-between; padding: 15px 40px 25px 40px; margin-top: auto; } /* Auto căn sát lề dưới */
+        .pdf-signature-col { display: flex; flex-direction: column; align-items: center; width: 30%; }
+        .pdf-signature-line { border-bottom: 1px solid black; width: 100%; height: 40px; margin-bottom: 5px; }
+
+        .photo-thumbnail { position: relative; width: 90px; height: 90px; border-radius: 10px; overflow: hidden; border: 1px solid #cbd5e1; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+        .photo-thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+        .photo-remove-btn { 
+            position: absolute; top: 4px; right: 4px; background: rgba(220,38,38,0.95); color: white; 
+            border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; 
+            font-size: 14px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body class="text-slate-800 antialiased font-sans">
+
+<!-- GIẢM padding-bottom ở đây vì chúng ta sẽ dùng khối spacer chuyên dụng ở dưới -->
+<div id="app-container" class="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8 pb-10">
+    <!-- Header -->
+    <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4 bg-white p-5 rounded-2xl shadow-soft border border-slate-100">
+        <div class="flex items-center gap-4">
+            <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center text-2xl shadow-inner-soft">🖨️</div>
+            <div>
+                <h1 class="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Phiếu Yêu Cầu Kỹ Thuật</h1>
+                <p class="text-sm text-slate-500 font-medium mt-0.5">Printing Dept. Repair Request</p>
+            </div>
+        </div>
+        <div class="flex flex-col items-end w-full sm:w-auto">
+            <div class="text-xs text-slate-400 font-semibold uppercase tracking-wider mb-1">Số tài liệu (Doc No.)</div>
+            <div id="display-doc-no" class="font-mono text-xl sm:text-2xl font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-lg border border-blue-100 w-full sm:w-auto text-center sm:text-right mb-3">—</div>
+            
+            <div class="flex flex-wrap justify-end gap-2 w-full">
+                <button onclick="triggerRestore()" class="flex-1 sm:flex-none text-xs bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-medium active:scale-95" title="Phục hồi">
+                    <span>📂</span> <span class="hidden sm:inline">Phục hồi</span>
+                </button>
+                <button onclick="triggerBackup()" class="flex-1 sm:flex-none text-xs bg-slate-50 text-slate-700 hover:bg-slate-100 border border-slate-200 px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-medium active:scale-95" title="Backup">
+                    <span>💾</span> <span class="hidden sm:inline">Sao lưu</span>
+                </button>
+                <button onclick="openExcelUploader()" class="flex-1 sm:flex-none text-xs bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3 py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors font-medium active:scale-95" title="Nạp DB Nhân sự">
+                    <span>📊</span> <span class="hidden sm:inline">Nạp Data</span>
+                </button>
+            </div>
+            <input type="file" id="file_restore" accept=".json" class="hidden" onchange="processRestoreFile(event)">
+        </div>
+    </header>
+
+    <div class="space-y-8">
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-blue-200">1</div>
+                <div>
+                    <h2 class="font-bold text-slate-800 text-lg">Thông Tin Yêu Cầu</h2>
+                    <p class="text-xs text-slate-500 font-medium">Dành cho bộ phận sản xuất (Requester)</p>
+                </div>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <!-- Row 1: Time & Person -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Ngày yêu cầu</label>
+                        <input type="date" id="req_date" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-slate-700 font-medium shadow-inner-soft appearance-none">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Giờ yêu cầu</label>
+                        <div class="relative">
+                            <input type="text" id="req_time" readonly placeholder="Chọn giờ..." onclick="openTimePicker('req_time')" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all cursor-pointer font-mono text-slate-700 font-medium shadow-inner-soft text-center sm:text-left">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">🕒</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1.5 lg:col-span-2">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Người yêu cầu</label>
+                        <div class="relative">
+                            <input type="text" id="req_by" list="employee_list" onchange="autoFillPerson(this)" onclick="try{this.showPicker && this.showPicker()}catch(e){}" placeholder="Nhập Mã NV hoặc tên..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-slate-700 font-medium shadow-inner-soft">
+                            <button type="button" onclick="openPersonPicker('req_by')" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-600 transition-colors" title="Chọn từ danh sách">🔍</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: Machine -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Công nghệ in (Tech)</label>
+                        <select id="print_tech" onchange="updateMachineList()" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all cursor-pointer text-slate-700 font-medium shadow-inner-soft appearance-none">
+                            <option value="">— Chọn Công Nghệ —</option>
+                            <option value="RFID/Thermal/Laser">RFID / Thermal / Laser</option>
+                            <option value="OFFSET">OFFSET</option>
+                            <option value="Digital">Digital (HP Indigo)</option>
+                            <option value="HTL">HTL (Screen Printing)</option>
+                            <option value="PFL">PFL (Rotary)</option>
+                            <option value="WOVEN">WOVEN</option>
+                            <option value="DIECUT">DIECUT</option>
+                            <option value="OTHER">Khác...</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tên máy (Machine)</label>
+                        <div class="flex gap-2">
+                            <select id="machine_name" class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all cursor-pointer text-slate-700 font-medium shadow-inner-soft appearance-none">
+                                <option value="">— Chọn Công Nghệ Trước —</option>
+                            </select>
+                            <input type="text" id="machine_custom" placeholder="Nhập tên máy..." class="hidden flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all text-slate-700 font-medium shadow-inner-soft">
+                            <button type="button" onclick="toggleCustomMachine()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl border border-slate-200 hover:bg-slate-200 transition-colors shadow-sm active:scale-95 flex items-center justify-center" title="Nhập thủ công">✏️</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 3: Problem Description -->
+                <div class="flex flex-col gap-1.5">
+                    <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Mô tả sự cố (Problem Description)</label>
+                    <textarea id="problem" rows="3" placeholder="Mô tả chi tiết tình trạng lỗi, hiện tượng..." class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500/50 focus:border-blue-500 outline-none transition-all resize-y text-slate-700 shadow-inner-soft"></textarea>
+                </div>
+
+                <!-- Row 4: Toggles -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-5 border-t border-slate-100">
+                    <div class="flex flex-col gap-2.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Trạng thái sự cố</label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="relative flex-1">
+                                <input type="radio" name="machine_status" id="st_first" value="First Bulk Print" class="toggle-radio hidden">
+                                <label for="st_first" class="toggle-label flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 w-full">🆕 Hàng SX lần đầu</label>
+                            </div>
+                            <div class="relative flex-1">
+                                <input type="radio" name="machine_status" id="st_repeat" value="Repeat Print" class="toggle-radio hidden">
+                                <label for="st_repeat" class="toggle-label flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 w-full">🔁 Hàng SX nhiều lần</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Mức độ ưu tiên</label>
+                        <div class="flex flex-wrap gap-3 items-center">
+                            <div class="relative flex-1 min-w-[120px]">
+                                <input type="radio" name="priority" id="pr_imm" value="Immediate" class="toggle-radio-danger hidden" onchange="document.getElementById('pr_other_txt').classList.add('hidden')">
+                                <label for="pr_imm" class="toggle-label flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 w-full">🔴 Hỗ trợ ngay</label>
+                            </div>
+                            <div class="relative flex-1 min-w-[120px]">
+                                <input type="radio" name="priority" id="pr_hold" value="Hold" class="toggle-radio-warning hidden" onchange="document.getElementById('pr_other_txt').classList.add('hidden')">
+                                <label for="pr_hold" class="toggle-label flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 w-full">🟡 Chạy tạm</label>
+                            </div>
+                            <div class="relative flex-1 min-w-[120px] flex flex-col gap-2">
+                                <div>
+                                    <input type="radio" name="priority" id="pr_other" value="Other" class="toggle-radio-purple hidden" onchange="document.getElementById('pr_other_txt').classList.remove('hidden'); document.getElementById('pr_other_txt').focus();">
+                                    <label for="pr_other" class="toggle-label flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 w-full">📌 Khác</label>
+                                </div>
+                                <input type="text" id="pr_other_txt" placeholder="Nhập ưu tiên..." class="hidden w-full px-3 py-2 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none transition-all text-sm shadow-inner-soft mt-1">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="bg-emerald-50/50 px-6 py-4 border-b border-emerald-100 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-emerald-200">2</div>
+                <div>
+                    <h2 class="font-bold text-emerald-900 text-lg">Phân Tích & Xử Lý</h2>
+                    <p class="text-xs text-emerald-600/80 font-medium">Dành cho bộ phận kỹ thuật (Technical Dept)</p>
+                </div>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <!-- Row 1: Tech info -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="flex flex-col gap-1.5 lg:col-span-2">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Người tiếp nhận</label>
+                        <div class="relative">
+                            <input type="text" id="recv_by" list="employee_list" onchange="autoFillPerson(this)" onclick="try{this.showPicker && this.showPicker()}catch(e){}" placeholder="Mã NV hoặc tên..." class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all text-slate-700 font-medium shadow-inner-soft">
+                            <button type="button" onclick="openPersonPicker('recv_by')" class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-600 transition-colors">🔍</button>
+                        </div>
+                    </div>
+                     <div class="flex flex-col gap-1.5 hidden lg:block">
+                        <!-- Spacer for grid alignment -->
+                    </div>
+                     <div class="flex flex-col gap-1.5 hidden lg:block">
+                        <!-- Spacer for grid alignment -->
+                    </div>
+                </div>
+
+                <!-- Row 2: Date & Time -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 items-end">
+                     <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Ngày nhận</label>
+                        <input type="date" id="recv_date" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all text-slate-700 font-medium shadow-inner-soft" onchange="calculateDowntime()">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Giờ nhận</label>
+                        <div class="relative">
+                            <input type="text" id="recv_time" readonly placeholder="Chọn giờ..." onclick="openTimePicker('recv_time')" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all cursor-pointer font-mono text-slate-700 font-medium shadow-inner-soft text-center" onchange="calculateDowntime()">
+                             <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">🕒</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Ngày HT</label>
+                        <input type="date" id="finish_date" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all text-slate-700 font-medium shadow-inner-soft" onchange="calculateDowntime()">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Giờ HT</label>
+                        <div class="relative">
+                            <input type="text" id="finish_time" readonly placeholder="Chọn giờ..." onclick="openTimePicker('finish_time')" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/50 outline-none transition-all cursor-pointer font-mono text-slate-700 font-medium shadow-inner-soft text-center" onchange="calculateDowntime()">
+                            <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">🕒</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-emerald-600 uppercase tracking-wide">Downtime (Phút)</label>
+                        <input type="number" id="downtime" readonly placeholder="0" class="px-4 py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 font-bold outline-none cursor-not-allowed shadow-inner-soft text-center">
+                    </div>
+                </div>
+
+                <!-- Row 3: Text areas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Nguyên nhân gốc (Root Cause)</label>
+                        <textarea id="root_cause" rows="3" placeholder="Phân tích nguyên nhân..." class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all resize-y text-slate-700 shadow-inner-soft"></textarea>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Hành động khắc phục (Action Taken)</label>
+                        <textarea id="action_taken" rows="3" placeholder="Các bước đã xử lý..." class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 outline-none transition-all resize-y text-slate-700 shadow-inner-soft"></textarea>
+                    </div>
+                </div>
+                
+                <!-- Row 4: Classifications -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-5 border-t border-slate-100">
+                    <div class="flex flex-col gap-2.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Phân loại lỗi (4M)</label>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                            <div class="relative"><input type="radio" name="err_cat" id="cat_man" value="MAN" class="toggle-radio-purple hidden"><label for="cat_man" class="toggle-label flex justify-center items-center gap-1 px-2 py-2 border border-slate-200 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 hover:bg-slate-50 text-center">Con người</label></div>
+                            <div class="relative"><input type="radio" name="err_cat" id="cat_mac" value="MACHINE" class="toggle-radio-purple hidden"><label for="cat_mac" class="toggle-label flex justify-center items-center gap-1 px-2 py-2 border border-slate-200 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 hover:bg-slate-50 text-center">Máy móc</label></div>
+                            <div class="relative"><input type="radio" name="err_cat" id="cat_mat" value="MATERIAL" class="toggle-radio-purple hidden"><label for="cat_mat" class="toggle-label flex justify-center items-center gap-1 px-2 py-2 border border-slate-200 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 hover:bg-slate-50 text-center">Vật tư</label></div>
+                            <div class="relative"><input type="radio" name="err_cat" id="cat_met" value="METHOD" class="toggle-radio-purple hidden"><label for="cat_met" class="toggle-label flex justify-center items-center gap-1 px-2 py-2 border border-slate-200 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 hover:bg-slate-50 text-center">P.Pháp</label></div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Nhóm công đoạn</label>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            <div class="relative"><input type="radio" name="err_type" id="typ_prepress" value="Prepress" class="toggle-radio-purple hidden"><label for="typ_prepress" class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 hover:bg-slate-50">💻 Trước in</label></div>
+                            <div class="relative"><input type="radio" name="err_type" id="typ_press" value="Press" class="toggle-radio-purple hidden"><label for="typ_press" class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 hover:bg-slate-50">🖨️ Trong in</label></div>
+                            <div class="relative"><input type="radio" name="err_type" id="typ_postpress" value="PostPress" class="toggle-radio-purple hidden"><label for="typ_postpress" class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border border-slate-200 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 hover:bg-slate-50">✂️ Sau in</label></div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="bg-amber-50/50 px-6 py-4 border-b border-amber-100 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-amber-500 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-amber-200">3</div>
+                <div>
+                    <h2 class="font-bold text-amber-900 text-lg">Hình Ảnh Cải Thiện</h2>
+                    <p class="text-xs text-amber-600/80 font-medium">Before & After Photos</p>
+                </div>
+            </div>
+            <div class="p-6">
+                <h3 class="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2"><span class="text-blue-500">📸</span> Hiện trường (Tối đa 3 ảnh/mục)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Before -->
+                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-5 bg-slate-50/50 flex flex-col h-full hover:border-blue-300 transition-colors">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Trạng thái lỗi (Trước)</span>
+                        </div>
+                        <div id="grid_img_before" class="flex flex-wrap gap-3 mb-4 min-h-[90px]"></div>
+                        <div class="mt-auto grid grid-cols-2 gap-3">
+                            <input type="file" id="file_img_before" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event, 'before')">
+                            <input type="file" id="cam_img_before" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event, 'before')">
+                            <button type="button" onclick="document.getElementById('file_img_before').click()" class="py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2">📁 <span class="hidden sm:inline">Chọn ảnh</span></button>
+                            <button type="button" onclick="document.getElementById('cam_img_before').click()" class="py-2.5 bg-blue-50 border border-blue-200 rounded-xl text-sm font-medium text-blue-700 hover:bg-blue-100 shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2">📷 <span class="hidden sm:inline">Chụp ảnh</span></button>
+                        </div>
+                    </div>
+                    <!-- After -->
+                    <div class="border-2 border-dashed border-slate-200 rounded-2xl p-5 bg-slate-50/50 flex flex-col h-full hover:border-emerald-300 transition-colors">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Đã khắc phục (Sau)</span>
+                        </div>
+                        <div id="grid_img_after" class="flex flex-wrap gap-3 mb-4 min-h-[90px]"></div>
+                        <div class="mt-auto grid grid-cols-2 gap-3">
+                            <input type="file" id="file_img_after" accept="image/*" multiple class="hidden" onchange="handleImageUpload(event, 'after')">
+                            <input type="file" id="cam_img_after" accept="image/*" capture="environment" class="hidden" onchange="handleImageUpload(event, 'after')">
+                            <button type="button" onclick="document.getElementById('file_img_after').click()" class="py-2.5 bg-white border border-slate-300 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2">📁 <span class="hidden sm:inline">Chọn ảnh</span></button>
+                            <button type="button" onclick="document.getElementById('cam_img_after').click()" class="py-2.5 bg-emerald-50 border border-emerald-200 rounded-xl text-sm font-medium text-emerald-700 hover:bg-emerald-100 shadow-sm active:scale-95 transition-all flex items-center justify-center gap-2">📷 <span class="hidden sm:inline">Chụp ảnh</span></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-2xl border border-slate-200 shadow-soft overflow-hidden">
+            <div class="bg-indigo-50/50 px-6 py-4 border-b border-indigo-100 flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-indigo-200">4</div>
+                <div>
+                    <h2 class="font-bold text-indigo-900 text-lg">Xác Nhận & Bàn Giao</h2>
+                    <p class="text-xs text-indigo-600/80 font-medium">Production & Tech Confirmation</p>
+                </div>
+            </div>
+            <div class="p-6 space-y-6">
+                <!-- Row 1: Quality & Status -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                     <div class="flex flex-col gap-2.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Chất lượng in sau xử lý</label>
+                        <div class="flex gap-3">
+                            <div class="relative flex-1">
+                                <input type="radio" name="chk_quality" id="qa_ok" value="OK" class="toggle-radio-success hidden">
+                                <label for="qa_ok" class="toggle-label flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 shadow-sm w-full">✅ Đạt chuẩn</label>
+                            </div>
+                            <div class="relative flex-1">
+                                <input type="radio" name="chk_quality" id="qa_ng" value="NG" class="toggle-radio-danger hidden">
+                                <label for="qa_ng" class="toggle-label flex items-center justify-center gap-2 px-4 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 shadow-sm w-full">❌ Chưa đạt</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col gap-2.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tình trạng sự cố</label>
+                        <div class="flex flex-col sm:flex-row gap-3">
+                            <div class="relative flex-1">
+                                <input type="radio" name="chk_status" id="st_done" value="DONE" class="toggle-radio-success hidden">
+                                <label for="st_done" class="toggle-label flex items-center justify-center gap-2 px-3 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 shadow-sm w-full">🟢 Đã khắc phục</label>
+                            </div>
+                            <div class="relative flex-1">
+                                <input type="radio" name="chk_status" id="st_monitor" value="MONITOR" class="toggle-radio-warning hidden">
+                                <label for="st_monitor" class="toggle-label flex items-center justify-center gap-2 px-3 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 shadow-sm w-full">🟡 Theo dõi</label>
+                            </div>
+                            <div class="relative flex-1">
+                                <input type="radio" name="chk_status" id="st_support" value="SUPPORT" class="toggle-radio-danger hidden">
+                                <label for="st_support" class="toggle-label flex items-center justify-center gap-2 px-3 py-3 border border-slate-200 rounded-xl cursor-pointer text-sm font-semibold text-slate-600 hover:bg-slate-50 shadow-sm w-full">🔴 Cần hỗ trợ</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Row 2: WO metrics -->
+                <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 pt-5 border-t border-slate-100">
+                    <div class="flex flex-col gap-1.5 col-span-2 lg:col-span-1">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Work order</label>
+                        <input type="text" id="work_order" placeholder="Số WO..." class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all font-medium text-slate-700">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Qty</label>
+                        <input type="number" id="wo_total_qty" placeholder="Tổng..." class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all font-medium text-slate-700" oninput="calculateWastePercent()">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Waste</label>
+                        <input type="number" id="waste_qty" placeholder="SL..." class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all font-medium text-slate-700" oninput="calculateWastePercent()">
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Đơn vị</label>
+                        <select id="waste_unit" class="px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all cursor-pointer font-medium text-slate-700 appearance-none">
+                            <option value="Pcs">Pcs (Cái/Nhãn)</option>
+                            <option value="Mét">Mét</option>
+                            <option value="Tờ in">Tờ in</option>
+                        </select>
+                    </div>
+                    <div class="flex flex-col gap-1.5">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">% Waste</label>
+                        <input type="text" id="waste_percent" readonly placeholder="0%" class="px-4 py-2.5 bg-slate-100 border border-slate-200 text-indigo-700 font-bold rounded-xl outline-none cursor-not-allowed text-center">
+                    </div>
+                </div>
+
+                <!-- Row 3: Sign -->
+                <div class="pt-5 border-t border-slate-100">
+                    <div class="flex flex-col gap-1.5 w-full md:w-1/2">
+                        <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Đại diện Sản Xuất ký nhận (Prod. Received By)</label>
+                        <div class="relative">
+                            <input type="text" id="prod_mgr" list="employee_list" onchange="autoFillPerson(this)" onclick="try{this.showPicker && this.showPicker()}catch(e){}" placeholder="Nhập Mã NV hoặc tên..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500/50 outline-none transition-all text-slate-700 font-medium shadow-inner-soft">
+                            <button type="button" onclick="openPersonPicker('prod_mgr')" class="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-slate-200 hover:bg-slate-300 rounded-lg text-slate-600 transition-colors">🔍</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- THÊM KHỐI SPACER VÀO ĐÂY: Tạo ra một khoảng trống lớn (256px) ở cuối trang -->
+        <!-- Điều này giúp đảm bảo khi bấm vào Input cuối cùng, bạn có thể cuộn nó lên giữa màn hình để bảng Datalist của Android có chỗ sổ xuống -->
+        <div class="h-64 w-full pointer-events-none opacity-0"></div>
+
+    </div>
+
+    <!-- Action Bar -->
+    <div class="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 sm:p-5 z-40 shadow-[0_-8px_30px_rgba(0,0,0,0.08)]">
+        <div class="max-w-5xl mx-auto flex flex-wrap gap-4 justify-between items-center">
+            <button onclick="clearForm()" class="px-5 py-3 text-sm font-bold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-xl transition-all active:scale-95 flex items-center gap-2">
+                🗑️ <span class="hidden sm:inline">Làm mới</span>
+            </button>
+            <button onclick="generatePDF()" id="btn-export" class="px-8 py-3 text-base font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30 rounded-xl transition-all active:scale-95 flex items-center gap-3">
+                <span>📄 Xuất PDF báo cáo</span>
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<!-- Time Picker Modal -->
+<div id="modal-time" class="modal-overlay fixed inset-0 bg-slate-900/60 z-[60] flex items-end sm:items-center justify-center backdrop-blur-sm pb-10 sm:pb-0">
+    <div class="modal-content bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-xs overflow-hidden">
+        <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex justify-between items-center">
+            <h3 id="time-modal-title" class="font-bold text-slate-800 text-lg">Chọn giờ</h3>
+            <button onclick="closeModal('modal-time')" class="w-10 h-10 flex items-center justify-center bg-slate-200 text-slate-500 rounded-full hover:bg-slate-300 transition-colors font-bold text-lg">✕</button>
+        </div>
+        <div class="p-6">
+            <div class="flex justify-center gap-6 text-sm font-bold text-slate-500 mb-3">
+                <div class="w-20 text-center uppercase tracking-widest">Giờ</div>
+                <div class="w-4"></div>
+                <div class="w-20 text-center uppercase tracking-widest">Phút</div>
+            </div>
+            <div class="relative flex justify-center items-center h-[220px] bg-slate-50 rounded-2xl border border-slate-200 shadow-inner-soft">
+                <div class="absolute inset-x-4 top-1/2 -translate-y-1/2 h-11 bg-blue-50 border border-blue-200 rounded-xl pointer-events-none shadow-sm"></div>
+                <div id="wheel-hour" class="wheel-container overflow-y-auto h-full w-20 text-center no-scrollbar relative z-10 text-2xl font-mono text-slate-400" style="scroll-behavior: smooth;"></div>
+                <div class="w-4 text-center font-bold text-slate-800 z-10 text-xl">:</div>
+                <div id="wheel-min" class="wheel-container overflow-y-auto h-full w-20 text-center no-scrollbar relative z-10 text-2xl font-mono text-slate-400" style="scroll-behavior: smooth;"></div>
+            </div>
+            <button onclick="confirmTime()" class="w-full mt-6 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md active:scale-95 transition-all text-lg">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<!-- Person Picker Modal -->
+<div id="modal-person" class="modal-overlay fixed inset-0 bg-slate-900/60 z-[60] flex items-end sm:items-center justify-center backdrop-blur-sm pb-10 sm:pb-0">
+    <div class="modal-content bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md overflow-hidden max-h-[85vh] flex flex-col">
+        <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex justify-between items-center shrink-0">
+            <h3 class="font-bold text-slate-800 text-lg">Chọn Nhân Sự</h3>
+            <button onclick="closeModal('modal-person')" class="w-8 h-8 flex items-center justify-center bg-slate-200 text-slate-500 rounded-full hover:bg-slate-300 transition-colors font-bold">✕</button>
+        </div>
+        <div class="p-6 space-y-5 overflow-y-auto pb-10 sm:pb-6">
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Bộ Phận</label>
+                <select id="pp_dept" onchange="updatePersonArea()" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none text-base">
+                    <option value="">— Chọn Bộ Phận —</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Khu Vực / Line</label>
+                <select id="pp_area" onchange="updatePersonName()" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none text-base">
+                    <option value="">— Chọn Bộ phận trước —</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-1.5">Họ Tên</label>
+                <select id="pp_name" class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-500/50 appearance-none text-base font-semibold text-blue-700">
+                    <option value="">— Chọn Khu vực trước —</option>
+                </select>
+            </div>
+            <button onclick="confirmPerson()" class="w-full mt-4 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md active:scale-95 transition-all text-lg shrink-0">Xác nhận</button>
+        </div>
+    </div>
+</div>
+
+<!-- Excel Data Loader Modal -->
+<div id="modal-excel" class="modal-overlay fixed inset-0 bg-slate-900/60 z-[70] flex items-end sm:items-center justify-center backdrop-blur-sm pb-10 sm:pb-0">
+    <div class="modal-content bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-md overflow-hidden max-h-[85vh] flex flex-col">
+        <div class="bg-slate-50 px-5 py-4 border-b border-slate-200 flex justify-between items-center shrink-0">
+            <h3 class="font-bold text-slate-800 text-lg">Cập nhật Data từ Excel</h3>
+            <button onclick="closeModal('modal-excel')" class="w-8 h-8 flex items-center justify-center bg-slate-200 text-slate-500 rounded-full hover:bg-slate-300 transition-colors font-bold">✕</button>
+        </div>
+        <div class="p-6 space-y-5 text-sm text-slate-600 overflow-y-auto pb-10 sm:pb-6">
+            <p>Ứng dụng hỗ trợ nạp dữ liệu <strong class="text-slate-800">Nhân Sự</strong> từ file Excel để gợi ý nhập liệu nhanh hơn.</p>
+            <div class="bg-amber-50 text-amber-800 p-4 rounded-xl border border-amber-200 text-xs font-medium leading-relaxed">
+                Vui lòng đảm bảo file Excel có cột Tên (Name), Mã NV, Bộ phận. Dữ liệu sẽ chỉ lưu tạm trên trình duyệt cục bộ.
+            </div>
+            
+            <div class="space-y-3 pt-2">
+                <div>
+                    <input type="file" id="file_people" accept=".xlsx, .xls" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer" onchange="processExcelFile(event, 'people')">
+                </div>
+            </div>
+            
+            <div id="excel_status" class="hidden p-3 rounded-xl bg-green-50 text-green-700 text-sm text-center font-bold mt-2 shadow-sm"></div>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container" class="fixed top-6 left-1/2 -translate-x-1/2 z-[80] flex flex-col items-center gap-2 pointer-events-none w-[90%] max-w-sm"></div>
+
+<!-- Datalist for Employee Selection -->
+<datalist id="employee_list"></datalist>
+
+<!-- Mẫu ẩn để render PDF, FIX: Xóa bỏ các dòng thừa bị lặp lại ở mục 2 -->
+<div id="pdf-template">
+    <div class="pdf-page" id="pdf-render-area">
+        <div class="pdf-border h-full flex flex-col">
+            <!-- Header -->
+            <div class="pdf-header">
+                <div class="pdf-meta">
+                    <div>Document No: GQD_0000</div>
+                    <div>Issue date : XX.XX.XXXX</div>
+                    <div>Revision date: XX.XX.XXXX</div>
+                    <div>Revision No : 01</div>
+                </div>
+                <div class="pdf-title-box">
+                    <div class="pdf-title">PHIẾU YÊU CẦU HỖ TRỢ KỸ THUẬT</div>
+                    <div class="pdf-subtitle">( Technical Request )</div>
+                </div>
+                <div class="w-[120px] flex items-center justify-center border-l-[1.5px] border-black p-2">
+                    <div class="text-center font-bold text-lg leading-tight" style="color: #0033a0;">TECH<br>PRINT</div>
+                </div>
+            </div>
+
+            <!-- Section 1 -->
+            <div class="pdf-section-title" style="background-color: #dbeafe;">
+                <span>1. Thông Tin Yêu Cầu Sửa Chữa (Requester)</span>
+                <span style="font-weight: normal; font-size: 10px;">Số tài liệu / Doc No: <strong id="pdf_doc_no"></strong></span>
+            </div>
+            <div class="pdf-row">
+                <div class="pdf-field"><span class="pdf-label">Ngày (Date):</span><div class="pdf-value" id="pdf_req_date"></div></div>
+                <div class="pdf-field ml-4"><span class="pdf-label">Giờ (Time):</span><div class="pdf-value w-16 text-center" id="pdf_req_time"></div></div>
+            </div>
+            <div class="pdf-row">
+                <div class="pdf-field flex-1"><span class="pdf-label">Người yêu cầu (Requested By):</span><div class="pdf-value flex-1" id="pdf_req_by"></div></div>
+                <div class="pdf-field ml-auto gap-4 items-center mb-1">
+                    <div class="flex items-center gap-1.5"><div class="pdf-checkbox" id="pdf_chk_first"></div> <span class="text-[10px]">Hàng SX lần đầu</span></div>
+                    <div class="flex items-center gap-1.5"><div class="pdf-checkbox" id="pdf_chk_repeat"></div> <span class="text-[10px]">Hàng SX nhiều lần</span></div>
+                </div>
+            </div>
+            <div class="pdf-row">
+                <div class="pdf-field flex-1"><span class="pdf-label">Công Nghệ / Tên máy (Tech/Machine):</span><div class="pdf-value flex-1" id="pdf_machine"></div></div>
+                <div class="pdf-field ml-auto gap-3 items-center mb-1">
+                    <div class="flex items-center gap-1"><div class="pdf-radio" id="pdf_rad_imm"></div> <span class="text-[10px] text-red-600 font-bold">Hỗ trợ ngay</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-radio" id="pdf_rad_hold"></div> <span class="text-[10px] text-amber-600 font-bold">Chạy tạm</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-radio" id="pdf_rad_other"></div> <span class="text-[10px] text-blue-600 font-bold">Khác: </span><div class="pdf-value min-w-[50px] inline-block !border-b-[1.5px] border-gray-500" id="pdf_rad_other_txt"></div></div>
+                </div>
+            </div>
+            <!-- Xóa class min-h-[32px] để chữ không bị nổi bồng bềnh -->
+            <div class="pdf-row border-b-0 pb-1">
+                <div class="pdf-field w-full items-start"><span class="pdf-label pt-1">Mô tả sự cố (Problem):</span><div class="pdf-value flex-1" id="pdf_prob"></div></div>
+            </div>
+
+            <!-- Section 2 -->
+            <div class="pdf-section-title" style="background-color: #dcfce7;">
+                <span>2. Thông Tin Xử Lý Của Kỹ Thuật (Technical Section)</span>
+            </div>
+            <div class="pdf-row">
+                <div class="pdf-field flex-1"><span class="pdf-label">Người nhận (Receive By):</span><div class="pdf-value flex-1" id="pdf_recv_by"></div></div>
+                <div class="pdf-field ml-4"><span class="pdf-label">Downtime:</span><div class="pdf-value w-16 text-center font-bold text-red-600" id="pdf_downtime"></div><span class="text-[9px]">phút</span></div>
+            </div>
+            <div class="pdf-row">
+                <div class="pdf-field flex-1"><span class="pdf-label">Nhận:</span><div class="pdf-value flex-1 text-center" id="pdf_recv_time_full"></div></div>
+                <div class="pdf-field flex-1 ml-4"><span class="pdf-label">Hoàn Thành:</span><div class="pdf-value flex-1 text-center" id="pdf_fin_time_full"></div></div>
+            </div>
+            <div class="pdf-row">
+                <div class="pdf-field w-full items-start"><span class="pdf-label pt-1">Nguyên nhân (Root Cause):</span><div class="pdf-value flex-1" id="pdf_rc"></div></div>
+            </div>
+            <div class="pdf-row">
+                <div class="pdf-field w-full items-start"><span class="pdf-label pt-1">Nội dung xử lý (Action Taken):</span><div class="pdf-value flex-1" id="pdf_act"></div></div>
+            </div>
+             <div class="pdf-row border-b-0 pb-1 flex justify-between bg-slate-50">
+                <div class="flex gap-4 items-center">
+                    <div class="font-bold text-[10px] mr-2">PHÂN LOẠI LỖI:</div>
+                    <div class="flex items-center gap-1"><div class="pdf-checkbox" id="pdf_cat_man"></div> <span class="text-[10px]">MAN</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-checkbox" id="pdf_cat_mac"></div> <span class="text-[10px]">MACHINE</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-checkbox" id="pdf_cat_mat"></div> <span class="text-[10px]">MATERIAL</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-checkbox" id="pdf_cat_met"></div> <span class="text-[10px]">METHOD</span></div>
+                </div>
+                 <div class="flex gap-4 items-center border-l-2 pl-4 border-slate-300">
+                    <div class="font-bold text-[10px] mr-2">NHÓM:</div>
+                    <div class="flex items-center gap-1"><div class="pdf-checkbox" id="pdf_typ_prepress"></div> <span class="text-[10px]">Trước in</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-checkbox" id="pdf_typ_press"></div> <span class="text-[10px]">In</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-checkbox" id="pdf_typ_postpress"></div> <span class="text-[10px]">GC sau in</span></div>
+                </div>
+            </div>
+
+            <!-- Section 3 & 4 -->
+            <div class="pdf-section-title" style="background-color: #f3f4f6;">
+                <span>3. Xác Nhận Bàn Giao</span>
+            </div>
+            <div class="pdf-row justify-between bg-slate-50 min-h-[40px]">
+                 <div class="flex items-center gap-3">
+                    <span class="pdf-label font-bold">Chất lượng in sau xử lý:</span>
+                    <div class="flex items-center gap-1"><div class="pdf-radio" id="pdf_qa_ok"></div> <span class="text-[10px]">Đạt chuẩn</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-radio" id="pdf_qa_ng"></div> <span class="text-[10px]">Chưa đạt</span></div>
+                </div>
+                 <div class="flex items-center gap-3">
+                    <span class="pdf-label font-bold">Tình trạng sự cố:</span>
+                    <div class="flex items-center gap-1"><div class="pdf-radio" id="pdf_st_done"></div> <span class="text-[10px]">Đã khắc phục</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-radio" id="pdf_st_monitor"></div> <span class="text-[10px]">Đang theo dõi</span></div>
+                    <div class="flex items-center gap-1"><div class="pdf-radio" id="pdf_st_support"></div> <span class="text-[10px]">Cần hỗ trợ</span></div>
+                </div>
+            </div>
+
+            <!-- Fix lỗi tràn viền bằng flex-nowrap -->
+            <div class="pdf-row bg-slate-50 min-h-[30px] border-t-0 text-[10px] gap-2 flex-nowrap overflow-hidden">
+                <div class="pdf-field flex-[1.5]"><span class="pdf-label font-bold">Work Order:</span><div class="pdf-value flex-1" id="pdf_work_order"></div></div>
+                <div class="pdf-field flex-1"><span class="pdf-label font-bold">Total Qty:</span><div class="pdf-value flex-1 text-center" id="pdf_wo_total_qty"></div></div>
+                <div class="pdf-field flex-1"><span class="pdf-label font-bold">Waste:</span><div class="pdf-value flex-1 text-center" id="pdf_waste_qty"></div></div>
+                <div class="pdf-field flex-[0.8] min-w-[50px]"><span class="pdf-label font-bold">Đơn vị:</span><div class="pdf-value flex-1 text-center" id="pdf_waste_unit"></div></div>
+                <div class="pdf-field flex-[0.8] min-w-[50px]"><span class="pdf-label font-bold">% Waste:</span><div class="pdf-value flex-1 text-center" id="pdf_waste_percent"></div></div>
+            </div>
+
+            <div class="pdf-signature-box flex-1">
+                <div class="pdf-signature-col">
+                    <div class="text-[10px] font-bold">SẢN XUẤT YÊU CẦU</div>
+                    <div class="text-[9px] text-gray-500">(Ký & ghi rõ họ tên)</div>
+                    <div class="pdf-signature-line mt-4"></div>
+                    <div class="font-bold text-[11px]" id="pdf_sig_req"></div>
+                </div>
+                 <div class="pdf-signature-col">
+                    <div class="text-[10px] font-bold">KỸ THUẬT THỰC HIỆN</div>
+                    <div class="text-[9px] text-gray-500">(Ký & ghi rõ họ tên)</div>
+                    <div class="pdf-signature-line mt-4"></div>
+                    <div class="font-bold text-[11px]" id="pdf_sig_mt"></div>
+                </div>
+                 <div class="pdf-signature-col">
+                    <div class="text-[10px] font-bold">SẢN XUẤT NHẬN BÀN GIAO</div>
+                    <div class="text-[9px] text-gray-500">(Ký & ghi rõ họ tên)</div>
+                    <div class="pdf-signature-line mt-4"></div>
+                    <div class="font-bold text-[11px]" id="pdf_sig_prod"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="pdf-footer">
+                <span id="pdf_footer_doc">Doc No: —</span>
+                <span>In từ hệ thống TechPrint.</span>
+                <span>Page 1/1</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const STATE = { docNo: '', photosBefore: [], photosAfter: [], activeTimeTarget: null, activePersonTarget: null };
+
+    let DEPT_DATA = {
+        'Production': { name: 'Sản Xuất', areas: ['RFID', 'OFFSET', 'Digital', 'HTL', 'PFL', 'Diecut', 'Packing'], roles: ['Quản lý', 'Leader', 'Operator'] },
+        'Technical': { name: 'Kỹ Thuật In', areas: ['Prepress', 'Press', 'PostPress'], roles: ['Manager', 'Supervisor', 'Technician'] },
+        'QA': { name: 'QA / QC', areas: ['QA', 'QC Lab'], roles: ['Manager', 'Leader', 'Inspector'] },
+        'Warehouse': { name: 'Kho', areas: ['Raw Material', 'Finished Goods'], roles: ['Supervisor', 'Storekeeper'] }
+    };
+    
+    let MACHINES = {
+        'RFID/Thermal/Laser': ['Laser printer 1', 'Laser printer 2', 'Laser cut', 'CLS P2P 1', 'CLS P2P 2', 'CLS R2R', 'Care Label Feeder', 'Ecopet G1', 'Ecopet G2', 'RFID1', 'RFID2', 'RFID3', 'RFID4', 'RFID5', 'RFID6', 'RFID7', 'AFINA', 'ITD (ETUN)', 'TOSHIBA', 'Epson 1', 'Epson 2', 'Fan Folding'],
+        'OFFSET': ['Máy co nhiệt', 'LAMINATION FBK 800', 'SM 52', 'SX 52', 'Polar', 'CLS Labeling', 'GWS Cutting', 'Water base coating', 'Auto Lamination'],
+        'Digital': ['IR Coating', 'HP Indigo 7K', 'HP 7K chiller 1', 'HP 7K chiller 2', 'UV Coating', 'Gluing Machine', 'PDM labeling'],
+        'HTL': ['ATMA', 'GSF Powder dusting', 'Automatic Flat Conveyor', 'Automatic Sheet Stacker', 'Chiller HTL', 'Heat Press', 'Lò sấy bảng', 'Máy chụp Bảng', 'Wash-Out Booth', 'Sheet label cutter', 'HTL R2R', 'Rewinding', 'Slitting'],
+        'PFL': ['PFL1', 'PFL2', 'PFL3', 'PFL4', 'PFL5', 'PFL6', 'C&F1', 'C&F2', 'C&F3', 'C&F4', 'C&F5', 'C&F6', 'C&F7', 'C&F8', 'C&F9', 'C&F10', 'C&F11', 'C&F12', 'C&F14', 'Inspection System', 'EAS-1', 'Máy sấy Focus', 'Máy sấy PFL'],
+        'WOVEN': ['WOVEN 1', 'WOVEN 2', 'WOVEN 3', 'WOVEN 4', 'WOVEN 5', 'WOVEN 6'],
+        'DIECUT': ['DIECUT 1', 'DIECUT 2', 'Máy Cán Màng']
+    };
+
+    let EXCEL_PEOPLE = [];
+    let autoSaveTimeout = null;
+
+    // --- FORM DATA EXTRACTION & INJECTION ---
+    function getFormState() {
+        const state = { inputs: {}, radios: {} };
+        document.querySelectorAll('input:not([type="radio"]):not([type="file"]), select, textarea').forEach(el => {
+            if (el.id) state.inputs[el.id] = el.value;
+        });
+        document.querySelectorAll('input[type="radio"]').forEach(el => {
+            if (el.checked && el.name) state.radios[el.name] = el.value;
+        });
+        return state;
+    }
+
+    function applyFormState(state) {
+        if (!state) return;
+        if (state.inputs) {
+            Object.keys(state.inputs).forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.value = state.inputs[id];
+                    if (id === 'print_tech') updateMachineList();
+                }
+            });
+            if (state.inputs['machine_name']) document.getElementById('machine_name').value = state.inputs['machine_name'];
+            if (state.inputs['machine_custom']) {
+                document.getElementById('machine_custom').value = state.inputs['machine_custom'];
+                if (state.inputs['machine_name'] === 'OTHER') toggleCustomMachine(true);
+            }
+            if (state.radios && state.radios['priority'] === 'Other') document.getElementById('pr_other_txt').classList.remove('hidden');
+            calculateWastePercent();
+            calculateDowntime();
+        }
+        if (state.radios) {
+            Object.keys(state.radios).forEach(name => {
+                const val = state.radios[name];
+                const el = document.querySelector(`input[name="${name}"][value="${val}"]`);
+                if (el) el.checked = true;
+            });
+        }
+    }
+
+    function setupAutoSave() {
+        document.querySelectorAll('input, select, textarea').forEach(el => {
+            el.addEventListener('input', () => { clearTimeout(autoSaveTimeout); autoSaveTimeout = setTimeout(saveToLocal, 1000); });
+            el.addEventListener('change', () => { clearTimeout(autoSaveTimeout); autoSaveTimeout = setTimeout(saveToLocal, 1000); });
+        });
+    }
+
+    function saveToLocal() {
+        try {
+            localStorage.setItem('techPrintFormState', JSON.stringify(getFormState()));
+            if (STATE.docNo) localStorage.setItem('techPrintDocNo', STATE.docNo);
+        } catch (e) {}
+    }
+
+    function loadLocalData() {
+        try {
+            const savedState = localStorage.getItem('techPrintFormState');
+            if (savedState) applyFormState(JSON.parse(savedState));
+            const savedDocNo = localStorage.getItem('techPrintDocNo');
+            if (savedDocNo) { STATE.docNo = savedDocNo; document.getElementById('display-doc-no').textContent = STATE.docNo; }
+            const savedExcel = localStorage.getItem('techPrintExcelData');
+            if (savedExcel) { EXCEL_PEOPLE = JSON.parse(savedExcel); updateEmployeeDatalist(); }
+        } catch (e) {}
+    }
+
+    function showToast(msg, isError = false) {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `px-5 py-3 rounded-xl shadow-lg text-sm font-bold text-white w-full text-center ${isError ? 'bg-red-600' : 'bg-slate-800'} toast-enter`;
+        toast.innerHTML = isError ? `❌ ${msg}` : `✨ ${msg}`;
+        container.appendChild(toast);
+        requestAnimationFrame(() => { toast.classList.remove('toast-enter'); toast.classList.add('toast-enter-active'); });
+        setTimeout(() => {
+            toast.classList.remove('toast-enter-active'); toast.classList.add('toast-exit-active');
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function generateDocNo() {
+        const d = new Date(), p = v => String(v).padStart(2, '0');
+        STATE.docNo = `REQ-${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}`;
+        document.getElementById('display-doc-no').textContent = STATE.docNo;
+    }
+
+    function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+
+    function init() {
+        if (!STATE.docNo) generateDocNo();
+        const reqDateEl = document.getElementById('req_date'), reqTimeEl = document.getElementById('req_time');
+        const recvDateEl = document.getElementById('recv_date'), finishDateEl = document.getElementById('finish_date');
+        
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        
+        if (!reqDateEl.value) reqDateEl.value = dateStr;
+        if (!reqTimeEl.value) reqTimeEl.value = now.toTimeString().slice(0,5);
+        if (!recvDateEl.value) recvDateEl.value = dateStr;
+        if (!finishDateEl.value) finishDateEl.value = dateStr;
+        
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => { if(e.target === overlay) overlay.classList.remove('show'); });
+        });
+        document.getElementById('machine_name').addEventListener('change', (e) => { if(e.target.value === 'OTHER') toggleCustomMachine(true); });
+    }
+
+    function updateMachineList() {
+        const tech = document.getElementById('print_tech').value, select = document.getElementById('machine_name'), customInput = document.getElementById('machine_custom');
+        select.innerHTML = '<option value="">— Chọn Máy —</option>';
+        customInput.classList.add('hidden'); select.classList.remove('hidden'); customInput.value = '';
+        if (tech === 'OTHER') { toggleCustomMachine(true); } 
+        else if(tech && MACHINES[tech]) {
+            MACHINES[tech].forEach(m => { select.innerHTML += `<option value="${m}">${m}</option>`; });
+            select.innerHTML += `<option value="OTHER">📌 Nhập máy khác...</option>`;
+        }
+    }
+
+    function toggleCustomMachine(forceCustom = false) {
+        const select = document.getElementById('machine_name'), customInput = document.getElementById('machine_custom');
+        if (forceCustom || !customInput.classList.contains('hidden')) {
+            select.classList.add('hidden'); customInput.classList.remove('hidden'); customInput.focus();
+        } else {
+            select.classList.remove('hidden'); customInput.classList.add('hidden'); select.value = '';
+        }
+    }
+
+    function clearForm() {
+        // Custom logic to bypass confirm for web app strict rules
+        document.querySelectorAll('input:not([type="radio"]):not([type="file"]), textarea, select').forEach(el => el.value = '');
+        document.querySelectorAll('input[type="radio"]').forEach(el => el.checked = false);
+        document.getElementById('pr_other_txt').classList.add('hidden');
+        STATE.photosBefore = []; STATE.photosAfter = [];
+        renderPhotos('before'); renderPhotos('after');
+        STATE.docNo = ''; init(); saveToLocal(); showToast('Đã làm mới biểu mẫu');
+        calculateDowntime();
+    }
+    
+    function calculateWastePercent() {
+        const total = parseFloat(document.getElementById('wo_total_qty').value) || 0;
+        const waste = parseFloat(document.getElementById('waste_qty').value) || 0;
+        const pctEl = document.getElementById('waste_percent');
+        if (total > 0) pctEl.value = ((waste / total) * 100).toFixed(2) + '%'; else pctEl.value = '0%';
+    }
+
+    function openTimePicker(targetId) {
+        STATE.activeTimeTarget = targetId;
+        const labels = { 'req_time': 'Giờ Yêu Cầu', 'recv_time': 'Giờ Tiếp Nhận', 'finish_time': 'Giờ Hoàn Thành' };
+        document.getElementById('time-modal-title').textContent = labels[targetId] || 'Chọn Giờ';
+        const hContainer = document.getElementById('wheel-hour'), mContainer = document.getElementById('wheel-min');
+        
+        if(!hContainer.innerHTML) {
+            const h = '<div class="wheel-item"></div><div class="wheel-item"></div>';
+            let hHtml = h; for(let i=0; i<24; i++) hHtml += `<div class="wheel-item" data-val="${i}">${String(i).padStart(2,'0')}</div>`; hHtml += h; hContainer.innerHTML = hHtml;
+            let mHtml = h; for(let i=0; i<60; i++) mHtml += `<div class="wheel-item" data-val="${i}">${String(i).padStart(2,'0')}</div>`; mHtml += h; mContainer.innerHTML = mHtml;
+            
+            [hContainer, mContainer].forEach(c => {
+                c.addEventListener('scroll', () => {
+                    clearTimeout(c.scrollTimeout);
+                    c.scrollTimeout = setTimeout(() => {
+                        const items = c.querySelectorAll('.wheel-item[data-val]'), center = c.scrollTop + (c.clientHeight / 2);
+                        items.forEach(item => {
+                            const itemCenter = item.offsetTop + (item.clientHeight / 2);
+                            if(Math.abs(center - itemCenter) < 22) item.classList.add('text-blue-600', 'font-bold', 'scale-[1.15]');
+                            else item.classList.remove('text-blue-600', 'font-bold', 'scale-[1.15]');
+                        });
+                    }, 50);
+                });
+            });
+        }
+        
+        document.getElementById('modal-time').classList.add('show');
+        const currentVal = document.getElementById(targetId).value;
+        let h = new Date().getHours(), m = new Date().getMinutes();
+        if(currentVal && currentVal.includes(':')) [h, m] = currentVal.split(':').map(Number);
+        
+        setTimeout(() => { hContainer.scrollTop = h * 44; mContainer.scrollTop = m * 44; }, 10);
+    }
+
+    function confirmTime() {
+        if(!STATE.activeTimeTarget) return;
+        const h = Math.round(document.getElementById('wheel-hour').scrollTop / 44);
+        const m = Math.round(document.getElementById('wheel-min').scrollTop / 44);
+        document.getElementById(STATE.activeTimeTarget).value = `${String(Math.min(Math.max(h,0),23)).padStart(2,'0')}:${String(Math.min(Math.max(m,0),59)).padStart(2,'0')}`;
+        closeModal('modal-time');
+        calculateDowntime(); 
+    }
+
+    function calculateDowntime() {
+        const recvDate = document.getElementById('recv_date').value;
+        const recvTime = document.getElementById('recv_time').value;
+        const finishDate = document.getElementById('finish_date').value;
+        const finishTime = document.getElementById('finish_time').value;
+        
+        if(recvDate && recvTime && finishDate && finishTime) {
+            const start = new Date(`${recvDate}T${recvTime}`);
+            const end = new Date(`${finishDate}T${finishTime}`);
+            const diffMs = end - start;
+            
+            if(diffMs >= 0) {
+                const diffMins = Math.floor(diffMs / 60000);
+                document.getElementById('downtime').value = diffMins;
+            } else {
+                document.getElementById('downtime').value = 0;
+            }
+        } else {
+            document.getElementById('downtime').value = '';
+        }
+    }
+
+    function openPersonPicker(targetId) {
+        STATE.activePersonTarget = targetId;
+        const deptSel = document.getElementById('pp_dept');
+        if (EXCEL_PEOPLE.length > 0) {
+            const depts = [...new Set(EXCEL_PEOPLE.map(p => p.dept).filter(Boolean))];
+            deptSel.innerHTML = '<option value="">— Chọn Bộ Phận —</option>';
+            depts.forEach(d => { deptSel.innerHTML += `<option value="${d}">${d}</option>`; });
+        } else {
+             deptSel.innerHTML = `<option value="">— Chọn Bộ Phận —</option><option value="Production">Sản Xuất</option><option value="Technical">Kỹ Thuật</option><option value="QA">QA / QC</option>`;
+        }
+        document.getElementById('pp_dept').value = '';
+        document.getElementById('pp_area').innerHTML = '<option value="">— Chọn Bộ phận trước —</option>';
+        document.getElementById('pp_name').innerHTML = '<option value="">— Chọn Khu vực trước —</option>';
+        document.getElementById('modal-person').classList.add('show');
+    }
+
+    function updatePersonArea() {
+        const deptId = document.getElementById('pp_dept').value, areaSel = document.getElementById('pp_area');
+        areaSel.innerHTML = '<option value="">— Chọn Khu Vực —</option>'; document.getElementById('pp_name').innerHTML = '<option value="">— Chọn Khu vực trước —</option>';
+        if(!deptId) return;
+        let areas = EXCEL_PEOPLE.length > 0 ? [...new Set(EXCEL_PEOPLE.filter(p => p.dept === deptId).map(p => p.area))] : (DEPT_DATA[deptId] ? DEPT_DATA[deptId].areas : []);
+        areas.forEach(a => areaSel.innerHTML += `<option value="${a}">${a}</option>`);
+    }
+
+    function updatePersonName() {
+        const deptId = document.getElementById('pp_dept').value, areaId = document.getElementById('pp_area').value, nameSel = document.getElementById('pp_name');
+        nameSel.innerHTML = '<option value="">— Chọn Tên —</option>';
+        if(!areaId) return;
+        let people = EXCEL_PEOPLE.length > 0 ? EXCEL_PEOPLE.filter(p => p.area === areaId && p.dept === deptId) : [{name: 'Nguyễn Văn A', role: 'Staff'}, {name: 'Trần B', role: 'Mgr'}];
+        people.forEach(p => nameSel.innerHTML += `<option value="${p.name}">${p.mnv ? `${p.name} (${p.mnv}) - ${p.role}` : `${p.name} - ${p.role}`}</option>`);
+        nameSel.innerHTML += `<option value="OTHER">📌 Khác (Tự nhập)</option>`;
+    }
+
+    function confirmPerson() {
+        let val = document.getElementById('pp_name').value;
+        if(val === 'OTHER') { 
+            val = "Tên NV tự nhập..."; 
+        } else if (!val) { return showToast('Vui lòng chọn nhân sự', true); }
+        if(STATE.activePersonTarget) document.getElementById(STATE.activePersonTarget).value = val;
+        closeModal('modal-person');
+    }
+
+    function autoFillPerson(el) {
+        if (!el.value) return; const val = el.value.trim().toLowerCase();
+        let found = EXCEL_PEOPLE.find(p => (p.mnv && p.mnv.toLowerCase() === val) || (p.name && p.name.toLowerCase() === val));
+        if (found) el.value = found.mnv ? `${found.name} - ${found.mnv}` : found.name;
+    }
+
+    function updateEmployeeDatalist() {
+        const dl = document.getElementById('employee_list'); dl.innerHTML = '';
+        EXCEL_PEOPLE.forEach(p => { const opt = document.createElement('option'); opt.value = p.mnv ? `${p.name} - ${p.mnv}` : p.name; dl.appendChild(opt); });
+    }
+
+    function openExcelUploader() { document.getElementById('modal-excel').classList.add('show'); }
+
+    function processExcelFile(e) {
+        const file = e.target.files[0]; if(!file) return;
+        const statusEl = document.getElementById('excel_status');
+        statusEl.classList.remove('hidden', 'bg-green-50', 'text-green-700', 'bg-red-50', 'text-red-700'); statusEl.classList.add('bg-blue-50', 'text-blue-700');
+        statusEl.textContent = 'Đang đọc file...';
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const data = new Uint8Array(evt.target.result), workbook = XLSX.read(data, {type: 'array'});
+                const sheetName = workbook.SheetNames[0], json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {header: 1, defval: ''});
+                let hr = -1, ci = null;
+                for(let r=0; r < Math.min(json.length, 6); r++) {
+                    const H = json[r] || [];
+                    const _diac = s => (s==null?'':String(s)).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+                    const _fc = keys => H.findIndex(h => { const ch = _diac(h); return ch && keys.some(k => ch===k||ch.includes(k)); });
+                    const name = _fc(['ho va ten','ho ten','ten nhan vien','full name','name','ten']);
+                    const mnv  = _fc(['mnv','ma nv','ma nhan vien','ma so nv','employee']);
+                    const dept = _fc(['bo phan','department','dept','phong ban']);
+                    const area = _fc(['khu vuc','area','line']);
+                    const role = _fc(['chuc vu','role','vi tri']);
+                    if(name >= 0) { hr = r; ci = {name, mnv, dept, area, role}; break; }
+                }
+                if(hr >= 0) {
+                    EXCEL_PEOPLE = [];
+                    for(let i = hr + 1; i < json.length; i++) {
+                        const row = json[i] || [], nm = (row[ci.name] != null ? String(row[ci.name]) : '').trim();
+                        if(!nm) continue;
+                        let dept = ci.dept >= 0 ? (row[ci.dept] != null ? String(row[ci.dept]) : '').trim() : 'Khác';
+                        let area = ci.area >= 0 ? (row[ci.area] != null ? String(row[ci.area]) : '').trim() : dept;
+                        let mnv  = ci.mnv >= 0 ? (row[ci.mnv] != null ? String(row[ci.mnv]) : '').trim() : '';
+                        let role = ci.role >= 0 ? (row[ci.role] != null ? String(row[ci.role]) : '').trim() : '';
+                        EXCEL_PEOPLE.push({ dept, area, mnv, name: nm, role });
+                    }
+                    statusEl.textContent = `Đã nạp ${EXCEL_PEOPLE.length} nhân sự.`; updateEmployeeDatalist();
+                    try { localStorage.setItem('techPrintExcelData', JSON.stringify(EXCEL_PEOPLE)); } catch(e){}
+                    statusEl.classList.replace('bg-blue-50', 'bg-green-50'); statusEl.classList.replace('text-blue-700', 'text-green-700');
+                } else throw new Error("Format lỗi");
+            } catch(err) {
+                statusEl.classList.replace('bg-blue-50', 'bg-red-50'); statusEl.classList.replace('text-blue-700', 'text-red-700');
+                statusEl.textContent = 'Lỗi đọc file.';
+            }
+        };
+        reader.readAsArrayBuffer(file);
+    }
+
+    function handleImageUpload(e, type) {
+        const files = Array.from(e.target.files); if(!files.length) return;
+        const targetArr = type === 'before' ? STATE.photosBefore : STATE.photosAfter;
+        files.forEach(file => {
+            if(targetArr.length >= 3) return showToast('Tối đa 3 ảnh/mục', true);
+            if(!file.type.startsWith('image/')) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'), MAX = 800, scale = MAX / img.width;
+                    canvas.width = MAX; canvas.height = img.height * scale;
+                    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+                    targetArr.push(canvas.toDataURL('image/jpeg', 0.7)); renderPhotos(type);
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+        e.target.value = '';
+    }
+
+    function removePhoto(type, i) { (type === 'before' ? STATE.photosBefore : STATE.photosAfter).splice(i, 1); renderPhotos(type); }
+
+    function renderPhotos(type) {
+        const arr = type === 'before' ? STATE.photosBefore : STATE.photosAfter, c = document.getElementById(`grid_img_${type}`);
+        c.innerHTML = arr.length ? '' : `<div class="text-xs text-slate-400 italic flex items-center justify-center w-full h-full">Chưa có ảnh</div>`;
+        arr.forEach((data, i) => c.innerHTML += `<div class="photo-thumbnail"><img src="${data}"><div class="photo-remove-btn" onclick="removePhoto('${type}', ${i})">✕</div></div>`);
+    }
+
+    function triggerBackup() {
+        const blob = new Blob([JSON.stringify({formState: getFormState(), excelPeople: EXCEL_PEOPLE, docNo: STATE.docNo})], { type: 'application/json' });
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `TechPrint_Backup_${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a); showToast("Đã tải Backup");
+    }
+    function triggerRestore() { document.getElementById('file_restore').click(); }
+    function processRestoreFile(e) {
+        const file = e.target.files[0]; if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            try {
+                const data = JSON.parse(evt.target.result);
+                if (data.formState) applyFormState(data.formState);
+                if (data.excelPeople) { EXCEL_PEOPLE = data.excelPeople; updateEmployeeDatalist(); }
+                if (data.docNo) { STATE.docNo = data.docNo; document.getElementById('display-doc-no').textContent = STATE.docNo; }
+                showToast("Phục hồi thành công!");
+            } catch (err) { showToast("File không hợp lệ", true); }
+        };
+        reader.readAsText(file); e.target.value = '';
+    }
+
+    function preparePDFDOM() {
+        const v = id => document.getElementById(id)?.value || '';
+        const t = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val || '—'; };
+        const c = (id, checked) => { const el = document.getElementById(id); if(el) { if(checked) el.classList.add('checked'); else el.classList.remove('checked'); }};
+        const r = (name) => document.querySelector(`input[name="${name}"]:checked`)?.value;
+        
+        t('pdf_doc_no', STATE.docNo); t('pdf_footer_doc', `Doc No: ${STATE.docNo}`);
+        t('pdf_req_date', v('req_date').split('-').reverse().join('/')); t('pdf_req_time', v('req_time')); t('pdf_req_by', v('req_by'));
+        
+        const tech = v('print_tech'); let mach = !document.getElementById('machine_custom').classList.contains('hidden') || v('machine_name') === 'OTHER' ? v('machine_custom') : v('machine_name');
+        t('pdf_machine', tech === 'OTHER' ? `[Khác] ${mach}` : (tech ? `[${tech}] ${mach}` : mach)); t('pdf_prob', v('problem'));
+        
+        const st = r('machine_status'); c('pdf_chk_first', st === 'First Bulk Print'); c('pdf_chk_repeat', st === 'Repeat Print');
+        const pri = r('priority'); c('pdf_rad_imm', pri === 'Immediate'); c('pdf_rad_hold', pri === 'Hold'); c('pdf_rad_other', pri === 'Other'); t('pdf_rad_other_txt', pri === 'Other' ? v('pr_other_txt') : '');
+        t('pdf_recv_by', v('recv_by')); 
+        
+        // Format Date helpers for PDF Section 2
+        const fDate = (d) => { if(!d) return ''; const p = d.split('-'); return p.length === 3 ? `${p[2]}/${p[1]}` : d; }
+        
+        t('pdf_recv_time_full', `${v('recv_time')} (${fDate(v('recv_date'))})`); 
+        t('pdf_fin_time_full', `${v('finish_time')} (${fDate(v('finish_date'))})`); 
+        t('pdf_downtime', v('downtime'));
+        
+        t('pdf_rc', v('root_cause')); t('pdf_act', v('action_taken'));
+        const cat = r('err_cat'); c('pdf_cat_man', cat === 'MAN'); c('pdf_cat_mac', cat === 'MACHINE'); c('pdf_cat_mat', cat === 'MATERIAL'); c('pdf_cat_met', cat === 'METHOD');
+        const typ = r('err_type'); c('pdf_typ_prepress', typ === 'Prepress'); c('pdf_typ_press', typ === 'Press'); c('pdf_typ_postpress', typ === 'PostPress');
+        const qa = r('chk_quality'); c('pdf_qa_ok', qa === 'OK'); c('pdf_qa_ng', qa === 'NG');
+        const status = r('chk_status'); c('pdf_st_done', status === 'DONE'); c('pdf_st_monitor', status === 'MONITOR'); c('pdf_st_support', status === 'SUPPORT');
+        t('pdf_work_order', v('work_order')); t('pdf_wo_total_qty', v('wo_total_qty')); t('pdf_waste_qty', v('waste_qty')); t('pdf_waste_unit', v('waste_unit')); t('pdf_waste_percent', v('waste_percent'));
+        t('pdf_sig_req', (v('req_by').split('-')[0] || '').trim()); t('pdf_sig_mt', (v('recv_by').split('-')[0] || '').trim()); t('pdf_sig_prod', (v('prod_mgr').split('-')[0] || '').trim());
+    }
+
+    async function generatePDF() {
+        const btn = document.getElementById('btn-export'), origTxt = btn.innerHTML;
+        btn.disabled = true; btn.innerHTML = '<span>⏳ Đang xuất PDF...</span>';
+        try {
+            preparePDFDOM();
+            const tpl = document.getElementById('pdf-template'); tpl.style.left = '0'; tpl.style.zIndex = '-1';
+            await new Promise(r => setTimeout(r, 100));
+            
+            // Ép cứng kích thước render để không bị sai tỷ lệ hay làm mờ
+            const canvas = await html2canvas(document.getElementById('pdf-render-area'), { 
+                scale: 3, 
+                useCORS: true, 
+                backgroundColor: '#ffffff', 
+                logging: false,
+                width: 794,
+                height: 1123,
+                windowWidth: 794,
+                windowHeight: 1123
+            });
+            tpl.style.left = '-9999px';
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+            
+            // Tính toán tỷ lệ xuất để hình khớp chuẩn chỉ 100% lên khổ A4 mà không bị thu lại/ngắn đi
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(canvas.toDataURL('image/jpeg', 1.0), 'JPEG', 0, 0, pdfWidth, pdfHeight);
+
+            if(STATE.photosBefore.length || STATE.photosAfter.length) {
+                pdf.addPage(); pdf.setFontSize(14); pdf.text("HINH ANH SUA CHUA / REPAIR PHOTOS", 105, 15, { align: 'center' });
+                pdf.setFontSize(9); pdf.text(`Doc No: ${STATE.docNo}`, 105, 21, { align: 'center' });
+                const colW = 90; pdf.setFontSize(11); pdf.text("TRUOC KHI SUA CHUA", 15 + colW/2, 30, { align: 'center' }); pdf.text("SAU KHI SUA CHUA", 105 + colW/2, 30, { align: 'center' });
+                pdf.setDrawColor(200); pdf.line(105, 30, 105, 280);
+                const renderCol = (photos, x) => { let y = 35; photos.forEach(d => { pdf.addImage(d, 'JPEG', x, y, colW, 80); y += 85; }); };
+                renderCol(STATE.photosBefore, 10); renderCol(STATE.photosAfter, 110);
+            }
+
+            const rDate = document.getElementById('req_date').value.split('-'), dateStr = rDate.length === 3 ? `${rDate[2]}${rDate[1]}${rDate[0]}` : 'Ngay';
+            const cleanFileName = `${dateStr} - ${document.getElementById('print_tech').value || 'KyThuat'} - ${document.querySelector('input[name="err_type"]:checked')?.value || 'SựCố'}`.replace(/[/\\?%*:|"<>]/g, '-');
+            pdf.save(`${cleanFileName}.pdf`);
+            showToast('Xuất PDF thành công!');
+        } catch (err) { showToast('Lỗi xuất PDF', true); console.error(err); } 
+        finally { btn.disabled = false; btn.innerHTML = origTxt; }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => { loadLocalData(); init(); setupAutoSave(); });
+</script>
+</body>
+</html>

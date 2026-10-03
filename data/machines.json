@@ -1,0 +1,500 @@
+[
+  {
+    "id": "mach-1",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Laser printer 1",
+    "isActive": true
+  },
+  {
+    "id": "mach-2",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Laser printer 2",
+    "isActive": true
+  },
+  {
+    "id": "mach-3",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Laser cut",
+    "isActive": true
+  },
+  {
+    "id": "mach-4",
+    "tech": "RFID/Thermal/Laser",
+    "name": "CLS P2P 1",
+    "isActive": true
+  },
+  {
+    "id": "mach-5",
+    "tech": "RFID/Thermal/Laser",
+    "name": "CLS P2P 2",
+    "isActive": true
+  },
+  {
+    "id": "mach-6",
+    "tech": "RFID/Thermal/Laser",
+    "name": "CLS R2R",
+    "isActive": true
+  },
+  {
+    "id": "mach-7",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Care Label Feeder",
+    "isActive": true
+  },
+  {
+    "id": "mach-8",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Ecopet G1",
+    "isActive": true
+  },
+  {
+    "id": "mach-9",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Ecopet G2",
+    "isActive": true
+  },
+  {
+    "id": "mach-10",
+    "tech": "RFID/Thermal/Laser",
+    "name": "RFID1",
+    "isActive": true
+  },
+  {
+    "id": "mach-11",
+    "tech": "RFID/Thermal/Laser",
+    "name": "RFID2",
+    "isActive": true
+  },
+  {
+    "id": "mach-12",
+    "tech": "RFID/Thermal/Laser",
+    "name": "RFID3",
+    "isActive": true
+  },
+  {
+    "id": "mach-13",
+    "tech": "RFID/Thermal/Laser",
+    "name": "RFID4",
+    "isActive": true
+  },
+  {
+    "id": "mach-14",
+    "tech": "RFID/Thermal/Laser",
+    "name": "RFID5",
+    "isActive": true
+  },
+  {
+    "id": "mach-15",
+    "tech": "RFID/Thermal/Laser",
+    "name": "RFID6",
+    "isActive": true
+  },
+  {
+    "id": "mach-16",
+    "tech": "RFID/Thermal/Laser",
+    "name": "RFID7",
+    "isActive": true
+  },
+  {
+    "id": "mach-17",
+    "tech": "RFID/Thermal/Laser",
+    "name": "AFINA",
+    "isActive": true
+  },
+  {
+    "id": "mach-18",
+    "tech": "RFID/Thermal/Laser",
+    "name": "ITD (ETUN)",
+    "isActive": true
+  },
+  {
+    "id": "mach-19",
+    "tech": "RFID/Thermal/Laser",
+    "name": "TOSHIBA",
+    "isActive": true
+  },
+  {
+    "id": "mach-20",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Epson 1",
+    "isActive": true
+  },
+  {
+    "id": "mach-21",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Epson 2",
+    "isActive": true
+  },
+  {
+    "id": "mach-22",
+    "tech": "RFID/Thermal/Laser",
+    "name": "Fan Folding",
+    "isActive": true
+  },
+  {
+    "id": "mach-23",
+    "tech": "OFFSET",
+    "name": "Máy co nhiệt",
+    "isActive": true
+  },
+  {
+    "id": "mach-24",
+    "tech": "OFFSET",
+    "name": "LAMINATION FBK 800",
+    "isActive": true
+  },
+  {
+    "id": "mach-25",
+    "tech": "OFFSET",
+    "name": "SM 52",
+    "isActive": true
+  },
+  {
+    "id": "mach-26",
+    "tech": "OFFSET",
+    "name": "SX 52",
+    "isActive": true
+  },
+  {
+    "id": "mach-27",
+    "tech": "OFFSET",
+    "name": "Polar",
+    "isActive": true
+  },
+  {
+    "id": "mach-28",
+    "tech": "OFFSET",
+    "name": "CLS Labeling",
+    "isActive": true
+  },
+  {
+    "id": "mach-29",
+    "tech": "OFFSET",
+    "name": "GWS Cutting",
+    "isActive": true
+  },
+  {
+    "id": "mach-30",
+    "tech": "OFFSET",
+    "name": "Water base coating",
+    "isActive": true
+  },
+  {
+    "id": "mach-31",
+    "tech": "OFFSET",
+    "name": "Auto Lamination",
+    "isActive": true
+  },
+  {
+    "id": "mach-32",
+    "tech": "Digital",
+    "name": "IR Coating",
+    "isActive": true
+  },
+  {
+    "id": "mach-33",
+    "tech": "Digital",
+    "name": "HP Indigo 7K",
+    "isActive": true
+  },
+  {
+    "id": "mach-34",
+    "tech": "Digital",
+    "name": "HP 7K chiller 1",
+    "isActive": true
+  },
+  {
+    "id": "mach-35",
+    "tech": "Digital",
+    "name": "HP 7K chiller 2",
+    "isActive": true
+  },
+  {
+    "id": "mach-36",
+    "tech": "Digital",
+    "name": "UV Coating",
+    "isActive": true
+  },
+  {
+    "id": "mach-37",
+    "tech": "Digital",
+    "name": "Gluing Machine",
+    "isActive": true
+  },
+  {
+    "id": "mach-38",
+    "tech": "Digital",
+    "name": "PDM labeling",
+    "isActive": true
+  },
+  {
+    "id": "mach-39",
+    "tech": "HTL",
+    "name": "ATMA",
+    "isActive": true
+  },
+  {
+    "id": "mach-40",
+    "tech": "HTL",
+    "name": "GSF Powder dusting",
+    "isActive": true
+  },
+  {
+    "id": "mach-41",
+    "tech": "HTL",
+    "name": "Automatic Flat Conveyor",
+    "isActive": true
+  },
+  {
+    "id": "mach-42",
+    "tech": "HTL",
+    "name": "Automatic Sheet Stacker",
+    "isActive": true
+  },
+  {
+    "id": "mach-43",
+    "tech": "HTL",
+    "name": "Chiller HTL",
+    "isActive": true
+  },
+  {
+    "id": "mach-44",
+    "tech": "HTL",
+    "name": "Heat Press",
+    "isActive": true
+  },
+  {
+    "id": "mach-45",
+    "tech": "HTL",
+    "name": "Lò sấy bảng",
+    "isActive": true
+  },
+  {
+    "id": "mach-46",
+    "tech": "HTL",
+    "name": "Máy chụp Bảng",
+    "isActive": true
+  },
+  {
+    "id": "mach-47",
+    "tech": "HTL",
+    "name": "Wash-Out Booth",
+    "isActive": true
+  },
+  {
+    "id": "mach-48",
+    "tech": "HTL",
+    "name": "Sheet label cutter",
+    "isActive": true
+  },
+  {
+    "id": "mach-49",
+    "tech": "HTL",
+    "name": "HTL R2R",
+    "isActive": true
+  },
+  {
+    "id": "mach-50",
+    "tech": "HTL",
+    "name": "Rewinding",
+    "isActive": true
+  },
+  {
+    "id": "mach-51",
+    "tech": "HTL",
+    "name": "Slitting",
+    "isActive": true
+  },
+  {
+    "id": "mach-52",
+    "tech": "PFL",
+    "name": "PFL1",
+    "isActive": true
+  },
+  {
+    "id": "mach-53",
+    "tech": "PFL",
+    "name": "PFL2",
+    "isActive": true
+  },
+  {
+    "id": "mach-54",
+    "tech": "PFL",
+    "name": "PFL3",
+    "isActive": true
+  },
+  {
+    "id": "mach-55",
+    "tech": "PFL",
+    "name": "PFL4",
+    "isActive": true
+  },
+  {
+    "id": "mach-56",
+    "tech": "PFL",
+    "name": "PFL5",
+    "isActive": true
+  },
+  {
+    "id": "mach-57",
+    "tech": "PFL",
+    "name": "PFL6",
+    "isActive": true
+  },
+  {
+    "id": "mach-58",
+    "tech": "PFL",
+    "name": "C&F1",
+    "isActive": true
+  },
+  {
+    "id": "mach-59",
+    "tech": "PFL",
+    "name": "C&F2",
+    "isActive": true
+  },
+  {
+    "id": "mach-60",
+    "tech": "PFL",
+    "name": "C&F3",
+    "isActive": true
+  },
+  {
+    "id": "mach-61",
+    "tech": "PFL",
+    "name": "C&F4",
+    "isActive": true
+  },
+  {
+    "id": "mach-62",
+    "tech": "PFL",
+    "name": "C&F5",
+    "isActive": true
+  },
+  {
+    "id": "mach-63",
+    "tech": "PFL",
+    "name": "C&F6",
+    "isActive": true
+  },
+  {
+    "id": "mach-64",
+    "tech": "PFL",
+    "name": "C&F7",
+    "isActive": true
+  },
+  {
+    "id": "mach-65",
+    "tech": "PFL",
+    "name": "C&F8",
+    "isActive": true
+  },
+  {
+    "id": "mach-66",
+    "tech": "PFL",
+    "name": "C&F9",
+    "isActive": true
+  },
+  {
+    "id": "mach-67",
+    "tech": "PFL",
+    "name": "C&F10",
+    "isActive": true
+  },
+  {
+    "id": "mach-68",
+    "tech": "PFL",
+    "name": "C&F11",
+    "isActive": true
+  },
+  {
+    "id": "mach-69",
+    "tech": "PFL",
+    "name": "C&F12",
+    "isActive": true
+  },
+  {
+    "id": "mach-70",
+    "tech": "PFL",
+    "name": "C&F14",
+    "isActive": true
+  },
+  {
+    "id": "mach-71",
+    "tech": "PFL",
+    "name": "Inspection System",
+    "isActive": true
+  },
+  {
+    "id": "mach-72",
+    "tech": "PFL",
+    "name": "EAS-1",
+    "isActive": true
+  },
+  {
+    "id": "mach-73",
+    "tech": "PFL",
+    "name": "Máy sấy Focus",
+    "isActive": true
+  },
+  {
+    "id": "mach-74",
+    "tech": "PFL",
+    "name": "Máy sấy PFL",
+    "isActive": true
+  },
+  {
+    "id": "mach-75",
+    "tech": "WOVEN",
+    "name": "WOVEN 1",
+    "isActive": true
+  },
+  {
+    "id": "mach-76",
+    "tech": "WOVEN",
+    "name": "WOVEN 2",
+    "isActive": true
+  },
+  {
+    "id": "mach-77",
+    "tech": "WOVEN",
+    "name": "WOVEN 3",
+    "isActive": true
+  },
+  {
+    "id": "mach-78",
+    "tech": "WOVEN",
+    "name": "WOVEN 4",
+    "isActive": true
+  },
+  {
+    "id": "mach-79",
+    "tech": "WOVEN",
+    "name": "WOVEN 5",
+    "isActive": true
+  },
+  {
+    "id": "mach-80",
+    "tech": "WOVEN",
+    "name": "WOVEN 6",
+    "isActive": true
+  },
+  {
+    "id": "mach-81",
+    "tech": "DIECUT",
+    "name": "DIECUT 1",
+    "isActive": true
+  },
+  {
+    "id": "mach-82",
+    "tech": "DIECUT",
+    "name": "DIECUT 2",
+    "isActive": true
+  },
+  {
+    "id": "mach-83",
+    "tech": "DIECUT",
+    "name": "Máy Cán Màng",
+    "isActive": true
+  }
+]
