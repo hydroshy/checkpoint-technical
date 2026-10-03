@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([cookieOrHeaderExtractor]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'Daviteq_Checkpoint_Technical_Key_2026_Secure!',
+      secretOrKey: process.env.JWT_SECRET || 'Checkpoint_Systems_Technical_Key_2026_Secure!',
     });
   }
 

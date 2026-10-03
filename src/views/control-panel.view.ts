@@ -187,15 +187,25 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
       </div>
 
       <!-- Right User Menu & Portal Links -->
-      <div class="flex items-center gap-2.5">
-        <!-- Switch back to User Dashboard -->
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Quick 1-Click Theme Toggle Button -->
+        <button
+          type="button"
+          @click="toggleTheme"
+          class="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+          :title="currentTheme === 'dark' ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'"
+        >
+          <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
+        </button>
+
+        <!-- Switch to Weekly Dashboard -->
         <a
           href="/dashboard"
           class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-50 dark:bg-sky-500/15 hover:bg-sky-100 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 transition"
-          title="Chuyển sang giao diện Nhập liệu nhân viên"
+          title="Chuyển sang Giao diện Weekly Technical Dashboard"
         >
-          <i class="fa-solid fa-file-pen text-sky-500"></i>
-          <span class="hidden sm:inline">User Dashboard</span>
+          <i class="fa-solid fa-chart-pie text-sky-500"></i>
+          <span class="hidden sm:inline">Weekly Dashboard</span>
         </a>
 
         <!-- User Menu Dropdown Button -->
@@ -295,10 +305,59 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         class="fixed md:static inset-y-0 left-0 z-30 glass-sidebar flex flex-col justify-between transition-all duration-200 ease-in-out md:flex-shrink-0 mt-14 md:mt-0"
       >
         <div class="space-y-4 overflow-y-auto flex-1">
+          <!-- GROUP 0: WEEKLY OPERATIONS (EXCEL DATABASE) -->
+          <div class="space-y-1">
+            <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-sky-500">
+              Vận Hành Kỹ Thuật Tuần
+            </div>
+            <a
+              href="/dashboard?tab=weekly-kpi"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer text-slate-700 dark:text-slate-300 hover:text-sky-500"
+            >
+              <i class="fa-solid fa-chart-pie w-4 text-center text-xs text-sky-500"></i>
+              <span class="truncate">Dashboard KPI Tuần</span>
+            </a>
+            <a
+              href="/dashboard?tab=weekly-requests"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer text-slate-700 dark:text-slate-300 hover:text-sky-500"
+            >
+              <i class="fa-solid fa-list-check w-4 text-center text-xs text-sky-500"></i>
+              <span class="truncate">1. Phiếu Yêu Cầu Tuần</span>
+            </a>
+            <a
+              href="/dashboard?tab=defect-logs"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer text-slate-700 dark:text-slate-300 hover:text-sky-500"
+            >
+              <i class="fa-solid fa-triangle-exclamation w-4 text-center text-xs text-amber-500"></i>
+              <span class="truncate">2. Defect Log Kỹ Thuật</span>
+            </a>
+            <a
+              href="/dashboard?tab=action-plans"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer text-slate-700 dark:text-slate-300 hover:text-sky-500"
+            >
+              <i class="fa-solid fa-bullseye w-4 text-center text-xs text-emerald-500"></i>
+              <span class="truncate">3. Action Plan Hành Động</span>
+            </a>
+            <a
+              href="/dashboard?tab=catalog"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer text-slate-700 dark:text-slate-300 hover:text-sky-500"
+            >
+              <i class="fa-solid fa-users-gear w-4 text-center text-xs text-indigo-500"></i>
+              <span class="truncate">Người Yêu Cầu & Thiết Bị</span>
+            </a>
+            <a
+              href="/dashboard?tab=v4-form"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer text-slate-700 dark:text-slate-300 hover:text-sky-500"
+            >
+              <i class="fa-solid fa-file-signature w-4 text-center text-xs text-violet-500"></i>
+              <span class="truncate">Phiếu Nhập Liệu V4.1</span>
+            </a>
+          </div>
+
           <!-- GROUP 1: GOVERNANCE -->
           <div class="space-y-1">
             <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              Quản Trị & Thống Kê
+              Quản Trị Chi Tiết V4
             </div>
             <button
               @click="switchTab('overview')"
@@ -1190,6 +1249,10 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
         };
 
+        const toggleTheme = () => {
+          setTheme(currentTheme.value === 'dark' ? 'light' : 'dark');
+        };
+
         const switchTab = (tab) => {
           activeTab.value = tab;
           sidebarOpen.value = false;
@@ -1601,6 +1664,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           usersList,
           newUser,
           setTheme,
+          toggleTheme,
           switchTab,
           loadStats,
           loadRequests,

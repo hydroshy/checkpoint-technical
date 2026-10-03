@@ -290,11 +290,30 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           >
             <i class="fa-solid fa-file-signature text-xs"></i> <span>Phiếu Chi Tiết V4.1</span>
           </button>
+
+          <button
+            @click="switchTab('v4-history')"
+            :class="activeTab === 'v4-history' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
+            class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
+          >
+            <i class="fa-solid fa-clock-rotate-left text-xs"></i> <span>Lịch Sử V4</span>
+            <span v-if="historyTotal || historyItems.length" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-500 text-white font-mono">{{ historyTotal || historyItems.length }}</span>
+          </button>
         </nav>
       </div>
 
       <!-- Right User Menu & Controls -->
-      <div class="flex items-center gap-2.5">
+      <div class="flex items-center gap-2 sm:gap-2.5">
+        <!-- Quick 1-Click Theme Toggle Button -->
+        <button
+          type="button"
+          @click="toggleTheme"
+          class="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+          :title="currentTheme === 'dark' ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'"
+        >
+          <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
+        </button>
+
         <!-- Switch View: Control Panel link for Admin / Technician -->
         <a
           v-if="isAdminOrTech"
@@ -1961,10 +1980,6 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         </div>
 
       </div>
-
-    </main>
-
-    
 
     </main>
 
@@ -3745,13 +3760,146 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
         const onPickerDeptChange = () => { pickerArea.value = ''; pickerSelectedName.value = ''; };
         const onPickerAreaChange = () => { pickerSelectedName.value = ''; };
-        const openExcelUploader = () => { const m = document.getElementById('modal-excel'); if (m) m.style.display = 'flex'; };
-        const processExcelFile = () => {};
-        const triggerBackup = () => {};
-        const triggerRestore = () => {};
-        const processRestoreFile = () => {};
-        const formatDisplayDate = (d) => d || '—';
-        const formatShortDate = (d) => d || '—';
+        const openExcelUploader = () => {
+          excelStatus.value = { show: false, isError: false, msg: '' };
+          const m = document.getElementById('modal-excel');
+          if (m) m.style.display = 'flex';
+        };
+
+        const processExcelFile = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          excelStatus.value = { show: true, isError: false, msg: 'Đang đọc và phân tích file Excel...' };
+          const reader = new FileReader();
+          reader.onload = async (evt) => {
+            try {
+              const data = new Uint8Array(evt.target.result);
+              const workbook = XLSX.read(data, { type: 'array' });
+              const sheetName = workbook.SheetNames[0];
+              const json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], { header: 1, defval: '' });
+
+              let hr = -1, ci = null;
+              for (let r = 0; r < Math.min(json.length, 6); r++) {
+                const H = json[r] || [];
+                const _diac = s => (s == null ? '' : String(s)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+                const _fc = keys => H.findIndex(h => { const ch = _diac(h); return ch && keys.some(k => ch === k || ch.includes(k)); });
+                const name = _fc(['ho va ten', 'ho ten', 'ten nhan vien', 'full name', 'name', 'ten']);
+                const mnv  = _fc(['mnv', 'ma nv', 'ma nhan vien', 'ma so nv', 'employee']);
+                const dept = _fc(['bo phan', 'department', 'dept', 'phong ban']);
+                const area = _fc(['khu vuc', 'area', 'line']);
+                const role = _fc(['chuc vu', 'role', 'vi tri']);
+                if (name >= 0) { hr = r; ci = { name, mnv, dept, area, role }; break; }
+              }
+
+              if (hr >= 0) {
+                const employees = [];
+                for (let i = hr + 1; i < json.length; i++) {
+                  const row = json[i] || [];
+                  const nm = (row[ci.name] != null ? String(row[ci.name]) : '').trim();
+                  if (!nm) continue;
+                  const dept = ci.dept >= 0 ? String(row[ci.dept] || '').trim() : 'Khác';
+                  const area = ci.area >= 0 ? String(row[ci.area] || '').trim() : dept;
+                  const mnv  = ci.mnv >= 0 ? String(row[ci.mnv] || '').trim() : '';
+                  const role = ci.role >= 0 ? String(row[ci.role] || '').trim() : 'Staff';
+                  employees.push({ name: nm, mnv, dept, area, role });
+                }
+
+                const res = await fetch('/api/employees/bulk-import', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  credentials: 'include',
+                  body: JSON.stringify({ employees })
+                });
+
+                if (res.ok) {
+                  excelStatus.value = { show: true, isError: false, msg: '✅ Đã nạp thành công ' + employees.length + ' nhân sự vào hệ thống!' };
+                  await loadEmployees();
+                  showToast('Đã nạp ' + employees.length + ' nhân sự');
+                } else {
+                  throw new Error('Lỗi lưu trữ nhân sự lên máy chủ');
+                }
+              } else {
+                throw new Error('Không nhận diện được tiêu đề cột (Họ và tên, Mã NV, Bộ phận...)');
+              }
+            } catch (err) {
+              excelStatus.value = { show: true, isError: true, msg: '❌ ' + (err.message || 'Lỗi đọc file Excel') };
+            }
+          };
+          reader.readAsArrayBuffer(file);
+        };
+
+        const triggerBackup = () => {
+          const data = {
+            form: form.value,
+            exportedAt: new Date().toISOString()
+          };
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = (form.value.docNo || 'Checkpoint') + '_Backup.json';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast('Đã tải file sao lưu JSON');
+        };
+
+        const triggerRestore = () => document.getElementById('file_restore')?.click();
+
+        const processRestoreFile = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            try {
+              const data = JSON.parse(evt.target.result);
+              if (data.form) {
+                form.value = { ...form.value, ...data.form };
+                showToast('Phục hồi dữ liệu biểu mẫu thành công!');
+              } else if (data.formState) {
+                form.value.docNo = data.docNo || form.value.docNo;
+                if (data.formState.inputs) {
+                  const ins = data.formState.inputs;
+                  if (ins.req_date) form.value.reqDate = ins.req_date;
+                  if (ins.req_time) form.value.reqTime = ins.req_time;
+                  if (ins.req_by) form.value.reqBy = ins.req_by;
+                  if (ins.print_tech) form.value.printTech = ins.print_tech;
+                  if (ins.machine_name) form.value.machineName = ins.machine_name;
+                  if (ins.problem) form.value.problem = ins.problem;
+                  if (ins.recv_by) form.value.recvBy = ins.recv_by;
+                  if (ins.recv_date) form.value.recvDate = ins.recv_date;
+                  if (ins.recv_time) form.value.recvTime = ins.recv_time;
+                  if (ins.finish_date) form.value.finishDate = ins.finish_date;
+                  if (ins.finish_time) form.value.finishTime = ins.finish_time;
+                  if (ins.root_cause) form.value.rootCause = ins.root_cause;
+                  if (ins.action_taken) form.value.actionTaken = ins.action_taken;
+                  if (ins.work_order) form.value.workOrder = ins.work_order;
+                  if (ins.prod_mgr) form.value.prodMgr = ins.prod_mgr;
+                }
+                showToast('Phục hồi dữ liệu biểu mẫu thành công!');
+              }
+            } catch (err) {
+              showToast('Tệp không đúng định dạng', true);
+            }
+          };
+          reader.readAsText(file);
+          e.target.value = '';
+        };
+
+        const formatDisplayDate = (d) => {
+          if (!d) return '—';
+          const p = String(d).split('-');
+          return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+        };
+
+        const formatShortDate = (d) => {
+          if (!d) return '';
+          const p = String(d).split('-');
+          return p.length === 3 ? p[2] + '/' + p[1] : d;
+        };
+
+        const toggleTheme = () => {
+          setTheme(currentTheme.value === 'dark' ? 'light' : 'dark');
+        };
 
         onMounted(() => {
           initForm();
@@ -3763,6 +3911,13 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
           const savedTheme = localStorage.getItem('checkpoint_theme') || 'light';
           currentTheme.value = savedTheme;
+
+          // Support ?tab= parameter in URL
+          const urlParams = new URLSearchParams(window.location.search);
+          const tabParam = urlParams.get('tab');
+          if (tabParam) {
+            switchTab(tabParam);
+          }
         });
 
         return {
@@ -3853,6 +4008,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           exportRequestersExcel,
           exportMachinesExcel,
           setTheme,
+          toggleTheme,
           clearForm,
           calculateDowntime,
           calculateWastePercent,

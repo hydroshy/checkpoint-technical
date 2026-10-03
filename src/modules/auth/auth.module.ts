@@ -9,7 +9,7 @@ import { JwtStrategy } from './jwt.strategy';
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'Daviteq_Checkpoint_Technical_Key_2026_Secure!',
+      secret: process.env.JWT_SECRET || 'Checkpoint_Systems_Technical_Key_2026_Secure!',
       signOptions: { expiresIn: '30d' },
     }),
   ],
