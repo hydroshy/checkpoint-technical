@@ -45,10 +45,10 @@ export const LOGIN_HTML = `<!DOCTYPE html>
       <!-- Logo Header -->
       <div class="text-center space-y-2">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-sky-500/10 border border-sky-500/30 p-2 shadow-inner mb-1 overflow-hidden">
-          <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-xl" alt="Daviteq Logo" />
+          <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-xl" alt="Checkpoint Systems Logo" />
         </div>
         <h1 class="text-xl font-extrabold tracking-tight text-white flex items-center justify-center gap-1.5">
-          <span class="text-sky-400">DAVITEQ</span> TechPrint
+          <span class="text-sky-400">CHECKPOINT</span> Systems
         </h1>
         <p class="text-xs text-slate-400 font-medium">Hệ Thống Phiếu Yêu Cầu Kỹ Thuật</p>
       </div>
@@ -107,7 +107,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
             <input type="checkbox" v-model="rememberMe" class="rounded border-slate-700 bg-slate-800 text-sky-500 focus:ring-0 mr-2" />
             Ghi nhớ đăng nhập
           </label>
-          <span class="text-[11px] text-slate-500 font-mono">Mặc định: Dvt@123</span>
+          <span class="text-[11px] text-slate-500 font-mono">Mặc định: Checkpoint@123</span>
         </div>
 
         <button
@@ -151,7 +151,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
 
         const fillCreds = (u) => {
           username.value = u;
-          password.value = 'Dvt@123';
+          password.value = 'Checkpoint@123';
         };
 
         const handleLogin = async () => {
@@ -175,7 +175,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
 
             if (data.access_token) {
               localStorage.setItem('checkpoint_token', data.access_token);
-              localStorage.setItem('lorawan_token', data.access_token);
               document.cookie = "access_token=" + encodeURIComponent(data.access_token) + "; Path=/; Max-Age=" + (30*24*3600) + "; SameSite=Lax";
             }
             if (data.user) {

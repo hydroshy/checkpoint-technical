@@ -4,20 +4,30 @@ import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import * as cookieParser from 'cookie-parser';
 import * as path from 'path';
+import * as fs from 'fs';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
+  // Resolve public directory reliably across dev (ts-node) and prod (dist)
+  const candidatePublicDirs = [
+    path.join(__dirname, 'public'),
+    path.join(__dirname, '..', 'public'),
+    path.join(process.cwd(), 'dist', 'public'),
+    path.join(process.cwd(), 'public'),
+  ];
+  const publicDir = candidatePublicDirs.find((dir) => fs.existsSync(dir)) || path.join(process.cwd(), 'public');
+
   // Static Assets (Brand logos, vendor libraries)
-  app.useStaticAssets(path.join(process.cwd(), 'public', 'images'), {
+  app.useStaticAssets(path.join(publicDir, 'images'), {
     prefix: '/images/',
   });
-  app.useStaticAssets(path.join(process.cwd(), 'public', 'vendor'), {
+  app.useStaticAssets(path.join(publicDir, 'vendor'), {
     prefix: '/vendor/',
   });
-  app.useStaticAssets(path.join(process.cwd(), 'public'), {
+  app.useStaticAssets(publicDir, {
     prefix: '/public/',
   });
 
@@ -40,7 +50,7 @@ async function bootstrap() {
 
   // Swagger Documentation
   const config = new DocumentBuilder()
-    .setTitle('Daviteq TechPrint - Checkpoint Technical API')
+    .setTitle('Checkpoint Systems - Technical Request & Maintenance API')
     .setDescription('Hệ thống Quản lý & Nhập liệu Phiếu Yêu cầu Kỹ thuật theo kiến trúc NestJS')
     .setVersion('1.0.0')
     .addBearerAuth()

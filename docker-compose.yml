@@ -11,7 +11,7 @@ services:
     environment:
       - PORT=3001
       - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET:-Daviteq_Checkpoint_Technical_Key_2026_Secure!}
+      - JWT_SECRET=${JWT_SECRET:-Checkpoint_Systems_Technical_Key_2026_Secure!}
       # PostgreSQL Server Connection Variables (Kết nối container PostgreSQL có sẵn)
       - DB_HOST=${POSTGRES_HOST}
       - DB_PORT=${POSTGRES_PORT}

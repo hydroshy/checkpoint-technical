@@ -23,7 +23,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
   <script>
     (function() {
       try {
-        var saved = localStorage.getItem('dvt_theme');
+        var saved = localStorage.getItem('checkpoint_theme') || localStorage.getItem('dvt_theme');
         var theme = (saved === 'dark') ? 'dark' : 'light';
         document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
       } catch(e) {
@@ -380,11 +380,11 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <div class="flex items-center gap-3">
         <a href="/dashboard" class="flex items-center gap-2.5 text-inherit font-extrabold text-sm tracking-tight text-decoration-none">
           <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-0.5 shadow-inner overflow-hidden">
-            <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-md" alt="Daviteq Logo" />
+            <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-md" alt="Checkpoint Systems Logo" />
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
-              <span><span class="text-sky-500">DAVITEQ</span> TechPrint</span>
+              <span><span class="text-sky-500">CHECKPOINT</span> Systems</span>
               <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-sky-500/15 text-sky-600 border border-sky-500/30">v4.1</span>
             </div>
             <span class="text-[10px] text-slate-500 font-normal">Phiếu Yêu Cầu Kỹ Thuật</span>
@@ -1439,7 +1439,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           <!-- Footer -->
           <div class="pdf-footer">
             <span>Doc No: {{ form.docNo }}</span>
-            <span>Hệ thống Quản lý Yêu cầu Kỹ thuật Daviteq</span>
+            <span>Hệ thống Quản lý Yêu cầu Kỹ thuật Checkpoint Systems</span>
             <span>Page 1/1</span>
           </div>
         </div>
@@ -1592,6 +1592,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         // Theme
         const setTheme = (theme) => {
           currentTheme.value = theme;
+          localStorage.setItem('checkpoint_theme', theme);
           localStorage.setItem('dvt_theme', theme);
           document.documentElement.classList.remove('theme-light', 'theme-dark');
           document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
@@ -2100,7 +2101,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           loadEmployees();
           loadHistory();
 
-          const savedTheme = localStorage.getItem('dvt_theme') || 'light';
+          const savedTheme = localStorage.getItem('checkpoint_theme') || localStorage.getItem('dvt_theme') || 'light';
           currentTheme.value = savedTheme;
         });
 

@@ -186,12 +186,12 @@ CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
 -- INITIAL DATA SEEDING (FROM EXCEL SPREADSHEETS)
 -- ==============================================================================
 
--- Default Users (Password: Dvt@123)
+-- Default Users (Password: Checkpoint@123)
 INSERT INTO users (id, username, email, password_hash, full_name, role, is_active)
 VALUES
-  ('user-admin-1', 'admin', 'admin@daviteq.com', 'a0', 'Super Administrator', 'ADMIN', true),
-  ('user-tech-1', 'tech01', 'tech01@daviteq.com', 'a0', 'Kỹ Thuật Viên Trưởng', 'TECHNICIAN', true),
-  ('user-emp-1', 'user01', 'user01@daviteq.com', 'a0', 'Nguyễn Văn A (SX)', 'EMPLOYEE', true)
+  ('user-admin-1', 'admin', 'admin@checkpointsystems.com', 'a0', 'Super Administrator', 'ADMIN', true),
+  ('user-tech-1', 'tech01', 'tech01@checkpointsystems.com', 'a0', 'Kỹ Thuật Viên Trưởng', 'TECHNICIAN', true),
+  ('user-emp-1', 'user01', 'user01@checkpointsystems.com', 'a0', 'Nguyễn Văn A (SX)', 'EMPLOYEE', true)
 ON CONFLICT (id) DO NOTHING;
 
 -- Seed Requesters (30 records)

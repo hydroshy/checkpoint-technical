@@ -1,6 +1,6 @@
-# Daviteq Image & Icon Asset Guide
+# Checkpoint Systems Image & Icon Asset Guide
 
-Thư mục này chứa toàn bộ hình ảnh và icon đại diện cho hệ thống Daviteq LoRaWAN Platform.
+Thư mục này chứa toàn bộ hình ảnh và icon đại diện cho hệ thống Checkpoint Systems Technical Request & Maintenance Platform.
 Bạn chỉ cần upload file hình ảnh đè lên các tên file tương ứng bên dưới.
 
 ---
@@ -10,9 +10,9 @@ Bạn chỉ cần upload file hình ảnh đè lên các tên file tương ứng
 | Tên File | Vị trí hiển thị | Kích thước khuyên dùng | Tỷ lệ | Định dạng hỗ trợ | Mô tả |
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **`favicon.png`** (hoặc `favicon.ico`) | **Icon trên tab trình duyệt (Title Bar)** | `32x32 px` hoặc `64x64 px` | 1:1 (Vuông) | `.png`, `.ico`, `.svg` | Icon nhỏ hiển thị trên tab của trình duyệt web |
-| **`logo-navbar.png`** (hoặc `logo-navbar.svg`) | **Icon góc trái trên thanh Navbar** (thay cho icon trụ sóng) | `64x64 px` hoặc `128x128 px` | 1:1 (Vuông) | `.png`, `.svg`, `.webp` | Logo đại diện thương hiệu Daviteq góc trên bên trái |
+| **`logo-navbar.png`** (hoặc `logo-navbar.svg`) | **Icon góc trái trên thanh Navbar** | `64x64 px` hoặc `128x128 px` | 1:1 (Vuông) | `.png`, `.svg`, `.webp` | Logo đại diện thương hiệu Checkpoint Systems góc trên bên trái |
 | **`logo-login.png`** (hoặc `logo-login.svg`) | **Icon / Logo chính tại trang Đăng nhập** | `128x128 px` hoặc `256x256 px` | 1:1 (Vuông) | `.png`, `.svg`, `.webp` | Logo lớn nổi bật ở đầu khung Login |
-| **`logo-full.png`** *(Tùy chọn)* | Banner Logo đầy đủ (Bao gồm hình + chữ Daviteq) | `400x100 px` | 4:1 (Ngang) | `.png`, `.svg` | Dùng cho trường hợp muốn hiển thị logo thương hiệu dạng ngang |
+| **`logo-full.png`** *(Tùy chọn)* | Banner Logo đầy đủ (Bao gồm hình + chữ Checkpoint Systems) | `400x100 px` | 4:1 (Ngang) | `.png`, `.svg` | Dùng cho trường hợp muốn hiển thị logo thương hiệu dạng ngang |
 | **`login-bg.png`** *(Tùy chọn)* | Hình nền trang đăng nhập | `1920x1080 px` | 16:9 | `.jpg`, `.png`, `.webp` | Hình nền công nghệ / IoT mờ phía sau |
 
 ---

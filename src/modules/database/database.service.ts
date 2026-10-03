@@ -674,13 +674,13 @@ export class DatabaseService implements OnModuleInit {
   public async seedDefaults() {
     // 1. Seed Users
     if (this.usersCache.length === 0) {
-      const defaultPasswordHash = await bcrypt.hash('Dvt@123', 10);
+      const defaultPasswordHash = await bcrypt.hash('Checkpoint@123', 10);
       const now = new Date().toISOString();
       const defaultUsers: UserRecord[] = [
         {
           id: 'user-admin-1',
           username: 'admin',
-          email: 'admin@daviteq.com',
+          email: 'admin@checkpointsystems.com',
           passwordHash: defaultPasswordHash,
           fullName: 'Super Administrator',
           role: 'ADMIN',
@@ -691,7 +691,7 @@ export class DatabaseService implements OnModuleInit {
         {
           id: 'user-tech-1',
           username: 'tech01',
-          email: 'tech01@daviteq.com',
+          email: 'tech01@checkpointsystems.com',
           passwordHash: defaultPasswordHash,
           fullName: 'Kỹ Thuật Viên Trưởng',
           role: 'TECHNICIAN',
@@ -702,7 +702,7 @@ export class DatabaseService implements OnModuleInit {
         {
           id: 'user-emp-1',
           username: 'user01',
-          email: 'user01@daviteq.com',
+          email: 'user01@checkpointsystems.com',
           passwordHash: defaultPasswordHash,
           fullName: 'Nguyễn Văn A (SX)',
           role: 'EMPLOYEE',

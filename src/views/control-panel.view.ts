@@ -21,7 +21,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
   <script>
     (function() {
       try {
-        var saved = localStorage.getItem('dvt_theme');
+        var saved = localStorage.getItem('checkpoint_theme') || localStorage.getItem('dvt_theme');
         var theme = (saved === 'dark') ? 'dark' : 'light';
         document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
       } catch(e) {
@@ -154,11 +154,11 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         <!-- Logo Button -->
         <a href="/control-panel" class="flex items-center gap-2.5 text-inherit font-extrabold text-sm tracking-tight text-decoration-none">
           <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-0.5 shadow-inner overflow-hidden">
-            <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-md" alt="Daviteq Logo" />
+            <img src="/images/logo-navbar.png" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png';};" class="w-full h-full object-contain rounded-md" alt="Checkpoint Systems Logo" />
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
-              <span><span class="text-sky-500">DAVITEQ</span> TechPrint</span>
+              <span><span class="text-sky-500">CHECKPOINT</span> Systems</span>
               <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/15 text-amber-600 border border-amber-500/30">Admin</span>
             </div>
             <span class="text-[10px] text-slate-500 font-normal">Control Panel</span>
@@ -1031,7 +1031,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           </div>
           <div class="space-y-1">
             <label class="font-bold text-slate-500">Email</label>
-            <input type="email" v-model="newUser.email" placeholder="email@daviteq.com..." class="input-box w-full px-3 py-2 rounded-xl font-mono" />
+            <input type="email" v-model="newUser.email" placeholder="email@checkpointsystems.com..." class="input-box w-full px-3 py-2 rounded-xl font-mono" />
           </div>
           <div class="space-y-1">
             <label class="font-bold text-slate-500">Vai trò (Role)</label>
@@ -1185,6 +1185,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
         const setTheme = (theme) => {
           currentTheme.value = theme;
+          localStorage.setItem('checkpoint_theme', theme);
           localStorage.setItem('dvt_theme', theme);
           document.documentElement.classList.remove('theme-light', 'theme-dark');
           document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
@@ -1564,7 +1565,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             return;
           }
 
-          const savedTheme = localStorage.getItem('dvt_theme') || 'light';
+          const savedTheme = localStorage.getItem('checkpoint_theme') || localStorage.getItem('dvt_theme') || 'light';
           currentTheme.value = savedTheme;
 
           loadStats();

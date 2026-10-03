@@ -20,13 +20,13 @@ export class UsersService {
       throw new ConflictException(`Tên đăng nhập '${body.username}' đã tồn tại.`);
     }
 
-    const passwordHash = await bcrypt.hash(body.password || 'Dvt@123', 10);
+    const passwordHash = await bcrypt.hash(body.password || 'Checkpoint@123', 10);
     const now = new Date().toISOString();
 
     const newUser: UserRecord = {
       id: uuidv4(),
       username: body.username.trim(),
-      email: body.email?.trim() || `${body.username.trim()}@daviteq.com`,
+      email: body.email?.trim() || `${body.username.trim()}@checkpointsystems.com`,
       passwordHash,
       fullName: body.fullName?.trim() || body.username.trim(),
       role: body.role || 'EMPLOYEE',

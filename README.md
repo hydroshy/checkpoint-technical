@@ -1,6 +1,6 @@
 # 🖨️ Checkpoint Technical - Hệ Thống Quản Lý & Nhập Liệu Phiếu Yêu Cầu Kỹ Thuật
 
-Dự án được xây dựng dựa trên nền tảng **NestJS** theo phong cách kiến trúc của `@dvt/`, tối ưu hóa dành riêng cho **Quản lý & Nhập liệu Phiếu Yêu cầu Kỹ thuật (Technical Request & Maintenance Platform)** cho nhà máy / phân xưởng in.
+Dự án được xây dựng dựa trên nền tảng **NestJS** theo phong cách kiến trúc của Checkpoint Systems, tối ưu hóa dành riêng cho **Quản lý & Nhập liệu Phiếu Yêu cầu Kỹ thuật (Technical Request & Maintenance Platform)** cho nhà máy / phân xưởng in.
 
 Dự án đã được loại bỏ toàn bộ các module về LoRaWAN, ChirpStack, Modbus, Serial UART và Quản lý máy chủ mạng, chỉ giữ lại và tập trung hoàn toàn vào:
 1. **Hệ thống xác thực (Auth & RBAC)**: Đăng nhập session JWT + Cookie (`access_token`), phân quyền vai trò (Admin, Kỹ thuật viên, Nhân viên sản xuất).
@@ -59,7 +59,7 @@ services:
     environment:
       - PORT=3001
       - NODE_ENV=production
-      - JWT_SECRET=${JWT_SECRET:-Daviteq_Checkpoint_Technical_Key_2026_Secure!}
+      - JWT_SECRET=${JWT_SECRET:-Checkpoint_Systems_Technical_Key_2026_Secure!}
       # PostgreSQL Server Connection Variables (Kết nối container PostgreSQL có sẵn)
       - DB_HOST=${POSTGRES_HOST}
       - DB_PORT=${POSTGRES_PORT}
