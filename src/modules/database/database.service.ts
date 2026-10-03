@@ -107,8 +107,8 @@ export class DatabaseService implements OnModuleInit {
   private async initDatabaseConnection() {
     const dbHost = process.env.DB_HOST || process.env.POSTGRES_HOST;
     const dbPort = parseInt(process.env.DB_PORT || process.env.POSTGRES_PORT || '5432', 10);
-    const dbUser = process.env.DB_USERNAME || process.env.DB_USER || process.env.POSTGRES_USER || 'postgres';
-    const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (process.env.POSTGRES_PASSWORD !== undefined ? process.env.POSTGRES_PASSWORD : 'postgres');
+    const dbUser = process.env.DB_USERNAME || process.env.DB_USER || process.env.POSTGRES_USER || 'admin';
+    const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (process.env.POSTGRES_PASSWORD !== undefined ? process.env.POSTGRES_PASSWORD : 'mason');
     const dbName = process.env.DB_NAME || process.env.DB_DATABASE || process.env.POSTGRES_DB || 'checkpoint_technical';
     const dbSsl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
     const autoInit = process.env.DB_AUTO_INIT !== 'false';
@@ -116,7 +116,7 @@ export class DatabaseService implements OnModuleInit {
     // Build candidate hosts if running inside or outside Docker
     const candidateHosts: string[] = [];
     if (dbHost) candidateHosts.push(dbHost);
-    const defaults = ['localhost', '127.0.0.1', 'postgres_db'];
+    const defaults = ['postgres', 'iot_postgres', 'localhost', '127.0.0.1', 'postgres_db'];
     for (const h of defaults) {
       if (!candidateHosts.includes(h)) candidateHosts.push(h);
     }
@@ -124,7 +124,7 @@ export class DatabaseService implements OnModuleInit {
     let connected = false;
 
     // Only attempt PostgreSQL connection if DB_HOST is explicitly provided or we have postgres environment configured
-    if (dbHost || process.env.DB_NAME || process.env.POSTGRES_DB) {
+    if (dbHost || process.env.DB_NAME || process.env.POSTGRES_DB || process.env.POSTGRES_USER) {
       for (const host of candidateHosts) {
         try {
           const poolConfig: PoolConfig = {
@@ -134,12 +134,43 @@ export class DatabaseService implements OnModuleInit {
             password: dbPassword,
             database: dbName,
             ssl: dbSsl,
-            connectionTimeoutMillis: 2000,
+            connectionTimeoutMillis: 2500,
             max: 10,
           };
 
-          const pool = new Pool(poolConfig);
-          await pool.query('SELECT 1');
+          let pool = new Pool(poolConfig);
+          try {
+            await pool.query('SELECT 1');
+          } catch (connErr: any) {
+            // If target database does not exist (PostgreSQL code 3D000), try auto-creating it
+            if (connErr.code === '3D000' || (connErr.message && connErr.message.includes('does not exist'))) {
+              this.logger.log(`Database "${dbName}" does not exist on ${host}. Attempting auto-creation...`);
+              const maintenanceDb = ['postgres', 'template1'].includes(dbName) ? 'template1' : 'postgres';
+              const adminPool = new Pool({
+                host,
+                port: dbPort,
+                user: dbUser,
+                password: dbPassword,
+                database: maintenanceDb,
+                ssl: dbSsl,
+                connectionTimeoutMillis: 2500,
+              });
+              try {
+                await adminPool.query(`CREATE DATABASE "${dbName}"`);
+                this.logger.log(`✅ Successfully auto-created PostgreSQL database: "${dbName}"`);
+                await adminPool.end();
+                // Reconnect to newly created database
+                pool = new Pool(poolConfig);
+                await pool.query('SELECT 1');
+              } catch (createErr: any) {
+                await adminPool.end().catch(() => {});
+                throw createErr;
+              }
+            } else {
+              throw connErr;
+            }
+          }
+
           this.pgPool = pool;
           this.isPgConnected = true;
           connected = true;

@@ -1,61 +1,45 @@
 version: '3.8'
 
+# ==============================================================================
+# CHECKPOINT TECHNICAL - DOCKER COMPOSE CONFIGURATION
+# ==============================================================================
+# Kết nối trực tiếp vào container PostgreSQL có sẵn (iot_postgres / service postgres)
+# trên mạng Docker nội bộ "internal_net".
+# ==============================================================================
+
 services:
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: checkpoint_technical_app
-    restart: always
+    restart: unless-stopped
     ports:
-      - "3001:3001"
+      - "${PORT:-3001}:3001"
     environment:
       - PORT=3001
       - NODE_ENV=production
-      - JWT_SECRET=Daviteq_Checkpoint_Technical_Key_2026_Secure!
-      # PostgreSQL Server Initialization Variables
-      - DB_HOST=postgres_db
-      - DB_PORT=5432
-      - DB_USERNAME=postgres
-      - DB_PASSWORD=postgres
-      - DB_NAME=checkpoint_technical
-      - DB_AUTO_INIT=true
+      - JWT_SECRET=${JWT_SECRET:-Daviteq_Checkpoint_Technical_Key_2026_Secure!}
+      # PostgreSQL Server Connection Variables (Kết nối container PostgreSQL có sẵn)
+      - DB_HOST=${DB_HOST:-postgres}
+      - DB_PORT=${DB_PORT:-5432}
+      - DB_USERNAME=${DB_USERNAME:-${POSTGRES_USER:-admin}}
+      - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD:-mason}}
+      - DB_NAME=${DB_NAME:-${POSTGRES_DB:-checkpoint_technical}}
+      - DB_AUTO_INIT=${DB_AUTO_INIT:-true}
       # Alternative Standard Postgres Env
-      - POSTGRES_HOST=postgres_db
-      - POSTGRES_PORT=5432
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=checkpoint_technical
-    depends_on:
-      postgres_db:
-        condition: service_healthy
-    networks:
-      - checkpoint_net
-
-  postgres_db:
-    image: postgres:15-alpine
-    container_name: checkpoint_technical_db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: checkpoint_technical
-    ports:
-      - "5432:5432"
+      - POSTGRES_HOST=${POSTGRES_HOST:-postgres}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-mason}
+      - POSTGRES_DB=${POSTGRES_DB:-checkpoint_technical}
+      - DATA_DIR=/app/data
     volumes:
-      - checkpoint_pgdata:/var/lib/postgresql/data
-      - ./config/schema.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d checkpoint_technical"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - ./data:/app/data
     networks:
-      - checkpoint_net
+      - internal_net
 
 networks:
-  checkpoint_net:
-    driver: bridge
-
-volumes:
-  checkpoint_pgdata:
+  internal_net:
+    external: true
+    name: internal_net

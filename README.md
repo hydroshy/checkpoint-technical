@@ -39,9 +39,9 @@ Mặc định server sẽ lắng nghe trên cổng `PORT=3001` (có thể cấu 
 
 ---
 
-## 🐘 Cấu Hình Cơ Sở Dữ Liệu PostgreSQL & Biến Môi Trường
+## 🐘 Cấu Hình Kết Nối PostgreSQL & Biến Môi Trường
 
-Hệ thống hỗ trợ kết nối và tự động khởi tạo cơ sở dữ liệu **PostgreSQL** thông qua các biến môi trường cấu hình trong file `.env` hoặc truyền trực tiếp vào Docker Container:
+Hệ thống hỗ trợ kết nối trực tiếp với **container PostgreSQL có sẵn** của bạn (ví dụ stack `iot_postgres` trên mạng Docker `internal_net`) hoặc PostgreSQL cài cục bộ, thông qua biến môi trường cấu hình trong file `.env` hoặc truyền vào `docker-compose.yml`:
 
 ### 1. Bảng Biến Môi Trường (Environment Variables)
 
@@ -50,23 +50,30 @@ Hệ thống hỗ trợ kết nối và tự động khởi tạo cơ sở dữ 
 | `PORT` | `3001` | Cổng HTTP lắng nghe của máy chủ NestJS |
 | `NODE_ENV` | `development` | Môi trường chạy (`development` / `production`) |
 | `JWT_SECRET` | `Daviteq_...` | Chuỗi khóa bí mật ký cấp JWT Auth token |
-| `DB_HOST` | `localhost` / `postgres_db` | Địa chỉ IP hoặc hostname của máy chủ PostgreSQL |
-| `DB_PORT` | `5432` | Cổng kết nối PostgreSQL |
-| `DB_USERNAME` | `postgres` | Tên đăng nhập cơ sở dữ liệu (hỗ trợ cả `POSTGRES_USER`) |
-| `DB_PASSWORD` | `postgres` | Mật khẩu truy cập PostgreSQL (hỗ trợ cả `POSTGRES_PASSWORD`) |
-| `DB_NAME` | `checkpoint_technical` | Tên cơ sở dữ liệu PostgreSQL (hỗ trợ cả `POSTGRES_DB`) |
+| `DB_HOST` | `postgres` / `localhost` | Hostname của PostgreSQL (`postgres` hoặc `iot_postgres` khi chạy Docker, `localhost` khi chạy dev) |
+| `DB_PORT` | `5432` | Cổng kết nối PostgreSQL (hoặc `POSTGRES_PORT`) |
+| `DB_USERNAME` | `admin` | Tên đăng nhập cơ sở dữ liệu (hỗ trợ cả `POSTGRES_USER`) |
+| `DB_PASSWORD` | `mason` | Mật khẩu truy cập PostgreSQL (hỗ trợ cả `POSTGRES_PASSWORD`) |
+| `DB_NAME` | `checkpoint_technical` | Tên cơ sở dữ liệu PostgreSQL (hỗ trợ cả `POSTGRES_DB` / `dvt`) |
 | `DB_SSL` | `false` | Bật/tắt SSL khi kết nối PostgreSQL (`true`/`false`) |
-| `DB_AUTO_INIT` | `true` | **Tự động khởi tạo bảng DDL & dữ liệu mẫu** khi kết nối DB |
+| `DB_AUTO_INIT` | `true` | **Tự động tạo database nếu chưa có, khởi tạo bảng DDL & nạp dữ liệu mẫu** khi kết nối DB |
 | `DATA_DIR` | `./data` | Thư mục lưu file JSON backup hoặc dự phòng khi DB offline |
 
-> 💡 **Khả Năng Chống Lỗi (Resilience Fallback)**: Khi khởi động, hệ thống sẽ tự động kiểm tra kết nối PostgreSQL. Nếu PostgreSQL sẵn sàng và `DB_AUTO_INIT=true`, hệ thống sẽ tự động chạy lệnh DDL tạo đầy đủ các bảng (`users`, `machines`, `employees`, `technical_requests`) và nạp dữ liệu mặc định. Trường hợp PostgreSQL tạm thời không khả dụng, hệ thống sẽ thông báo và tự động chuyển về cơ chế file JSON dự phòng mà không làm sập server.
+> 💡 **Khả Năng Chống Lỗi (Resilience Fallback)**: Khi khởi động, hệ thống sẽ tự động kiểm tra kết nối PostgreSQL:
+> 1. Nếu database `DB_NAME` chưa tồn tại, hệ thống tự động chạy lệnh `CREATE DATABASE` để khởi tạo.
+> 2. Nếu `DB_AUTO_INIT=true`, hệ thống tự động chạy DDL tạo đầy đủ các bảng (`users`, `machines`, `employees`, `technical_requests`) và nạp dữ liệu mặc định.
+> 3. Nếu PostgreSQL tạm thời chưa sẵn sàng, hệ thống sẽ ghi log cảnh báo và tự động chuyển về cơ chế file JSON dự phòng mà không làm sập server.
 
-### 2. Khởi Chạy Nhanh Với Docker Compose (Bao gồm PostgreSQL)
+### 2. Khởi Chạy Nhanh Với Docker Compose (Dùng Chung Container PostgreSQL Có Sẵn)
 
-Dự án đã chuẩn bị sẵn file `docker-compose.yml` tích hợp sẵn container PostgreSQL và App Server:
+File `docker-compose.yml` được cấu hình để kết nối trực tiếp vào mạng nội bộ `internal_net` của container PostgreSQL hiện có:
 
 ```bash
-# Khởi chạy toàn bộ hệ thống gồm PostgreSQL 15 & NestJS App
+# 1. Đảm bảo stack PostgreSQL & Metabase của bạn đang chạy và có mạng 'internal_net'
+# (Nếu mạng có tiền tố theo thư mục, có thể đặt tên mạng rõ ràng là internal_net)
+
+# 2. Khởi chạy Checkpoint Technical App
+cd checkpoint_technical
 docker compose up -d --build
 
 # Xem log hoạt động
