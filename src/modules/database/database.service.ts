@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as bcrypt from 'bcryptjs';
@@ -153,7 +153,7 @@ export interface TechnicalRequestRecord {
 }
 
 @Injectable()
-export class DatabaseService implements OnModuleInit {
+export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
   private readonly dataDir: string;
   private pgPool: Pool | null = null;
@@ -190,25 +190,30 @@ export class DatabaseService implements OnModuleInit {
    * Gracefully falls back to local JSON persistence if PG is unreachable.
    */
   private async initDatabaseConnection() {
-    const dbHost = process.env.DB_HOST || process.env.POSTGRES_HOST;
-    const dbPort = parseInt(process.env.DB_PORT || process.env.POSTGRES_PORT || '5432', 10);
-    const dbUser = process.env.DB_USERNAME || process.env.DB_USER || process.env.POSTGRES_USER || 'postgres';
-    const dbPassword = process.env.DB_PASSWORD !== undefined ? process.env.DB_PASSWORD : (process.env.POSTGRES_PASSWORD !== undefined ? process.env.POSTGRES_PASSWORD : 'postgres');
-    const dbName = process.env.DB_NAME || process.env.DB_DATABASE || process.env.POSTGRES_DB || 'checkpoint_technical';
+    const dbHost = process.env.POSTGRES_HOST || process.env.DB_HOST;
+    const dbPort = parseInt(process.env.POSTGRES_PORT || process.env.DB_PORT || '5432', 10);
+    const dbUser = process.env.POSTGRES_USER || process.env.DB_USERNAME || process.env.DB_USER || process.env.USER || 'admin';
+    const dbPassword = process.env.POSTGRES_PASSWORD !== undefined
+      ? process.env.POSTGRES_PASSWORD
+      : (process.env.DB_PASSWORD !== undefined
+        ? process.env.DB_PASSWORD
+        : (process.env.PASSWORD !== undefined ? process.env.PASSWORD : 'Ph@nloi20031403'));
+    const dbName = process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB_DATABASE || process.env.DB || 'checkpoint';
     const dbSsl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
     const autoInit = process.env.DB_AUTO_INIT !== 'false';
 
     const candidateHosts: string[] = [];
     if (dbHost) candidateHosts.push(dbHost);
-    const defaults = ['localhost', '127.0.0.1', 'postgres_db'];
+    const defaults = ['192.168.1.35', 'postgres_db', 'localhost', '127.0.0.1'];
     for (const h of defaults) {
       if (!candidateHosts.includes(h)) candidateHosts.push(h);
     }
 
     let connected = false;
 
-    if (dbHost || process.env.DB_NAME || process.env.POSTGRES_DB) {
+    if (dbHost || process.env.DB_NAME || process.env.POSTGRES_DB || process.env.DB) {
       for (const host of candidateHosts) {
+        let testPool: Pool | null = null;
         try {
           const poolConfig: PoolConfig = {
             host,
@@ -217,19 +222,26 @@ export class DatabaseService implements OnModuleInit {
             password: dbPassword,
             database: dbName,
             ssl: dbSsl,
-            connectionTimeoutMillis: 2000,
+            connectionTimeoutMillis: 3000,
+            idleTimeoutMillis: 30000,
             max: 10,
           };
 
-          const pool = new Pool(poolConfig);
-          await pool.query('SELECT 1');
-          this.pgPool = pool;
+          testPool = new Pool(poolConfig);
+          testPool.on('error', (err) => {
+            this.logger.error(`PostgreSQL pool client error: ${err.message}`);
+          });
+
+          await testPool.query('SELECT 1');
+          this.pgPool = testPool;
           this.isPgConnected = true;
           connected = true;
           this.logger.log(`✅ Connected to PostgreSQL database: ${host}:${dbPort}/${dbName}`);
           break;
         } catch (err: any) {
-          // Continue to next candidate host
+          if (testPool) {
+            await testPool.end().catch(() => {});
+          }
         }
       }
     }
@@ -254,10 +266,16 @@ export class DatabaseService implements OnModuleInit {
     if (!this.pgPool) return;
 
     try {
-      await this.pgPool.query(`
-        CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-        CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+      try {
+        await this.pgPool.query(`
+          CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+          CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+        `);
+      } catch (extErr: any) {
+        this.logger.debug(`Optional PostgreSQL extensions skipped: ${extErr.message}`);
+      }
 
+      await this.pgPool.query(`
         -- 1. Users Table
         CREATE TABLE IF NOT EXISTS users (
           id VARCHAR(255) PRIMARY KEY,
@@ -723,7 +741,7 @@ export class DatabaseService implements OnModuleInit {
       for (const u of defaultUsers) {
         this.addUser(u);
       }
-      this.logger.log('✅ Default users seeded (admin, tech01, user01 / Dvt@123)');
+      this.logger.log('✅ Default users seeded (admin, tech01, user01 / Checkpoint@123)');
     }
 
     // 2. If PostgreSQL is connected and requesters table is empty, seed from JSON
@@ -1415,5 +1433,31 @@ export class DatabaseService implements OnModuleInit {
       return true;
     }
     return false;
+  }
+
+  async onModuleDestroy() {
+    if (this.pgPool) {
+      try {
+        await this.pgPool.end();
+        this.logger.log('PostgreSQL connection pool closed.');
+      } catch (err: any) {
+        this.logger.warn(`Error closing PostgreSQL pool: ${err.message}`);
+      }
+    }
+  }
+
+  public isPostgresConnected(): boolean {
+    return this.isPgConnected;
+  }
+
+  public getDatabaseInfo() {
+    return {
+      connected: this.isPgConnected,
+      type: this.isPgConnected ? 'postgresql' : 'json_file',
+      host: process.env.POSTGRES_HOST || process.env.DB_HOST || '192.168.1.35',
+      port: parseInt(process.env.POSTGRES_PORT || process.env.DB_PORT || '5432', 10),
+      database: process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB || 'checkpoint',
+      user: process.env.POSTGRES_USER || process.env.DB_USERNAME || process.env.USER || 'admin',
+    };
   }
 }

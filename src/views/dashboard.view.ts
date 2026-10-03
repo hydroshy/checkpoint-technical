@@ -232,9 +232,9 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
               <span class="text-sm font-extrabold"><span class="text-sky-500">CHECKPOINT</span> Systems</span>
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-600 border border-sky-500/30">Weekly Ops</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">Weekly Ops</span>
             </div>
-            <span class="text-[10px] text-slate-500 font-medium">Weekly Technical Dashboard & Maintenance</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Weekly Technical Dashboard & Maintenance</span>
           </div>
         </a>
 
@@ -314,6 +314,17 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
         </button>
 
+        <!-- Swagger Docs Link -->
+        <a
+          href="/api/docs"
+          target="_blank"
+          class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 transition"
+          title="Tài liệu API Swagger"
+        >
+          <i class="fa-solid fa-book text-sky-500"></i>
+          <span>API Docs</span>
+        </a>
+
         <!-- Switch View: Control Panel link for Admin / Technician -->
         <a
           v-if="isAdminOrTech"
@@ -389,6 +400,14 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
               >
                 <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-sky-500"></i> Admin Control Panel</span>
                 <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
+              </a>
+              <a
+                href="/api/docs"
+                target="_blank"
+                class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
+              >
+                <span class="flex items-center gap-2"><i class="fa-solid fa-book text-sky-500"></i> Swagger API Docs</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
               </a>
             </div>
 
@@ -2660,6 +2679,17 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         const userMenuOpen = ref(false);
         const currentTheme = ref('light');
         const currentUser = ref({});
+        try {
+          const cachedUser = localStorage.getItem('checkpoint_user');
+          if (cachedUser) currentUser.value = JSON.parse(cachedUser);
+        } catch(e) {}
+
+        const getAuthHeaders = (extra = {}) => {
+          const headers = { ...extra };
+          const token = localStorage.getItem('checkpoint_token');
+          if (token) headers['Authorization'] = 'Bearer ' + token;
+          return headers;
+        };
         const savingServer = ref(false);
         const exportingPDF = ref(false);
         const customMachineMode = ref(false);
@@ -2967,32 +2997,32 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         };
 
         const loadWeeklyRequests = async () => {
-          const res = await fetch('/api/weekly-requests', { credentials: 'include' });
+          const res = await fetch('/api/weekly-requests', { headers: getAuthHeaders(), credentials: 'include' });
           if (res.ok) weeklyRequests.value = await res.json();
         };
 
         const loadDefectLogs = async () => {
-          const res = await fetch('/api/defect-logs', { credentials: 'include' });
+          const res = await fetch('/api/defect-logs', { headers: getAuthHeaders(), credentials: 'include' });
           if (res.ok) defectLogs.value = await res.json();
         };
 
         const loadActionPlans = async () => {
-          const res = await fetch('/api/action-plans', { credentials: 'include' });
+          const res = await fetch('/api/action-plans', { headers: getAuthHeaders(), credentials: 'include' });
           if (res.ok) actionPlans.value = await res.json();
         };
 
         const loadRequesters = async () => {
-          const res = await fetch('/api/requesters', { credentials: 'include' });
+          const res = await fetch('/api/requesters', { headers: getAuthHeaders(), credentials: 'include' });
           if (res.ok) requestersList.value = await res.json();
         };
 
         const loadMachinesList = async () => {
-          const res = await fetch('/api/machines', { credentials: 'include' });
+          const res = await fetch('/api/machines', { headers: getAuthHeaders(), credentials: 'include' });
           if (res.ok) rawMachinesList.value = await res.json();
         };
 
         const loadLookupOptions = async () => {
-          const res = await fetch('/api/lookup-options', { credentials: 'include' });
+          const res = await fetch('/api/lookup-options', { headers: getAuthHeaders(), credentials: 'include' });
           if (res.ok) lookupOptions.value = await res.json();
         };
 
@@ -3151,7 +3181,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch(url, {
               method,
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               body: JSON.stringify(item),
               credentials: 'include'
             });
@@ -3171,7 +3201,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         const deleteWeeklyRequest = async (id) => {
           if (!confirm('Bạn có chắc chắn muốn xóa phiếu yêu cầu này không?')) return;
           try {
-            const res = await fetch('/api/weekly-requests/' + id, { method: 'DELETE', credentials: 'include' });
+            const res = await fetch('/api/weekly-requests/' + id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               showToast('Đã xóa phiếu kỹ thuật');
               await loadWeeklyRequests();
@@ -3211,7 +3241,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch(url, {
               method,
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               body: JSON.stringify(item),
               credentials: 'include'
             });
@@ -3229,7 +3259,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         const deleteDefectLog = async (id) => {
           if (!confirm('Bạn có chắc chắn muốn xóa sự cố Defect này không?')) return;
           try {
-            const res = await fetch('/api/defect-logs/' + id, { method: 'DELETE', credentials: 'include' });
+            const res = await fetch('/api/defect-logs/' + id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               showToast('Đã xóa sự cố Defect');
               await loadDefectLogs();
@@ -3270,7 +3300,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch(url, {
               method,
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               body: JSON.stringify(item),
               credentials: 'include'
             });
@@ -3288,7 +3318,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         const deleteActionPlan = async (id) => {
           if (!confirm('Bạn có chắc chắn muốn xóa kế hoạch này không?')) return;
           try {
-            const res = await fetch('/api/action-plans/' + id, { method: 'DELETE', credentials: 'include' });
+            const res = await fetch('/api/action-plans/' + id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               showToast('Đã xóa kế hoạch');
               await loadActionPlans();
@@ -3324,7 +3354,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch(url, {
               method,
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               body: JSON.stringify(item),
               credentials: 'include'
             });
@@ -3341,7 +3371,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         const deleteRequester = async (id) => {
           if (!confirm('Bạn có chắc chắn muốn xóa người yêu cầu này?')) return;
           try {
-            const res = await fetch('/api/requesters/' + id, { method: 'DELETE', credentials: 'include' });
+            const res = await fetch('/api/requesters/' + id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               showToast('Đã xóa người yêu cầu');
               await loadRequesters();
@@ -3373,7 +3403,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch(url, {
               method,
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               body: JSON.stringify(item),
               credentials: 'include'
             });
@@ -3391,7 +3421,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         const deleteMachine = async (id) => {
           if (!confirm('Bạn có chắc chắn muốn xóa máy này khỏi danh mục?')) return;
           try {
-            const res = await fetch('/api/machines/' + id, { method: 'DELETE', credentials: 'include' });
+            const res = await fetch('/api/machines/' + id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               showToast('Đã xóa máy');
               await loadMachinesList();
@@ -3604,7 +3634,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch('/api/technical-requests', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               body: JSON.stringify(form.value),
               credentials: 'include'
             });
@@ -3665,7 +3695,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
             if (historyFilter.value.chkStatus && historyFilter.value.chkStatus !== 'ALL') url += '&chkStatus=' + historyFilter.value.chkStatus;
             if (historyFilter.value.printTech && historyFilter.value.printTech !== 'ALL') url += '&printTech=' + historyFilter.value.printTech;
 
-            const res = await fetch(url, { credentials: 'include' });
+            const res = await fetch(url, { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               const data = await res.json();
               historyItems.value = data.items || [];
@@ -3685,21 +3715,21 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
         const loadMachinesCatalog = async () => {
           try {
-            const res = await fetch('/api/machines/grouped', { credentials: 'include' });
+            const res = await fetch('/api/machines/grouped', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) machineCatalog.value = await res.json();
           } catch(e) {}
         };
 
         const loadEmployees = async () => {
           try {
-            const res = await fetch('/api/employees', { credentials: 'include' });
+            const res = await fetch('/api/employees', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) employeeDatalist.value = await res.json();
           } catch(e) {}
         };
 
         const loadSession = async () => {
           try {
-            const res = await fetch('/auth/session', { credentials: 'include' });
+            const res = await fetch('/auth/session', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               currentUser.value = await res.json();
             } else {
@@ -3709,7 +3739,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         };
 
         const handleLogout = async () => {
-          await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+          await fetch('/auth/logout', { method: 'POST', headers: getAuthHeaders(), credentials: 'include' });
           localStorage.removeItem('checkpoint_token');
           localStorage.removeItem('checkpoint_user');
           window.location.replace('/login?logout=1');
@@ -3806,7 +3836,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
                 const res = await fetch('/api/employees/bulk-import', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
                   credentials: 'include',
                   body: JSON.stringify({ employees })
                 });

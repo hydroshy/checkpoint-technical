@@ -148,20 +148,20 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
   <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen" @click="handleGlobalClick">
     
     <!-- TOP APP BAR -->
-    <header class="glass-header sticky top-0 z-40 px-4 sm:px-6 h-14 flex items-center justify-between">
+    <header class="glass-header sticky top-0 z-40 px-4 sm:px-6 h-16 flex items-center justify-between">
       <!-- Left Brand & Navigation -->
       <div class="flex items-center gap-3">
         <!-- Logo Button -->
         <a href="/control-panel" class="flex items-center gap-2.5 text-inherit font-extrabold text-sm tracking-tight text-decoration-none">
-          <div class="w-8 h-8 rounded-lg bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-0.5 shadow-inner overflow-hidden">
-            <img src="/images/logo-navbar.png?v=2" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png?v=2';};" class="w-full h-full object-contain rounded-md" alt="Checkpoint Systems Logo" />
+          <div class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-1 shadow-inner overflow-hidden">
+            <img src="/images/logo-navbar.png?v=2" onerror="this.onerror=null; this.src='/images/logo-full.png'; this.onerror=function(){this.src='/images/favicon.png?v=2';};" class="w-full h-full object-contain rounded-lg" alt="Checkpoint Systems Logo" />
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
-              <span><span class="text-sky-500">CHECKPOINT</span> Systems</span>
-              <span class="px-1.5 py-0.2 rounded text-[9px] font-bold bg-amber-500/15 text-amber-600 border border-amber-500/30">Admin</span>
+              <span class="text-sm font-extrabold"><span class="text-sky-500">CHECKPOINT</span> Systems</span>
+              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">Admin</span>
             </div>
-            <span class="text-[10px] text-slate-500 font-normal">Control Panel</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Control Panel</span>
           </div>
         </a>
 
@@ -197,6 +197,17 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         >
           <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
         </button>
+
+        <!-- Swagger Docs Link -->
+        <a
+          href="/api/docs"
+          target="_blank"
+          class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 transition"
+          title="Tài liệu API Swagger"
+        >
+          <i class="fa-solid fa-book text-sky-500"></i>
+          <span>API Docs</span>
+        </a>
 
         <!-- Switch to Weekly Dashboard -->
         <a
@@ -263,14 +274,22 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               </div>
             </div>
 
-            <!-- Switch View -->
+            <!-- Switch View & Portal Links -->
             <div class="space-y-1 text-xs pb-3 border-b border-slate-100 dark:border-slate-800">
               <a
                 href="/dashboard"
                 class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
               >
-                <span class="flex items-center gap-2"><i class="fa-solid fa-file-signature text-sky-500"></i> User Dashboard</span>
+                <span class="flex items-center gap-2"><i class="fa-solid fa-chart-pie text-sky-500"></i> Weekly Technical Dashboard</span>
                 <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
+              </a>
+              <a
+                href="/api/docs"
+                target="_blank"
+                class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
+              >
+                <span class="flex items-center gap-2"><i class="fa-solid fa-book text-sky-500"></i> Swagger API Docs</span>
+                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
               </a>
               <div class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
                 <span class="flex items-center gap-2"><i class="fa-solid fa-sliders"></i> Control Panel</span>
@@ -1151,6 +1170,17 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const userMenuOpen = ref(false);
         const currentTheme = ref('light');
         const currentUser = ref({});
+        try {
+          const cachedUser = localStorage.getItem('checkpoint_user');
+          if (cachedUser) currentUser.value = JSON.parse(cachedUser);
+        } catch(e) {}
+
+        const getAuthHeaders = (extra = {}) => {
+          const headers = { ...extra };
+          const token = localStorage.getItem('checkpoint_token');
+          if (token) headers['Authorization'] = 'Bearer ' + token;
+          return headers;
+        };
 
         // Overview stats
         const stats = ref({});
@@ -1266,7 +1296,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         // Data Loaders
         const loadStats = async () => {
           try {
-            const res = await fetch('/api/technical-requests/stats', { credentials: 'include' });
+            const res = await fetch('/api/technical-requests/stats', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               stats.value = await res.json();
             }
@@ -1284,7 +1314,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             if (reqFilter.value.printTech && reqFilter.value.printTech !== 'ALL') url += '&printTech=' + reqFilter.value.printTech;
             if (reqFilter.value.priority && reqFilter.value.priority !== 'ALL') url += '&priority=' + reqFilter.value.priority;
 
-            const res = await fetch(url, { credentials: 'include' });
+            const res = await fetch(url, { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               const data = await res.json();
               requestsList.value = data.items || [];
@@ -1310,7 +1340,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch('/api/technical-requests/' + ticket.id, {
               method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               credentials: 'include',
               body: JSON.stringify({ chkStatus: newStatus })
             });
@@ -1329,6 +1359,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch('/api/technical-requests/' + ticket.id, {
               method: 'DELETE',
+              headers: getAuthHeaders(),
               credentials: 'include'
             });
             if (res.ok) {
@@ -1344,7 +1375,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         // Machines Management
         const loadMachines = async () => {
           try {
-            const res = await fetch('/api/machines/grouped', { credentials: 'include' });
+            const res = await fetch('/api/machines/grouped', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               machineCatalog.value = await res.json();
             }
@@ -1360,7 +1391,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch('/api/machines', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               credentials: 'include',
               body: JSON.stringify(newMachine.value)
             });
@@ -1377,12 +1408,12 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const deleteMachineByName = async (tech, name) => {
           if (!confirm('Xóa máy ' + name + ' thuộc nhóm ' + tech + '?')) return;
           try {
-            const allRes = await fetch('/api/machines', { credentials: 'include' });
+            const allRes = await fetch('/api/machines', { headers: getAuthHeaders(), credentials: 'include' });
             if (allRes.ok) {
               const all = await allRes.json();
               const found = all.find(m => m.tech === tech && m.name === name);
               if (found) {
-                await fetch('/api/machines/' + found.id, { method: 'DELETE', credentials: 'include' });
+                await fetch('/api/machines/' + found.id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
                 showToast('Đã xóa máy ' + name);
                 loadMachines();
               }
@@ -1395,7 +1426,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         // Employees Management
         const loadEmployees = async () => {
           try {
-            const res = await fetch('/api/employees', { credentials: 'include' });
+            const res = await fetch('/api/employees', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               employeesList.value = await res.json();
             }
@@ -1411,7 +1442,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch('/api/employees', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               credentials: 'include',
               body: JSON.stringify(newEmployee.value)
             });
@@ -1428,7 +1459,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const deleteEmployee = async (emp) => {
           if (!confirm('Xóa nhân viên ' + emp.name + '?')) return;
           try {
-            const res = await fetch('/api/employees/' + emp.id, { method: 'DELETE', credentials: 'include' });
+            const res = await fetch('/api/employees/' + emp.id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               showToast('Đã xóa nhân viên');
               loadEmployees();
@@ -1454,7 +1485,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               let hr = -1, ci = null;
               for (let r = 0; r < Math.min(json.length, 6); r++) {
                 const H = json[r] || [];
-                const _diac = s => (s == null ? '' : String(s)).normalize('NFD').replace(/[\\u0300-\\u036f]/g, '').toLowerCase().trim();
+                const _diac = s => (s == null ? '' : String(s)).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
                 const _fc = keys => H.findIndex(h => { const ch = _diac(h); return ch && keys.some(k => ch === k || ch.includes(k)); });
                 const name = _fc(['ho va ten', 'ho ten', 'ten nhan vien', 'full name', 'name', 'ten']);
                 const mnv  = _fc(['mnv', 'ma nv', 'ma nhan vien', 'ma so nv', 'employee']);
@@ -1479,7 +1510,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
                 const res = await fetch('/api/employees/bulk-import', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
                   credentials: 'include',
                   body: JSON.stringify({ employees })
                 });
@@ -1500,7 +1531,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         // Users Management
         const loadUsers = async () => {
           try {
-            const res = await fetch('/api/users', { credentials: 'include' });
+            const res = await fetch('/api/users', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               usersList.value = await res.json();
             }
@@ -1508,7 +1539,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         };
 
         const openAddUserModal = () => {
-          newUser.value = { username: '', password: 'Dvt@123', fullName: '', email: '', role: 'EMPLOYEE' };
+          newUser.value = { username: '', password: 'Checkpoint@123', fullName: '', email: '', role: 'EMPLOYEE' };
           openModal('modal-add-user');
         };
 
@@ -1516,7 +1547,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch('/api/users', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               credentials: 'include',
               body: JSON.stringify(newUser.value)
             });
@@ -1536,7 +1567,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const deleteUser = async (u) => {
           if (!confirm('Xóa tài khoản @' + u.username + '?')) return;
           try {
-            const res = await fetch('/api/users/' + u.id, { method: 'DELETE', credentials: 'include' });
+            const res = await fetch('/api/users/' + u.id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               showToast('Đã xóa tài khoản');
               loadUsers();
@@ -1603,7 +1634,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         };
 
         const handleLogout = async () => {
-          await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
+          await fetch('/auth/logout', { method: 'POST', headers: getAuthHeaders(), credentials: 'include' });
           localStorage.removeItem('checkpoint_token');
           localStorage.removeItem('checkpoint_user');
           window.location.replace('/login?logout=1');
@@ -1615,7 +1646,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
         onMounted(async () => {
           try {
-            const res = await fetch('/auth/session', { credentials: 'include' });
+            const res = await fetch('/auth/session', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               currentUser.value = await res.json();
             } else {

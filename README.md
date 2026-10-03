@@ -2,7 +2,7 @@
 
 Dự án được xây dựng dựa trên nền tảng **NestJS** theo phong cách kiến trúc của Checkpoint Systems, tối ưu hóa dành riêng cho **Quản lý & Nhập liệu Phiếu Yêu cầu Kỹ thuật (Technical Request & Maintenance Platform)** cho nhà máy / phân xưởng in.
 
-Dự án đã được loại bỏ toàn bộ các module về LoRaWAN, ChirpStack, Modbus, Serial UART và Quản lý máy chủ mạng, chỉ giữ lại và tập trung hoàn toàn vào:
+Hệ thống tập trung hoàn toàn vào:
 1. **Hệ thống xác thực (Auth & RBAC)**: Đăng nhập session JWT + Cookie (`access_token`), phân quyền vai trò (Admin, Kỹ thuật viên, Nhân viên sản xuất).
 2. **Giao diện Vận hành / Dashboard (`/dashboard`)**: Dành cho nhân viên & kỹ thuật viên thao tác nhập liệu trực quan, đầy đủ tính năng theo mẫu phiếu chuẩn HTML V4.1.
 3. **Giao diện Quản trị / Control Panel (`/control-panel`)**: Dành cho Quản lý / Ban Giám đốc phân tích thống kê chỉ số Downtime, biểu đồ sự cố 4M, quản lý danh sách phiếu, danh mục máy in, danh sách nhân sự và tài khoản hệ thống.
@@ -41,7 +41,7 @@ Mặc định server sẽ lắng nghe trên cổng `PORT=3001` (có thể cấu 
 
 ## 🐳 Cấu Hình Docker Compose & Biến Môi Trường
 
-Hệ thống kết nối trực tiếp với **container PostgreSQL có sẵn** thông qua 2 external networks: `iot_postgres_internal_net` và `dockge_default`:
+Hệ thống kết nối trực tiếp với PostgreSQL (`192.168.1.35:5432/checkpoint`) hoặc container PostgreSQL nội bộ:
 
 ### 1. File `docker-compose.yml` Chuẩn
 
@@ -55,18 +55,28 @@ services:
     container_name: checkpoint_technical_app
     restart: unless-stopped
     ports:
-      - ${PORT:-3001}:3001
+      - "${PORT:-3001}:3001"
     environment:
-      - PORT=3001
+      - PORT=${PORT:-3001}
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET:-Checkpoint_Systems_Technical_Key_2026_Secure!}
-      # PostgreSQL Server Connection Variables (Kết nối container PostgreSQL có sẵn)
-      - DB_HOST=${POSTGRES_HOST}
-      - DB_PORT=${POSTGRES_PORT}
-      - DB_USERNAME=${DB_USERNAME:-${POSTGRES_USER}}
-      - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD}}
-      - DB_NAME=${DB_NAME:-${POSTGRES_DB}}
-      - DB_AUTO_INIT=${DB_AUTO_INIT}
+      # PostgreSQL Server Connection Variables (192.168.1.35:5432/checkpoint)
+      - POSTGRES_HOST=${POSTGRES_HOST:-192.168.1.35}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Ph@nloi20031403}
+      - POSTGRES_DB=${POSTGRES_DB:-checkpoint}
+      # YAML Environment Direct Aliases
+      - USER=${USER:-admin}
+      - PASSWORD=${PASSWORD:-Ph@nloi20031403}
+      - DB=${DB:-checkpoint}
+      # Compatible DB_* environment variables
+      - DB_HOST=${DB_HOST:-${POSTGRES_HOST:-192.168.1.35}}
+      - DB_PORT=${DB_PORT:-${POSTGRES_PORT:-5432}}
+      - DB_USERNAME=${DB_USERNAME:-${POSTGRES_USER:-admin}}
+      - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD:-Ph@nloi20031403}}
+      - DB_NAME=${DB_NAME:-${POSTGRES_DB:-checkpoint}}
+      - DB_AUTO_INIT=${DB_AUTO_INIT:-true}
     volumes:
       - ./data:/app/data
     networks:
@@ -119,13 +129,13 @@ Hệ thống tự động khởi tạo và nạp đầy đủ dữ liệu từ 2
 
 ## 🔑 Tài Khoản Mặc Định (Default Credentials)
 
-Hệ thống được thiết lập sẵn 3 tài khoản mẫu ứng với các vai trò khác nhau (mật khẩu mặc định: `Dvt@123`):
+Hệ thống được thiết lập sẵn 3 tài khoản mẫu ứng với các vai trò khác nhau (mật khẩu mặc định: `Checkpoint@123`):
 
 | Tên Đăng Nhập | Mật Khẩu | Vai Trò | Quyền Hạn |
 | :--- | :--- | :--- | :--- |
-| **`admin`** | `Dvt@123` | **ADMIN** | Toàn quyền: Truy cập cả Dashboard và Control Panel, xem phân tích sự cố, quản lý toàn bộ phiếu, máy móc, nhân sự và người dùng. |
-| **`tech01`** | `Dvt@123` | **TECHNICIAN** | Kỹ thuật viên: Nhập & xử lý phiếu, phân tích nguyên nhân 4M, cập nhật downtime, quản lý máy móc & nhân sự. |
-| **`user01`** | `Dvt@123` | **EMPLOYEE** | Nhân viên sản xuất: Nhập phiếu yêu cầu mới, xem lịch sử các phiếu của mình, xuất báo cáo PDF. |
+| **`admin`** | `Checkpoint@123` | **ADMIN** | Toàn quyền: Truy cập cả Dashboard và Control Panel, xem phân tích sự cố, quản lý toàn bộ phiếu, máy móc, nhân sự và người dùng. |
+| **`tech01`** | `Checkpoint@123` | **TECHNICIAN** | Kỹ thuật viên: Nhập & xử lý phiếu, phân tích nguyên nhân 4M, cập nhật downtime, quản lý máy móc & nhân sự. |
+| **`user01`** | `Checkpoint@123` | **EMPLOYEE** | Nhân viên sản xuất: Nhập phiếu yêu cầu mới, xem lịch sử các phiếu của mình, xuất báo cáo PDF. |
 
 ---
 

@@ -38,7 +38,7 @@ export class AuthController {
   @Post('logout')
   @ApiOperation({ summary: 'Logout and clear session cookies' })
   async logout(@Req() req: Request, @Res() res: Response) {
-    const cookieNames = ['access_token', 'checkpoint_token', 'lorawan_token', 'session_id', 'connect.sid'];
+    const cookieNames = ['access_token', 'checkpoint_token', 'session_id', 'connect.sid'];
     cookieNames.forEach((name) => {
       res.clearCookie(name, { path: '/', sameSite: 'lax', httpOnly: false });
       res.clearCookie(name, { path: '/', sameSite: 'lax', httpOnly: true });

@@ -764,7 +764,7 @@
             <!-- Footer -->
             <div class="pdf-footer">
                 <span id="pdf_footer_doc">Doc No: —</span>
-                <span>In từ hệ thống TechPrint.</span>
+                <span>In từ hệ thống Checkpoint Systems.</span>
                 <span>Page 1/1</span>
             </div>
         </div>
@@ -843,18 +843,18 @@
 
     function saveToLocal() {
         try {
-            localStorage.setItem('techPrintFormState', JSON.stringify(getFormState()));
-            if (STATE.docNo) localStorage.setItem('techPrintDocNo', STATE.docNo);
+            localStorage.setItem('checkpointFormState', JSON.stringify(getFormState()));
+            if (STATE.docNo) localStorage.setItem('checkpointDocNo', STATE.docNo);
         } catch (e) {}
     }
 
     function loadLocalData() {
         try {
-            const savedState = localStorage.getItem('techPrintFormState');
+            const savedState = localStorage.getItem('checkpointFormState');
             if (savedState) applyFormState(JSON.parse(savedState));
-            const savedDocNo = localStorage.getItem('techPrintDocNo');
+            const savedDocNo = localStorage.getItem('checkpointDocNo');
             if (savedDocNo) { STATE.docNo = savedDocNo; document.getElementById('display-doc-no').textContent = STATE.docNo; }
-            const savedExcel = localStorage.getItem('techPrintExcelData');
+            const savedExcel = localStorage.getItem('checkpointExcelData');
             if (savedExcel) { EXCEL_PEOPLE = JSON.parse(savedExcel); updateEmployeeDatalist(); }
         } catch (e) {}
     }
@@ -1091,7 +1091,7 @@
                         EXCEL_PEOPLE.push({ dept, area, mnv, name: nm, role });
                     }
                     statusEl.textContent = `Đã nạp ${EXCEL_PEOPLE.length} nhân sự.`; updateEmployeeDatalist();
-                    try { localStorage.setItem('techPrintExcelData', JSON.stringify(EXCEL_PEOPLE)); } catch(e){}
+                    try { localStorage.setItem('checkpointExcelData', JSON.stringify(EXCEL_PEOPLE)); } catch(e){}
                     statusEl.classList.replace('bg-blue-50', 'bg-green-50'); statusEl.classList.replace('text-blue-700', 'text-green-700');
                 } else throw new Error("Format lỗi");
             } catch(err) {
@@ -1134,7 +1134,7 @@
 
     function triggerBackup() {
         const blob = new Blob([JSON.stringify({formState: getFormState(), excelPeople: EXCEL_PEOPLE, docNo: STATE.docNo})], { type: 'application/json' });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `TechPrint_Backup_${new Date().toISOString().split('T')[0]}.json`;
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `Checkpoint_Backup_${new Date().toISOString().split('T')[0]}.json`;
         document.body.appendChild(a); a.click(); document.body.removeChild(a); showToast("Đã tải Backup");
     }
     function triggerRestore() { document.getElementById('file_restore').click(); }

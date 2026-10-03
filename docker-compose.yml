@@ -7,20 +7,34 @@ services:
     container_name: checkpoint_technical_app
     restart: unless-stopped
     ports:
-      - ${PORT:-3001}:3001
+      - "${PORT:-3001}:3001"
     environment:
-      - PORT=3001
+      - PORT=${PORT:-3001}
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET:-Checkpoint_Systems_Technical_Key_2026_Secure!}
-      # PostgreSQL Server Connection Variables (Kết nối container PostgreSQL có sẵn)
-      - DB_HOST=${POSTGRES_HOST}
-      - DB_PORT=${POSTGRES_PORT}
-      - DB_USERNAME=${DB_USERNAME:-${POSTGRES_USER}}
-      - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD}}
-      - DB_NAME=${DB_NAME:-${POSTGRES_DB}}
-      - DB_AUTO_INIT=${DB_AUTO_INIT}
+      # PostgreSQL Server Connection Variables (192.168.1.35:5432/checkpoint)
+      - POSTGRES_HOST=${POSTGRES_HOST:-192.168.1.35}
+      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Ph@nloi20031403}
+      - POSTGRES_DB=${POSTGRES_DB:-checkpoint}
+      # YAML Environment Direct Aliases
+      - USER=${USER:-admin}
+      - PASSWORD=${PASSWORD:-Ph@nloi20031403}
+      - DB=${DB:-checkpoint}
+      # Compatible DB_* environment variables
+      - DB_HOST=${DB_HOST:-${POSTGRES_HOST:-192.168.1.35}}
+      - DB_PORT=${DB_PORT:-${POSTGRES_PORT:-5432}}
+      - DB_USERNAME=${DB_USERNAME:-${POSTGRES_USER:-admin}}
+      - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD:-Ph@nloi20031403}}
+      - DB_NAME=${DB_NAME:-${POSTGRES_DB:-checkpoint}}
+      - DB_AUTO_INIT=${DB_AUTO_INIT:-true}
     volumes:
       - ./data:/app/data
+    networks:
+      - iot_postgres_internal_net
+      - dockge_default
+
 networks:
   iot_postgres_internal_net:
     external: true
