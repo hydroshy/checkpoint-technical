@@ -6,7 +6,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Checkpoint Systems - Weekly Technical Dashboard & Operations</title>
+  <title>Checkpoint Systems - Technical</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png?v=3" />
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png?v=3" />
   <link rel="shortcut icon" href="/images/favicon.ico?v=3" />
@@ -2275,10 +2275,6 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         </div>
       </div>
     </div>
-
-  </div>
-
-  
 
     <!-- =========================================================================
          NEW MODALS FOR WEEKLY DASHBOARD CRUD

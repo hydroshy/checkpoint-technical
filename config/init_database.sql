@@ -2,20 +2,20 @@
 -- CHECKPOINT SYSTEMS — POSTGRESQL DATABASE INITIALIZATION SCRIPT
 -- ==============================================================================
 -- Tệp cấu hình: checkpoint_technical/config/init_database.sql
--- Mục đích: Khởi tạo mới hoặc tái tạo toàn bộ CSDL "checkpoint" cho hệ thống Checkpoint Technical.
+-- Mục đích: Khởi tạo mới hoặc tái tạo toàn bộ CSDL "checkpoint_technical" cho hệ thống Checkpoint Technical.
 -- Khắc phục: Lỗi relation "form_lookup_options" does not exist, tạo đầy đủ 9 bảng.
 -- Tương thích: PostgreSQL 14, 15, 16+
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
--- 1. TẠO CƠ SỞ DỮ LIỆU CHECKPOINT & THIẾT LẬP KẾT NỐI
+-- 1. TẠO CƠ SỞ DỮ LIỆU CHECKPOINT_TECHNICAL & THIẾT LẬP KẾT NỐI
 -- ------------------------------------------------------------------------------
 -- Lưu ý: Chạy lệnh dưới đây với quyền postgres / superuser trên server.
 -- Nếu cơ sở dữ liệu đã tồn tại sẵn, có thể bỏ qua lệnh CREATE DATABASE này.
-CREATE DATABASE checkpoint;
+CREATE DATABASE checkpoint_technical;
 
--- Chuyển kết nối tới cơ sở dữ liệu checkpoint vừa tạo:
-\c checkpoint;
+-- Chuyển kết nối tới cơ sở dữ liệu checkpoint_technical vừa tạo:
+\c checkpoint_technical;
 
 -- Cấu hình chuẩn cho mã hóa ký tự UTF-8 và xử lý chuỗi:
 SET client_encoding = 'UTF8';
@@ -209,6 +209,39 @@ CREATE TABLE IF NOT EXISTS technical_requests (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS problem TEXT;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS machine_status VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS priority_other TEXT;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_by VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_date VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_time VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS finish_date VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS finish_time VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS root_cause TEXT;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS action_taken TEXT;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS err_cat VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS err_type VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS photos_before JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS photos_after JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_status VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS prod_mgr VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
 CREATE INDEX IF NOT EXISTS idx_tech_req_created_at ON technical_requests(created_at);
 
@@ -702,4 +735,4 @@ INSERT INTO sheet_lists_do_not_delete (id, row_index, request_id, request_type, 
 -- 4.9. Seed bảng technical_requests (1 phiếu mẫu ban đầu Form V4.1)
 INSERT INTO technical_requests (id, doc_no, req_date, req_time, req_by, print_tech, machine_name, problem, machine_status, priority, priority_other, recv_by, recv_date, recv_time, finish_date, finish_time, downtime, root_cause, action_taken, err_cat, err_type, photos_before, photos_after, chk_quality, chk_status, work_order, wo_total_qty, waste_qty, waste_unit, waste_percent, prod_mgr, created_by, created_at, updated_at) VALUES ('2f8c2b65-9660-4041-9c22-aeac7310fdce', 'REQ-20261003-1945', '2026-10-03', '19:45', 'Nguyễn Văn An - NV001', 'Digital', 'HP Indigo 7K', 'Lỗi nhiệt độ sấy không ổn định gây nhòe mực', 'First Bulk Print', 'Immediate', NULL, 'Phạm Minh Đức - NV004', '2026-10-03', '19:50', '2026-10-03', '20:20', 30, 'Cảm biến nhiệt độ chập chờn', 'Thay thế sensor nhiệt mới và test màu đạt chuẩn', 'MACHINE', 'Press', '[]'::jsonb, '[]'::jsonb, 'OK', 'DONE', 'WO-77192', 3000, 15, 'Tờ in', '0.50%', 'Ngô Trọng Nghĩa - NV008', 'admin', '2026-10-03T12:41:42.383Z', '2026-10-03T12:41:42.383Z') ON CONFLICT (id) DO NOTHING;
 
--- Hoàn tất khởi tạo cơ sở dữ liệu checkpoint.
+-- Hoàn tất khởi tạo cơ sở dữ liệu checkpoint_technical.

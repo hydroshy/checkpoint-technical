@@ -198,7 +198,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       : (process.env.DB_PASSWORD !== undefined
         ? process.env.DB_PASSWORD
         : (process.env.PASSWORD !== undefined ? process.env.PASSWORD : 'Ph@nloi20031403'));
-    const dbName = process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB_DATABASE || process.env.DB || 'checkpoint';
+    const dbName = process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB_DATABASE || process.env.DB || 'checkpoint_technical';
     const dbSsl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
     // Tự động khởi tạo Schema mặc định = true nếu chưa có biến môi trường
     const autoInitEnv = process.env.DB_AUTO_INIT;
@@ -297,6 +297,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255);
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(255);
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'EMPLOYEE';
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
           `,
         },
@@ -314,6 +322,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE requesters ADD COLUMN IF NOT EXISTS stt INT;
+            ALTER TABLE requesters ADD COLUMN IF NOT EXISTS department VARCHAR(255);
+            ALTER TABLE requesters ADD COLUMN IF NOT EXISTS area VARCHAR(255);
+            ALTER TABLE requesters ADD COLUMN IF NOT EXISTS mnv VARCHAR(100);
+            ALTER TABLE requesters ADD COLUMN IF NOT EXISTS full_name VARCHAR(255);
+            ALTER TABLE requesters ADD COLUMN IF NOT EXISTS position VARCHAR(255);
+            ALTER TABLE requesters ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE requesters ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_requesters_mnv ON requesters(mnv);
             CREATE INDEX IF NOT EXISTS idx_requesters_area ON requesters(area);
           `,
@@ -339,6 +355,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             ALTER TABLE machines ADD COLUMN IF NOT EXISTS name VARCHAR(255);
             ALTER TABLE machines ADD COLUMN IF NOT EXISTS area VARCHAR(255);
             ALTER TABLE machines ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS code VARCHAR(100);
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS note TEXT;
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_machines_tech ON machines(tech);
             CREATE INDEX IF NOT EXISTS idx_machines_name ON machines(name);
           `,
@@ -362,6 +383,19 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS request_id VARCHAR(255);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS request_date VARCHAR(50);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS request_type VARCHAR(255);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS item_equipment VARCHAR(255);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS severity VARCHAR(100);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS status VARCHAR(100);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS sla_target_hours NUMERIC;
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS actual_hours NUMERIC;
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS met_sla VARCHAR(50);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS reported_by VARCHAR(255);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS resolved_by VARCHAR(255);
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_wtr_req_id ON weekly_technical_requests(request_id);
             CREATE INDEX IF NOT EXISTS idx_wtr_status ON weekly_technical_requests(status);
           `,
@@ -384,6 +418,18 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS defect_id INT;
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS defect_date VARCHAR(50);
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS facility VARCHAR(255);
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS source VARCHAR(255);
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS root_cause_category VARCHAR(255);
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS specific_issue TEXT;
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS affected_product TEXT;
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS downtime_minutes VARCHAR(100);
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS recurring_issue VARCHAR(50);
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS eight_d_required VARCHAR(50);
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_defect_logs_defect_id ON defect_logs(defect_id);
           `,
         },
@@ -406,6 +452,19 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS action_id VARCHAR(100);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS date_logged VARCHAR(50);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS facility VARCHAR(255);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS related_defect_id VARCHAR(100);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS fix_type VARCHAR(255);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS description TEXT;
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS pic VARCHAR(255);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS deadline VARCHAR(50);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS status VARCHAR(100);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS resource_needed VARCHAR(255);
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS remarks TEXT;
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_action_plans_action_id ON action_plans(action_id);
           `,
         },
@@ -421,6 +480,12 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               is_active BOOLEAN NOT NULL DEFAULT true,
               created_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS category VARCHAR(100);
+            ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS item_value VARCHAR(255);
+            ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS item_label VARCHAR(255);
+            ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;
+            ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+            ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_lookup_category ON form_lookup_options(category);
           `,
         },
@@ -443,6 +508,19 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               resource_needed VARCHAR(255),
               created_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS row_index INT;
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS request_id VARCHAR(255);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS request_type VARCHAR(255);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS item_equipment VARCHAR(255);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS severity VARCHAR(100);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS status_req VARCHAR(100);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS yes_no VARCHAR(50);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS source VARCHAR(255);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS root_cause VARCHAR(255);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS fix_type VARCHAR(255);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS status_act VARCHAR(100);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS resource_needed VARCHAR(255);
+            ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
           `,
         },
         {
@@ -484,6 +562,39 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS problem TEXT;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS machine_status VARCHAR(100);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS priority_other TEXT;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_by VARCHAR(255);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_date VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_time VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS finish_date VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS finish_time VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS root_cause TEXT;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS action_taken TEXT;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS err_cat VARCHAR(100);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS err_type VARCHAR(100);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS photos_before JSONB DEFAULT '[]'::jsonb;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS photos_after JSONB DEFAULT '[]'::jsonb;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_status VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS prod_mgr VARCHAR(255);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
           `,
         },
@@ -1566,7 +1677,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       type: this.isPgConnected ? 'postgresql' : 'json_file',
       host: process.env.POSTGRES_HOST || process.env.DB_HOST || '192.168.1.35',
       port: parseInt(process.env.POSTGRES_PORT || process.env.DB_PORT || '5432', 10),
-      database: process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB || 'checkpoint',
+      database: process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB || 'checkpoint_technical',
       user: process.env.POSTGRES_USER || process.env.DB_USERNAME || process.env.USER || 'admin',
     };
   }

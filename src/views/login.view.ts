@@ -6,7 +6,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Đăng Nhập - Checkpoint Systems Technical Request & Maintenance Platform</title>
+  <title>Checkpoint Systems - Technical</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png?v=3" />
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png?v=3" />
   <link rel="shortcut icon" href="/images/favicon.ico?v=3" />
@@ -70,22 +70,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
       border-color: #0284c7;
       box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
     }
-    .theme-light .quick-role-btn {
-      background: #f8fafc;
-      border-color: #e2e8f0;
-      color: #334155;
-    }
-    .theme-light .quick-role-btn:hover {
-      background: #f0f9ff;
-      border-color: #38bdf8;
-      color: #0284c7;
-    }
-    .theme-light .quick-role-btn.active {
-      background: #e0f2fe;
-      border-color: #0284c7;
-      color: #0369a1;
-      font-weight: 700;
-    }
 
     /* Dark Theme */
     html.theme-dark body {
@@ -112,22 +96,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
       border-color: #38bdf8;
       box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
     }
-    .theme-dark .quick-role-btn {
-      background: rgba(2, 6, 23, 0.6);
-      border-color: #1e293b;
-      color: #94a3b8;
-    }
-    .theme-dark .quick-role-btn:hover {
-      background: rgba(14, 165, 233, 0.1);
-      border-color: #38bdf8;
-      color: #38bdf8;
-    }
-    .theme-dark .quick-role-btn.active {
-      background: rgba(14, 165, 233, 0.2);
-      border-color: #38bdf8;
-      color: #38bdf8;
-      font-weight: 700;
-    }
   </style>
 </head>
 <body class="flex flex-col justify-between">
@@ -143,9 +111,9 @@ export const LOGIN_HTML = `<!DOCTYPE html>
         <div class="leading-none text-left">
           <div class="flex items-center gap-1.5">
             <span class="text-sm font-extrabold"><span class="text-sky-500">CHECKPOINT</span> Systems</span>
-            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">Weekly Ops</span>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">Technical</span>
           </div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Technical Dashboard & Maintenance</span>
+          <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Checkpoint Systems - Technical</span>
         </div>
       </a>
 
@@ -194,7 +162,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
               <span class="text-sky-500">CHECKPOINT</span> Systems
             </h1>
             <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Weekly Technical Dashboard & Maintenance Platform
+              Checkpoint Systems - Technical
             </p>
           </div>
 
@@ -206,47 +174,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
           >
             <i :class="alert.type === 'error' ? 'fa-solid fa-circle-exclamation text-sm' : 'fa-solid fa-circle-check text-sm'"></i>
             <span class="flex-1">{{ alert.msg }}</span>
-          </div>
-
-          <!-- Quick Role Selector Cards -->
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider text-slate-400 px-0.5">
-              <span>Đăng nhập nhanh theo vai trò:</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                @click="fillCreds('admin')"
-                :class="{ active: username === 'admin' }"
-                class="quick-role-btn p-2 rounded-xl border text-center transition flex flex-col items-center gap-1 cursor-pointer select-none"
-              >
-                <i class="fa-solid fa-user-shield text-amber-500 text-sm"></i>
-                <span class="text-[11px] font-bold leading-tight">Admin</span>
-                <span class="text-[9px] opacity-70 font-mono">Quản trị</span>
-              </button>
-              
-              <button
-                type="button"
-                @click="fillCreds('tech01')"
-                :class="{ active: username === 'tech01' }"
-                class="quick-role-btn p-2 rounded-xl border text-center transition flex flex-col items-center gap-1 cursor-pointer select-none"
-              >
-                <i class="fa-solid fa-wrench text-sky-500 text-sm"></i>
-                <span class="text-[11px] font-bold leading-tight">Kỹ Thuật</span>
-                <span class="text-[9px] opacity-70 font-mono">tech01</span>
-              </button>
-              
-              <button
-                type="button"
-                @click="fillCreds('user01')"
-                :class="{ active: username === 'user01' }"
-                class="quick-role-btn p-2 rounded-xl border text-center transition flex flex-col items-center gap-1 cursor-pointer select-none"
-              >
-                <i class="fa-solid fa-industry text-emerald-500 text-sm"></i>
-                <span class="text-[11px] font-bold leading-tight">Sản Xuất</span>
-                <span class="text-[9px] opacity-70 font-mono">user01</span>
-              </button>
-            </div>
           </div>
 
           <!-- Login Form -->
@@ -264,7 +191,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
                   v-model="username"
                   type="text"
                   required
-                  placeholder="admin, tech01, user01..."
+                  placeholder="Tên đăng nhập hoặc email..."
                   autocomplete="username"
                   class="input-box w-full pl-10 pr-4 py-2.5 rounded-xl text-sm placeholder-slate-400 focus:outline-none transition font-medium"
                 />
@@ -301,7 +228,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
               </div>
             </div>
 
-            <!-- Remember me & Password Hint -->
+            <!-- Remember me -->
             <div class="flex items-center justify-between text-xs pt-1">
               <label class="flex items-center text-slate-600 dark:text-slate-400 cursor-pointer select-none">
                 <input
@@ -311,9 +238,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
                 />
                 Ghi nhớ đăng nhập
               </label>
-              <span class="text-[11px] text-slate-400 dark:text-slate-500 font-mono">
-                Mật khẩu: Checkpoint@123
-              </span>
             </div>
 
             <!-- Submit Button -->
@@ -346,7 +270,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
 
     <!-- FOOTER BAR -->
     <footer class="py-3 px-4 text-center text-xs text-slate-400 dark:text-slate-500 border-t border-slate-200 dark:border-slate-800/60">
-      Checkpoint Systems Weekly Technical Dashboard & Operations • v2.0
+      Checkpoint Systems - Technical
     </footer>
 
   </div>
@@ -357,8 +281,8 @@ export const LOGIN_HTML = `<!DOCTYPE html>
 
     createApp({
       setup() {
-        const username = ref('admin');
-        const password = ref('Checkpoint@123');
+        const username = ref('');
+        const password = ref('');
         const showPassword = ref(false);
         const rememberMe = ref(true);
         const loading = ref(false);
@@ -383,11 +307,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
 
         const showAlert = (msg, type = 'info') => {
           alert.value = { show: true, type, msg };
-        };
-
-        const fillCreds = (u) => {
-          username.value = u;
-          password.value = 'Checkpoint@123';
         };
 
         const handleLogin = async () => {
@@ -458,7 +377,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
           alert,
           currentTheme,
           toggleTheme,
-          fillCreds,
           handleLogin
         };
       }

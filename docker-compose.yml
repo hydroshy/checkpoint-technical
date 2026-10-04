@@ -12,22 +12,22 @@ services:
       - PORT=${PORT:-3001}
       - NODE_ENV=production
       - JWT_SECRET=${JWT_SECRET:-Checkpoint_Systems_Technical_Key_2026_Secure!}
-      # PostgreSQL Server Connection Variables (192.168.1.35:5432/checkpoint)
+      # PostgreSQL Server Connection Variables (192.168.1.35:5432/checkpoint_technical)
       - POSTGRES_HOST=${POSTGRES_HOST:-192.168.1.35}
       - POSTGRES_PORT=${POSTGRES_PORT:-5432}
       - POSTGRES_USER=${POSTGRES_USER:-admin}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Ph@nloi20031403}
-      - POSTGRES_DB=${POSTGRES_DB:-checkpoint}
+      - POSTGRES_DB=${POSTGRES_DB:-checkpoint_technical}
       # YAML Environment Direct Aliases
       - USER=${USER:-admin}
       - PASSWORD=${PASSWORD:-Ph@nloi20031403}
-      - DB=${DB:-checkpoint}
+      - DB=${DB:-checkpoint_technical}
       # Compatible DB_* environment variables
       - DB_HOST=${DB_HOST:-${POSTGRES_HOST:-192.168.1.35}}
       - DB_PORT=${DB_PORT:-${POSTGRES_PORT:-5432}}
       - DB_USERNAME=${DB_USERNAME:-${POSTGRES_USER:-admin}}
       - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD:-Ph@nloi20031403}}
-      - DB_NAME=${DB_NAME:-${POSTGRES_DB:-checkpoint}}
+      - DB_NAME=${DB_NAME:-${POSTGRES_DB:-checkpoint_technical}}
       - DB_AUTO_INIT=${DB_AUTO_INIT:-true}
     volumes:
       - ./data:/app/data
