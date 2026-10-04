@@ -198,8 +198,9 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
         </button>
 
-        <!-- Swagger Docs Link -->
+        <!-- Swagger Docs Link (Admin Only) -->
         <a
+          v-if="currentUser.role === 'ADMIN' || currentUser.username === 'admin'"
           href="/api/docs"
           target="_blank"
           class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 transition"
@@ -284,6 +285,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                 <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
               </a>
               <a
+                v-if="currentUser.role === 'ADMIN' || currentUser.username === 'admin'"
                 href="/api/docs"
                 target="_blank"
                 class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"

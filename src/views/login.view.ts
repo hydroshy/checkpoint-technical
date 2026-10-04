@@ -125,17 +125,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
           <span>Hệ Thống Trực Tuyến</span>
         </div>
 
-        <!-- Swagger Docs Link -->
-        <a
-          href="/api/docs"
-          target="_blank"
-          class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 transition"
-          title="Tài liệu API Swagger"
-        >
-          <i class="fa-solid fa-book text-sky-500"></i>
-          <span>API Docs</span>
-        </a>
-
         <!-- 1-Click Theme Toggle Button -->
         <button
           type="button"
