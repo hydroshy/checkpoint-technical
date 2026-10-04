@@ -83,6 +83,11 @@ services:
       - iot_postgres_internal_net
       - dockge_default
 
+> 💡 **Hướng dẫn khởi tạo CSDL PostgreSQL chi tiết**:
+> - Xem tệp tài liệu toàn diện: [`docs/POSTGRESQL_INITIALIZATION_GUIDE.md`](./docs/POSTGRESQL_INITIALIZATION_GUIDE.md)
+> - Script SQL DDL & Seed hoàn chỉnh: [`config/init_database.sql`](./config/init_database.sql)
+> - Hướng dẫn 2 cách: Cách 1 dùng script qua `psql` / `pgAdmin 4` / `DBeaver` / Docker Compose, Cách 2 tự động qua `DB_AUTO_INIT=true` (xử lý triệt để lỗi `relation "form_lookup_options" does not exist`).
+
 networks:
   iot_postgres_internal_net:
     external: true

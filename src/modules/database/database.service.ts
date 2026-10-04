@@ -200,7 +200,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         : (process.env.PASSWORD !== undefined ? process.env.PASSWORD : 'Ph@nloi20031403'));
     const dbName = process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB_DATABASE || process.env.DB || 'checkpoint';
     const dbSsl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
-    const autoInit = process.env.DB_AUTO_INIT !== 'false';
+    // Tự động khởi tạo Schema mặc định = true nếu chưa có biến môi trường
+    const autoInitEnv = process.env.DB_AUTO_INIT;
+    const autoInit = autoInitEnv === undefined || autoInitEnv === null || autoInitEnv.trim() === ''
+      ? true
+      : !['false', '0', 'no', 'off'].includes(autoInitEnv.toLowerCase().trim());
 
     const candidateHosts: string[] = [];
     if (dbHost) candidateHosts.push(dbHost);
@@ -261,6 +265,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   /**
    * Create schema tables in PostgreSQL if they do not exist.
+   * Executes each table creation independently to ensure complete resilience:
+   * even if one table or extension has an issue, all other tables (including form_lookup_options)
+   * are guaranteed to be created.
    */
   private async initPgSchema() {
     if (!this.pgPool) return;
@@ -275,199 +282,235 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         this.logger.debug(`Optional PostgreSQL extensions skipped: ${extErr.message}`);
       }
 
-      await this.pgPool.query(`
-        -- 1. Users Table
-        CREATE TABLE IF NOT EXISTS users (
-          id VARCHAR(255) PRIMARY KEY,
-          username VARCHAR(255) UNIQUE NOT NULL,
-          email VARCHAR(255) NOT NULL,
-          password_hash VARCHAR(255) NOT NULL,
-          full_name VARCHAR(255) NOT NULL,
-          role VARCHAR(50) NOT NULL DEFAULT 'EMPLOYEE',
-          is_active BOOLEAN NOT NULL DEFAULT true,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-        CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+      const tableStatements = [
+        {
+          name: 'users',
+          sql: `
+            CREATE TABLE IF NOT EXISTS users (
+              id VARCHAR(255) PRIMARY KEY,
+              username VARCHAR(255) UNIQUE NOT NULL,
+              email VARCHAR(255) NOT NULL,
+              password_hash VARCHAR(255) NOT NULL,
+              full_name VARCHAR(255) NOT NULL,
+              role VARCHAR(50) NOT NULL DEFAULT 'EMPLOYEE',
+              is_active BOOLEAN NOT NULL DEFAULT true,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+          `,
+        },
+        {
+          name: 'requesters',
+          sql: `
+            CREATE TABLE IF NOT EXISTS requesters (
+              id VARCHAR(255) PRIMARY KEY,
+              stt INT,
+              department VARCHAR(255),
+              area VARCHAR(255),
+              mnv VARCHAR(100) UNIQUE NOT NULL,
+              full_name VARCHAR(255) NOT NULL,
+              position VARCHAR(255),
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_requesters_mnv ON requesters(mnv);
+            CREATE INDEX IF NOT EXISTS idx_requesters_area ON requesters(area);
+          `,
+        },
+        {
+          name: 'machines',
+          sql: `
+            CREATE TABLE IF NOT EXISTS machines (
+              id VARCHAR(255) PRIMARY KEY,
+              stt INT DEFAULT 0,
+              tech VARCHAR(255),
+              name VARCHAR(255),
+              area VARCHAR(255),
+              machine_name VARCHAR(255),
+              code VARCHAR(100),
+              note TEXT,
+              is_active BOOLEAN NOT NULL DEFAULT true,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS stt INT DEFAULT 0;
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS tech VARCHAR(255);
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS name VARCHAR(255);
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS area VARCHAR(255);
+            ALTER TABLE machines ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+            CREATE INDEX IF NOT EXISTS idx_machines_tech ON machines(tech);
+            CREATE INDEX IF NOT EXISTS idx_machines_name ON machines(name);
+          `,
+        },
+        {
+          name: 'weekly_technical_requests',
+          sql: `
+            CREATE TABLE IF NOT EXISTS weekly_technical_requests (
+              id VARCHAR(255) PRIMARY KEY,
+              request_id VARCHAR(255) NOT NULL,
+              request_date VARCHAR(50),
+              request_type VARCHAR(255),
+              item_equipment VARCHAR(255),
+              severity VARCHAR(100),
+              status VARCHAR(100),
+              sla_target_hours NUMERIC,
+              actual_hours NUMERIC,
+              met_sla VARCHAR(50),
+              reported_by VARCHAR(255),
+              resolved_by VARCHAR(255),
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_wtr_req_id ON weekly_technical_requests(request_id);
+            CREATE INDEX IF NOT EXISTS idx_wtr_status ON weekly_technical_requests(status);
+          `,
+        },
+        {
+          name: 'defect_logs',
+          sql: `
+            CREATE TABLE IF NOT EXISTS defect_logs (
+              id VARCHAR(255) PRIMARY KEY,
+              defect_id INT NOT NULL,
+              defect_date VARCHAR(50),
+              facility VARCHAR(255),
+              source VARCHAR(255),
+              root_cause_category VARCHAR(255),
+              specific_issue TEXT,
+              affected_product TEXT,
+              downtime_minutes VARCHAR(100),
+              recurring_issue VARCHAR(50),
+              eight_d_required VARCHAR(50),
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_defect_logs_defect_id ON defect_logs(defect_id);
+          `,
+        },
+        {
+          name: 'action_plans',
+          sql: `
+            CREATE TABLE IF NOT EXISTS action_plans (
+              id VARCHAR(255) PRIMARY KEY,
+              action_id VARCHAR(100) NOT NULL,
+              date_logged VARCHAR(50),
+              facility VARCHAR(255),
+              related_defect_id VARCHAR(100),
+              fix_type VARCHAR(255),
+              description TEXT,
+              pic VARCHAR(255),
+              deadline VARCHAR(50),
+              status VARCHAR(100),
+              resource_needed VARCHAR(255),
+              remarks TEXT,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_action_plans_action_id ON action_plans(action_id);
+          `,
+        },
+        {
+          name: 'form_lookup_options',
+          sql: `
+            CREATE TABLE IF NOT EXISTS form_lookup_options (
+              id VARCHAR(255) PRIMARY KEY,
+              category VARCHAR(100) NOT NULL,
+              item_value VARCHAR(255) NOT NULL,
+              item_label VARCHAR(255),
+              sort_order INT DEFAULT 0,
+              is_active BOOLEAN NOT NULL DEFAULT true,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_lookup_category ON form_lookup_options(category);
+          `,
+        },
+        {
+          name: 'sheet_lists_do_not_delete',
+          sql: `
+            CREATE TABLE IF NOT EXISTS sheet_lists_do_not_delete (
+              id VARCHAR(255) PRIMARY KEY,
+              row_index INT,
+              request_id VARCHAR(255),
+              request_type VARCHAR(255),
+              item_equipment VARCHAR(255),
+              severity VARCHAR(100),
+              status_req VARCHAR(100),
+              yes_no VARCHAR(50),
+              source VARCHAR(255),
+              root_cause VARCHAR(255),
+              fix_type VARCHAR(255),
+              status_act VARCHAR(100),
+              resource_needed VARCHAR(255),
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+          `,
+        },
+        {
+          name: 'technical_requests',
+          sql: `
+            CREATE TABLE IF NOT EXISTS technical_requests (
+              id VARCHAR(255) PRIMARY KEY,
+              doc_no VARCHAR(255) UNIQUE NOT NULL,
+              req_date VARCHAR(50),
+              req_time VARCHAR(50),
+              req_by VARCHAR(255),
+              print_tech VARCHAR(255),
+              machine_name VARCHAR(255),
+              problem TEXT,
+              machine_status VARCHAR(100),
+              priority VARCHAR(100),
+              priority_other TEXT,
+              recv_by VARCHAR(255),
+              recv_date VARCHAR(50),
+              recv_time VARCHAR(50),
+              finish_date VARCHAR(50),
+              finish_time VARCHAR(50),
+              downtime NUMERIC DEFAULT 0,
+              root_cause TEXT,
+              action_taken TEXT,
+              err_cat VARCHAR(100),
+              err_type VARCHAR(100),
+              photos_before JSONB DEFAULT '[]'::jsonb,
+              photos_after JSONB DEFAULT '[]'::jsonb,
+              chk_quality VARCHAR(50),
+              chk_status VARCHAR(50),
+              work_order VARCHAR(255),
+              wo_total_qty NUMERIC DEFAULT 0,
+              waste_qty NUMERIC DEFAULT 0,
+              waste_unit VARCHAR(50),
+              waste_percent VARCHAR(50),
+              prod_mgr VARCHAR(255),
+              created_by VARCHAR(255),
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
+          `,
+        },
+      ];
 
-        -- 2. Requesters Table (Từ Sheet Requester trong Name of reqester.xlsx)
-        CREATE TABLE IF NOT EXISTS requesters (
-          id VARCHAR(255) PRIMARY KEY,
-          stt INT,
-          department VARCHAR(255),
-          area VARCHAR(255),
-          mnv VARCHAR(100) UNIQUE NOT NULL,
-          full_name VARCHAR(255) NOT NULL,
-          position VARCHAR(255),
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-        CREATE INDEX IF NOT EXISTS idx_requesters_mnv ON requesters(mnv);
-        CREATE INDEX IF NOT EXISTS idx_requesters_area ON requesters(area);
+      for (const t of tableStatements) {
+        try {
+          await this.pgPool.query(t.sql);
+        } catch (tableErr: any) {
+          this.logger.error(`Failed to initialize table ${t.name}: ${tableErr.message}`);
+        }
+      }
 
-        -- 3. Machines Table (Từ Sheet Machine list trong Name of reqester.xlsx)
-        CREATE TABLE IF NOT EXISTS machines (
-          id VARCHAR(255) PRIMARY KEY,
-          stt INT DEFAULT 0,
-          tech VARCHAR(255),
-          name VARCHAR(255),
-          area VARCHAR(255),
-          machine_name VARCHAR(255),
-          code VARCHAR(100),
-          note TEXT,
-          is_active BOOLEAN NOT NULL DEFAULT true,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-        ALTER TABLE machines ADD COLUMN IF NOT EXISTS stt INT DEFAULT 0;
-        ALTER TABLE machines ADD COLUMN IF NOT EXISTS tech VARCHAR(255);
-        ALTER TABLE machines ADD COLUMN IF NOT EXISTS name VARCHAR(255);
-        ALTER TABLE machines ADD COLUMN IF NOT EXISTS area VARCHAR(255);
-        ALTER TABLE machines ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
-        UPDATE machines SET tech = COALESCE(tech, area, ''), name = COALESCE(name, machine_name, ''), area = COALESCE(area, tech, ''), machine_name = COALESCE(machine_name, name, '') WHERE tech IS NULL OR name IS NULL OR area IS NULL OR machine_name IS NULL;
-        CREATE INDEX IF NOT EXISTS idx_machines_tech ON machines(tech);
-        CREATE INDEX IF NOT EXISTS idx_machines_name ON machines(name);
-
-        -- 4. Weekly Technical Requests (Từ Sheet 1_Technical_Requests trong Weekly_Technical_Dashboard_Database.xlsx)
-        CREATE TABLE IF NOT EXISTS weekly_technical_requests (
-          id VARCHAR(255) PRIMARY KEY,
-          request_id VARCHAR(255) NOT NULL,
-          request_date VARCHAR(50),
-          request_type VARCHAR(255),
-          item_equipment VARCHAR(255),
-          severity VARCHAR(100),
-          status VARCHAR(100),
-          sla_target_hours NUMERIC,
-          actual_hours NUMERIC,
-          met_sla VARCHAR(50),
-          reported_by VARCHAR(255),
-          resolved_by VARCHAR(255),
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-        CREATE INDEX IF NOT EXISTS idx_wtr_req_id ON weekly_technical_requests(request_id);
-        CREATE INDEX IF NOT EXISTS idx_wtr_status ON weekly_technical_requests(status);
-
-        -- 5. Defect Log (Từ Sheet 2_Defect_Log trong Weekly_Technical_Dashboard_Database.xlsx)
-        CREATE TABLE IF NOT EXISTS defect_logs (
-          id VARCHAR(255) PRIMARY KEY,
-          defect_id INT NOT NULL,
-          defect_date VARCHAR(50),
-          facility VARCHAR(255),
-          source VARCHAR(255),
-          root_cause_category VARCHAR(255),
-          specific_issue TEXT,
-          affected_product TEXT,
-          downtime_minutes VARCHAR(100),
-          recurring_issue VARCHAR(50),
-          eight_d_required VARCHAR(50),
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-        CREATE INDEX IF NOT EXISTS idx_defect_logs_defect_id ON defect_logs(defect_id);
-
-        -- 6. Action Plan (Từ Sheet 3_Action_Plan trong Weekly_Technical_Dashboard_Database.xlsx)
-        CREATE TABLE IF NOT EXISTS action_plans (
-          id VARCHAR(255) PRIMARY KEY,
-          action_id VARCHAR(100) NOT NULL,
-          date_logged VARCHAR(50),
-          facility VARCHAR(255),
-          related_defect_id VARCHAR(100),
-          fix_type VARCHAR(255),
-          description TEXT,
-          pic VARCHAR(255),
-          deadline VARCHAR(50),
-          status VARCHAR(100),
-          resource_needed VARCHAR(255),
-          remarks TEXT,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-        CREATE INDEX IF NOT EXISTS idx_action_plans_action_id ON action_plans(action_id);
-
-        -- 7. Form Lookup Options (Từ Sheet Lists_DO_NOT_DELETE)
-        CREATE TABLE IF NOT EXISTS form_lookup_options (
-          id VARCHAR(255) PRIMARY KEY,
-          category VARCHAR(100) NOT NULL,
-          item_value VARCHAR(255) NOT NULL,
-          item_label VARCHAR(255),
-          sort_order INT DEFAULT 0,
-          is_active BOOLEAN NOT NULL DEFAULT true,
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-        CREATE INDEX IF NOT EXISTS idx_lookup_category ON form_lookup_options(category);
-
-        -- 8. Sheet Lists DO NOT DELETE (Lưu trực tiếp dòng bảng từ Excel)
-        CREATE TABLE IF NOT EXISTS sheet_lists_do_not_delete (
-          id VARCHAR(255) PRIMARY KEY,
-          row_index INT,
-          request_id VARCHAR(255),
-          request_type VARCHAR(255),
-          item_equipment VARCHAR(255),
-          severity VARCHAR(100),
-          status_req VARCHAR(100),
-          yes_no VARCHAR(50),
-          source VARCHAR(255),
-          root_cause VARCHAR(255),
-          fix_type VARCHAR(255),
-          status_act VARCHAR(100),
-          resource_needed VARCHAR(255),
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-
-        -- 9. Technical Requests (Phiếu Yêu Cầu Kỹ Thuật Chi Tiết Form V4.1)
-        CREATE TABLE IF NOT EXISTS technical_requests (
-          id VARCHAR(255) PRIMARY KEY,
-          doc_no VARCHAR(255) UNIQUE NOT NULL,
-          req_date VARCHAR(50),
-          req_time VARCHAR(50),
-          req_by VARCHAR(255),
-          print_tech VARCHAR(255),
-          machine_name VARCHAR(255),
-          problem TEXT,
-          machine_status VARCHAR(100),
-          priority VARCHAR(100),
-          priority_other TEXT,
-          recv_by VARCHAR(255),
-          recv_date VARCHAR(50),
-          recv_time VARCHAR(50),
-          finish_date VARCHAR(50),
-          finish_time VARCHAR(50),
-          downtime NUMERIC DEFAULT 0,
-          root_cause TEXT,
-          action_taken TEXT,
-          err_cat VARCHAR(100),
-          err_type VARCHAR(100),
-          photos_before JSONB DEFAULT '[]'::jsonb,
-          photos_after JSONB DEFAULT '[]'::jsonb,
-          chk_quality VARCHAR(50),
-          chk_status VARCHAR(50),
-          work_order VARCHAR(255),
-          wo_total_qty NUMERIC DEFAULT 0,
-          waste_qty NUMERIC DEFAULT 0,
-          waste_unit VARCHAR(50),
-          waste_percent VARCHAR(50),
-          prod_mgr VARCHAR(255),
-          created_by VARCHAR(255),
-          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-          updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-        );
-        CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
-      `);
-      this.logger.log('✅ PostgreSQL Schema verified / initialized (users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests)');
+      this.logger.log('✅ PostgreSQL Schema verified / initialized (9 tables: users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests)');
     } catch (e: any) {
       this.logger.error(`Failed to initialize PostgreSQL schema: ${e.message}`);
     }
   }
 
   /**
-   * Load all tables from PostgreSQL into cache.
+   * Load all tables from PostgreSQL into cache with per-table resilience and JSON fallback.
    */
   private async loadFromPg() {
     if (!this.pgPool) return;
 
+    // 1. Users
     try {
-      // 1. Users
       const usersRes = await this.pgPool.query('SELECT * FROM users ORDER BY created_at ASC');
       this.usersCache = usersRes.rows.map(r => ({
         id: r.id,
@@ -480,8 +523,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
         updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
       }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load users from PG (${err.message}). Using local JSON fallback.`);
+      this.usersCache = this.readJson<UserRecord[]>('users.json', []);
+    }
 
-      // 2. Requesters
+    // 2. Requesters
+    try {
       const requestersRes = await this.pgPool.query('SELECT * FROM requesters ORDER BY stt ASC, id ASC');
       this.requestersCache = requestersRes.rows.map(r => ({
         id: r.id,
@@ -492,8 +540,6 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         fullName: r.full_name || '',
         position: r.position || '',
       }));
-
-      // Synchronize employeesCache from requesters
       this.employeesCache = this.requestersCache.map(r => ({
         id: r.id,
         mnv: r.mnv,
@@ -502,8 +548,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         area: r.area,
         role: r.position,
       }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load requesters from PG (${err.message}). Using local JSON fallback.`);
+      this.requestersCache = this.readJson<RequesterRecord[]>('requesters.json', []);
+      this.employeesCache = this.readJson<EmployeeRecord[]>('employees.json', []);
+    }
 
-      // 3. Machines
+    // 3. Machines
+    try {
       const machinesRes = await this.pgPool.query('SELECT * FROM machines ORDER BY id ASC');
       this.machinesCache = machinesRes.rows.map(r => ({
         id: r.id,
@@ -513,8 +565,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         note: r.note || undefined,
         isActive: r.is_active !== undefined ? r.is_active : true,
       }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load machines from PG (${err.message}). Using local JSON fallback.`);
+      this.machinesCache = this.readJson<MachineRecord[]>('machines.json', []);
+    }
 
-      // 4. Weekly Requests
+    // 4. Weekly Requests
+    try {
       const weeklyRes = await this.pgPool.query('SELECT * FROM weekly_technical_requests ORDER BY id ASC');
       this.weeklyRequestsCache = weeklyRes.rows.map(r => ({
         id: r.id,
@@ -530,8 +587,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         reportedBy: r.reported_by || '',
         resolvedBy: r.resolved_by || undefined,
       }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load weekly_technical_requests from PG (${err.message}). Using local JSON fallback.`);
+      this.weeklyRequestsCache = this.readJson<WeeklyTechnicalRequestRecord[]>('weekly_technical_requests.json', []);
+    }
 
-      // 5. Defect Logs
+    // 5. Defect Logs
+    try {
       const defectRes = await this.pgPool.query('SELECT * FROM defect_logs ORDER BY defect_id ASC');
       this.defectLogsCache = defectRes.rows.map(r => ({
         id: r.id,
@@ -546,8 +608,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         recurringIssue: r.recurring_issue || '',
         eightDRequired: r.eight_d_required || '',
       }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load defect_logs from PG (${err.message}). Using local JSON fallback.`);
+      this.defectLogsCache = this.readJson<DefectLogRecord[]>('defect_logs.json', []);
+    }
 
-      // 6. Action Plans
+    // 6. Action Plans
+    try {
       const actionRes = await this.pgPool.query('SELECT * FROM action_plans ORDER BY id ASC');
       this.actionPlansCache = actionRes.rows.map(r => ({
         id: r.id,
@@ -563,8 +630,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         resourceNeeded: r.resource_needed || '',
         remarks: r.remarks || null,
       }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load action_plans from PG (${err.message}). Using local JSON fallback.`);
+      this.actionPlansCache = this.readJson<ActionPlanRecord[]>('action_plans.json', []);
+    }
 
-      // 7. Form Lookup Options
+    // 7. Form Lookup Options
+    try {
       const lookupRes = await this.pgPool.query('SELECT * FROM form_lookup_options ORDER BY category, sort_order ASC');
       this.formLookupOptionsCache = lookupRes.rows.map(r => ({
         id: r.id,
@@ -574,8 +646,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         sortOrder: r.sort_order || 0,
         isActive: r.is_active,
       }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load form_lookup_options from PG (${err.message}). Using local JSON fallback.`);
+      this.formLookupOptionsCache = this.readJson<FormLookupOptionRecord[]>('form_lookup_options.json', []);
+    }
 
-      // 8. Sheet Lists DO NOT DELETE
+    // 8. Sheet Lists DO NOT DELETE
+    try {
       const sheetListsRes = await this.pgPool.query('SELECT * FROM sheet_lists_do_not_delete ORDER BY row_index ASC');
       this.sheetListsCache = sheetListsRes.rows.map(r => ({
         id: r.id,
@@ -592,8 +669,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         statusAct: r.status_act,
         resourceNeeded: r.resource_needed,
       }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load sheet_lists_do_not_delete from PG (${err.message}). Using local JSON fallback.`);
+      this.sheetListsCache = this.readJson<SheetListsRowRecord[]>('sheet_lists_do_not_delete.json', []);
+    }
 
-      // 9. Technical Requests Form V4.1
+    // 9. Technical Requests Form V4.1
+    try {
       const techReqRes = await this.pgPool.query('SELECT * FROM technical_requests ORDER BY created_at DESC');
       this.requestsCache = techReqRes.rows.map(r => ({
         id: r.id,
@@ -631,11 +713,12 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
         updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
       }));
-
-      this.logger.log(`📦 PostgreSQL Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.requestsCache.length} v4 requests.`);
-    } catch (e: any) {
-      this.logger.error(`Error loading data from PostgreSQL: ${e.message}`);
+    } catch (err: any) {
+      this.logger.warn(`Could not load technical_requests from PG (${err.message}). Using local JSON fallback.`);
+      this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', []);
     }
+
+    this.logger.log(`📦 Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.formLookupOptionsCache.length} lookup options, ${this.requestsCache.length} v4 requests.`);
   }
 
   private getFilePath(filename: string): string {
@@ -789,6 +872,30 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       const jsonOpts = this.readJson<FormLookupOptionRecord[]>('form_lookup_options.json', []);
       for (const o of jsonOpts) {
         this.addLookupOption(o);
+      }
+    }
+
+    // 8. If PostgreSQL is connected and sheet_lists_do_not_delete table is empty, seed from JSON
+    if (this.isPgConnected && this.pgPool && this.sheetListsCache.length === 0) {
+      const jsonSheetLists = this.readJson<SheetListsRowRecord[]>('sheet_lists_do_not_delete.json', []);
+      this.sheetListsCache = jsonSheetLists;
+      for (const s of jsonSheetLists) {
+        this.pgPool
+          .query(
+            `INSERT INTO sheet_lists_do_not_delete (id, row_index, request_id, request_type, item_equipment, severity, status_req, yes_no, source, root_cause, fix_type, status_act, resource_needed)
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+             ON CONFLICT (id) DO NOTHING`,
+            [s.id, s.rowIndex, s.requestId, s.requestType, s.itemEquipment, s.severity, s.statusReq, s.yesNo, s.source, s.rootCause, s.fixType, s.statusAct, s.resourceNeeded],
+          )
+          .catch((err) => this.logger.error(`PG Error inserting sheet lists row: ${err.message}`));
+      }
+    }
+
+    // 9. If PostgreSQL is connected and technical_requests table is empty, seed from JSON
+    if (this.isPgConnected && this.pgPool && this.requestsCache.length === 0) {
+      const jsonRequests = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', []);
+      for (const req of jsonRequests) {
+        this.addRequest(req);
       }
     }
   }
@@ -1293,6 +1400,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   // ==================== FORM LOOKUP OPTIONS (Lists_DO_NOT_DELETE) ====================
   getLookupOptions(category?: string): FormLookupOptionRecord[] {
+    if (this.formLookupOptionsCache.length === 0) {
+      this.formLookupOptionsCache = this.readJson<FormLookupOptionRecord[]>('form_lookup_options.json', []);
+    }
     if (category) {
       return this.formLookupOptionsCache.filter(o => o.category.toLowerCase() === category.toLowerCase());
     }

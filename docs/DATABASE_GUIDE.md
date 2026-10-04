@@ -17,6 +17,7 @@ Hệ thống quản lý phiếu yêu cầu kỹ thuật của **Checkpoint Syste
 - **Password**: `Ph@nloi20031403` (`POSTGRES_PASSWORD` / `DB_PASSWORD`)
 - **Database Name**: `checkpoint` (`POSTGRES_DB` / `DB_NAME`)
 - **Tự động khởi tạo Schema**: `DB_AUTO_INIT=true`
+- **Hướng dẫn khởi tạo CSDL chi tiết**: Xem [POSTGRESQL_INITIALIZATION_GUIDE.md](./POSTGRESQL_INITIALIZATION_GUIDE.md) (Hướng dẫn thực thi SQL DDL qua psql, pgAdmin, DBeaver, Docker Compose và xử lý lỗi `relation form_lookup_options does not exist`).
 
 ---
 
