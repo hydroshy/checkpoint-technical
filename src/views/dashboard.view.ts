@@ -6,7 +6,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Checkpoint Systems - Technical</title>
+  <title>Checkpoint Systems</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png?v=3" />
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png?v=3" />
   <link rel="shortcut icon" href="/images/favicon.ico?v=3" />
@@ -248,7 +248,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
             <div class="flex items-center gap-1.5">
               <span class="text-sm font-extrabold"><span class="text-sky-500">Checkpoint</span> Systems</span>
             </div>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Technical Dashboard</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Dashboard</span>
           </div>
         </a>
       </div>
@@ -314,11 +314,11 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
             <!-- Portal Links -->
             <div class="space-y-1 text-xs pb-3 border-b border-slate-100 dark:border-slate-800">
               <a
-                v-if="isAdminOrTech"
+                v-if="canAccessControlPanel"
                 href="/control-panel"
                 class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
               >
-                <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-sky-500"></i> Admin Control Panel</span>
+                <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-sky-500"></i> Control Panel</span>
                 <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
               </a>
               <a
@@ -348,213 +348,193 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     <main class="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-32">
 
       <!-- =========================================================================
-           PRIMARY NAVIGATION CARDS (Cụm thẻ Card điều hướng chính)
+           DASHBOARD HOME: MODULE CARDS (Hiện trực tiếp khi chưa vào module)
            ========================================================================= -->
-      <section class="mb-8">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
-          
-          <!-- THẺ 1: TẠO PHIẾU YÊU CẦU (PHIẾU NHẬP LIỆU) -->
+      <section v-if="!isRequestActive && !isKpiActive" class="mb-8">
+        <div class="mb-6">
+          <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">Dashboard</h1>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">Hệ thống giám sát và quản lý kỹ thuật Checkpoint Systems</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
+          <!-- THẺ 1: PHIẾU NHẬP LIỆU -->
           <div
             v-if="canCreateRequest"
             @click="selectMenuCard('request')"
-            :class="[
-              isRequestActive ? 'border-sky-500 ring-2 ring-sky-500/20 shadow-lg bg-sky-50/50 dark:bg-sky-950/20' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900 shadow-sm',
-              'cursor-pointer hover:shadow-md'
-            ]"
-            class="relative rounded-2xl border p-5 sm:p-6 transition-all duration-200 flex flex-col justify-between overflow-hidden group select-none"
+            class="relative rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-sky-500/60 dark:hover:border-sky-500/60 bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl p-6 sm:p-7 transition-all duration-200 flex flex-col justify-between overflow-hidden group cursor-pointer select-none"
           >
-            <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-sky-500/20 transition-all"></div>
+            <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-sky-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-sky-500/20 transition-all"></div>
 
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex items-center gap-3.5">
-                <div
-                  :class="isRequestActive ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30' : 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20'"
-                  class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-transform group-hover:scale-105"
-                >
-                  <i class="fa-solid fa-file-circle-plus"></i>
+            <div>
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="w-14 h-14 rounded-2xl bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 flex items-center justify-center text-2xl transition-transform group-hover:scale-110">
+                    <i class="fa-solid fa-file-signature"></i>
+                  </div>
+                  <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">Phiếu Nhập Liệu</h2>
+                    <span class="text-xs font-semibold text-sky-600 dark:text-sky-400">Yêu Cầu & Sự Cố Kỹ Thuật</span>
+                  </div>
                 </div>
-                <div>
-                  <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">Tạo phiếu yêu cầu</h2>
-                  <span class="text-xs font-semibold text-sky-600 dark:text-sky-400">Phiếu Nhập Liệu</span>
-                </div>
-              </div>
 
-              <!-- Active Status Badge / Action Hint -->
-              <div class="flex items-center gap-2">
-                <span
-                  v-if="isRequestActive"
-                  class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-sky-500 text-white shadow-sm flex items-center gap-1.5"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Đang mở
-                </span>
-                <span
-                  v-else
-                  class="px-2.5 py-1 rounded-full text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 flex items-center gap-1 group-hover:bg-sky-50 dark:group-hover:bg-sky-950/40 group-hover:text-sky-600 dark:group-hover:text-sky-400 transition"
-                >
-                  Mở mục <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                <span class="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 group-hover:bg-sky-500 group-hover:text-white transition">
+                  Mở module <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </span>
               </div>
+
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed">
+                Khởi tạo và ghi nhận sự cố kỹ thuật, báo hỏng máy in, downtime & yêu cầu hỗ trợ sửa chữa bảo trì.
+              </p>
             </div>
 
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
-              Khởi tạo và ghi nhận sự cố kỹ thuật, báo hỏng máy in, downtime & yêu cầu hỗ trợ sửa chữa bảo trì.
-            </p>
-
-            <!-- Sub Navigation Pills when card is active -->
-            <div v-if="isRequestActive" class="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between" @click.stop>
-              <div class="flex items-center gap-2">
-                <button
-                  type="button"
-                  @click="switchTab('v4-form')"
-                  :class="activeTab === 'v4-form' ? 'bg-sky-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-                  class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <i class="fa-solid fa-file-signature text-[11px]"></i> Phiếu Nhập Liệu
-                </button>
-                <button
-                  type="button"
-                  @click="switchTab('v4-history'); loadHistory();"
-                  :class="activeTab === 'v4-history' ? 'bg-sky-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-                  class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <i class="fa-solid fa-clock-rotate-left text-[11px]"></i> Lịch Sử Phiếu
-                  <span v-if="historyTotal || historyItems.length" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">{{ historyTotal || historyItems.length }}</span>
-                </button>
-              </div>
-              <button
-                type="button"
-                @click="activeTab = ''"
-                class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1 cursor-pointer"
-                title="Đóng mục này và trở về Menu"
-              >
-                <i class="fa-solid fa-xmark"></i> Đóng
-              </button>
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-sky-500 text-[10px]"></i> Phiếu Yêu Cầu & Lịch Sử Phiếu</span>
+              <span class="font-mono font-medium text-slate-400">Module 01</span>
             </div>
           </div>
 
-          <!-- THẺ 2: DASHBOARD KPI (TECHNICAL DASHBOARD) -->
+          <!-- THẺ 2: REPORT TUẦN (thay vì Technical Dashboard) -->
           <div
             v-if="canViewKpi"
             @click="selectMenuCard('kpi')"
-            :class="[
-              isKpiActive ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900 shadow-sm',
-              'cursor-pointer hover:shadow-md'
-            ]"
-            class="relative rounded-2xl border p-5 sm:p-6 transition-all duration-200 flex flex-col justify-between overflow-hidden group select-none"
+            class="relative rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-emerald-500/60 dark:hover:border-emerald-500/60 bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl p-6 sm:p-7 transition-all duration-200 flex flex-col justify-between overflow-hidden group cursor-pointer select-none"
           >
-            <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+            <div class="absolute -right-8 -bottom-8 w-36 h-36 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
 
-            <div class="flex items-start justify-between gap-4">
-              <div class="flex items-center gap-3.5">
-                <div
-                  :class="isKpiActive ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'"
-                  class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-transform group-hover:scale-105"
-                >
-                  <i class="fa-solid fa-chart-pie"></i>
+            <div>
+              <div class="flex items-start justify-between gap-4">
+                <div class="flex items-center gap-4">
+                  <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center text-2xl transition-transform group-hover:scale-110">
+                    <i class="fa-solid fa-chart-pie"></i>
+                  </div>
+                  <div>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">Report Tuần</h2>
+                    <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Báo Cáo Kỹ Thuật & Phân Tích KPI</span>
+                  </div>
                 </div>
-                <div>
-                  <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">Dashboard KPI</h2>
-                  <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Technical Dashboard</span>
-                </div>
-              </div>
 
-              <!-- Active Status Badge / Action Hint -->
-              <div class="flex items-center gap-2">
-                <span
-                  v-if="isKpiActive"
-                  class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500 text-white shadow-sm flex items-center gap-1.5"
-                >
-                  <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Đang mở
-                </span>
-                <span
-                  v-else
-                  class="px-2.5 py-1 rounded-full text-[10px] font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 flex items-center gap-1 group-hover:bg-emerald-50 dark:group-hover:bg-emerald-950/40 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition"
-                >
-                  Mở mục <i class="fa-solid fa-arrow-right text-[9px]"></i>
+                <span class="px-3 py-1.5 rounded-full text-xs font-semibold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800 flex items-center gap-1.5 group-hover:bg-emerald-500 group-hover:text-white transition">
+                  Mở module <i class="fa-solid fa-arrow-right text-[10px]"></i>
                 </span>
               </div>
+
+              <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-4 leading-relaxed">
+                Theo dõi và phân tích chỉ số SLA, hiệu suất sửa chữa, tỷ lệ hoàn thành, Defect Logs & Action Plans.
+              </p>
             </div>
 
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
-              Theo dõi và phân tích chỉ số SLA, hiệu suất sửa chữa, tỷ lệ hoàn thành, Defect Logs & Action Plans.
-            </p>
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs text-slate-400">
+              <span class="flex items-center gap-1.5"><i class="fa-solid fa-circle-check text-emerald-500 text-[10px]"></i> KPI, Phiếu Yêu Cầu, Defect & Action</span>
+              <span class="font-mono font-medium text-slate-400">Module 02</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-            <!-- Sub Navigation Pills when card is active -->
-            <div v-if="isKpiActive" class="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 flex flex-wrap items-center justify-between gap-2" @click.stop>
-              <div class="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  @click="switchTab('weekly-kpi')"
-                  :class="activeTab === 'weekly-kpi' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-                  class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <i class="fa-solid fa-chart-pie text-[11px]"></i> Tổng Quan KPI
-                </button>
-                <button
-                  type="button"
-                  @click="switchTab('weekly-requests')"
-                  :class="activeTab === 'weekly-requests' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-                  class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <i class="fa-solid fa-list-check text-[11px]"></i> 1. Phiếu Yêu Cầu
-                  <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">{{ weeklyRequests.length }}</span>
-                </button>
-                <button
-                  type="button"
-                  @click="switchTab('defect-logs')"
-                  :class="activeTab === 'defect-logs' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-                  class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <i class="fa-solid fa-triangle-exclamation text-amber-500 text-[11px]"></i> 2. Defect Log
-                  <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-700 dark:text-amber-300 font-mono">{{ defectLogs.length }}</span>
-                </button>
-                <button
-                  type="button"
-                  @click="switchTab('action-plans')"
-                  :class="activeTab === 'action-plans' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-                  class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <i class="fa-solid fa-bullseye text-emerald-500 text-[11px]"></i> 3. Action Plan
-                  <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono">{{ actionPlans.length }}</span>
-                </button>
-                <button
-                  type="button"
-                  @click="switchTab('catalog')"
-                  :class="activeTab === 'catalog' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-                  class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-                >
-                  <i class="fa-solid fa-users-gear text-[11px]"></i> Người Yêu Cầu & Máy
-                </button>
-              </div>
+      <!-- =========================================================================
+           MODULE NAVIGATION & BREADCRUMB (Khi đang mở một Module)
+           ========================================================================= -->
+      <section v-if="isRequestActive || isKpiActive" class="mb-6">
+        <div class="glass-card rounded-2xl p-3.5 sm:p-4 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+          <!-- Breadcrumb -->
+          <div class="flex items-center flex-wrap gap-2 text-sm">
+            <button
+              @click="activeTab = ''"
+              type="button"
+              class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              title="Quay lại Dashboard"
+            >
+              <i class="fa-solid fa-house text-xs"></i>
+              <span>Dashboard</span>
+            </button>
+            <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+            <span class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+              <i :class="isRequestActive ? 'fa-solid fa-file-signature text-sky-500' : 'fa-solid fa-chart-pie text-emerald-500'"></i>
+              <span>{{ isRequestActive ? 'Phiếu Nhập Liệu' : 'Report Tuần' }}</span>
+            </span>
+          </div>
+
+          <!-- Sub-tabs navigation buttons for active module -->
+          <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+            <!-- Phiếu Nhập Liệu Tabs -->
+            <template v-if="isRequestActive">
               <button
                 type="button"
-                @click="activeTab = ''"
-                class="px-2.5 py-1 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center gap-1 cursor-pointer"
-                title="Đóng mục này và trở về Menu"
+                @click="switchTab('v4-form')"
+                :class="activeTab === 'v4-form' ? 'bg-sky-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
               >
-                <i class="fa-solid fa-xmark"></i> Đóng
+                <i class="fa-solid fa-file-signature text-[11px]"></i> Phiếu Nhập Liệu
               </button>
-            </div>
-          </div>
+              <button
+                type="button"
+                @click="switchTab('v4-history'); loadHistory();"
+                :class="activeTab === 'v4-history' ? 'bg-sky-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-clock-rotate-left text-[11px]"></i> Lịch Sử Phiếu
+                <span v-if="historyTotal || historyItems.length" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">{{ historyTotal || historyItems.length }}</span>
+              </button>
+            </template>
 
-        </div>
+            <!-- Report Tuần Tabs -->
+            <template v-if="isKpiActive">
+              <button
+                type="button"
+                @click="switchTab('weekly-kpi')"
+                :class="activeTab === 'weekly-kpi' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-chart-pie text-[11px]"></i> Tổng Quan KPI
+              </button>
+              <button
+                type="button"
+                @click="switchTab('weekly-requests')"
+                :class="activeTab === 'weekly-requests' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-list-check text-[11px]"></i> Phiếu Yêu Cầu
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">{{ weeklyRequests.length }}</span>
+              </button>
+              <button
+                type="button"
+                @click="switchTab('defect-logs')"
+                :class="activeTab === 'defect-logs' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-[11px]"></i> Defect Log
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-700 dark:text-amber-300 font-mono">{{ defectLogs.length }}</span>
+              </button>
+              <button
+                type="button"
+                @click="switchTab('action-plans')"
+                :class="activeTab === 'action-plans' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-bullseye text-emerald-500 text-[11px]"></i> Action Plan
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono">{{ actionPlans.length }}</span>
+              </button>
+              <button
+                type="button"
+                @click="switchTab('catalog')"
+                :class="activeTab === 'catalog' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-users-gear text-[11px]"></i> Người Yêu Cầu & Máy
+              </button>
+            </template>
 
-        <!-- Thông báo khi chưa chọn mục nào từ menu -->
-        <div v-if="!isRequestActive && !isKpiActive && (canCreateRequest || canViewKpi)" class="glass-card rounded-2xl p-8 sm:p-12 text-center border-dashed border-2 border-slate-200 dark:border-slate-800 my-6">
-          <div class="w-16 h-16 rounded-2xl bg-sky-500/10 text-sky-500 flex items-center justify-center text-2xl mx-auto mb-3">
-            <i class="fa-solid fa-hand-pointer"></i>
+            <!-- Quay lại Dashboard button -->
+            <button
+              type="button"
+              @click="activeTab = ''"
+              class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition flex items-center gap-1.5 cursor-pointer ml-auto"
+              title="Quay lại Dashboard"
+            >
+              <i class="fa-solid fa-arrow-left text-[11px]"></i>
+              <span>Quay lại Dashboard</span>
+            </button>
           </div>
-          <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Chọn một mục ở Menu trên để hiển thị nội dung</h3>
-          <p class="text-xs text-slate-500 mt-1 max-w-md mx-auto">Nhấp vào thẻ "Tạo phiếu yêu cầu" hoặc "Dashboard KPI" để mở giao diện làm việc tương ứng.</p>
-        </div>
-
-        <!-- Block notice if neither permission granted -->
-        <div v-if="!canCreateRequest && !canViewKpi" class="glass-card rounded-2xl p-8 text-center my-6 space-y-3">
-          <div class="w-16 h-16 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center text-2xl mx-auto">
-            <i class="fa-solid fa-user-lock"></i>
-          </div>
-          <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Chưa Được Phân Quyền Truy Cập</h3>
-          <p class="text-xs text-slate-500 max-w-md mx-auto">Tài khoản của bạn hiện chưa được cấp quyền 'Tạo phiếu yêu cầu' hoặc 'Xem Dashboard KPI'. Vui lòng liên hệ Quản trị viên để được cấp quyền.</p>
         </div>
       </section>
 
@@ -566,10 +546,10 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         <div class="glass-card rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-sky-500/10 via-transparent to-cyan-500/10 border-sky-500/20">
           <div>
             <div class="flex items-center gap-2">
-              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500 text-white uppercase tracking-wider">Weekly Dashboard</span>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500 text-white uppercase tracking-wider">Report Tuần</span>
               <span class="text-xs text-slate-400 font-mono">Database Synced: 2 Excel Files</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">Bảng Điều Khiển Kỹ Thuật Hàng Tuần</h1>
+            <h1 class="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">Báo Cáo Kỹ Thuật Hàng Tuần</h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
               Giám sát toàn diện 28 phiếu yêu cầu kỹ thuật, 4 sự cố Defect Log, 5 kế hoạch khắc phục Action Plan, 30 người yêu cầu và 121 thiết bị máy móc.
             </p>
@@ -2885,13 +2865,19 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           return u.username === 'admin' || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN';
         });
 
-        const isAdminOrTech = computed(() => {
+        const canAccessControlPanel = computed(() => {
           const u = currentUser.value;
-          if (!u) return false;
+          if (!u || !u.username) return false;
           if (u.username === 'admin' || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') return true;
-          if (u.permissions && (u.permissions.canAccessControlPanel || u.permissions.isAdmin)) return true;
-          return u.role === 'TECHNICIAN';
+          let perms = u.permissions;
+          if (typeof perms === 'string') {
+            try { perms = JSON.parse(perms); } catch(e) {}
+          }
+          if (perms && (perms.canAccessControlPanel || perms.isAdmin)) return true;
+          return false;
         });
+
+        const isAdminOrTech = canAccessControlPanel;
 
         const canCreateRequest = computed(() => {
           const u = currentUser.value;
@@ -4170,6 +4156,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           canViewKpi,
           isAdmin,
           isAdminOrTech,
+          canAccessControlPanel,
           userMenuOpen,
           currentTheme,
           currentUser,

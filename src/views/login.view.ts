@@ -6,7 +6,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>Checkpoint Systems - Technical</title>
+  <title>Checkpoint Systems</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png?v=3" />
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png?v=3" />
   <link rel="shortcut icon" href="/images/favicon.ico?v=3" />
@@ -50,11 +50,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
       background: radial-gradient(circle at 50% 10%, #f0f9ff 0%, #e2e8f0 100%);
       color: #0f172a;
     }
-    .theme-light .glass-navbar {
-      background: rgba(255, 255, 255, 0.92);
-      border-bottom: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-    }
     .theme-light .glass-card {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(16px);
@@ -76,11 +71,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
       background: radial-gradient(circle at 50% 10%, #0c2d48 0%, #020617 80%);
       color: #f8fafc;
     }
-    .theme-dark .glass-navbar {
-      background: rgba(15, 23, 42, 0.9);
-      border-bottom: 1px solid rgba(56, 189, 248, 0.15);
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
-    }
     .theme-dark .glass-card {
       background: rgba(15, 23, 42, 0.82);
       backdrop-filter: blur(16px);
@@ -98,62 +88,37 @@ export const LOGIN_HTML = `<!DOCTYPE html>
     }
   </style>
 </head>
-<body class="flex flex-col justify-between">
-  <div id="app" v-cloak class="min-h-screen flex flex-col justify-between">
+<body class="min-h-screen">
+  <div id="app" v-cloak class="min-h-screen flex items-center justify-center p-4 sm:p-6 relative">
     
-    <!-- TOP NAVBAR -->
-    <header class="glass-navbar sticky top-0 z-40 px-4 sm:px-6 h-16 flex items-center justify-between transition-colors">
-      <!-- Left Logo & Brand -->
-      <a href="/login" class="flex items-center gap-2.5 text-inherit font-extrabold text-sm tracking-tight text-decoration-none">
-        <div class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-1 shadow-inner overflow-hidden">
-          <img src="/images/logo-navbar.png?v=3" onerror="this.onerror=null; this.src='/images/logo-login.png?v=3'; this.onerror=function(){this.src='/images/favicon.png?v=3';};" class="w-full h-full object-contain rounded-lg" alt="Checkpoint Systems Logo" />
-        </div>
-        <div class="leading-none text-left">
-          <div class="flex items-center gap-1.5">
-            <span class="text-sm font-extrabold"><span class="text-sky-500">CHECKPOINT</span> Systems</span>
-            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">Technical</span>
-          </div>
-          <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Checkpoint Systems - Technical</span>
-        </div>
-      </a>
-
-      <!-- Right Controls -->
-      <div class="flex items-center gap-2.5 sm:gap-3">
-        <!-- System Status Badge -->
-        <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span>Hệ Thống Trực Tuyến</span>
-        </div>
-
-        <!-- 1-Click Theme Toggle Button -->
-        <button
-          type="button"
-          @click="toggleTheme"
-          class="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 shadow-sm transition cursor-pointer"
-          :title="currentTheme === 'dark' ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'"
-        >
-          <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-sm"></i>
-        </button>
-      </div>
-    </header>
+    <!-- 1-Click Theme Toggle Button (Floating) -->
+    <div class="fixed top-4 right-4 z-40">
+      <button
+        type="button"
+        @click="toggleTheme"
+        class="flex items-center justify-center w-9 h-9 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 shadow-sm transition cursor-pointer"
+        :title="currentTheme === 'dark' ? 'Chuyển sang Giao diện Sáng' : 'Chuyển sang Giao diện Tối'"
+      >
+        <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-sm"></i>
+      </button>
+    </div>
 
     <!-- MAIN LOGIN CARD CONTAINER -->
-    <main class="flex-1 flex items-center justify-center p-4 sm:p-6 my-auto">
-      <div class="w-full max-w-md">
-        <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
-          
-          <!-- Logo & Brand Header -->
-          <div class="text-center space-y-2">
-            <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-sky-500/10 border border-sky-500/30 p-2.5 shadow-inner mb-1 overflow-hidden transition-transform hover:scale-105">
-              <img src="/images/logo-login.png?v=3" onerror="this.onerror=null; this.src='/images/logo-navbar.png?v=3'; this.onerror=function(){this.src='/images/favicon.png?v=3';};" class="w-full h-full object-contain rounded-xl" alt="Checkpoint Systems Logo" />
-            </div>
-            <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight flex items-center justify-center gap-1.5">
-              <span class="text-sky-500">CHECKPOINT</span> Systems
-            </h1>
-            <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              Checkpoint Systems - Technical
-            </p>
+    <main class="w-full max-w-md my-auto">
+      <div class="glass-card rounded-3xl p-6 sm:p-8 space-y-6">
+        
+        <!-- Logo & Brand Header -->
+        <div class="text-center space-y-2">
+          <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-sky-500/10 border border-sky-500/30 p-2.5 shadow-inner mb-1 overflow-hidden transition-transform hover:scale-105">
+            <img src="/images/logo-login.png?v=3" onerror="this.onerror=null; this.src='/images/logo-navbar.png?v=3'; this.onerror=function(){this.src='/images/favicon.png?v=3';};" class="w-full h-full object-contain rounded-xl" alt="Checkpoint Systems Logo" />
           </div>
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight flex items-center justify-center gap-1.5">
+            <span class="text-sky-500">CHECKPOINT</span> Systems
+          </h1>
+          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            Checkpoint Systems
+          </p>
+        </div>
 
           <!-- Alert Notification -->
           <div
@@ -245,22 +210,13 @@ export const LOGIN_HTML = `<!DOCTYPE html>
           </form>
 
           <!-- System Info Footer -->
-          <div class="pt-3 border-t border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 text-center space-y-1">
-            <div class="flex items-center justify-center gap-2 font-mono text-[10px]">
-              <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">PostgreSQL DB: Ready</span>
-              <span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800">NestJS v10</span>
-            </div>
+          <div class="pt-3 border-t border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 text-center">
             <div>© 2026 Checkpoint Systems Inc. All rights reserved.</div>
           </div>
 
         </div>
       </div>
     </main>
-
-    <!-- FOOTER BAR -->
-    <footer class="py-3 px-4 text-center text-xs text-slate-400 dark:text-slate-500 border-t border-slate-200 dark:border-slate-800/60">
-      Checkpoint Systems - Technical
-    </footer>
 
   </div>
 
