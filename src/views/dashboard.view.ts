@@ -231,6 +231,55 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       height: 40px;
       margin-bottom: 5px;
     }
+
+    /* Toggle Labels & Active Visual Effects */
+    .toggle-label {
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      user-select: none;
+    }
+    .toggle-label:hover {
+      transform: translateY(-1px);
+    }
+    .toggle-radio:checked + label,
+    .toggle-radio:checked + .toggle-label {
+      background-color: #0284c7 !important;
+      color: #ffffff !important;
+      border-color: #0284c7 !important;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.35) !important;
+      font-weight: 700 !important;
+    }
+    .toggle-radio-success:checked + label,
+    .toggle-radio-success:checked + .toggle-label {
+      background-color: #059669 !important;
+      color: #ffffff !important;
+      border-color: #059669 !important;
+      box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.35) !important;
+      font-weight: 700 !important;
+    }
+    .toggle-radio-danger:checked + label,
+    .toggle-radio-danger:checked + .toggle-label {
+      background-color: #dc2626 !important;
+      color: #ffffff !important;
+      border-color: #dc2626 !important;
+      box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.35) !important;
+      font-weight: 700 !important;
+    }
+    .toggle-radio-warning:checked + label,
+    .toggle-radio-warning:checked + .toggle-label {
+      background-color: #d97706 !important;
+      color: #ffffff !important;
+      border-color: #d97706 !important;
+      box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.35) !important;
+      font-weight: 700 !important;
+    }
+    .toggle-radio-purple:checked + label,
+    .toggle-radio-purple:checked + .toggle-label {
+      background-color: #7c3aed !important;
+      color: #ffffff !important;
+      border-color: #7c3aed !important;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.35) !important;
+      font-weight: 700 !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
@@ -1577,13 +1626,21 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
                   <div class="flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-1">
                       <input type="radio" name="machineStatus" id="st_first" value="First Bulk Print" v-model="form.machineStatus" class="toggle-radio hidden" />
-                      <label for="st_first" class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">
+                      <label
+                        for="st_first"
+                        :class="form.machineStatus === 'First Bulk Print' ? 'bg-sky-600 text-white border-sky-600 ring-2 ring-sky-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >
                         🆕 Hàng SX lần đầu
                       </label>
                     </div>
                     <div class="relative flex-1">
                       <input type="radio" name="machineStatus" id="st_repeat" value="Repeat Print" v-model="form.machineStatus" class="toggle-radio hidden" />
-                      <label for="st_repeat" class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">
+                      <label
+                        for="st_repeat"
+                        :class="form.machineStatus === 'Repeat Print' ? 'bg-sky-600 text-white border-sky-600 ring-2 ring-sky-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >
                         🔁 Hàng SX nhiều lần
                       </label>
                     </div>
@@ -1595,20 +1652,32 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
                   <div class="flex flex-wrap gap-2.5 items-center">
                     <div class="relative flex-1 min-w-[110px]">
                       <input type="radio" name="priority" id="pr_imm" value="Immediate" v-model="form.priority" class="toggle-radio-danger hidden" />
-                      <label for="pr_imm" class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">
+                      <label
+                        for="pr_imm"
+                        :class="form.priority === 'Immediate' ? 'bg-red-600 text-white border-red-600 ring-2 ring-red-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >
                         🔴 Hỗ trợ ngay
                       </label>
                     </div>
                     <div class="relative flex-1 min-w-[110px]">
                       <input type="radio" name="priority" id="pr_hold" value="Hold" v-model="form.priority" class="toggle-radio-warning hidden" />
-                      <label for="pr_hold" class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">
+                      <label
+                        for="pr_hold"
+                        :class="form.priority === 'Hold' ? 'bg-amber-500 text-white border-amber-500 ring-2 ring-amber-300/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >
                         🟡 Chạy tạm
                       </label>
                     </div>
                     <div class="relative flex-1 min-w-[110px] flex flex-col gap-1.5">
                       <div>
                         <input type="radio" name="priority" id="pr_other" value="Other" v-model="form.priority" class="toggle-radio-purple hidden" />
-                        <label for="pr_other" class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">
+                        <label
+                          for="pr_other"
+                          :class="form.priority === 'Other' ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                          class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                        >
                           📌 Khác
                         </label>
                       </div>
@@ -1739,19 +1808,35 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
                   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div class="relative">
                       <input type="radio" name="errCat" id="cat_man" value="MAN" v-model="form.errCat" class="toggle-radio-purple hidden" />
-                      <label for="cat_man" class="toggle-label flex justify-center items-center px-2 py-2 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">Con người</label>
+                      <label
+                        for="cat_man"
+                        :class="form.errCat === 'MAN' ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex justify-center items-center px-2 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
+                      >Con người</label>
                     </div>
                     <div class="relative">
                       <input type="radio" name="errCat" id="cat_mac" value="MACHINE" v-model="form.errCat" class="toggle-radio-purple hidden" />
-                      <label for="cat_mac" class="toggle-label flex justify-center items-center px-2 py-2 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">Máy móc</label>
+                      <label
+                        for="cat_mac"
+                        :class="form.errCat === 'MACHINE' ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex justify-center items-center px-2 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
+                      >Máy móc</label>
                     </div>
                     <div class="relative">
                       <input type="radio" name="errCat" id="cat_mat" value="MATERIAL" v-model="form.errCat" class="toggle-radio-purple hidden" />
-                      <label for="cat_mat" class="toggle-label flex justify-center items-center px-2 py-2 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">Vật tư</label>
+                      <label
+                        for="cat_mat"
+                        :class="form.errCat === 'MATERIAL' ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex justify-center items-center px-2 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
+                      >Vật tư</label>
                     </div>
                     <div class="relative">
                       <input type="radio" name="errCat" id="cat_met" value="METHOD" v-model="form.errCat" class="toggle-radio-purple hidden" />
-                      <label for="cat_met" class="toggle-label flex justify-center items-center px-2 py-2 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">P.Pháp</label>
+                      <label
+                        for="cat_met"
+                        :class="form.errCat === 'METHOD' ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex justify-center items-center px-2 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
+                      >P.Pháp</label>
                     </div>
                   </div>
                 </div>
@@ -1761,15 +1846,27 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div class="relative">
                       <input type="radio" name="errType" id="typ_prepress" value="Prepress" v-model="form.errType" class="toggle-radio-purple hidden" />
-                      <label for="typ_prepress" class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">💻 Trước in</label>
+                      <label
+                        for="typ_prepress"
+                        :class="form.errType === 'Prepress' ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
+                      >💻 Trước in</label>
                     </div>
                     <div class="relative">
                       <input type="radio" name="errType" id="typ_press" value="Press" v-model="form.errType" class="toggle-radio-purple hidden" />
-                      <label for="typ_press" class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">🖨️ Trong in</label>
+                      <label
+                        for="typ_press"
+                        :class="form.errType === 'Press' ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
+                      >🖨️ Trong in</label>
                     </div>
                     <div class="relative">
                       <input type="radio" name="errType" id="typ_postpress" value="PostPress" v-model="form.errType" class="toggle-radio-purple hidden" />
-                      <label for="typ_postpress" class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border border-slate-200 dark:border-slate-700 rounded-lg cursor-pointer text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800">✂️ Sau in</label>
+                      <label
+                        for="typ_postpress"
+                        :class="form.errType === 'PostPress' ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
+                      >✂️ Sau in</label>
                     </div>
                   </div>
                 </div>
@@ -1860,11 +1957,19 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
                   <div class="flex gap-3">
                     <div class="relative flex-1">
                       <input type="radio" name="chkQuality" id="qa_ok" value="OK" v-model="form.chkQuality" class="toggle-radio-success hidden" />
-                      <label for="qa_ok" class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">✅ Đạt chuẩn</label>
+                      <label
+                        for="qa_ok"
+                        :class="form.chkQuality === 'OK' ? 'bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >✅ Đạt chuẩn</label>
                     </div>
                     <div class="relative flex-1">
                       <input type="radio" name="chkQuality" id="qa_ng" value="NG" v-model="form.chkQuality" class="toggle-radio-danger hidden" />
-                      <label for="qa_ng" class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">❌ Chưa đạt</label>
+                      <label
+                        for="qa_ng"
+                        :class="form.chkQuality === 'NG' ? 'bg-red-600 text-white border-red-600 ring-2 ring-red-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >❌ Chưa đạt</label>
                     </div>
                   </div>
                 </div>
@@ -1874,15 +1979,27 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
                   <div class="flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-1">
                       <input type="radio" name="chkStatus" id="st_done" value="DONE" v-model="form.chkStatus" class="toggle-radio-success hidden" />
-                      <label for="st_done" class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">🟢 Đã khắc phục</label>
+                      <label
+                        for="st_done"
+                        :class="form.chkStatus === 'DONE' ? 'bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >🟢 Đã khắc phục</label>
                     </div>
                     <div class="relative flex-1">
                       <input type="radio" name="chkStatus" id="st_monitor" value="MONITOR" v-model="form.chkStatus" class="toggle-radio-warning hidden" />
-                      <label for="st_monitor" class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">🟡 Đang theo dõi</label>
+                      <label
+                        for="st_monitor"
+                        :class="form.chkStatus === 'MONITOR' ? 'bg-amber-500 text-white border-amber-500 ring-2 ring-amber-300/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >🟡 Đang theo dõi</label>
                     </div>
                     <div class="relative flex-1">
                       <input type="radio" name="chkStatus" id="st_support" value="SUPPORT" v-model="form.chkStatus" class="toggle-radio-danger hidden" />
-                      <label for="st_support" class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border border-slate-200 dark:border-slate-700 rounded-xl cursor-pointer text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 w-full">🔴 Cần hỗ trợ</label>
+                      <label
+                        for="st_support"
+                        :class="form.chkStatus === 'SUPPORT' ? 'bg-red-600 text-white border-red-600 ring-2 ring-red-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
+                        class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
+                      >🔴 Cần hỗ trợ</label>
                     </div>
                   </div>
                 </div>

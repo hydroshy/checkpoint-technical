@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { LOGIN_HTML } from './views/login.view';
 import { DASHBOARD_HTML } from './views/dashboard.view';
 import { CONTROL_PANEL_HTML } from './views/control-panel.view';
+import { FORM_REQUEST_HTML } from './views/form-request.view';
 
 @Controller()
 export class AppController {
@@ -115,6 +116,14 @@ export class AppController {
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(CONTROL_PANEL_HTML);
+  }
+
+  @Get('form-request')
+  @ApiExcludeEndpoint()
+  getFormRequestPage(@Req() req: Request, @Res() res: Response) {
+    this.setNoCacheHeaders(res);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(FORM_REQUEST_HTML);
   }
 
   @Get('reset-session')

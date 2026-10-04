@@ -525,6 +525,23 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               <i class="fa-solid fa-table-list w-4 text-center text-xs text-emerald-500"></i>
               <span class="truncate">Phiếu Yêu Cầu Kỹ Thuật</span>
             </button>
+            <a
+              href="/form-request"
+              target="_blank"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-between transition text-left cursor-pointer"
+              title="Mở form chia sẻ công khai"
+            >
+              <div class="flex items-center gap-2.5 truncate">
+                <i class="fa-solid fa-share-nodes w-4 text-center text-xs text-sky-500"></i>
+                <span class="truncate">Form Công Khai</span>
+              </div>
+              <span
+                class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded uppercase"
+                :class="isPublicFormEnabled ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'"
+              >
+                {{ isPublicFormEnabled ? 'Bật' : 'Tắt' }}
+              </span>
+            </a>
           </div>
 
           <!-- GROUP 2: DANH MỤC THIẾT BỊ & NHÂN SỰ -->
@@ -616,6 +633,79 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             >
               <i class="fa-solid fa-arrows-rotate"></i> Cập nhật số liệu
             </button>
+          </div>
+
+          <!-- Public Form Sharing Card (Admin Control Panel) -->
+          <div class="glass-card rounded-2xl p-5 border border-sky-500/20 bg-gradient-to-r from-sky-500/5 via-indigo-500/5 to-purple-500/5 space-y-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-xl text-sky-500 shadow-sm">
+                  <i class="fa-solid fa-share-nodes"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2.5 flex-wrap">
+                    <h3 class="text-base font-bold tracking-tight">Chia Sẻ Form Yêu Cầu Kỹ Thuật (Public Form)</h3>
+                    <span
+                      class="text-[11px] px-2.5 py-0.5 rounded-full font-mono font-bold border transition"
+                      :class="isPublicFormEnabled ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 'bg-slate-500/10 text-slate-500 border-slate-500/20'"
+                    >
+                      <i class="fa-solid fa-circle text-[7px] mr-1" :class="isPublicFormEnabled ? 'text-emerald-500 animate-pulse' : 'text-slate-400'"></i>
+                      {{ isPublicFormEnabled ? 'ĐANG BẬT (CÔNG KHAI)' : 'ĐANG TẮT (NỘI BỘ)' }}
+                    </span>
+                  </div>
+                  <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                    Khi bật, nhân viên xưởng hoặc các bên liên quan có thể truy cập <b>/form-request</b> và gửi phiếu trực tiếp mà không cần đăng nhập tài khoản.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Switch Toggle Button -->
+              <div class="flex items-center gap-3 self-end sm:self-center bg-white/60 dark:bg-slate-900/60 p-2 rounded-2xl border border-slate-200/80 dark:border-slate-800">
+                <span class="text-xs font-bold" :class="isPublicFormEnabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'">
+                  {{ isPublicFormEnabled ? 'Đang mở' : 'Đang đóng' }}
+                </span>
+                <button
+                  type="button"
+                  @click="togglePublicForm"
+                  :disabled="togglingPublicForm"
+                  :title="isPublicFormEnabled ? 'Nhấn để tắt form công khai' : 'Nhấn để bật form công khai'"
+                  class="relative inline-flex h-6 w-12 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 select-none"
+                  :class="isPublicFormEnabled ? 'bg-sky-600' : 'bg-slate-300 dark:bg-slate-700'"
+                >
+                  <span
+                    class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out"
+                    :class="isPublicFormEnabled ? 'translate-x-6' : 'translate-x-0'"
+                  ></span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Public Link & Action Buttons -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
+              <div class="flex-1 flex items-center gap-2.5 px-4 py-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-mono text-slate-700 dark:text-slate-300 overflow-hidden shadow-inner">
+                <i class="fa-solid fa-link text-sky-500 text-xs flex-shrink-0"></i>
+                <span class="truncate select-all font-semibold">{{ publicFormUrl }}</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  @click="copyPublicFormLink"
+                  class="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow-sm cursor-pointer whitespace-nowrap active:scale-95"
+                >
+                  <i :class="copySuccess ? 'fa-solid fa-check text-emerald-300' : 'fa-regular fa-copy'"></i>
+                  <span>{{ copySuccess ? 'Đã sao chép!' : 'Sao chép link' }}</span>
+                </button>
+                <a
+                  :href="publicFormUrl"
+                  target="_blank"
+                  class="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer whitespace-nowrap text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700"
+                  title="Mở biểu mẫu công khai trong tab mới"
+                >
+                  <i class="fa-solid fa-arrow-up-right-from-square text-xs text-sky-500"></i>
+                  <span>Mở form</span>
+                </a>
+              </div>
+            </div>
           </div>
 
           <!-- KPI Cards -->
@@ -1336,6 +1426,74 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
         // Overview stats
         const stats = ref({});
+
+        // Public Form Sharing Configuration
+        const isPublicFormEnabled = ref(false);
+        const togglingPublicForm = ref(false);
+        const copySuccess = ref(false);
+        const publicFormUrl = computed(() => {
+          if (typeof window !== 'undefined') {
+            return window.location.origin + '/form-request';
+          }
+          return '/form-request';
+        });
+
+        const loadPublicFormStatus = async () => {
+          try {
+            const res = await fetch('/api/public/form-status');
+            if (res.ok) {
+              const data = await res.json();
+              isPublicFormEnabled.value = !!(data.enabled ?? data.isPublicFormEnabled);
+            }
+          } catch (e) {
+            console.error('Failed to load public form status:', e);
+          }
+        };
+
+        const togglePublicForm = async () => {
+          if (togglingPublicForm.value) return;
+          togglingPublicForm.value = true;
+          const targetState = !isPublicFormEnabled.value;
+          try {
+            const res = await fetch('/api/settings/public-form', {
+              method: 'PUT',
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+              body: JSON.stringify({ isPublicFormEnabled: targetState, enabled: targetState }),
+              credentials: 'include'
+            });
+            if (res.ok) {
+              const data = await res.json();
+              isPublicFormEnabled.value = !!(data.enabled ?? data.isPublicFormEnabled ?? targetState);
+              showToast(isPublicFormEnabled.value ? 'Đã BẬT chia sẻ form công khai' : 'Đã TẮT chia sẻ form công khai');
+            } else {
+              showToast('Không thể cập nhật cấu hình form công khai', true);
+            }
+          } catch (e) {
+            showToast('Lỗi kết nối máy chủ', true);
+          } finally {
+            togglingPublicForm.value = false;
+          }
+        };
+
+        const copyPublicFormLink = async () => {
+          try {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              await navigator.clipboard.writeText(publicFormUrl.value);
+            } else {
+              const textarea = document.createElement('textarea');
+              textarea.value = publicFormUrl.value;
+              document.body.appendChild(textarea);
+              textarea.select();
+              document.execCommand('copy');
+              document.body.removeChild(textarea);
+            }
+            copySuccess.value = true;
+            showToast('Đã sao chép liên kết form công khai vào clipboard!');
+            setTimeout(() => { copySuccess.value = false; }, 2500);
+          } catch (e) {
+            showToast('Không thể tự động sao chép, vui lòng copy thủ công', true);
+          }
+        };
 
         // Requests Master Table
         const requestsList = ref([]);
@@ -2628,6 +2786,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           loadMachines();
           loadRequests();
           loadEmployees();
+          loadPublicFormStatus();
           if (currentUser.value.role === 'ADMIN' || (currentUser.value.permissions && currentUser.value.permissions.canAccessControlPanel)) {
             loadUsers();
           }
@@ -2721,7 +2880,14 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           showAddMachineModal,
           showAddEmployeeModal,
           showAddUserModal,
-          showExcelModal
+          showExcelModal,
+          isPublicFormEnabled,
+          togglingPublicForm,
+          copySuccess,
+          publicFormUrl,
+          loadPublicFormStatus,
+          togglePublicForm,
+          copyPublicFormLink
         };
       }
     }).mount('#app');

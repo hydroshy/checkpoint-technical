@@ -199,6 +199,12 @@ export interface TechnicalRequestRecord {
   updatedAt: string;
 }
 
+export interface SystemSettingsRecord {
+  isPublicFormEnabled: boolean;
+  updatedAt?: string;
+  updatedBy?: string;
+}
+
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
@@ -216,6 +222,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private formLookupOptionsCache: FormLookupOptionRecord[] = [];
   private sheetListsCache: SheetListsRowRecord[] = [];
   private requestsCache: TechnicalRequestRecord[] = [];
+  private settingsCache: SystemSettingsRecord = { isPublicFormEnabled: false };
 
   constructor() {
     this.dataDir = path.resolve(process.env.DATA_DIR || './data');
@@ -647,6 +654,17 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
           `,
         },
+        {
+          name: 'system_settings',
+          sql: `
+            CREATE TABLE IF NOT EXISTS system_settings (
+              key VARCHAR(100) PRIMARY KEY,
+              value JSONB NOT NULL,
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_by VARCHAR(255)
+            );
+          `,
+        },
       ];
 
       for (const t of tableStatements) {
@@ -657,7 +675,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      this.logger.log('✅ PostgreSQL Schema verified / initialized (9 tables: users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests)');
+      this.logger.log('✅ PostgreSQL Schema verified / initialized (10 tables: users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests, system_settings)');
     } catch (e: any) {
       this.logger.error(`Failed to initialize PostgreSQL schema: ${e.message}`);
     }
@@ -885,6 +903,26 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         .filter(r => r.id !== '2f8c2b65-9660-4041-9c22-aeac7310fdce' && r.docNo !== 'REQ-20261003-1945');
     }
 
+    // 10. System Settings
+    try {
+      const settingsRes = await this.pgPool.query("SELECT * FROM system_settings WHERE key = 'public_form'");
+      if (settingsRes.rows.length > 0) {
+        const val = typeof settingsRes.rows[0].value === 'string'
+          ? JSON.parse(settingsRes.rows[0].value)
+          : settingsRes.rows[0].value;
+        this.settingsCache = {
+          isPublicFormEnabled: !!val.isPublicFormEnabled,
+          updatedAt: settingsRes.rows[0].updated_at ? new Date(settingsRes.rows[0].updated_at).toISOString() : undefined,
+          updatedBy: settingsRes.rows[0].updated_by || undefined,
+        };
+      } else {
+        this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: false });
+      }
+    } catch (err: any) {
+      this.logger.warn(`Could not load system_settings from PG (${err.message}). Using local JSON fallback.`);
+      this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: false });
+    }
+
     this.logger.log(`📦 Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.formLookupOptionsCache.length} lookup options, ${this.requestsCache.length} v4 requests.`);
   }
 
@@ -944,6 +982,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     this.sheetListsCache = this.readJson<SheetListsRowRecord[]>('sheet_lists_do_not_delete.json', []);
     this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', [])
       .filter(r => r.id !== '2f8c2b65-9660-4041-9c22-aeac7310fdce' && r.docNo !== 'REQ-20261003-1945');
+    this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: false });
 
     // Sync employeesCache from requesters
     if (this.requestersCache.length > 0) {
@@ -1769,6 +1808,41 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       return true;
     }
     return false;
+  }
+
+  getSettings(): SystemSettingsRecord {
+    return this.settingsCache;
+  }
+
+  saveSettings(): void {
+    this.writeJson('settings.json', this.settingsCache);
+  }
+
+  updateSettings(updates: Partial<SystemSettingsRecord>, updatedBy?: string): SystemSettingsRecord {
+    const now = new Date().toISOString();
+    this.settingsCache = {
+      ...this.settingsCache,
+      ...updates,
+      updatedAt: now,
+      ...(updatedBy ? { updatedBy } : {}),
+    };
+    this.saveSettings();
+
+    if (this.isPgConnected && this.pgPool) {
+      this.pgPool.query(
+        `INSERT INTO system_settings (key, value, updated_at, updated_by)
+         VALUES ($1, $2, $3, $4)
+         ON CONFLICT (key) DO UPDATE SET
+           value = EXCLUDED.value,
+           updated_at = EXCLUDED.updated_at,
+           updated_by = EXCLUDED.updated_by`,
+        ['public_form', JSON.stringify({ isPublicFormEnabled: this.settingsCache.isPublicFormEnabled }), now, updatedBy || null]
+      ).catch((err: any) => {
+        this.logger.error(`PG Error updating system_settings: ${err.message}`);
+      });
+    }
+
+    return this.settingsCache;
   }
 
   async onModuleDestroy() {

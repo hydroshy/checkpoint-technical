@@ -246,6 +246,17 @@ ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ D
 CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
 CREATE INDEX IF NOT EXISTS idx_tech_req_created_at ON technical_requests(created_at);
 
+-- 3.10. Bảng system_settings (Cấu hình hệ thống, bao gồm Public Form)
+CREATE TABLE IF NOT EXISTS system_settings (
+  key VARCHAR(100) PRIMARY KEY,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by VARCHAR(255)
+);
+INSERT INTO system_settings (key, value, updated_at, updated_by)
+VALUES ('public_form', '{"isPublicFormEnabled":false}'::jsonb, now(), 'system')
+ON CONFLICT (key) DO NOTHING;
+
 -- ------------------------------------------------------------------------------
 -- 4. DỮ LIỆU MẪU BAN ĐẦU (SEED DATA TỪ HỆ THỐNG GỐC EXCEL & JSON)
 -- ------------------------------------------------------------------------------

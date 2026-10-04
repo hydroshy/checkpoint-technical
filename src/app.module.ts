@@ -8,6 +8,7 @@ import { MachinesModule } from './modules/machines/machines.module';
 import { EmployeesModule } from './modules/employees/employees.module';
 import { UsersModule } from './modules/users/users.module';
 import { WeeklyDashboardModule } from './modules/weekly-dashboard/weekly-dashboard.module';
+import { SettingsModule } from './modules/settings/settings.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { WeeklyDashboardModule } from './modules/weekly-dashboard/weekly-dashboa
     EmployeesModule,
     UsersModule,
     WeeklyDashboardModule,
+    SettingsModule,
   ],
   controllers: [AppController],
 })

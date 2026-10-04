@@ -182,6 +182,14 @@ CREATE TABLE IF NOT EXISTS technical_requests (
 );
 CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
 
+-- System Settings
+CREATE TABLE IF NOT EXISTS system_settings (
+  key VARCHAR(100) PRIMARY KEY,
+  value JSONB NOT NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by VARCHAR(255)
+);
+
 -- ==============================================================================
 -- INITIAL DATA SEEDING (FROM EXCEL SPREADSHEETS)
 -- ==============================================================================
