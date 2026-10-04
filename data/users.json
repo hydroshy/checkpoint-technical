@@ -7,6 +7,11 @@
     "fullName": "Super Administrator",
     "role": "ADMIN",
     "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": true,
+      "canAccessControlPanel": true
+    },
     "createdAt": "2026-10-03T08:28:04.802Z",
     "updatedAt": "2026-10-03T08:28:04.802Z"
   },
@@ -18,6 +23,11 @@
     "fullName": "Kỹ Thuật Viên Trưởng",
     "role": "TECHNICIAN",
     "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": true,
+      "canAccessControlPanel": false
+    },
     "createdAt": "2026-10-03T08:28:04.802Z",
     "updatedAt": "2026-10-03T08:28:04.802Z"
   },
@@ -29,6 +39,11 @@
     "fullName": "Nguyễn Văn A (SX)",
     "role": "EMPLOYEE",
     "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
     "createdAt": "2026-10-03T08:28:04.802Z",
     "updatedAt": "2026-10-03T08:28:04.802Z"
   }

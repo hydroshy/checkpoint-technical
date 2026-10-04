@@ -158,7 +158,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
-              <span class="text-sm font-extrabold"><span class="text-sky-500">CHECKPOINT</span> Systems</span>
+              <span class="text-sm font-extrabold"><span class="text-sky-500">Checkpoint</span> Systems</span>
               <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">Admin</span>
             </div>
             <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Control Panel</span>
@@ -369,7 +369,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer text-slate-700 dark:text-slate-300 hover:text-sky-500"
             >
               <i class="fa-solid fa-file-signature w-4 text-center text-xs text-violet-500"></i>
-              <span class="truncate">Phiếu Nhập Liệu V4.1</span>
+              <span class="truncate">Phiếu Nhập Liệu</span>
             </a>
           </div>
 
@@ -892,6 +892,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                     <th class="py-3 px-4">Họ và Tên</th>
                     <th class="py-3 px-4">Email</th>
                     <th class="py-3 px-4">Vai Trò (Role)</th>
+                    <th class="py-3 px-4">Phân Quyền (Permissions)</th>
                     <th class="py-3 px-4">Trạng Thái</th>
                     <th class="py-3 px-4 text-right">Thao Tác</th>
                   </tr>
@@ -912,6 +913,40 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                       >
                         {{ u.role }}
                       </span>
+                    </td>
+                    <td class="py-3 px-4">
+                      <div class="flex flex-wrap items-center gap-3">
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] font-medium select-none" :title="'Cấp quyền Tạo phiếu yêu cầu cho @' + u.username">
+                          <input
+                            type="checkbox"
+                            :checked="getUserPerm(u, 'canCreateRequest')"
+                            :disabled="u.username === 'admin'"
+                            @change="toggleUserPerm(u, 'canCreateRequest', $event.target.checked)"
+                            class="rounded text-sky-600 focus:ring-sky-500 h-4 w-4 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer disabled:opacity-50"
+                          />
+                          <span class="text-slate-700 dark:text-slate-200">Tạo phiếu yêu cầu</span>
+                        </label>
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] font-medium select-none" :title="'Cấp quyền Xem Dashboard KPI cho @' + u.username">
+                          <input
+                            type="checkbox"
+                            :checked="getUserPerm(u, 'canViewKpi')"
+                            :disabled="u.username === 'admin'"
+                            @change="toggleUserPerm(u, 'canViewKpi', $event.target.checked)"
+                            class="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer disabled:opacity-50"
+                          />
+                          <span class="text-slate-700 dark:text-slate-200">Xem Dashboard KPI</span>
+                        </label>
+                        <label class="inline-flex items-center gap-1.5 cursor-pointer text-[11px] font-medium select-none" :title="'Cấp quyền Quản trị viên cho @' + u.username">
+                          <input
+                            type="checkbox"
+                            :checked="getUserPerm(u, 'canAccessControlPanel')"
+                            :disabled="u.username === 'admin'"
+                            @change="toggleUserPerm(u, 'canAccessControlPanel', $event.target.checked)"
+                            class="rounded text-amber-600 focus:ring-amber-500 h-4 w-4 border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 cursor-pointer disabled:opacity-50"
+                          />
+                          <span class="font-bold text-amber-600 dark:text-amber-400">Quản trị viên</span>
+                        </label>
+                      </div>
                     </td>
                     <td class="py-3 px-4">
                       <span class="inline-flex items-center gap-1.5 text-[11px] font-bold" :class="u.isActive ? 'text-emerald-500' : 'text-red-500'">
@@ -1117,11 +1152,28 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           </div>
           <div class="space-y-1">
             <label class="font-bold text-slate-500">Vai trò (Role)</label>
-            <select v-model="newUser.role" class="input-box w-full px-3 py-2 rounded-xl font-bold cursor-pointer">
+            <select v-model="newUser.role" @change="onNewUserRoleChange" class="input-box w-full px-3 py-2 rounded-xl font-bold cursor-pointer">
               <option value="EMPLOYEE">EMPLOYEE (Nhân viên nhập liệu)</option>
               <option value="TECHNICIAN">TECHNICIAN (Kỹ thuật viên)</option>
               <option value="ADMIN">ADMIN (Quản trị viên toàn quyền)</option>
             </select>
+          </div>
+          <div class="space-y-2 pt-2 border-t border-slate-200 dark:border-slate-800">
+            <label class="font-bold text-slate-500 block">Cấp quyền truy cập (Permissions)</label>
+            <div class="space-y-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold select-none">
+                <input type="checkbox" v-model="newUser.permissions.canCreateRequest" class="rounded text-sky-600 focus:ring-sky-500 h-4 w-4">
+                <span>Tạo phiếu yêu cầu</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold select-none">
+                <input type="checkbox" v-model="newUser.permissions.canViewKpi" class="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4">
+                <span>Xem Dashboard KPI</span>
+              </label>
+              <label class="flex items-center gap-2 cursor-pointer text-xs font-semibold select-none">
+                <input type="checkbox" v-model="newUser.permissions.canAccessControlPanel" @change="e => { if (e.target.checked) newUser.role = 'ADMIN'; }" class="rounded text-amber-600 focus:ring-amber-500 h-4 w-4">
+                <span class="text-amber-600 dark:text-amber-400 font-bold">Quản trị viên</span>
+              </label>
+            </div>
           </div>
           <div class="pt-2 flex gap-3">
             <button type="button" @click="closeModal('modal-add-user')" class="flex-1 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-bold">Hủy</button>
@@ -1215,7 +1267,18 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
         // Users
         const usersList = ref([]);
-        const newUser = ref({ username: '', password: '', fullName: '', email: '', role: 'EMPLOYEE' });
+        const newUser = ref({
+          username: '',
+          password: '',
+          fullName: '',
+          email: '',
+          role: 'EMPLOYEE',
+          permissions: {
+            canCreateRequest: true,
+            canViewKpi: false,
+            canAccessControlPanel: false
+          }
+        });
 
         // Computed
         const currentTabLabel = computed(() => {
@@ -1576,8 +1639,103 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           } catch (e) {}
         };
 
+        const getUserPerm = (u, permKey) => {
+          if (!u) return false;
+          if (u.username === 'admin') return true;
+          if (u.permissions && u.permissions[permKey] !== undefined) {
+            return Boolean(u.permissions[permKey]);
+          }
+          if (u.role === 'ADMIN') return true;
+          if (u.role === 'TECHNICIAN') {
+            return permKey === 'canCreateRequest' || permKey === 'canViewKpi';
+          }
+          if (u.role === 'EMPLOYEE') {
+            return permKey === 'canCreateRequest';
+          }
+          return false;
+        };
+
+        const toggleUserPerm = async (u, permKey, checked) => {
+          const currentPerms = {
+            canCreateRequest: getUserPerm(u, 'canCreateRequest'),
+            canViewKpi: getUserPerm(u, 'canViewKpi'),
+            canAccessControlPanel: getUserPerm(u, 'canAccessControlPanel')
+          };
+          currentPerms[permKey] = checked;
+
+          let newRole = u.role;
+          if (permKey === 'canAccessControlPanel') {
+            if (checked) {
+              newRole = 'ADMIN';
+            } else if (u.role === 'ADMIN') {
+              newRole = 'EMPLOYEE';
+            }
+          }
+
+          u.permissions = currentPerms;
+          u.role = newRole;
+
+          try {
+            const payload = {
+              fullName: u.fullName,
+              email: u.email,
+              role: u.role,
+              isActive: u.isActive,
+              permissions: currentPerms
+            };
+            const res = await fetch('/api/users/' + u.id, {
+              method: 'PUT',
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+              credentials: 'include',
+              body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+              showToast('Đã cập nhật phân quyền cho @' + u.username);
+            } else {
+              const resPerms = await fetch('/api/users/' + u.id + '/permissions', {
+                method: 'PUT',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
+                body: JSON.stringify(currentPerms)
+              });
+              if (resPerms.ok) {
+                showToast('Đã cập nhật phân quyền cho @' + u.username);
+              } else {
+                const err = await res.json().catch(() => ({}));
+                showToast(err.message || 'Lỗi cập nhật phân quyền', true);
+                loadUsers();
+              }
+            }
+          } catch (e) {
+            showToast('Lỗi kết nối khi cập nhật phân quyền', true);
+            loadUsers();
+          }
+        };
+
+        const onNewUserRoleChange = () => {
+          if (newUser.value.role === 'ADMIN') {
+            newUser.value.permissions = { canCreateRequest: true, canViewKpi: true, canAccessControlPanel: true };
+          } else if (newUser.value.role === 'TECHNICIAN') {
+            newUser.value.permissions = { canCreateRequest: true, canViewKpi: true, canAccessControlPanel: false };
+          } else {
+            newUser.value.permissions = { canCreateRequest: true, canViewKpi: false, canAccessControlPanel: false };
+          }
+        };
+
         const openAddUserModal = () => {
-          newUser.value = { username: '', password: 'Checkpoint@123', fullName: '', email: '', role: 'EMPLOYEE' };
+          newUser.value = {
+            username: '',
+            password: 'Checkpoint@123',
+            fullName: '',
+            email: '',
+            role: 'EMPLOYEE',
+            permissions: {
+              canCreateRequest: true,
+              canViewKpi: false,
+              canAccessControlPanel: false
+            }
+          };
           openModal('modal-add-user');
         };
 
@@ -1703,7 +1861,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           loadMachines();
           loadRequests();
           loadEmployees();
-          if (currentUser.value.role === 'ADMIN') {
+          if (currentUser.value.role === 'ADMIN' || (currentUser.value.permissions && currentUser.value.permissions.canAccessControlPanel)) {
             loadUsers();
           }
         });
@@ -1732,6 +1890,9 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           newEmployee,
           usersList,
           newUser,
+          getUserPerm,
+          toggleUserPerm,
+          onNewUserRoleChange,
           setTheme,
           toggleTheme,
           switchTab,

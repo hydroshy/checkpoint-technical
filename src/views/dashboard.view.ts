@@ -246,116 +246,21 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
-              <span class="text-sm font-extrabold"><span class="text-sky-500">CHECKPOINT</span> Systems</span>
-              <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-500/15 text-sky-600 dark:text-sky-400 border border-sky-500/30">Weekly Ops</span>
+              <span class="text-sm font-extrabold"><span class="text-sky-500">Checkpoint</span> Systems</span>
             </div>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Weekly Technical Dashboard & Maintenance</span>
+            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Technical Dashboard</span>
           </div>
         </a>
-
-        <!-- Portal Main Tabs (Desktop) -->
-        <nav class="hidden lg:flex items-center gap-1 ml-4 pl-4 border-l border-slate-200 dark:border-slate-800 text-xs font-semibold">
-          <button
-            @click="switchTab('weekly-kpi')"
-            :class="activeTab === 'weekly-kpi' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-chart-pie text-xs"></i> <span>Dashboard KPI</span>
-          </button>
-          
-          <button
-            @click="switchTab('weekly-requests')"
-            :class="activeTab === 'weekly-requests' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-list-check text-xs"></i> <span>1. Phiếu Yêu Cầu</span>
-            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-sky-500 text-white font-mono">{{ weeklyRequests.length }}</span>
-          </button>
-
-          <button
-            @click="switchTab('defect-logs')"
-            :class="activeTab === 'defect-logs' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-triangle-exclamation text-xs text-amber-500"></i> <span>2. Defect Log</span>
-            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500 text-white font-mono">{{ defectLogs.length }}</span>
-          </button>
-
-          <button
-            @click="switchTab('action-plans')"
-            :class="activeTab === 'action-plans' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-bullseye text-xs text-emerald-500"></i> <span>3. Action Plan</span>
-            <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500 text-white font-mono">{{ actionPlans.length }}</span>
-          </button>
-
-          <button
-            @click="switchTab('catalog')"
-            :class="activeTab === 'catalog' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-users-gear text-xs"></i> <span>Người Yêu Cầu & Máy</span>
-          </button>
-
-          <button
-            @click="switchTab('v4-form')"
-            :class="activeTab === 'v4-form' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-file-signature text-xs"></i> <span>Phiếu Chi Tiết V4.1</span>
-          </button>
-
-          <button
-            @click="switchTab('v4-history')"
-            :class="activeTab === 'v4-history' ? 'bg-sky-500/15 text-sky-600 dark:text-sky-400 font-bold' : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'"
-            class="px-3 py-1.5 rounded-lg transition flex items-center gap-1.5 cursor-pointer"
-          >
-            <i class="fa-solid fa-clock-rotate-left text-xs"></i> <span>Lịch Sử V4</span>
-            <span v-if="historyTotal || historyItems.length" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-500 text-white font-mono">{{ historyTotal || historyItems.length }}</span>
-          </button>
-        </nav>
       </div>
 
-      <!-- Right User Menu & Controls -->
-      <div class="flex items-center gap-2 sm:gap-2.5">
-        <!-- Quick 1-Click Theme Toggle Button -->
-        <button
-          type="button"
-          @click="toggleTheme"
-          class="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
-          :title="currentTheme === 'dark' ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'"
-        >
-          <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
-        </button>
-
-        <!-- Swagger Docs Link -->
-        <a
-          href="/api/docs"
-          target="_blank"
-          class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 transition"
-          title="Tài liệu API Swagger"
-        >
-          <i class="fa-solid fa-book text-sky-500"></i>
-          <span>API Docs</span>
-        </a>
-
-        <!-- Switch View: Control Panel link for Admin / Technician -->
-        <a
-          v-if="isAdminOrTech"
-          href="/control-panel"
-          class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-700 transition"
-          title="Chuyển sang Giao diện Quản trị Control Panel"
-        >
-          <i class="fa-solid fa-sliders text-sky-500"></i>
-          <span>Control Panel</span>
-        </a>
-
+      <!-- Right User Menu & Controls (Gom tất cả icon/avatar vào 1 dropdown) -->
+      <div class="flex items-center">
         <!-- User Menu Dropdown Button -->
         <div class="relative">
           <button
             @click.stop="userMenuOpen = !userMenuOpen"
             class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition cursor-pointer select-none"
+            title="Tài khoản & Thiết lập"
           >
             <div class="w-6 h-6 rounded-full bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 flex items-center justify-center font-bold text-xs">
               {{ userInitials }}
@@ -438,66 +343,187 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       </div>
     </header>
 
-    <!-- MOBILE / TABLET HORIZONTAL SCROLLING TABS -->
-    <div class="lg:hidden flex overflow-x-auto border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-3 py-2 gap-1.5 text-xs font-bold custom-scrollbar">
-      <button
-        @click="switchTab('weekly-kpi')"
-        :class="activeTab === 'weekly-kpi' ? 'bg-sky-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-        class="flex-shrink-0 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
-      >
-        <i class="fa-solid fa-chart-pie"></i> KPI Dashboard
-      </button>
-      <button
-        @click="switchTab('weekly-requests')"
-        :class="activeTab === 'weekly-requests' ? 'bg-sky-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-        class="flex-shrink-0 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
-      >
-        <i class="fa-solid fa-list-check"></i> 1. Yêu Cầu ({{ weeklyRequests.length }})
-      </button>
-      <button
-        @click="switchTab('defect-logs')"
-        :class="activeTab === 'defect-logs' ? 'bg-sky-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-        class="flex-shrink-0 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
-      >
-        <i class="fa-solid fa-triangle-exclamation"></i> 2. Defect ({{ defectLogs.length }})
-      </button>
-      <button
-        @click="switchTab('action-plans')"
-        :class="activeTab === 'action-plans' ? 'bg-sky-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-        class="flex-shrink-0 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
-      >
-        <i class="fa-solid fa-bullseye"></i> 3. Action Plan ({{ actionPlans.length }})
-      </button>
-      <button
-        @click="switchTab('catalog')"
-        :class="activeTab === 'catalog' ? 'bg-sky-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-        class="flex-shrink-0 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
-      >
-        <i class="fa-solid fa-users-gear"></i> Người Yêu Cầu & Máy
-      </button>
-      <button
-        @click="switchTab('v4-form')"
-        :class="activeTab === 'v4-form' ? 'bg-sky-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-        class="flex-shrink-0 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
-      >
-        <i class="fa-solid fa-file-signature"></i> Phiếu V4.1
-      </button>
-      <button
-        @click="switchTab('v4-history'); loadHistory();"
-        :class="activeTab === 'v4-history' ? 'bg-sky-500 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300'"
-        class="flex-shrink-0 px-3 py-2 rounded-xl transition flex items-center gap-1.5"
-      >
-        <i class="fa-solid fa-clock-rotate-left"></i> Lịch Sử V4
-      </button>
-    </div>
-
     <!-- MAIN BODY -->
     <main class="flex-1 w-full max-w-7xl mx-auto p-4 sm:p-6 lg:p-8 pb-32">
 
       <!-- =========================================================================
+           PRIMARY NAVIGATION CARDS (Cụm thẻ Card điều hướng chính)
+           ========================================================================= -->
+      <section class="mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
+          
+          <!-- THẺ 1: TẠO PHIẾU YÊU CẦU (PHIẾU NHẬP LIỆU) -->
+          <div
+            @click="canCreateRequest ? switchTab('v4-form') : showToast('Tài khoản của bạn không có quyền Tạo phiếu yêu cầu', true)"
+            :class="[
+              isRequestActive ? 'border-sky-500 ring-2 ring-sky-500/20 shadow-lg bg-sky-50/50 dark:bg-sky-950/20' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900 shadow-sm',
+              !canCreateRequest ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'
+            ]"
+            class="relative rounded-2xl border p-5 sm:p-6 transition-all duration-200 flex flex-col justify-between overflow-hidden group select-none"
+          >
+            <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-sky-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-sky-500/20 transition-all"></div>
+
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3.5">
+                <div
+                  :class="isRequestActive ? 'bg-sky-500 text-white shadow-md shadow-sky-500/30' : 'bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20'"
+                  class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-transform group-hover:scale-105"
+                >
+                  <i class="fa-solid fa-file-circle-plus"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">Tạo phiếu yêu cầu</h2>
+                    <span v-if="!canCreateRequest" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400 border border-red-200 dark:border-red-900/50 flex items-center gap-1">
+                      <i class="fa-solid fa-lock text-[9px]"></i> Khóa quyền
+                    </span>
+                  </div>
+                  <span class="text-xs font-semibold text-sky-600 dark:text-sky-400">Phiếu Nhập Liệu</span>
+                </div>
+              </div>
+
+              <!-- Active Status Badge -->
+              <span
+                v-if="isRequestActive"
+                class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-sky-500 text-white shadow-sm flex items-center gap-1.5"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Đang xem
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
+              Khởi tạo và ghi nhận sự cố kỹ thuật, báo hỏng máy in, downtime & yêu cầu hỗ trợ sửa chữa bảo trì.
+            </p>
+
+            <!-- Sub Navigation Pills when card is active -->
+            <div v-if="isRequestActive" class="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center gap-2" @click.stop>
+              <button
+                type="button"
+                @click="switchTab('v4-form')"
+                :class="activeTab === 'v4-form' ? 'bg-sky-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-file-signature text-[11px]"></i> Phiếu Nhập Liệu
+              </button>
+              <button
+                type="button"
+                @click="switchTab('v4-history'); loadHistory();"
+                :class="activeTab === 'v4-history' ? 'bg-sky-500 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-clock-rotate-left text-[11px]"></i> Lịch Sử Phiếu
+                <span v-if="historyTotal || historyItems.length" class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">{{ historyTotal || historyItems.length }}</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- THẺ 2: DASHBOARD KPI (TECHNICAL DASHBOARD) -->
+          <div
+            @click="canViewKpi ? switchTab('weekly-kpi') : showToast('Tài khoản của bạn không có quyền Xem Dashboard KPI', true)"
+            :class="[
+              isKpiActive ? 'border-emerald-500 ring-2 ring-emerald-500/20 shadow-lg bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 bg-white dark:bg-slate-900 shadow-sm',
+              !canViewKpi ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'
+            ]"
+            class="relative rounded-2xl border p-5 sm:p-6 transition-all duration-200 flex flex-col justify-between overflow-hidden group select-none"
+          >
+            <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-emerald-500/20 transition-all"></div>
+
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-center gap-3.5">
+                <div
+                  :class="isKpiActive ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/30' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'"
+                  class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl transition-transform group-hover:scale-105"
+                >
+                  <i class="fa-solid fa-chart-pie"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight">Dashboard KPI</h2>
+                    <span v-if="!canViewKpi" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-600 dark:bg-red-950/50 dark:text-red-400 border border-red-200 dark:border-red-900/50 flex items-center gap-1">
+                      <i class="fa-solid fa-lock text-[9px]"></i> Khóa quyền
+                    </span>
+                  </div>
+                  <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Technical Dashboard</span>
+                </div>
+              </div>
+
+              <!-- Active Status Badge -->
+              <span
+                v-if="isKpiActive"
+                class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-500 text-white shadow-sm flex items-center gap-1.5"
+              >
+                <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span> Đang xem
+              </span>
+            </div>
+
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-3 leading-relaxed">
+              Theo dõi và phân tích chỉ số SLA, hiệu suất sửa chữa, tỷ lệ hoàn thành, Defect Logs & Action Plans.
+            </p>
+
+            <!-- Sub Navigation Pills when card is active -->
+            <div v-if="isKpiActive" class="mt-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60 flex flex-wrap items-center gap-2" @click.stop>
+              <button
+                type="button"
+                @click="switchTab('weekly-kpi')"
+                :class="activeTab === 'weekly-kpi' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-chart-pie text-[11px]"></i> Tổng Quan KPI
+              </button>
+              <button
+                type="button"
+                @click="switchTab('weekly-requests')"
+                :class="activeTab === 'weekly-requests' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-list-check text-[11px]"></i> 1. Phiếu Yêu Cầu
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">{{ weeklyRequests.length }}</span>
+              </button>
+              <button
+                type="button"
+                @click="switchTab('defect-logs')"
+                :class="activeTab === 'defect-logs' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-triangle-exclamation text-amber-500 text-[11px]"></i> 2. Defect Log
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-700 dark:text-amber-300 font-mono">{{ defectLogs.length }}</span>
+              </button>
+              <button
+                type="button"
+                @click="switchTab('action-plans')"
+                :class="activeTab === 'action-plans' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-bullseye text-emerald-500 text-[11px]"></i> 3. Action Plan
+                <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono">{{ actionPlans.length }}</span>
+              </button>
+              <button
+                type="button"
+                @click="switchTab('catalog')"
+                :class="activeTab === 'catalog' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
+                class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-users-gear text-[11px]"></i> Người Yêu Cầu & Máy
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Block notice if neither permission granted -->
+        <div v-if="!canCreateRequest && !canViewKpi" class="glass-card rounded-2xl p-8 text-center my-6 space-y-3">
+          <div class="w-16 h-16 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center text-2xl mx-auto">
+            <i class="fa-solid fa-user-lock"></i>
+          </div>
+          <h3 class="text-base font-bold text-slate-800 dark:text-slate-100">Chưa Được Phân Quyền Truy Cập</h3>
+          <p class="text-xs text-slate-500 max-w-md mx-auto">Tài khoản của bạn hiện chưa được cấp quyền 'Tạo phiếu yêu cầu' hoặc 'Xem Dashboard KPI'. Vui lòng liên hệ Quản trị viên để được cấp quyền.</p>
+        </div>
+      </section>
+
+      <!-- =========================================================================
            TAB 1: WEEKLY KPI DASHBOARD & CHARTS
            ========================================================================= -->
-      <div v-show="activeTab === 'weekly-kpi'" class="space-y-6">
+      <div v-show="canViewKpi && activeTab === 'weekly-kpi'" class="space-y-6">
         <!-- Top Banner -->
         <div class="glass-card rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-sky-500/10 via-transparent to-cyan-500/10 border-sky-500/20">
           <div>
@@ -741,7 +767,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <!-- =========================================================================
            TAB 2: SHEET 1_TECHNICAL_REQUESTS (28 RECORDS)
            ========================================================================= -->
-      <div v-show="activeTab === 'weekly-requests'" class="space-y-6">
+      <div v-show="canViewKpi && activeTab === 'weekly-requests'" class="space-y-6">
         <!-- Header & Action Toolbar -->
         <div class="glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -897,7 +923,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <!-- =========================================================================
            TAB 3: SHEET 2_DEFECT_LOG (4 RECORDS)
            ========================================================================= -->
-      <div v-show="activeTab === 'defect-logs'" class="space-y-6">
+      <div v-show="canViewKpi && activeTab === 'defect-logs'" class="space-y-6">
         <!-- Header & Action Toolbar -->
         <div class="glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -1040,7 +1066,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <!-- =========================================================================
            TAB 4: SHEET 3_ACTION_PLAN (5 RECORDS)
            ========================================================================= -->
-      <div v-show="activeTab === 'action-plans'" class="space-y-6">
+      <div v-show="canViewKpi && activeTab === 'action-plans'" class="space-y-6">
         <!-- Header & Action Toolbar -->
         <div class="glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -1176,7 +1202,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <!-- =========================================================================
            TAB 5: CATALOG (REQUESTERS: 30 & MACHINES: 121)
            ========================================================================= -->
-      <div v-show="activeTab === 'catalog'" class="space-y-6">
+      <div v-show="canViewKpi && activeTab === 'catalog'" class="space-y-6">
         <!-- Sub-tabs Toggle -->
         <div class="glass-card rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div class="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
@@ -1370,7 +1396,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <!-- =========================================================================
            TAB 1: BIỂU MẪU NHẬP LIỆU (TECHNICAL REQUEST FORM)
            ========================================================================= -->
-      <div v-show="activeTab === 'v4-form'" class="space-y-6">
+      <div v-show="canCreateRequest && activeTab === 'v4-form'" class="space-y-6">
         
         <!-- Header Info Card -->
         <header class="glass-card rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -1909,7 +1935,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       <!-- =========================================================================
            TAB 2: LỊCH SỬ PHIẾU YÊU CẦU (HISTORY & TRACKING)
            ========================================================================= -->
-      <div v-show="activeTab === 'v4-history'" class="space-y-6">
+      <div v-show="canCreateRequest && activeTab === 'v4-history'" class="space-y-6">
         
         <!-- Filter Bar -->
         <div class="glass-card rounded-2xl p-5 space-y-4">
@@ -2018,7 +2044,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     </main>
 
     <!-- FIXED BOTTOM ACTION BAR (FOR FORM TAB) -->
-    <div v-show="activeTab === 'v4-form'" class="fixed bottom-0 left-0 right-0 glass-header border-t border-slate-200 dark:border-slate-800 p-3 sm:p-4 z-40 backdrop-blur-md">
+    <div v-show="canCreateRequest && activeTab === 'v4-form'" class="fixed bottom-0 left-0 right-0 glass-header border-t border-slate-200 dark:border-slate-800 p-3 sm:p-4 z-40 backdrop-blur-md">
       <div class="max-w-5xl mx-auto flex flex-wrap gap-3 justify-between items-center">
         <button
           @click="clearForm"
@@ -2816,8 +2842,45 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         });
 
         const isAdminOrTech = computed(() => {
-          const r = currentUser.value.role || currentUser.value.userType;
-          return r === 'ADMIN' || r === 'SUPER_ADMIN' || r === 'TECHNICIAN';
+          const u = currentUser.value;
+          if (!u) return false;
+          if (u.username === 'admin' || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') return true;
+          if (u.permissions && (u.permissions.canAccessControlPanel || u.permissions.isAdmin)) return true;
+          return u.role === 'TECHNICIAN';
+        });
+
+        const canCreateRequest = computed(() => {
+          const u = currentUser.value;
+          if (!u || !u.username) return true;
+          if (u.username === 'admin' || u.role === 'ADMIN') return true;
+          if (u.permissions && u.permissions.canCreateRequest !== undefined) {
+            return Boolean(u.permissions.canCreateRequest);
+          }
+          return true;
+        });
+
+        const canViewKpi = computed(() => {
+          const u = currentUser.value;
+          if (!u || !u.username) return true;
+          if (u.username === 'admin' || u.role === 'ADMIN') return true;
+          if (u.permissions && u.permissions.canViewKpi !== undefined) {
+            return Boolean(u.permissions.canViewKpi);
+          }
+          if (u.role === 'TECHNICIAN') return true;
+          if (u.role === 'EMPLOYEE') return false;
+          return false;
+        });
+
+        const isRequestActive = computed(() => {
+          return activeTab.value === 'v4-form' || activeTab.value === 'v4-history';
+        });
+
+        const isKpiActive = computed(() => {
+          return activeTab.value === 'weekly-kpi' ||
+                 activeTab.value === 'weekly-requests' ||
+                 activeTab.value === 'defect-logs' ||
+                 activeTab.value === 'action-plans' ||
+                 activeTab.value === 'catalog';
         });
 
         // KPI Computations
@@ -2996,6 +3059,14 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
         // Navigation
         const switchTab = (tab) => {
+          if ((tab === 'v4-form' || tab === 'v4-history') && !canCreateRequest.value) {
+            showToast('Tài khoản của bạn không có quyền Tạo phiếu yêu cầu', true);
+            return;
+          }
+          if ((tab === 'weekly-kpi' || tab === 'weekly-requests' || tab === 'defect-logs' || tab === 'action-plans' || tab === 'catalog') && !canViewKpi.value) {
+            showToast('Tài khoản của bạn không có quyền Xem Dashboard KPI', true);
+            return;
+          }
           activeTab.value = tab;
           showTimeModal.value = false;
           showPersonModal.value = false;
@@ -3600,14 +3671,14 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         };
 
         const clearForm = () => {
-          if (!confirm('Bạn có muốn làm mới toàn bộ biểu mẫu phiếu V4.1?')) return;
+          if (!confirm('Bạn có muốn làm mới toàn bộ biểu mẫu Phiếu Nhập Liệu?')) return;
           initForm();
           form.value.problem = '';
           form.value.rootCause = '';
           form.value.actionTaken = '';
           form.value.photosBefore = [];
           form.value.photosAfter = [];
-          showToast('Đã làm mới biểu mẫu phiếu V4.1');
+          showToast('Đã làm mới biểu mẫu Phiếu Nhập Liệu');
         };
 
         const calculateDowntime = () => {
@@ -3679,7 +3750,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
               showToast('Lưu phiếu ' + form.value.docNo + ' thành công!');
               await loadHistory();
             } else {
-              showToast('Lỗi khi lưu phiếu V4.1', true);
+              showToast('Lỗi khi lưu Phiếu Nhập Liệu', true);
             }
           } catch(e) {
             showToast('Lỗi kết nối máy chủ', true);
@@ -3768,6 +3839,12 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
             const res = await fetch('/auth/session', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               currentUser.value = await res.json();
+              localStorage.setItem('checkpoint_user', JSON.stringify(currentUser.value));
+              if (isKpiActive.value && !canViewKpi.value && canCreateRequest.value) {
+                activeTab.value = 'v4-form';
+              } else if (isRequestActive.value && !canCreateRequest.value && canViewKpi.value) {
+                activeTab.value = 'weekly-kpi';
+              }
             } else {
               window.location.replace('/login');
             }
@@ -4021,6 +4098,10 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         return {
           activeTab,
           switchTab,
+          isRequestActive,
+          isKpiActive,
+          canCreateRequest,
+          canViewKpi,
           userMenuOpen,
           currentTheme,
           currentUser,

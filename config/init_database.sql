@@ -40,6 +40,7 @@ CREATE TABLE IF NOT EXISTS users (
   full_name VARCHAR(255) NOT NULL,
   role VARCHAR(50) NOT NULL DEFAULT 'EMPLOYEE',
   is_active BOOLEAN NOT NULL DEFAULT true,
+  permissions JSONB NOT NULL DEFAULT '{"canCreateRequest":true,"canViewKpi":false,"canAccessControlPanel":false}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
@@ -250,9 +251,9 @@ CREATE INDEX IF NOT EXISTS idx_tech_req_created_at ON technical_requests(created
 -- ------------------------------------------------------------------------------
 
 -- 4.1. Seed bảng users (3 tài khoản chuẩn: admin, tech01, user01 - Mật khẩu mặc định: Checkpoint@123)
-INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, created_at, updated_at) VALUES ('user-admin-1', 'admin', 'admin@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Super Administrator', 'ADMIN', true, '2026-10-03T08:28:04.802Z', '2026-10-03T08:28:04.802Z') ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, is_active = EXCLUDED.is_active;
-INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, created_at, updated_at) VALUES ('user-tech-1', 'tech01', 'tech01@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Kỹ Thuật Viên Trưởng', 'TECHNICIAN', true, '2026-10-03T08:28:04.802Z', '2026-10-03T08:28:04.802Z') ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, is_active = EXCLUDED.is_active;
-INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, created_at, updated_at) VALUES ('user-emp-1', 'user01', 'user01@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Nguyễn Văn A (SX)', 'EMPLOYEE', true, '2026-10-03T08:28:04.802Z', '2026-10-03T08:28:04.802Z') ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, is_active = EXCLUDED.is_active;
+INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, permissions, created_at, updated_at) VALUES ('user-admin-1', 'admin', 'admin@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Super Administrator', 'ADMIN', true, '{"canCreateRequest":true,"canViewKpi":true,"canAccessControlPanel":true}'::jsonb, '2026-10-03T08:28:04.802Z', '2026-10-03T08:28:04.802Z') ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, is_active = EXCLUDED.is_active, permissions = EXCLUDED.permissions;
+INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, permissions, created_at, updated_at) VALUES ('user-tech-1', 'tech01', 'tech01@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Kỹ Thuật Viên Trưởng', 'TECHNICIAN', true, '{"canCreateRequest":true,"canViewKpi":true,"canAccessControlPanel":false}'::jsonb, '2026-10-03T08:28:04.802Z', '2026-10-03T08:28:04.802Z') ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, is_active = EXCLUDED.is_active, permissions = EXCLUDED.permissions;
+INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, permissions, created_at, updated_at) VALUES ('user-emp-1', 'user01', 'user01@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Nguyễn Văn A (SX)', 'EMPLOYEE', true, '{"canCreateRequest":true,"canViewKpi":false,"canAccessControlPanel":false}'::jsonb, '2026-10-03T08:28:04.802Z', '2026-10-03T08:28:04.802Z') ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, is_active = EXCLUDED.is_active, permissions = EXCLUDED.permissions;
 
 -- 4.2. Seed bảng requesters (30 nhân sự)
 INSERT INTO requesters (id, stt, department, area, mnv, full_name, position) VALUES ('req-VN5117', 1, 'Production', 'Production', 'VN5117', 'Lê Minh Hoàng', 'Assistant Production Manager') ON CONFLICT (mnv) DO NOTHING;

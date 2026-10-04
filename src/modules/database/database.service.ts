@@ -4,6 +4,52 @@ import * as path from 'path';
 import * as bcrypt from 'bcryptjs';
 import { Pool, PoolConfig } from 'pg';
 
+export interface UserPermissions {
+  canCreateRequest: boolean;
+  canViewKpi: boolean;
+  canAccessControlPanel: boolean;
+}
+
+export function getDefaultPermissions(role?: string): UserPermissions {
+  if (role === 'ADMIN') {
+    return {
+      canCreateRequest: true,
+      canViewKpi: true,
+      canAccessControlPanel: true,
+    };
+  }
+  if (role === 'TECHNICIAN') {
+    return {
+      canCreateRequest: true,
+      canViewKpi: true,
+      canAccessControlPanel: false,
+    };
+  }
+  return {
+    canCreateRequest: true,
+    canViewKpi: false,
+    canAccessControlPanel: false,
+  };
+}
+
+export function normalizePermissions(role: string = 'EMPLOYEE', perms?: any): UserPermissions {
+  const def = getDefaultPermissions(role);
+  if (!perms || typeof perms !== 'object') {
+    return def;
+  }
+  return {
+    canCreateRequest: typeof perms.canCreateRequest === 'boolean'
+      ? perms.canCreateRequest
+      : (typeof perms.can_create_request === 'boolean' ? perms.can_create_request : def.canCreateRequest),
+    canViewKpi: typeof perms.canViewKpi === 'boolean'
+      ? perms.canViewKpi
+      : (typeof perms.can_view_kpi === 'boolean' ? perms.can_view_kpi : def.canViewKpi),
+    canAccessControlPanel: typeof perms.canAccessControlPanel === 'boolean'
+      ? perms.canAccessControlPanel
+      : (typeof perms.can_access_control_panel === 'boolean' ? perms.can_access_control_panel : def.canAccessControlPanel),
+  };
+}
+
 export interface UserRecord {
   id: string;
   username: string;
@@ -12,6 +58,7 @@ export interface UserRecord {
   fullName: string;
   role: 'ADMIN' | 'TECHNICIAN' | 'EMPLOYEE';
   isActive: boolean;
+  permissions: UserPermissions;
   createdAt: string;
   updatedAt: string;
 }
@@ -294,6 +341,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               full_name VARCHAR(255) NOT NULL,
               role VARCHAR(50) NOT NULL DEFAULT 'EMPLOYEE',
               is_active BOOLEAN NOT NULL DEFAULT true,
+              permissions JSONB NOT NULL DEFAULT '{"canCreateRequest":true,"canViewKpi":false,"canAccessControlPanel":false}'::jsonb,
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
@@ -303,6 +351,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(255);
             ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'EMPLOYEE';
             ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+            ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '{"canCreateRequest":true,"canViewKpi":false,"canAccessControlPanel":false}'::jsonb;
             ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
             ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
@@ -631,12 +680,16 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         fullName: r.full_name,
         role: r.role,
         isActive: r.is_active,
+        permissions: this.parsePermissions(r.role, r.permissions),
         createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
         updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
       }));
     } catch (err: any) {
       this.logger.warn(`Could not load users from PG (${err.message}). Using local JSON fallback.`);
-      this.usersCache = this.readJson<UserRecord[]>('users.json', []);
+      this.usersCache = this.readJson<UserRecord[]>('users.json', []).map(u => ({
+        ...u,
+        permissions: this.parsePermissions(u.role, (u as any).permissions),
+      }));
     }
 
     // 2. Requesters
@@ -866,8 +919,22 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     }
   }
 
+  private parsePermissions(role: string, perms: any): UserPermissions {
+    if (typeof perms === 'string') {
+      try {
+        return normalizePermissions(role, JSON.parse(perms));
+      } catch {
+        return getDefaultPermissions(role);
+      }
+    }
+    return normalizePermissions(role, perms);
+  }
+
   public loadAll() {
-    this.usersCache = this.readJson<UserRecord[]>('users.json', []);
+    this.usersCache = this.readJson<UserRecord[]>('users.json', []).map(u => ({
+      ...u,
+      permissions: this.parsePermissions(u.role, (u as any).permissions),
+    }));
     this.requestersCache = this.readJson<RequesterRecord[]>('requesters.json', []);
     this.machinesCache = this.readJson<MachineRecord[]>('machines.json', []);
     this.weeklyRequestsCache = this.readJson<WeeklyTechnicalRequestRecord[]>('weekly_technical_requests.json', []);
@@ -909,6 +976,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           fullName: 'Super Administrator',
           role: 'ADMIN',
           isActive: true,
+          permissions: getDefaultPermissions('ADMIN'),
           createdAt: now,
           updatedAt: now,
         },
@@ -920,6 +988,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           fullName: 'Kỹ Thuật Viên Trưởng',
           role: 'TECHNICIAN',
           isActive: true,
+          permissions: getDefaultPermissions('TECHNICIAN'),
           createdAt: now,
           updatedAt: now,
         },
@@ -931,6 +1000,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           fullName: 'Nguyễn Văn A (SX)',
           role: 'EMPLOYEE',
           isActive: true,
+          permissions: getDefaultPermissions('EMPLOYEE'),
           createdAt: now,
           updatedAt: now,
         },
@@ -1031,18 +1101,22 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   saveUsers(): void { this.writeJson('users.json', this.usersCache); }
 
   addUser(user: UserRecord): void {
+    const userToSave: UserRecord = {
+      ...user,
+      permissions: normalizePermissions(user.role, user.permissions),
+    };
     const existingIdx = this.usersCache.findIndex(u => u.id === user.id);
     if (existingIdx !== -1) {
-      this.usersCache[existingIdx] = user;
+      this.usersCache[existingIdx] = userToSave;
     } else {
-      this.usersCache.push(user);
+      this.usersCache.push(userToSave);
     }
     this.saveUsers();
 
     if (this.isPgConnected && this.pgPool) {
       this.pgPool.query(
-        `INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, created_at, updated_at)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        `INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, permissions, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
          ON CONFLICT (id) DO UPDATE SET
            username = EXCLUDED.username,
            email = EXCLUDED.email,
@@ -1050,8 +1124,20 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
            full_name = EXCLUDED.full_name,
            role = EXCLUDED.role,
            is_active = EXCLUDED.is_active,
+           permissions = EXCLUDED.permissions,
            updated_at = EXCLUDED.updated_at`,
-        [user.id, user.username, user.email, user.passwordHash, user.fullName, user.role, user.isActive, user.createdAt, user.updatedAt],
+        [
+          userToSave.id,
+          userToSave.username,
+          userToSave.email,
+          userToSave.passwordHash,
+          userToSave.fullName,
+          userToSave.role,
+          userToSave.isActive,
+          JSON.stringify(userToSave.permissions),
+          userToSave.createdAt,
+          userToSave.updatedAt,
+        ],
       ).catch(err => this.logger.error(`PG Error inserting user: ${err.message}`));
     }
   }
@@ -1059,7 +1145,18 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   updateUser(id: string, updates: Partial<UserRecord>): UserRecord | undefined {
     const idx = this.usersCache.findIndex(u => u.id === id);
     if (idx !== -1) {
-      this.usersCache[idx] = { ...this.usersCache[idx], ...updates, updatedAt: new Date().toISOString() };
+      const current = this.usersCache[idx];
+      const newRole = updates.role || current.role;
+      const newPermissions = updates.permissions
+        ? normalizePermissions(newRole, { ...current.permissions, ...updates.permissions })
+        : current.permissions;
+
+      this.usersCache[idx] = {
+        ...current,
+        ...updates,
+        permissions: newPermissions,
+        updatedAt: new Date().toISOString(),
+      };
       this.saveUsers();
       const updated = this.usersCache[idx];
 
@@ -1072,9 +1169,20 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
              full_name = COALESCE($5, full_name),
              role = COALESCE($6, role),
              is_active = COALESCE($7, is_active),
-             updated_at = $8
+             permissions = COALESCE($8::jsonb, permissions),
+             updated_at = $9
            WHERE id = $1`,
-          [id, updates.username, updates.email, updates.passwordHash, updates.fullName, updates.role, updates.isActive, updated.updatedAt],
+          [
+            id,
+            updates.username,
+            updates.email,
+            updates.passwordHash,
+            updates.fullName,
+            updates.role,
+            updates.isActive,
+            updates.permissions ? JSON.stringify(updated.permissions) : null,
+            updated.updatedAt,
+          ],
         ).catch(err => this.logger.error(`PG Error updating user: ${err.message}`));
       }
 
