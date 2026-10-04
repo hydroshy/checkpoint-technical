@@ -281,7 +281,7 @@ npm run start:prod
 | 6 | `action_plans` | Kế hoạch hành động khắc phục lỗi | 5 |
 | 7 | **`form_lookup_options`** | **Danh mục các dropdown động (Dropdown Options)** | **167** |
 | 8 | `sheet_lists_do_not_delete` | Dòng tham chiếu gốc Excel | 109 |
-| 9 | `technical_requests` | Phiếu yêu cầu kỹ thuật biểu mẫu V4.1 | >= 1 |
+| 9 | `technical_requests` | Phiếu yêu cầu kỹ thuật biểu mẫu V4.1 | 0 (Không nạp dữ liệu mẫu; do người dùng tạo) |
 
 ---
 

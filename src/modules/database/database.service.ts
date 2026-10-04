@@ -788,7 +788,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     // 9. Technical Requests Form V4.1
     try {
       const techReqRes = await this.pgPool.query('SELECT * FROM technical_requests ORDER BY created_at DESC');
-      this.requestsCache = techReqRes.rows.map(r => ({
+      this.requestsCache = techReqRes.rows
+        .filter(r => r.id !== '2f8c2b65-9660-4041-9c22-aeac7310fdce' && r.doc_no !== 'REQ-20261003-1945')
+        .map(r => ({
         id: r.id,
         docNo: r.doc_no,
         reqDate: r.req_date || '',
@@ -826,7 +828,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       }));
     } catch (err: any) {
       this.logger.warn(`Could not load technical_requests from PG (${err.message}). Using local JSON fallback.`);
-      this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', []);
+      this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', [])
+        .filter(r => r.id !== '2f8c2b65-9660-4041-9c22-aeac7310fdce' && r.docNo !== 'REQ-20261003-1945');
     }
 
     this.logger.log(`📦 Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.formLookupOptionsCache.length} lookup options, ${this.requestsCache.length} v4 requests.`);
@@ -872,7 +875,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     this.actionPlansCache = this.readJson<ActionPlanRecord[]>('action_plans.json', []);
     this.formLookupOptionsCache = this.readJson<FormLookupOptionRecord[]>('form_lookup_options.json', []);
     this.sheetListsCache = this.readJson<SheetListsRowRecord[]>('sheet_lists_do_not_delete.json', []);
-    this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', []);
+    this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', [])
+      .filter(r => r.id !== '2f8c2b65-9660-4041-9c22-aeac7310fdce' && r.docNo !== 'REQ-20261003-1945');
 
     // Sync employeesCache from requesters
     if (this.requestersCache.length > 0) {
@@ -1002,11 +1006,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    // 9. If PostgreSQL is connected and technical_requests table is empty, seed from JSON
-    if (this.isPgConnected && this.pgPool && this.requestsCache.length === 0) {
-      const jsonRequests = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', []);
-      for (const req of jsonRequests) {
-        this.addRequest(req);
+    // 9. Technical requests: operational data only, do not seed mock data.
+    if (this.isPgConnected && this.pgPool) {
+      try {
+        await this.pgPool.query(
+          "DELETE FROM technical_requests WHERE id = '2f8c2b65-9660-4041-9c22-aeac7310fdce' OR doc_no = 'REQ-20261003-1945'"
+        );
+      } catch (err: any) {
+        // Ignore table or query error during cleanup
       }
     }
   }

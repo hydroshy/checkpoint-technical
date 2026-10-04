@@ -149,6 +149,19 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     .theme-dark .badge-medium { background: rgba(14, 165, 233, 0.2); color: #38bdf8; border-color: rgba(14, 165, 233, 0.3); }
     .theme-dark .badge-low { background: rgba(148, 163, 184, 0.2); color: #cbd5e1; border-color: rgba(148, 163, 184, 0.3); }
 
+    /* Modals */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background-color: rgba(2, 6, 23, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 60;
+    }
+    .modal-content {
+      transform: translateY(0);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     /* PDF Template styles */
     #pdf-template {
       position: absolute;
@@ -2039,33 +2052,47 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- TIME PICKER MODAL -->
-    <div id="modal-time" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-end sm:items-center justify-center backdrop-blur-sm pb-10 sm:pb-0" @click="closeModal('modal-time')">
+    <div id="modal-time" v-if="showTimeModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-end sm:items-center justify-center backdrop-blur-sm pb-10 sm:pb-0" @click="closeTimeModal">
       <div class="modal-content bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-2xl shadow-2xl w-full sm:max-w-xs overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">{{ activeTimeLabel }}</h3>
-          <button @click="closeModal('modal-time')" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          <button @click="closeTimeModal" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
         </div>
         <div class="p-6 relative select-none">
-          <div class="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-11 bg-sky-500/10 border-y border-sky-500/30 pointer-events-none rounded-lg"></div>
-          <div class="flex justify-center items-center gap-4 h-48 overflow-hidden">
-            <div id="wheel-hour" class="wheel-container w-20 h-full overflow-y-scroll no-scrollbar text-center text-lg text-slate-500 font-mono"></div>
-            <div class="text-xl font-bold text-sky-500 pb-1">:</div>
-            <div id="wheel-min" class="wheel-container w-20 h-full overflow-y-scroll no-scrollbar text-center text-lg text-slate-500 font-mono"></div>
+          <div class="flex justify-center items-center gap-3">
+            <div class="flex flex-col items-center">
+              <label class="text-[10px] font-bold text-slate-400 mb-1">GIỜ (00-23)</label>
+              <select v-model="pickerHour" class="input-box text-center font-mono text-xl font-bold p-2.5 rounded-xl w-24">
+                <option v-for="h in hourOptions" :key="h" :value="h">{{ h }}</option>
+              </select>
+            </div>
+            <span class="text-2xl font-bold text-sky-500 mt-4">:</span>
+            <div class="flex flex-col items-center">
+              <label class="text-[10px] font-bold text-slate-400 mb-1">PHÚT (00-59)</label>
+              <select v-model="pickerMinute" class="input-box text-center font-mono text-xl font-bold p-2.5 rounded-xl w-24">
+                <option v-for="m in minuteOptions" :key="m" :value="m">{{ m }}</option>
+              </select>
+            </div>
+          </div>
+          <div class="mt-4 flex justify-center">
+            <button type="button" @click="setTimeToNow" class="text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-clock"></i> Lấy giờ hiện tại
+            </button>
           </div>
         </div>
         <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex gap-3">
-          <button @click="closeModal('modal-time')" class="flex-1 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300">Hủy</button>
+          <button @click="closeTimeModal" class="flex-1 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300">Hủy</button>
           <button @click="confirmTime" class="flex-1 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md shadow-sky-500/30">Chọn</button>
         </div>
       </div>
     </div>
 
     <!-- PERSON PICKER MODAL -->
-    <div id="modal-person" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-person')">
+    <div id="modal-person" v-if="showPersonModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closePersonModal">
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Chọn Nhân Sự</h3>
-          <button @click="closeModal('modal-person')" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          <button @click="closePersonModal" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
         </div>
         <div class="p-5 space-y-4">
           <div class="space-y-1.5">
@@ -2094,18 +2121,18 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           </div>
         </div>
         <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex gap-3">
-          <button @click="closeModal('modal-person')" class="flex-1 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300">Đóng</button>
+          <button @click="closePersonModal" class="flex-1 py-2 rounded-xl border border-slate-300 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300">Đóng</button>
           <button @click="confirmPerson" class="flex-1 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-md shadow-sky-500/30">Xác Nhận</button>
         </div>
       </div>
     </div>
 
     <!-- EXCEL UPLOADER MODAL -->
-    <div id="modal-excel" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-excel')">
+    <div id="modal-excel" v-if="showExcelModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeExcelModal">
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Nạp Danh Sách Nhân Sự Excel</h3>
-          <button @click="closeModal('modal-excel')" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
+          <button @click="closeExcelModal" class="text-slate-400 hover:text-slate-600 text-lg">✕</button>
         </div>
         <div class="p-5 space-y-4">
           <p class="text-xs text-slate-500 leading-relaxed">
@@ -2125,7 +2152,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           </div>
         </div>
         <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-          <button @click="closeModal('modal-excel')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200">Đóng</button>
+          <button @click="closeExcelModal" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200">Đóng</button>
         </div>
       </div>
     </div>
@@ -2711,6 +2738,13 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
 
         // Modal states
         const modalState = ref({ type: null, isEdit: false, item: {} });
+        const showTimeModal = ref(false);
+        const showPersonModal = ref(false);
+        const showExcelModal = ref(false);
+        const hourOptions = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+        const minuteOptions = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
+        const pickerHour = ref('08');
+        const pickerMinute = ref('00');
 
         // Printable V4 Form State
         const form = ref({
@@ -2963,6 +2997,10 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         // Navigation
         const switchTab = (tab) => {
           activeTab.value = tab;
+          showTimeModal.value = false;
+          showPersonModal.value = false;
+          showExcelModal.value = false;
+          modalState.value = { type: null, isEdit: false, item: {} };
           if (tab === 'weekly-kpi') {
             nextTick(() => renderCharts());
           }
@@ -3748,21 +3786,42 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         };
 
         // Modal pickers for V4
+        const setTimeToNow = () => {
+          const now = new Date();
+          pickerHour.value = String(now.getHours()).padStart(2, '0');
+          pickerMinute.value = String(now.getMinutes()).padStart(2, '0');
+        };
+
         const openTimePicker = (target, label) => {
           activeTimeTarget.value = target;
-          activeTimeLabel.value = label || 'Chọn Giờ';
-          const modal = document.getElementById('modal-time');
-          if (modal) modal.style.display = 'flex';
+          if (!label) {
+            if (target === 'reqTime') label = 'Chọn Giờ Yêu Cầu';
+            else if (target === 'recvTime') label = 'Chọn Giờ Tiếp Nhận';
+            else if (target === 'finishTime') label = 'Chọn Giờ Hoàn Thành';
+            else label = 'Chọn Giờ';
+          }
+          activeTimeLabel.value = label;
+          const existing = form.value[target];
+          if (existing && typeof existing === 'string' && existing.includes(':')) {
+            const parts = existing.split(':');
+            pickerHour.value = String(parts[0] || '08').padStart(2, '0');
+            pickerMinute.value = String(parts[1] || '00').padStart(2, '0');
+          } else {
+            setTimeToNow();
+          }
+          showTimeModal.value = true;
+        };
+
+        const closeTimeModal = () => {
+          showTimeModal.value = false;
         };
 
         const confirmTime = () => {
-          const now = new Date();
-          const tStr = String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0');
           if (activeTimeTarget.value) {
-            form.value[activeTimeTarget.value] = tStr;
+            form.value[activeTimeTarget.value] = pickerHour.value + ':' + pickerMinute.value;
             calculateDowntime();
           }
-          closeModal('modal-time');
+          showTimeModal.value = false;
         };
 
         const openPersonPicker = (target) => {
@@ -3770,28 +3829,39 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           pickerDept.value = '';
           pickerArea.value = '';
           pickerSelectedName.value = '';
-          const modal = document.getElementById('modal-person');
-          if (modal) modal.style.display = 'flex';
+          showPersonModal.value = true;
+        };
+
+        const closePersonModal = () => {
+          showPersonModal.value = false;
         };
 
         const confirmPerson = () => {
           if (activePersonTarget.value && pickerSelectedName.value && pickerSelectedName.value !== 'OTHER') {
             form.value[activePersonTarget.value] = pickerSelectedName.value;
           }
-          closeModal('modal-person');
+          showPersonModal.value = false;
         };
 
         const closeModal = (id) => {
-          const modal = document.getElementById(id);
-          if (modal) modal.style.display = 'none';
+          if (id === 'modal-time') showTimeModal.value = false;
+          else if (id === 'modal-person') showPersonModal.value = false;
+          else if (id === 'modal-excel') showExcelModal.value = false;
+          else {
+            const modal = document.getElementById(id);
+            if (modal) modal.style.display = 'none';
+          }
         };
 
         const onPickerDeptChange = () => { pickerArea.value = ''; pickerSelectedName.value = ''; };
         const onPickerAreaChange = () => { pickerSelectedName.value = ''; };
         const openExcelUploader = () => {
           excelStatus.value = { show: false, isError: false, msg: '' };
-          const m = document.getElementById('modal-excel');
-          if (m) m.style.display = 'flex';
+          showExcelModal.value = true;
+        };
+
+        const closeExcelModal = () => {
+          showExcelModal.value = false;
         };
 
         const processExcelFile = (e) => {
@@ -4054,14 +4124,25 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           handleLogout,
           handleGlobalClick,
           openTimePicker,
+          closeTimeModal,
           confirmTime,
           openPersonPicker,
+          closePersonModal,
           confirmPerson,
           closeModal,
           onPickerDeptChange,
           onPickerAreaChange,
           openExcelUploader,
+          closeExcelModal,
           processExcelFile,
+          showTimeModal,
+          showPersonModal,
+          showExcelModal,
+          hourOptions,
+          minuteOptions,
+          pickerHour,
+          pickerMinute,
+          setTimeToNow,
           triggerBackup,
           triggerRestore,
           processRestoreFile,

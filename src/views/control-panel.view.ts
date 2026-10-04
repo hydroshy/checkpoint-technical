@@ -129,8 +129,6 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
     /* Modals */
     .modal-overlay {
-      opacity: 0;
-      pointer-events: none;
       transition: opacity 0.25s ease;
     }
     .modal-overlay.show {
@@ -138,7 +136,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
       pointer-events: auto;
     }
     .modal-content {
-      transform: translateY(16px) scale(0.97);
+      transform: translateY(0) scale(1);
       transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .modal-overlay.show .modal-content {
@@ -942,7 +940,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- TICKET DETAIL MODAL -->
-    <div id="modal-ticket-detail" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-ticket-detail')">
+    <div id="modal-ticket-detail" v-if="showTicketDetailModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-ticket-detail')">
       <div v-if="selectedTicket" class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10">
           <div>
@@ -1030,7 +1028,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- ADD MACHINE MODAL -->
-    <div id="modal-add-machine" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-add-machine')">
+    <div id="modal-add-machine" v-if="showAddMachineModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-add-machine')">
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Thêm Máy In Mới</h3>
@@ -1058,7 +1056,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- ADD EMPLOYEE MODAL -->
-    <div id="modal-add-employee" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-add-employee')">
+    <div id="modal-add-employee" v-if="showAddEmployeeModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-add-employee')">
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Thêm Nhân Sự</h3>
@@ -1094,7 +1092,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- ADD USER MODAL -->
-    <div id="modal-add-user" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-add-user')">
+    <div id="modal-add-user" v-if="showAddUserModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-add-user')">
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Thêm Tài Khoản Đăng Nhập</h3>
@@ -1134,7 +1132,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- EXCEL UPLOADER MODAL -->
-    <div id="modal-excel" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-excel')">
+    <div id="modal-excel" v-if="showExcelModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-excel')">
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Nạp Danh Sách Nhân Sự Excel</h3>
@@ -1171,6 +1169,13 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
     createApp({
       setup() {
         const activeTab = ref('overview');
+        const showTicketDetailModal = ref(false);
+        const showAddMachineModal = ref(false);
+        const showAddEmployeeModal = ref(false);
+        const showAddUserModal = ref(false);
+        const showExcelModal = ref(false);
+        const showTimeModal = ref(false);
+        const showPersonModal = ref(false);
         const sidebarOpen = ref(false);
         const sidebarCollapsed = ref(false);
         const userMenuOpen = ref(false);
@@ -1264,8 +1269,28 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           }, 3200);
         };
 
-        const openModal = (id) => document.getElementById(id)?.classList.add('show');
-        const closeModal = (id) => document.getElementById(id)?.classList.remove('show');
+        const openModal = (id) => {
+          if (id === 'modal-ticket-detail') showTicketDetailModal.value = true;
+          else if (id === 'modal-add-machine') showAddMachineModal.value = true;
+          else if (id === 'modal-add-employee') showAddEmployeeModal.value = true;
+          else if (id === 'modal-add-user') showAddUserModal.value = true;
+          else if (id === 'modal-excel') showExcelModal.value = true;
+          else if (id === 'modal-time') showTimeModal.value = true;
+          else if (id === 'modal-person') showPersonModal.value = true;
+          else document.getElementById(id)?.classList.add('show');
+        };
+
+        const closeModal = (id) => {
+          if (id === 'modal-ticket-detail') showTicketDetailModal.value = false;
+          else if (id === 'modal-add-machine') showAddMachineModal.value = false;
+          else if (id === 'modal-add-employee') showAddEmployeeModal.value = false;
+          else if (id === 'modal-add-user') showAddUserModal.value = false;
+          else if (id === 'modal-excel') showExcelModal.value = false;
+          else if (id === 'modal-time') showTimeModal.value = false;
+          else if (id === 'modal-person') showPersonModal.value = false;
+          else document.getElementById(id)?.classList.remove('show');
+        };
+
         const triggerUpload = (id) => document.getElementById(id)?.click();
 
         const get4MLabel = (k) => {
@@ -1292,6 +1317,13 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const switchTab = (tab) => {
           activeTab.value = tab;
           sidebarOpen.value = false;
+          showTicketDetailModal.value = false;
+          showAddMachineModal.value = false;
+          showAddEmployeeModal.value = false;
+          showAddUserModal.value = false;
+          showExcelModal.value = false;
+          showTimeModal.value = false;
+          showPersonModal.value = false;
           if (tab === 'overview') loadStats();
           if (tab === 'requests') loadRequests();
           if (tab === 'machines') loadMachines();
@@ -1730,7 +1762,14 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           handleGlobalClick,
           closeModal,
           get4MLabel,
-          getPercent
+          getPercent,
+          showTicketDetailModal,
+          showAddMachineModal,
+          showAddEmployeeModal,
+          showAddUserModal,
+          showExcelModal,
+          showTimeModal,
+          showPersonModal
         };
       }
     }).mount('#app');
