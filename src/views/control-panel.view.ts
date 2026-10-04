@@ -869,9 +869,10 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             />
             <select v-model="reqFilter.chkStatus" @change="applyReqFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
               <option value="ALL">— Tất cả trạng thái —</option>
-              <option value="DONE">🟢 Đã khắc phục (DONE)</option>
-              <option value="MONITOR">🟡 Đang theo dõi (MONITOR)</option>
-              <option value="SUPPORT">🔴 Cần hỗ trợ (SUPPORT)</option>
+              <option value="Open">🔵 Open</option>
+              <option value="In Progress">🟡 In Progress</option>
+              <option value="Overdue">🔴 Overdue</option>
+              <option value="Closed">🟢 Closed</option>
             </select>
             <select v-model="reqFilter.printTech" @change="applyReqFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
               <option value="ALL">— Tất cả công nghệ in —</option>
@@ -1176,7 +1177,9 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             </div>
             <div>
               <span class="text-slate-400 block text-[10px] font-bold">TRẠNG THÁI</span>
-              <span class="font-bold text-emerald-500">{{ selectedTicket.chkStatus || 'DONE' }}</span>
+              <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold inline-block" :class="getStatusBadgeClass(selectedTicket.chkStatus || selectedTicket.status)">
+                {{ selectedTicket.chkStatus || selectedTicket.status || 'Open' }}
+              </span>
             </div>
           </div>
 
@@ -1225,10 +1228,11 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex justify-between items-center">
           <div class="flex items-center gap-2">
             <span class="text-slate-400 text-[11px]">Đổi trạng thái:</span>
-            <select :value="selectedTicket.chkStatus" @change="e => updateTicketStatus(selectedTicket, e.target.value)" class="input-box px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">
-              <option value="DONE">🟢 Đã khắc phục (DONE)</option>
-              <option value="MONITOR">🟡 Đang theo dõi (MONITOR)</option>
-              <option value="SUPPORT">🔴 Cần hỗ trợ (SUPPORT)</option>
+            <select :value="selectedTicket.chkStatus || selectedTicket.status" @change="e => updateTicketStatus(selectedTicket, e.target.value)" class="input-box px-3 py-1.5 rounded-lg text-xs font-bold cursor-pointer">
+              <option value="Open">🔵 Open</option>
+              <option value="In Progress">🟡 In Progress</option>
+              <option value="Overdue">🔴 Overdue</option>
+              <option value="Closed">🟢 Closed</option>
             </select>
           </div>
           <button @click="closeModal('modal-ticket-detail')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
@@ -1733,12 +1737,23 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                   field: 'chkStatus',
                   sorter: 'string',
                   hozAlign: 'center',
-                  minWidth: 110,
+                  minWidth: 120,
+                  editor: 'select',
+                  editorParams: {
+                    values: ['Open', 'In Progress', 'Overdue', 'Closed']
+                  },
+                  cellEdited: (cell) => {
+                    const r = cell.getRow().getData();
+                    updateTicketStatus(r, cell.getValue());
+                  },
                   formatter: cell => {
-                    const s = cell.getValue() || 'DONE';
-                    if (s === 'DONE') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">DONE</span>';
-                    if (s === 'MONITOR') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">MONITOR</span>';
-                    return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">SUPPORT</span>';
+                    const s = cell.getValue() || cell.getRow().getData().status || 'Open';
+                    const lower = String(s).toLowerCase();
+                    if (lower === 'open') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">Open</span>';
+                    if (lower === 'in progress' || lower === 'monitor') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">In Progress</span>';
+                    if (lower === 'overdue' || lower === 'support') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">Overdue</span>';
+                    if (lower === 'closed' || lower === 'done' || lower === 'completed') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Closed</span>';
+                    return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">' + s + '</span>';
                   }
                 },
                 {
@@ -1780,7 +1795,18 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           reqTable.clearFilter();
           const filters = [];
           if (reqFilter.value.chkStatus && reqFilter.value.chkStatus !== 'ALL') {
-            filters.push({ field: 'chkStatus', type: '=', value: reqFilter.value.chkStatus });
+            const fVal = reqFilter.value.chkStatus.toLowerCase();
+            filters.push({
+              field: 'chkStatus',
+              type: (headerValue, rowValue, rowData) => {
+                const s = String(rowData.chkStatus || rowData.status || '').toLowerCase();
+                if (fVal === 'closed') return s === 'closed' || s === 'done';
+                if (fVal === 'in progress') return s === 'in progress' || s === 'monitor';
+                if (fVal === 'overdue') return s === 'overdue' || s === 'support';
+                return s === fVal;
+              },
+              value: reqFilter.value.chkStatus
+            });
           }
           if (reqFilter.value.printTech && reqFilter.value.printTech !== 'ALL') {
             filters.push({ field: 'printTech', type: '=', value: reqFilter.value.printTech });
@@ -2155,12 +2181,20 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                 title: 'Trạng Thái',
                 field: 'status',
                 sorter: 'string',
-                minWidth: 100,
+                minWidth: 110,
                 hozAlign: 'center',
+                editor: 'select',
+                editorParams: {
+                  values: ['Open', 'In Progress', 'Overdue', 'Closed']
+                },
                 formatter: cell => {
-                  const s = cell.getValue();
-                  if (s === 'Done' || s === 'Closed') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">' + s + '</span>';
-                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">' + (s || 'Open') + '</span>';
+                  const s = cell.getValue() || 'Open';
+                  const lower = String(s).toLowerCase();
+                  if (lower === 'open') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">Open</span>';
+                  if (lower === 'in progress') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">In Progress</span>';
+                  if (lower === 'overdue') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">Overdue</span>';
+                  if (lower === 'closed' || lower === 'done' || lower === 'completed') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">Closed</span>';
+                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">' + s + '</span>';
                 }
               },
               { title: 'SLA (Giờ)', field: 'slaTargetHours', sorter: 'number', hozAlign: 'center', minWidth: 90 },
@@ -2350,10 +2384,11 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               method: 'PUT',
               headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
               credentials: 'include',
-              body: JSON.stringify({ chkStatus: newStatus })
+              body: JSON.stringify({ chkStatus: newStatus, status: newStatus })
             });
             if (res.ok) {
               ticket.chkStatus = newStatus;
+              ticket.status = newStatus;
               showToast('Đã cập nhật trạng thái phiếu thành ' + newStatus);
               loadStats();
               loadRequests();
@@ -2361,6 +2396,15 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           } catch (err) {
             showToast('Lỗi cập nhật', true);
           }
+        };
+
+        const getStatusBadgeClass = (status) => {
+          const s = (status || '').toLowerCase().trim();
+          if (s === 'open') return 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30';
+          if (s === 'in progress' || s === 'monitor') return 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30';
+          if (s === 'overdue' || s === 'support') return 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30';
+          if (s === 'closed' || s === 'done' || s === 'completed') return 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
+          return 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border border-slate-500/30';
         };
 
         const deleteRequest = async (ticket) => {
@@ -2846,6 +2890,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           applyReqFilters,
           viewTicketDetail,
           updateTicketStatus,
+          getStatusBadgeClass,
           deleteRequest,
           loadMachines,
           applyMachineFilters,

@@ -93,6 +93,19 @@ export interface EmployeeRecord {
   email?: string;
 }
 
+export type TicketStatus = 'Open' | 'In Progress' | 'Overdue' | 'Closed';
+export const VALID_TICKET_STATUSES: readonly TicketStatus[] = ['Open', 'In Progress', 'Overdue', 'Closed'] as const;
+
+export function normalizeTicketStatus(status?: string | null): TicketStatus {
+  if (!status) return 'Open';
+  const s = status.trim().toLowerCase();
+  if (s === 'in progress' || s === 'in_progress' || s === 'inprogress' || s === 'progress') return 'In Progress';
+  if (s === 'overdue' || s === 'late') return 'Overdue';
+  if (s === 'closed' || s === 'done' || s === 'completed' || s === 'resolved') return 'Closed';
+  if (s === 'open') return 'Open';
+  return 'Open';
+}
+
 export interface WeeklyTechnicalRequestRecord {
   id: string;
   requestId: string;
@@ -100,7 +113,7 @@ export interface WeeklyTechnicalRequestRecord {
   requestType: string;
   itemEquipment: string;
   severity: string;
-  status: string;
+  status: TicketStatus | string;
   slaTargetHours?: number | null;
   actualHours?: number | null;
   metSla?: string;
@@ -454,6 +467,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_wtr_req_id ON weekly_technical_requests(request_id);
             CREATE INDEX IF NOT EXISTS idx_wtr_status ON weekly_technical_requests(status);
+            ALTER TABLE weekly_technical_requests DROP CONSTRAINT IF EXISTS chk_weekly_status;
+            ALTER TABLE weekly_technical_requests ADD CONSTRAINT chk_weekly_status CHECK (status IN ('Open', 'In Progress', 'Overdue', 'Closed'));
           `,
         },
         {
@@ -762,7 +777,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         requestType: r.request_type || '',
         itemEquipment: r.item_equipment || '',
         severity: r.severity || '',
-        status: r.status || '',
+        status: normalizeTicketStatus(r.status),
         slaTargetHours: r.sla_target_hours !== null ? Number(r.sla_target_hours) : null,
         actualHours: r.actual_hours !== null ? Number(r.actual_hours) : null,
         metSla: r.met_sla || undefined,
@@ -975,7 +990,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     }));
     this.requestersCache = this.readJson<RequesterRecord[]>('requesters.json', []);
     this.machinesCache = this.readJson<MachineRecord[]>('machines.json', []);
-    this.weeklyRequestsCache = this.readJson<WeeklyTechnicalRequestRecord[]>('weekly_technical_requests.json', []);
+    this.weeklyRequestsCache = this.readJson<WeeklyTechnicalRequestRecord[]>('weekly_technical_requests.json', []).map(w => ({
+      ...w,
+      status: normalizeTicketStatus(w.status),
+    }));
     this.defectLogsCache = this.readJson<DefectLogRecord[]>('defect_logs.json', []);
     this.actionPlansCache = this.readJson<ActionPlanRecord[]>('action_plans.json', []);
     this.formLookupOptionsCache = this.readJson<FormLookupOptionRecord[]>('form_lookup_options.json', []);
@@ -1067,29 +1085,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       }
     }
 
-    // 4. If PostgreSQL is connected and weekly_requests table is empty, seed from JSON
-    if (this.isPgConnected && this.pgPool && this.weeklyRequestsCache.length === 0) {
-      const jsonWeekly = this.readJson<WeeklyTechnicalRequestRecord[]>('weekly_technical_requests.json', []);
-      for (const w of jsonWeekly) {
-        this.addWeeklyRequest(w);
-      }
-    }
-
-    // 5. If PostgreSQL is connected and defect_logs table is empty, seed from JSON
-    if (this.isPgConnected && this.pgPool && this.defectLogsCache.length === 0) {
-      const jsonDefects = this.readJson<DefectLogRecord[]>('defect_logs.json', []);
-      for (const d of jsonDefects) {
-        this.addDefectLog(d);
-      }
-    }
-
-    // 6. If PostgreSQL is connected and action_plans table is empty, seed from JSON
-    if (this.isPgConnected && this.pgPool && this.actionPlansCache.length === 0) {
-      const jsonActions = this.readJson<ActionPlanRecord[]>('action_plans.json', []);
-      for (const a of jsonActions) {
-        this.addActionPlan(a);
-      }
-    }
+    // 4. Operational tables (weekly_technical_requests, defect_logs, action_plans, technical_requests):
+    // 100% real data from PostgreSQL, do NOT auto-seed mock data.
 
     // 7. If PostgreSQL is connected and form_lookup_options table is empty, seed from JSON
     if (this.isPgConnected && this.pgPool && this.formLookupOptionsCache.length === 0) {
@@ -1466,11 +1463,15 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   saveWeeklyRequests(): void { this.writeJson('weekly_technical_requests.json', this.weeklyRequestsCache); }
 
   addWeeklyRequest(w: WeeklyTechnicalRequestRecord): void {
-    const idx = this.weeklyRequestsCache.findIndex(x => x.id === w.id);
+    const itemToSave: WeeklyTechnicalRequestRecord = {
+      ...w,
+      status: normalizeTicketStatus(w.status),
+    };
+    const idx = this.weeklyRequestsCache.findIndex(x => x.id === itemToSave.id);
     if (idx !== -1) {
-      this.weeklyRequestsCache[idx] = w;
+      this.weeklyRequestsCache[idx] = itemToSave;
     } else {
-      this.weeklyRequestsCache.unshift(w);
+      this.weeklyRequestsCache.unshift(itemToSave);
     }
     this.saveWeeklyRequests();
 
@@ -1493,7 +1494,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
            reported_by = EXCLUDED.reported_by,
            resolved_by = EXCLUDED.resolved_by,
            updated_at = now()`,
-        [w.id, w.requestId, w.requestDate || null, w.requestType, w.itemEquipment, w.severity, w.status, w.slaTargetHours, w.actualHours, w.metSla || null, w.reportedBy, w.resolvedBy || null],
+        [itemToSave.id, itemToSave.requestId, itemToSave.requestDate || null, itemToSave.requestType, itemToSave.itemEquipment, itemToSave.severity, itemToSave.status, itemToSave.slaTargetHours, itemToSave.actualHours, itemToSave.metSla || null, itemToSave.reportedBy, itemToSave.resolvedBy || null],
       ).catch(err => this.logger.error(`PG Error inserting weekly request: ${err.message}`));
     }
   }
@@ -1501,7 +1502,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   updateWeeklyRequest(id: string, updates: Partial<WeeklyTechnicalRequestRecord>): WeeklyTechnicalRequestRecord | undefined {
     const idx = this.weeklyRequestsCache.findIndex(w => w.id === id);
     if (idx !== -1) {
-      this.weeklyRequestsCache[idx] = { ...this.weeklyRequestsCache[idx], ...updates };
+      const cleanUpdates = {
+        ...updates,
+        ...(updates.status !== undefined ? { status: normalizeTicketStatus(updates.status) } : {}),
+      };
+      this.weeklyRequestsCache[idx] = { ...this.weeklyRequestsCache[idx], ...cleanUpdates };
       this.saveWeeklyRequests();
       const updated = this.weeklyRequestsCache[idx];
 

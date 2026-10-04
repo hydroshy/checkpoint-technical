@@ -634,11 +634,16 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
                 <i class="fa-solid fa-list-check"></i>
               </div>
             </div>
-            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
+            <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex flex-wrap items-center justify-between gap-1 text-xs">
               <span class="text-emerald-500 font-bold flex items-center gap-1">
                 <i class="fa-solid fa-circle-check"></i> Đạt SLA: {{ kpiSlaMetRate }}%
               </span>
-              <span class="text-slate-400 font-mono">{{ kpiOpenRequests }} Đang Mở</span>
+              <div class="flex items-center gap-1.5 font-mono text-[10px] font-bold">
+                <span class="px-1.5 py-0.5 rounded bg-sky-500/10 text-sky-500" title="Open">{{ kpiOpenRequests }} Open</span>
+                <span class="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-500" title="In Progress">{{ kpiInProgressRequests }} Prog</span>
+                <span class="px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-500" title="Overdue" v-if="kpiOverdueRequests > 0">{{ kpiOverdueRequests }} Overdue</span>
+                <span class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-500" title="Closed">{{ kpiClosedRequests }} Closed</span>
+              </div>
             </div>
           </div>
 
@@ -896,8 +901,8 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
               <option value="ALL">Tất cả trạng thái</option>
               <option value="Open">Open</option>
               <option value="In Progress">In Progress</option>
+              <option value="Overdue">Overdue</option>
               <option value="Closed">Closed</option>
-              <option value="Pending">Pending</option>
             </select>
           </div>
 
@@ -2097,9 +2102,10 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
             />
             <select v-model="historyFilter.chkStatus" @change="loadHistory" class="input-box px-4 py-2 rounded-xl text-xs">
               <option value="ALL">— Tất cả trạng thái —</option>
-              <option value="DONE">🟢 Đã khắc phục (DONE)</option>
-              <option value="MONITOR">🟡 Đang theo dõi (MONITOR)</option>
-              <option value="SUPPORT">🔴 Cần hỗ trợ (SUPPORT)</option>
+              <option value="Open">🔵 Open</option>
+              <option value="In Progress">🟡 In Progress</option>
+              <option value="Overdue">🔴 Overdue</option>
+              <option value="Closed">🟢 Closed</option>
             </select>
             <select v-model="historyFilter.printTech" @change="loadHistory" class="input-box px-4 py-2 rounded-xl text-xs">
               <option value="ALL">— Tất cả công nghệ in —</option>
@@ -2130,14 +2136,10 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
               <div class="flex flex-wrap items-center gap-2">
                 <span class="font-mono text-sm font-bold text-sky-600 dark:text-sky-400">{{ item.docNo }}</span>
                 <span
-                  :class="{
-                    'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20': item.chkStatus === 'DONE',
-                    'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20': item.chkStatus === 'MONITOR',
-                    'bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20': item.chkStatus === 'SUPPORT'
-                  }"
+                  :class="getStatusClass(item.chkStatus || item.status)"
                   class="px-2 py-0.5 rounded-full text-[10px] font-bold border"
                 >
-                  {{ item.chkStatus === 'DONE' ? 'Đã khắc phục' : (item.chkStatus === 'MONITOR' ? 'Đang theo dõi' : 'Cần hỗ trợ') }}
+                  {{ item.chkStatus || item.status || 'Open' }}
                 </span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                   {{ item.printTech }}
@@ -2544,8 +2546,8 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
               <select v-model="modalState.item.status" required class="input-box w-full px-3.5 py-2.5 rounded-xl outline-none">
                 <option value="Open">Open (Mới mở)</option>
                 <option value="In Progress">In Progress (Đang xử lý)</option>
-                <option value="Closed">Closed (Đã xong)</option>
-                <option value="Pending">Pending (Tạm dừng)</option>
+                <option value="Overdue">Overdue (Quá hạn)</option>
+                <option value="Closed">Closed (Đã hoàn thành)</option>
               </select>
             </div>
 
@@ -3055,6 +3057,11 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         const kpiSlaMetRate = computed(() => kpiTotalRequests.value ? Math.round((kpiSlaMetCount.value / kpiTotalRequests.value) * 100) : 100);
         const kpiOpenRequests = computed(() => weeklyRequests.value.filter(r => (r.status || '').toLowerCase() === 'open').length);
         const kpiInProgressRequests = computed(() => weeklyRequests.value.filter(r => (r.status || '').toLowerCase().includes('progress')).length);
+        const kpiOverdueRequests = computed(() => weeklyRequests.value.filter(r => (r.status || '').toLowerCase() === 'overdue').length);
+        const kpiClosedRequests = computed(() => weeklyRequests.value.filter(r => {
+          const s = (r.status || '').toLowerCase();
+          return s === 'closed' || s === 'completed' || s === 'done';
+        }).length);
         const kpiTotalDefects = computed(() => defectLogs.value.length);
         const kpiDefect8DCount = computed(() => defectLogs.value.filter(d => (d.eightDRequired || '').toLowerCase().includes('yes')).length);
         const kpiDefectRecurringCount = computed(() => defectLogs.value.filter(d => (d.recurringIssue || '').toLowerCase().includes('yes')).length);
@@ -3203,11 +3210,12 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         };
 
         const getStatusClass = (st) => {
-          const s = (st || '').toLowerCase();
-          if (s === 'closed' || s === 'completed') return 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400';
-          if (s === 'in progress') return 'bg-amber-500/20 text-amber-600 dark:text-amber-400';
-          if (s === 'open') return 'bg-sky-500/20 text-sky-600 dark:text-sky-400';
-          return 'bg-purple-500/20 text-purple-600 dark:text-purple-400';
+          const s = (st || '').toLowerCase().trim();
+          if (s === 'open') return 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30';
+          if (s === 'in progress') return 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30';
+          if (s === 'overdue') return 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30';
+          if (s === 'closed' || s === 'completed' || s === 'done') return 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
+          return 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border border-slate-500/30';
         };
 
         const showToast = (msg, isError = false) => {
@@ -3336,20 +3344,23 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           const statusCanvas = document.getElementById('chart-status');
           if (statusCanvas) {
             if (chartStatus) chartStatus.destroy();
-            const stCounts = { Open: 0, 'In Progress': 0, Closed: 0, Pending: 0 };
+            const stCounts = { Open: 0, 'In Progress': 0, Overdue: 0, Closed: 0 };
             weeklyRequests.value.forEach(r => {
-              const k = r.status || 'Open';
-              if (stCounts[k] !== undefined) stCounts[k]++;
-              else stCounts['Open']++;
+              const s = (r.status || 'Open').trim().toLowerCase();
+              if (s === 'open') stCounts.Open++;
+              else if (s === 'in progress') stCounts['In Progress']++;
+              else if (s === 'overdue') stCounts.Overdue++;
+              else if (s === 'closed' || s === 'completed' || s === 'done') stCounts.Closed++;
+              else stCounts.Open++;
             });
             chartStatus = new Chart(statusCanvas, {
               type: 'bar',
               data: {
-                labels: ['Open', 'In Progress', 'Closed', 'Pending'],
+                labels: ['Open', 'In Progress', 'Overdue', 'Closed'],
                 datasets: [{
                   label: 'Số phiếu',
-                  data: [stCounts.Open, stCounts['In Progress'], stCounts.Closed, stCounts.Pending],
-                  backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981', '#a855f7'],
+                  data: [stCounts.Open, stCounts['In Progress'], stCounts.Overdue, stCounts.Closed],
+                  backgroundColor: ['#0ea5e9', '#f59e0b', '#f43f5e', '#10b981'],
                   borderRadius: 8
                 }]
               },
@@ -4317,6 +4328,8 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
           kpiSlaMetRate,
           kpiOpenRequests,
           kpiInProgressRequests,
+          kpiOverdueRequests,
+          kpiClosedRequests,
           kpiTotalDefects,
           kpiDefect8DCount,
           kpiDefectRecurringCount,
