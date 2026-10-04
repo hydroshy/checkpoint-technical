@@ -1,4 +1,5 @@
 import * as assert from 'assert';
+import * as jwt from 'jsonwebtoken';
 import { DatabaseService } from './src/modules/database/database.service';
 import { SettingsService } from './src/modules/settings/settings.service';
 import { SettingsController } from './src/modules/settings/settings.controller';
@@ -138,6 +139,53 @@ async function runTests() {
   }
   assert.strictEqual(forbiddenCaught, true, 'Should throw ForbiddenException when public form is disabled');
   console.log('   ✓ PublicController rejects POST with 403 Forbidden when public form is disabled');
+
+  // 4.5 Token bypass test when public form is DISABLED
+  const secret = process.env.JWT_SECRET || 'Checkpoint_Systems_Technical_Key_2026_Secure!';
+  const adminToken = jwt.sign({ sub: 'user-admin-1', username: 'admin', role: 'ADMIN' }, secret);
+  const empToken = jwt.sign({ sub: 'user-emp-1', username: 'user01', role: 'EMPLOYEE' }, secret);
+
+  // 4.5.1 form-status with admin token should allow access and indicate bypass
+  const adminStatusRes = publicController.getFormStatus({
+    headers: { authorization: `Bearer ${adminToken}` }
+  });
+  assert.strictEqual(adminStatusRes.canAccess, true);
+  assert.strictEqual(adminStatusRes.enabled, true);
+  assert.strictEqual(adminStatusRes.isPublicFormEnabled, false);
+  assert.strictEqual(adminStatusRes.bypass, true);
+  assert.strictEqual(adminStatusRes.authenticated, true);
+  assert.strictEqual(adminStatusRes.user?.username, 'admin');
+  console.log('   ✓ PublicController getFormStatus() allows bypass with admin token');
+
+  // 4.5.2 POST with admin token bypasses restriction
+  const adminReq = await publicController.createPublicTechnicalRequest(validPayload as any, {
+    headers: { authorization: `Bearer ${adminToken}` }
+  });
+  assert.ok(adminReq.id);
+  assert.strictEqual(adminReq.createdBy, 'admin');
+  console.log('   ✓ PublicController createPublicTechnicalRequest() succeeds with admin token bypass');
+
+  // 4.5.3 POST with employee token in cookies bypasses restriction
+  const empReq = await publicController.createPublicTechnicalRequest(validPayload as any, {
+    cookies: { checkpoint_token: empToken }
+  });
+  assert.ok(empReq.id);
+  assert.strictEqual(empReq.createdBy, 'user01');
+  console.log('   ✓ PublicController createPublicTechnicalRequest() succeeds with employee cookie bypass');
+
+  // 4.6 Catalogs and lookup options check
+  const lookupRes = publicController.getLookupOptions();
+  assert.ok(Array.isArray(lookupRes), 'lookupOptions should be an array');
+  const catalogsWithLookup = publicController.getCatalogs();
+  assert.ok(Array.isArray(catalogsWithLookup.lookupOptions), 'catalogs should include lookupOptions');
+  console.log('   ✓ PublicController lookup-options and catalogs verified');
+
+  // 4.7 Restore public form to enabled (default state = true)
+  settingsService.setPublicFormStatus(true, 'system');
+  assert.strictEqual(settingsService.isPublicFormEnabled(), true);
+  const finalSettings = JSON.parse(fs.readFileSync(settingsJsonPath, 'utf-8'));
+  assert.strictEqual(finalSettings.isPublicFormEnabled, true);
+  console.log('   ✓ Settings restored to default isPublicFormEnabled=true');
 
   console.log('✅ All Public Form & Settings tests passed successfully!');
 }

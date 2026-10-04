@@ -14,12 +14,13 @@ async function testHttpEndpoints() {
   const baseUrl = 'http://localhost:3999';
 
   try {
-    // 1. Initial form status should be false
+    // 1. Initial form status should be true by default
     const resStatus1 = await fetch(`${baseUrl}/api/public/form-status`);
     assert.strictEqual(resStatus1.status, 200, 'form-status should return 200');
     const dataStatus1 = await resStatus1.json();
-    console.log('   ✓ GET /api/public/form-status:', dataStatus1);
-    assert.strictEqual(dataStatus1.enabled, false);
+    console.log('   ✓ GET /api/public/form-status (initial default enabled):', dataStatus1);
+    assert.strictEqual(dataStatus1.enabled, true);
+    assert.strictEqual(dataStatus1.isPublicFormEnabled, true);
 
     // 2. Catalogs public endpoints
     const resMachines = await fetch(`${baseUrl}/api/public/machines`);
@@ -52,36 +53,13 @@ async function testHttpEndpoints() {
     assert.ok(catalogsData.machines && catalogsData.employees);
     console.log('   ✓ GET /api/public/catalogs verified');
 
-    // 3. Submit technical request while disabled -> 403
-    const reqPayload = {
-      reqDate: '2026-10-04',
-      reqTime: '15:45',
-      reqBy: 'Lê Minh Hoàng - VN5117',
-      printTech: 'OFFSET',
-      machineName: 'SM 52',
-      problem: 'Lỗi cấp phôi tự động',
-      priority: 'Immediate',
-      machineStatus: 'First Bulk Print',
-    };
+    const resLookup = await fetch(`${baseUrl}/api/public/lookup-options`);
+    assert.strictEqual(resLookup.status, 200);
+    const lookupData = await resLookup.json();
+    assert.ok(Array.isArray(lookupData));
+    console.log(`   ✓ GET /api/public/lookup-options returned ${lookupData.length} options`);
 
-    const resPostDisabled = await fetch(`${baseUrl}/api/public/technical-requests`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(reqPayload),
-    });
-    assert.strictEqual(resPostDisabled.status, 403, 'POST should return 403 when public is disabled');
-    console.log('   ✓ POST /api/public/technical-requests returned 403 when disabled');
-
-    // 4. PUT /api/settings/public-form without auth -> 401
-    const resPutNoAuth = await fetch(`${baseUrl}/api/settings/public-form`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ isPublicFormEnabled: true }),
-    });
-    assert.strictEqual(resPutNoAuth.status, 401, 'PUT settings without auth must be 401');
-    console.log('   ✓ PUT /api/settings/public-form correctly blocked with 401 without auth');
-
-    // 5. Login as admin
+    // 3. Login as admin
     const resLogin = await fetch(`${baseUrl}/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -93,29 +71,18 @@ async function testHttpEndpoints() {
     assert.ok(token, 'Access token should be returned');
     console.log('   ✓ Admin login successful');
 
-    // 6. Enable public form via PUT /api/settings/public-form with token
-    const resPutEnabled = await fetch(`${baseUrl}/api/settings/public-form`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ isPublicFormEnabled: true }),
-    });
-    assert.strictEqual(resPutEnabled.status, 200, 'PUT settings with admin auth must be 200');
-    const putData = await resPutEnabled.json();
-    assert.strictEqual(putData.success, true);
-    assert.strictEqual(putData.isPublicFormEnabled, true);
-    console.log('   ✓ PUT /api/settings/public-form enabled successfully by admin:', putData);
+    // 4. Submit technical request while enabled -> 201 Created (no token!)
+    const reqPayload = {
+      reqDate: '2026-10-04',
+      reqTime: '15:45',
+      reqBy: 'Lê Minh Hoàng - VN5117',
+      printTech: 'OFFSET',
+      machineName: 'SM 52',
+      problem: 'Lỗi cấp phôi tự động',
+      priority: 'Immediate',
+      machineStatus: 'First Bulk Print',
+    };
 
-    // 7. Verify GET /api/public/form-status is now true
-    const resStatus2 = await fetch(`${baseUrl}/api/public/form-status`);
-    const dataStatus2 = await resStatus2.json();
-    assert.strictEqual(dataStatus2.enabled, true);
-    assert.strictEqual(dataStatus2.isPublicFormEnabled, true);
-    console.log('   ✓ GET /api/public/form-status reflects enabled state');
-
-    // 8. Submit technical request while enabled -> 201 Created (no token!)
     const resPostEnabled = await fetch(`${baseUrl}/api/public/technical-requests`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -128,7 +95,7 @@ async function testHttpEndpoints() {
     assert.strictEqual(createdReq.createdBy, 'public');
     console.log(`   ✓ POST /api/public/technical-requests created request ${createdReq.docNo} (createdBy: ${createdReq.createdBy})`);
 
-    // 9. Disable public form via PUT /api/settings/public-form
+    // 5. Disable public form via PUT /api/settings/public-form with admin token
     const resPutDisabled = await fetch(`${baseUrl}/api/settings/public-form`, {
       method: 'PUT',
       headers: {
@@ -142,14 +109,60 @@ async function testHttpEndpoints() {
     assert.strictEqual(putDisabledData.isPublicFormEnabled, false);
     console.log('   ✓ PUT /api/settings/public-form disabled successfully by admin');
 
-    // 10. Verify POST is blocked again
-    const resPostBlockedAgain = await fetch(`${baseUrl}/api/public/technical-requests`, {
+    // 6. Verify unauthenticated form status reflects disabled
+    const resStatusDisabled = await fetch(`${baseUrl}/api/public/form-status`);
+    const dataStatusDisabled = await resStatusDisabled.json();
+    assert.strictEqual(dataStatusDisabled.enabled, false);
+    assert.strictEqual(dataStatusDisabled.isPublicFormEnabled, false);
+    console.log('   ✓ GET /api/public/form-status without auth is disabled (enabled: false)');
+
+    // 7. Verify authenticated admin form status reflects BYPASS (enabled: true, bypass: true)
+    const resStatusAdmin = await fetch(`${baseUrl}/api/public/form-status`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const dataStatusAdmin = await resStatusAdmin.json();
+    assert.strictEqual(dataStatusAdmin.enabled, true, 'Admin should have access even when public is disabled');
+    assert.strictEqual(dataStatusAdmin.isPublicFormEnabled, false);
+    assert.strictEqual(dataStatusAdmin.bypass, true);
+    assert.strictEqual(dataStatusAdmin.authenticated, true);
+    console.log('   ✓ GET /api/public/form-status with admin token bypasses lock (enabled: true, bypass: true)');
+
+    // 8. Submit technical request while disabled without auth -> 403 Forbidden
+    const resPostDisabled = await fetch(`${baseUrl}/api/public/technical-requests`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(reqPayload),
     });
-    assert.strictEqual(resPostBlockedAgain.status, 403);
-    console.log('   ✓ POST /api/public/technical-requests blocked again with 403');
+    assert.strictEqual(resPostDisabled.status, 403, 'POST should return 403 when public is disabled and no token');
+    console.log('   ✓ POST /api/public/technical-requests returned 403 for guest when disabled');
+
+    // 9. Submit technical request while disabled WITH admin token -> 201 Created (Bypass!)
+    const resPostAdminBypass = await fetch(`${baseUrl}/api/public/technical-requests`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(reqPayload),
+    });
+    assert.strictEqual(resPostAdminBypass.status, 201, 'POST with admin token should bypass lock');
+    const adminCreatedReq = await resPostAdminBypass.json();
+    assert.strictEqual(adminCreatedReq.createdBy, 'admin');
+    console.log('   ✓ POST /api/public/technical-requests succeeded with admin token bypass (createdBy: admin)');
+
+    // 10. Re-enable public form via PUT /api/settings/public-form to keep default state true
+    const resPutReenabled = await fetch(`${baseUrl}/api/settings/public-form`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ isPublicFormEnabled: true }),
+    });
+    assert.strictEqual(resPutReenabled.status, 200);
+    const putReenabledData = await resPutReenabled.json();
+    assert.strictEqual(putReenabledData.isPublicFormEnabled, true);
+    console.log('   ✓ Re-enabled public form (default state = true)');
 
     console.log('🎉 ALL HTTP E2E tests passed cleanly!');
   } finally {

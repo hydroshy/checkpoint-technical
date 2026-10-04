@@ -254,7 +254,7 @@ CREATE TABLE IF NOT EXISTS system_settings (
   updated_by VARCHAR(255)
 );
 INSERT INTO system_settings (key, value, updated_at, updated_by)
-VALUES ('public_form', '{"isPublicFormEnabled":false}'::jsonb, now(), 'system')
+VALUES ('public_form', '{"isPublicFormEnabled":true}'::jsonb, now(), 'system')
 ON CONFLICT (key) DO NOTHING;
 
 -- ------------------------------------------------------------------------------

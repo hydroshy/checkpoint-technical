@@ -53,11 +53,6 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
       background-color: #f8fafc;
       color: #0f172a;
     }
-    .theme-light .glass-header {
-      background: rgba(255, 255, 255, 0.95);
-      border-bottom: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-    }
     .theme-light .glass-card {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -77,11 +72,6 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
     html.theme-dark body {
       background-color: #030712;
       color: #f1f5f9;
-    }
-    .theme-dark .glass-header {
-      background: rgba(15, 23, 42, 0.95);
-      border-bottom: 1px solid #1e293b;
-      box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.4);
     }
     .theme-dark .glass-card {
       background: rgba(15, 23, 42, 0.85);
@@ -201,131 +191,187 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
       position: relative;
       background: white;
     }
-    .pdf-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 6px;
-      margin-bottom: 6px;
+    .pdf-border {
+      border: 2px solid #0284c7;
+      border-radius: 4px;
+      padding: 8mm 10mm;
+      min-height: calc(297mm - 24mm);
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
     }
-    .pdf-table th, .pdf-table td {
-      border: 1px solid #374151;
-      padding: 4px 6px;
-      text-align: left;
+    .pdf-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 2px solid #0284c7;
+      padding-bottom: 8px;
+      margin-bottom: 10px;
     }
-    .pdf-table th {
-      background-color: #f3f4f6;
-      font-weight: bold;
+    .pdf-meta {
+      font-size: 9px;
+      color: #64748b;
+      line-height: 1.4;
     }
-    .pdf-header-title {
-      font-size: 18px;
+    .pdf-title-box {
+      text-align: right;
+    }
+    .pdf-title {
+      font-size: 16px;
       font-weight: 800;
       color: #0284c7;
-      text-align: center;
-      text-transform: uppercase;
       letter-spacing: 0.5px;
+    }
+    .pdf-subtitle {
+      font-size: 9px;
+      color: #64748b;
+      text-transform: uppercase;
+      font-weight: 600;
     }
     .pdf-section-title {
       font-size: 11px;
       font-weight: bold;
-      background-color: #e2e8f0;
-      padding: 3px 6px;
+      padding: 4px 8px;
       margin-top: 8px;
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       border-left: 3px solid #0284c7;
       text-transform: uppercase;
-    }
-    .pdf-signatures {
       display: flex;
       justify-content: space-between;
-      margin-top: 20px;
+      align-items: center;
+    }
+    .pdf-row {
+      display: flex;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 5px 0;
+      font-size: 11px;
+      align-items: center;
+    }
+    .pdf-field {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pdf-label {
+      font-weight: bold;
+      color: #334155;
+      font-size: 10px;
+    }
+    .pdf-value {
+      border-bottom: 1px dotted #94a3b8;
+      min-height: 18px;
+      padding: 0 4px;
+      font-size: 11px;
+    }
+    .pdf-checkbox {
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid #475569;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+    }
+    .pdf-checkbox.checked::after {
+      content: '✓';
+      font-size: 10px;
+      font-weight: bold;
+      color: #0284c7;
+    }
+    .pdf-radio {
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid #475569;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+    }
+    .pdf-radio.checked::after {
+      content: '●';
+      font-size: 8px;
+      color: #0284c7;
+    }
+    .pdf-signature-box {
+      display: flex;
+      justify-content: space-between;
+      padding: 15px 20px 10px 20px;
+      margin-top: 15px;
     }
     .pdf-signature-col {
       display: flex;
       flex-direction: column;
       align-items: center;
       width: 30%;
+      text-align: center;
     }
     .pdf-signature-line {
-      border-bottom: 1px solid black;
+      border-bottom: 1px solid #64748b;
       width: 100%;
-      height: 40px;
-      margin-bottom: 5px;
+      height: 45px;
+      margin-bottom: 6px;
+    }
+    .pdf-footer {
+      margin-top: auto;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 6px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 9px;
+      color: #94a3b8;
+    }
+
+    /* Print media */
+    @media print {
+      body {
+        background: white !important;
+        color: black !important;
+      }
+      #app > *:not(#pdf-template) {
+        display: none !important;
+      }
+      #pdf-template {
+        position: static !important;
+        left: 0 !important;
+        top: 0 !important;
+        display: block !important;
+      }
+      .pdf-page {
+        width: 100% !important;
+        min-height: 100% !important;
+        padding: 0 !important;
+      }
     }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased">
   <div id="app" v-cloak class="flex-1 flex flex-col">
 
-    <!-- TOP HEADER -->
-    <header class="glass-header sticky top-0 z-40 px-4 sm:px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <a href="/form-request" class="flex items-center gap-2.5 text-inherit font-extrabold text-sm tracking-tight text-decoration-none">
-          <div class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center p-1 shadow-inner overflow-hidden">
-            <img src="/images/logo-navbar.png?v=3" onerror="this.onerror=null; this.src='/images/logo-login.png?v=3'; this.onerror=function(){this.src='/images/favicon.png?v=3';};" class="w-full h-full object-contain rounded-lg" alt="Checkpoint Systems Logo" />
-          </div>
-          <div class="leading-none text-left">
-            <div class="flex items-center gap-1.5">
-              <span class="text-sm font-extrabold"><span class="text-sky-500">Checkpoint</span> Systems</span>
-            </div>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Phiếu Yêu Cầu Kỹ Thuật (Public Form)</span>
-          </div>
-        </a>
-      </div>
-
-      <div class="flex items-center gap-2 sm:gap-3">
-        <!-- Theme Toggle -->
-        <button
-          type="button"
-          @click="toggleTheme"
-          class="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
-          :title="currentTheme === 'dark' ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'"
-        >
-          <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
-        </button>
-
-        <!-- Login Link -->
-        <a
-          href="/login"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/15 hover:bg-sky-100 dark:hover:bg-sky-500/25 border border-sky-200 dark:border-sky-500/30 transition shadow-sm"
-        >
-          <i class="fa-solid fa-right-to-bracket text-sky-500"></i>
-          <span>Đăng nhập</span>
-        </a>
-      </div>
-    </header>
-
-    <!-- MAIN BODY -->
+    <!-- MAIN BODY (STANDALONE FORM - NO TOP HEADER BAR) -->
     <main class="flex-1 max-w-5xl w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
 
       <!-- LOADING STATE -->
-      <div v-if="loadingStatus" class="flex flex-col items-center justify-center py-24 space-y-4">
+      <div v-if="loadingStatus && !isPublicFormEnabled && !isAdminOrStaff" class="flex flex-col items-center justify-center py-24 space-y-4">
         <i class="fa-solid fa-circle-notch fa-spin text-3xl text-sky-500"></i>
-        <p class="text-sm font-medium text-slate-500">Đang kiểm tra trạng thái biểu mẫu...</p>
+        <p class="text-sm font-medium text-slate-500">Đang tải phiếu yêu cầu kỹ thuật...</p>
       </div>
 
-      <!-- CLOSED STATE BANNER (When Admin has disabled public form) -->
-      <div v-else-if="!isPublicFormEnabled" class="glass-card rounded-3xl p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6 my-12 border border-slate-200 dark:border-slate-800 shadow-xl">
+      <!-- CLOSED STATE BANNER (When Public Form disabled AND guest has no admin/staff token) -->
+      <div v-else-if="!isPublicFormEnabled && !isAdminOrStaff" class="glass-card rounded-3xl p-8 sm:p-12 text-center max-w-xl mx-auto space-y-6 my-12 border border-slate-200 dark:border-slate-800 shadow-xl">
         <div class="w-20 h-20 mx-auto rounded-3xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl text-amber-500 shadow-inner">
           <i class="fa-solid fa-lock"></i>
         </div>
         <div class="space-y-2">
           <h2 class="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">Biểu Mẫu Tạm Khóa</h2>
           <p class="text-sm text-slate-500 dark:text-slate-400 leading-relaxed">
-            Chức năng gửi yêu cầu kỹ thuật công khai hiện đang được <b>tạm đóng</b> bởi Quản trị viên hệ thống. Vui lòng liên hệ bộ phận kỹ thuật hoặc đăng nhập tài khoản nhân viên để tiếp tục.
+            Chức năng gửi yêu cầu kỹ thuật công khai hiện đang được tạm đóng bởi Quản trị viên hệ thống. Vui lòng liên hệ bộ phận kỹ thuật để được hỗ trợ.
           </p>
         </div>
-        <div class="pt-4 flex flex-col sm:flex-row gap-3 justify-center">
-          <a
-            href="/login"
-            class="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-sm font-bold shadow-md shadow-sky-500/30 transition flex items-center justify-center gap-2"
-          >
-            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-            <span>Đăng nhập hệ thống</span>
-          </a>
+        <div class="pt-4 flex justify-center">
           <button
             type="button"
             @click="checkPublicFormStatus"
-            class="px-5 py-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 rounded-xl text-sm font-semibold transition flex items-center justify-center gap-2 cursor-pointer"
+            class="px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-sm font-bold shadow-md shadow-sky-500/30 transition flex items-center justify-center gap-2 cursor-pointer"
           >
             <i class="fa-solid fa-arrows-rotate"></i>
             <span>Thử lại</span>
@@ -333,11 +379,11 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
         </div>
       </div>
 
-      <!-- ACTIVE PUBLIC FORM -->
+      <!-- ACTIVE STANDALONE FORM -->
       <div v-else class="space-y-6">
 
-        <!-- Form Top Header Info Card -->
-        <header class="glass-card rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <!-- Form Top Header Info Card (Div, not Header tag) -->
+        <div class="glass-card rounded-2xl p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div class="flex items-center gap-3.5">
             <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-2xl text-sky-500 shadow-inner">
               🖨️
@@ -345,39 +391,77 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
             <div>
               <div class="flex items-center gap-2">
                 <h1 class="text-xl sm:text-2xl font-bold tracking-tight">Phiếu Yêu Cầu Kỹ Thuật</h1>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase">
+                <span v-if="isAdminOrStaff" class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20 uppercase">
+                  Nội bộ / Admin
+                </span>
+                <span v-else class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase">
                   Công khai
                 </span>
               </div>
-              <p class="text-xs text-slate-400 font-medium mt-0.5">Biểu mẫu gửi yêu cầu sửa chữa sự cố & downtime (Printing Dept.)</p>
+              <p class="text-xs text-slate-400 font-medium mt-0.5">Printing Dept. Repair Request & Downtime Form</p>
             </div>
           </div>
           <div class="flex flex-col items-end w-full sm:w-auto">
             <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1">Số tài liệu (Doc No.)</div>
-            <div class="font-mono text-xl sm:text-2xl font-bold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-3 py-1 rounded-xl border border-sky-500/20 w-full sm:w-auto text-center sm:text-right mb-2">
+            <div class="font-mono text-xl sm:text-2xl font-bold text-sky-600 dark:text-sky-400 bg-sky-500/10 px-3 py-1 rounded-xl border border-sky-500/20 w-full sm:w-auto text-center sm:text-right mb-3">
               {{ form.docNo || '—' }}
             </div>
-            <div class="flex items-center gap-2">
+
+            <!-- Top Action Buttons: Làm mới, Phục hồi, Sao lưu, In, Xuất PDF, Theme toggle -->
+            <div class="flex flex-wrap justify-end gap-2 w-full">
               <button
                 type="button"
                 @click="clearForm"
-                class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 font-medium transition cursor-pointer"
+                class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 font-medium transition cursor-pointer text-slate-700 dark:text-slate-300"
                 title="Làm mới form"
               >
-                <span>🔄</span> Làm mới
+                <span>🔄</span> <span>Làm mới</span>
+              </button>
+              <button
+                type="button"
+                @click="triggerRestore"
+                class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 font-medium transition cursor-pointer text-slate-700 dark:text-slate-300"
+                title="Phục hồi form từ file JSON"
+              >
+                <span>📂</span> <span>Phục hồi</span>
+              </button>
+              <button
+                type="button"
+                @click="triggerBackup"
+                class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 font-medium transition cursor-pointer text-slate-700 dark:text-slate-300"
+                title="Sao lưu form ra file JSON"
+              >
+                <span>💾</span> <span>Sao lưu</span>
+              </button>
+              <button
+                type="button"
+                @click="printForm"
+                class="text-xs bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 font-medium transition cursor-pointer text-slate-700 dark:text-slate-300"
+                title="In phiếu"
+              >
+                <span>🖨️</span> <span>In phiếu</span>
               </button>
               <button
                 type="button"
                 @click="generatePDF"
                 :disabled="exportingPDF"
-                class="text-xs bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 hover:bg-sky-100 px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 font-medium transition cursor-pointer"
+                class="text-xs bg-sky-50 text-sky-700 dark:bg-sky-500/15 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-500/25 px-3 py-1.5 rounded-lg flex items-center justify-center gap-1.5 font-medium transition cursor-pointer border border-sky-200 dark:border-sky-500/30"
                 title="Xuất file PDF"
               >
-                <span>📄</span> Xuất PDF
+                <span>📄</span> <span>{{ exportingPDF ? 'Đang xuất...' : 'Xuất PDF' }}</span>
+              </button>
+              <button
+                type="button"
+                @click="toggleTheme"
+                class="flex items-center justify-center w-8 h-8 rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 transition cursor-pointer"
+                :title="currentTheme === 'dark' ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'"
+              >
+                <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
               </button>
             </div>
+            <input type="file" id="file_restore" accept=".json" class="hidden" @change="processRestoreFile" />
           </div>
-        </header>
+        </div>
 
         <!-- FORM SECTIONS -->
         <form @submit.prevent="submitPublicForm" class="space-y-6">
@@ -437,28 +521,29 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                 </div>
               </div>
 
-              <!-- Row 2: Tech, Machine & Work Order -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+              <!-- Row 2: Machine -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Công nghệ in <span class="text-red-500">*</span></label>
-                  <select v-model="form.printTech" @change="handleTechChange" required class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Công nghệ in (Tech) <span class="text-red-500">*</span></label>
+                  <select v-model="form.printTech" @change="handleTechChange" required class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition cursor-pointer">
                     <option value="" disabled>-- Chọn công nghệ --</option>
-                    <option v-for="t in availableTechs" :key="t" :value="t">{{ t }}</option>
+                    <option v-for="(machines, tech) in machineCatalog" :key="tech" :value="tech">{{ tech }}</option>
+                    <option value="OTHER">Khác...</option>
                   </select>
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tên máy / Thiết bị <span class="text-red-500">*</span></label>
-                  <div class="relative">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tên máy (Machine) <span class="text-red-500">*</span></label>
+                  <div class="flex gap-2">
                     <select
                       v-if="!customMachineMode"
                       v-model="form.machineName"
                       @change="handleMachineSelectChange"
                       required
-                      class="input-box w-full px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition"
+                      class="input-box flex-1 px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition cursor-pointer"
                     >
-                      <option value="" disabled>-- Chọn máy --</option>
+                      <option value="" disabled>-- {{ form.printTech ? 'Chọn Máy' : 'Chọn Công Nghệ Trước' }} --</option>
                       <option v-for="m in currentTechMachines" :key="m" :value="m">{{ m }}</option>
-                      <option value="__OTHER__">Khác (Nhập tùy chỉnh)...</option>
+                      <option value="__OTHER__">📌 Nhập máy khác...</option>
                     </select>
                     <input
                       v-else
@@ -466,13 +551,17 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                       v-model="form.machineName"
                       placeholder="Nhập tên máy..."
                       required
-                      class="input-box w-full px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition"
+                      class="input-box flex-1 px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition"
                     />
+                    <button
+                      type="button"
+                      @click="customMachineMode = !customMachineMode"
+                      class="px-4 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 transition"
+                      :title="customMachineMode ? 'Chọn từ danh sách' : 'Nhập tên máy thủ công'"
+                    >
+                      ✏️
+                    </button>
                   </div>
-                </div>
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Work Order (WO No.)</label>
-                  <input type="text" v-model="form.workOrder" placeholder="Số WO (ví dụ: WO-88291)..." class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition" />
                 </div>
               </div>
 
@@ -488,16 +577,16 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                 ></textarea>
               </div>
 
-              <!-- Row 4: Group 1 (Trạng thái sự cố) & Group 2 (Mức độ ưu tiên) -->
+              <!-- Row 4: Status & Priority Toggles (6 button groups: 1 & 2) -->
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-5 border-t border-slate-100 dark:border-slate-800">
-                <!-- Group 1: Trạng thái sự cố (Single choice only) -->
+                <!-- Group 1: Trạng thái sự cố (Single choice) -->
                 <div class="flex flex-col gap-2.5">
                   <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Trạng thái sự cố</label>
                   <div class="flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-1">
-                      <input type="radio" name="public_machineStatus" id="pst_first" value="First Bulk Print" v-model="form.machineStatus" class="toggle-radio hidden" />
+                      <input type="radio" name="public_machineStatus" id="st_first" value="First Bulk Print" v-model="form.machineStatus" class="toggle-radio hidden" />
                       <label
-                        for="pst_first"
+                        for="st_first"
                         :class="form.machineStatus === 'First Bulk Print' ? 'bg-sky-600 text-white border-sky-600 ring-2 ring-sky-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >
@@ -505,9 +594,9 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                       </label>
                     </div>
                     <div class="relative flex-1">
-                      <input type="radio" name="public_machineStatus" id="pst_repeat" value="Repeat Print" v-model="form.machineStatus" class="toggle-radio hidden" />
+                      <input type="radio" name="public_machineStatus" id="st_repeat" value="Repeat Print" v-model="form.machineStatus" class="toggle-radio hidden" />
                       <label
-                        for="pst_repeat"
+                        for="st_repeat"
                         :class="form.machineStatus === 'Repeat Print' ? 'bg-sky-600 text-white border-sky-600 ring-2 ring-sky-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >
@@ -517,14 +606,14 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                   </div>
                 </div>
 
-                <!-- Group 2: Mức độ ưu tiên (Single choice only) -->
+                <!-- Group 2: Mức độ ưu tiên (Single choice) -->
                 <div class="flex flex-col gap-2.5">
                   <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Mức độ ưu tiên</label>
                   <div class="flex flex-wrap gap-2.5 items-center">
                     <div class="relative flex-1 min-w-[110px]">
-                      <input type="radio" name="public_priority" id="ppr_imm" value="Immediate" v-model="form.priority" class="toggle-radio-danger hidden" />
+                      <input type="radio" name="public_priority" id="pr_imm" value="Immediate" v-model="form.priority" class="toggle-radio-danger hidden" />
                       <label
-                        for="ppr_imm"
+                        for="pr_imm"
                         :class="form.priority === 'Immediate' ? 'bg-red-600 text-white border-red-600 ring-2 ring-red-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >
@@ -532,9 +621,9 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                       </label>
                     </div>
                     <div class="relative flex-1 min-w-[110px]">
-                      <input type="radio" name="public_priority" id="ppr_hold" value="Hold" v-model="form.priority" class="toggle-radio-warning hidden" />
+                      <input type="radio" name="public_priority" id="pr_hold" value="Hold" v-model="form.priority" class="toggle-radio-warning hidden" />
                       <label
-                        for="ppr_hold"
+                        for="pr_hold"
                         :class="form.priority === 'Hold' ? 'bg-amber-500 text-white border-amber-500 ring-2 ring-amber-300/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >
@@ -543,9 +632,9 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                     </div>
                     <div class="relative flex-1 min-w-[110px] flex flex-col gap-1.5">
                       <div>
-                        <input type="radio" name="public_priority" id="ppr_other" value="Other" v-model="form.priority" class="toggle-radio-purple hidden" />
+                        <input type="radio" name="public_priority" id="pr_other" value="Other" v-model="form.priority" class="toggle-radio-purple hidden" />
                         <label
-                          for="ppr_other"
+                          for="pr_other"
                           :class="form.priority === 'Other' ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                           class="toggle-label flex items-center justify-center gap-1.5 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                         >
@@ -566,27 +655,27 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
             </div>
           </section>
 
-          <!-- SECTION 2: TIẾP NHẬN & XỬ LÝ (KỸ THUẬT) -->
+          <!-- SECTION 2: PHÂN TÍCH & XỬ LÝ -->
           <section class="glass-card rounded-2xl overflow-hidden">
             <div class="bg-emerald-500/5 px-6 py-4 border-b border-emerald-500/15 flex items-center gap-3">
               <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md shadow-emerald-500/30">2</div>
               <div>
-                <h2 class="font-bold text-base sm:text-lg">Tiếp Nhận & Xử Lý Sự Cố</h2>
-                <p class="text-xs text-slate-500 font-medium">Dành cho bộ phận kỹ thuật (Technical Support)</p>
+                <h2 class="font-bold text-base sm:text-lg">Phân Tích & Xử Lý</h2>
+                <p class="text-xs text-slate-500 font-medium">Dành cho bộ phận kỹ thuật (Technical Dept)</p>
               </div>
             </div>
             
             <div class="p-6 space-y-6">
-              <!-- Row 1: Person & Time Reception -->
+              <!-- Row 1: Technical Receiver -->
               <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                 <div class="flex flex-col gap-1.5 lg:col-span-2">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Người tiếp nhận kỹ thuật</label>
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Người tiếp nhận (Kỹ thuật)</label>
                   <div class="relative">
                     <input
                       type="text"
                       v-model="form.recvBy"
                       list="employee_list"
-                      placeholder="Mã NV hoặc tên người tiếp nhận..."
+                      placeholder="Mã NV hoặc tên kỹ thuật viên..."
                       class="input-box w-full pl-4 pr-10 py-2.5 rounded-xl text-sm font-medium outline-none transition"
                     />
                     <button
@@ -599,12 +688,16 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                     </button>
                   </div>
                 </div>
+              </div>
+
+              <!-- Row 2: Date & Time Calculation -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Ngày tiếp nhận</label>
-                  <input type="date" v-model="form.recvDate" @change="calculateDowntime" class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition" />
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Ngày nhận</label>
+                  <input type="date" v-model="form.recvDate" @change="calculateDowntime" class="input-box px-3.5 py-2.5 rounded-xl text-sm outline-none" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Giờ tiếp nhận</label>
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Giờ nhận</label>
                   <div class="relative">
                     <input
                       type="text"
@@ -612,18 +705,14 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                       readonly
                       placeholder="Chọn giờ..."
                       @click="openTimePicker('recvTime')"
-                      class="input-box w-full px-4 py-2.5 rounded-xl font-mono text-sm font-medium outline-none transition cursor-pointer"
+                      class="input-box w-full px-3.5 py-2.5 rounded-xl font-mono text-sm text-center outline-none cursor-pointer"
                     />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">🕒</span>
+                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">🕒</span>
                   </div>
                 </div>
-              </div>
-
-              <!-- Row 2: Finish Time & Downtime -->
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div class="flex flex-col gap-1.5">
                   <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Ngày hoàn thành</label>
-                  <input type="date" v-model="form.finishDate" @change="calculateDowntime" class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none transition" />
+                  <input type="date" v-model="form.finishDate" @change="calculateDowntime" class="input-box px-3.5 py-2.5 rounded-xl text-sm outline-none" />
                 </div>
                 <div class="flex flex-col gap-1.5">
                   <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Giờ hoàn thành</label>
@@ -634,81 +723,78 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                       readonly
                       placeholder="Chọn giờ..."
                       @click="openTimePicker('finishTime')"
-                      class="input-box w-full px-4 py-2.5 rounded-xl font-mono text-sm font-medium outline-none transition cursor-pointer"
+                      class="input-box w-full px-3.5 py-2.5 rounded-xl font-mono text-sm text-center outline-none cursor-pointer"
                     />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">🕒</span>
+                    <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">🕒</span>
                   </div>
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Downtime (Phút dừng máy)</label>
-                  <div class="relative">
-                    <input
-                      type="number"
-                      v-model.number="form.downtime"
-                      placeholder="0"
-                      class="input-box w-full px-4 py-2.5 rounded-xl font-mono font-bold text-sm outline-none transition text-red-600 dark:text-red-400"
-                    />
-                    <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 pointer-events-none">phút</span>
-                  </div>
+                  <label class="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wide">Downtime (Phút)</label>
+                  <input
+                    type="number"
+                    v-model="form.downtime"
+                    readonly
+                    class="px-4 py-2.5 bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 text-emerald-700 dark:text-emerald-400 font-mono font-bold rounded-xl text-center outline-none"
+                  />
                 </div>
               </div>
 
-              <!-- Row 3: Root Cause & Action Taken -->
+              <!-- Row 3: Text areas -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Nguyên nhân sự cố (Root Cause)</label>
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Nguyên nhân gốc (Root Cause)</label>
                   <textarea
                     v-model="form.rootCause"
                     rows="3"
-                    placeholder="Phân tích chi tiết nguyên nhân gốc rễ..."
+                    placeholder="Phân tích nguyên nhân cốt lõi gây ra sự cố..."
                     class="input-box px-4 py-3 rounded-xl text-sm outline-none resize-y"
                   ></textarea>
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Biện pháp xử lý (Action Taken)</label>
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Hành động khắc phục (Action Taken)</label>
                   <textarea
                     v-model="form.actionTaken"
                     rows="3"
-                    placeholder="Hành động đã khắc phục, thay thế linh kiện..."
+                    placeholder="Các bước và phương pháp kỹ thuật đã xử lý..."
                     class="input-box px-4 py-3 rounded-xl text-sm outline-none resize-y"
                   ></textarea>
                 </div>
               </div>
 
-              <!-- Row 4: Group 3 (Phân loại lỗi 4M) & Group 4 (Nhóm công đoạn) -->
+              <!-- Row 4: 4M & Process Stage (6 button groups: 3 & 4) -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-5 border-t border-slate-100 dark:border-slate-800">
-                <!-- Group 3: Phân loại lỗi (4M) (Single choice only) -->
+                <!-- Group 3: Phân loại lỗi (4M) -->
                 <div class="flex flex-col gap-2.5">
                   <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Phân loại lỗi (4M)</label>
                   <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <div class="relative">
-                      <input type="radio" name="public_errCat" id="pcat_man" value="MAN" v-model="form.errCat" class="toggle-radio-purple hidden" />
+                      <input type="radio" name="public_errCat" id="cat_man" value="MAN" v-model="form.errCat" class="toggle-radio-purple hidden" />
                       <label
-                        for="pcat_man"
+                        for="cat_man"
                         :class="form.errCat === 'MAN' ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex justify-center items-center px-2 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
                       >Con người</label>
                     </div>
                     <div class="relative">
-                      <input type="radio" name="public_errCat" id="pcat_mac" value="MACHINE" v-model="form.errCat" class="toggle-radio-purple hidden" />
+                      <input type="radio" name="public_errCat" id="cat_mac" value="MACHINE" v-model="form.errCat" class="toggle-radio-purple hidden" />
                       <label
-                        for="pcat_mac"
+                        for="cat_mac"
                         :class="form.errCat === 'MACHINE' ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex justify-center items-center px-2 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
                       >Máy móc</label>
                     </div>
                     <div class="relative">
-                      <input type="radio" name="public_errCat" id="pcat_mat" value="MATERIAL" v-model="form.errCat" class="toggle-radio-purple hidden" />
+                      <input type="radio" name="public_errCat" id="cat_mat" value="MATERIAL" v-model="form.errCat" class="toggle-radio-purple hidden" />
                       <label
-                        for="pcat_mat"
+                        for="cat_mat"
                         :class="form.errCat === 'MATERIAL' ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex justify-center items-center px-2 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
                       >Vật tư</label>
                     </div>
                     <div class="relative">
-                      <input type="radio" name="public_errCat" id="pcat_met" value="METHOD" v-model="form.errCat" class="toggle-radio-purple hidden" />
+                      <input type="radio" name="public_errCat" id="cat_met" value="METHOD" v-model="form.errCat" class="toggle-radio-purple hidden" />
                       <label
-                        for="pcat_met"
+                        for="cat_met"
                         :class="form.errCat === 'METHOD' ? 'bg-indigo-600 text-white border-indigo-600 ring-2 ring-indigo-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex justify-center items-center px-2 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
                       >P.Pháp</label>
@@ -716,30 +802,30 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                   </div>
                 </div>
 
-                <!-- Group 4: Nhóm công đoạn (Single choice only) -->
+                <!-- Group 4: Nhóm công đoạn -->
                 <div class="flex flex-col gap-2.5">
                   <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Nhóm công đoạn</label>
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     <div class="relative">
-                      <input type="radio" name="public_errType" id="ptyp_prepress" value="Prepress" v-model="form.errType" class="toggle-radio-purple hidden" />
+                      <input type="radio" name="public_errType" id="typ_prepress" value="Prepress" v-model="form.errType" class="toggle-radio-purple hidden" />
                       <label
-                        for="ptyp_prepress"
+                        for="typ_prepress"
                         :class="form.errType === 'Prepress' ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
                       >💻 Trước in</label>
                     </div>
                     <div class="relative">
-                      <input type="radio" name="public_errType" id="ptyp_press" value="Press" v-model="form.errType" class="toggle-radio-purple hidden" />
+                      <input type="radio" name="public_errType" id="typ_press" value="Press" v-model="form.errType" class="toggle-radio-purple hidden" />
                       <label
-                        for="ptyp_press"
+                        for="typ_press"
                         :class="form.errType === 'Press' ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
                       >🖨️ Trong in</label>
                     </div>
                     <div class="relative">
-                      <input type="radio" name="public_errType" id="ptyp_postpress" value="PostPress" v-model="form.errType" class="toggle-radio-purple hidden" />
+                      <input type="radio" name="public_errType" id="typ_postpress" value="PostPress" v-model="form.errType" class="toggle-radio-purple hidden" />
                       <label
-                        for="ptyp_postpress"
+                        for="typ_postpress"
                         :class="form.errType === 'PostPress' ? 'bg-purple-600 text-white border-purple-600 ring-2 ring-purple-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex justify-center items-center gap-1.5 px-3 py-2 border rounded-lg cursor-pointer text-xs font-semibold transition"
                       >✂️ Sau in</label>
@@ -776,12 +862,12 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                     </div>
                   </div>
                   <div class="mt-auto grid grid-cols-2 gap-3">
-                    <input type="file" id="pfile_before" accept="image/*" multiple class="hidden" @change="e => handleImageUpload(e, 'before')" />
-                    <input type="file" id="pcam_before" accept="image/*" capture="environment" class="hidden" @change="e => handleImageUpload(e, 'before')" />
-                    <button type="button" @click="triggerUpload('pfile_before')" class="py-2 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <input type="file" id="file_before" accept="image/*" multiple class="hidden" @change="e => handleImageUpload(e, 'before')" />
+                    <input type="file" id="cam_before" accept="image/*" capture="environment" class="hidden" @change="e => handleImageUpload(e, 'before')" />
+                    <button type="button" @click="triggerUpload('file_before')" class="py-2 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-1.5 cursor-pointer">
                       📁 <span>Chọn ảnh</span>
                     </button>
-                    <button type="button" @click="triggerUpload('pcam_before')" class="py-2 px-3 bg-sky-50 dark:bg-sky-500/15 border border-sky-200 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 rounded-xl text-xs font-semibold hover:bg-sky-100 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <button type="button" @click="triggerUpload('cam_before')" class="py-2 px-3 bg-sky-50 dark:bg-sky-500/15 border border-sky-200 dark:border-sky-500/30 text-sky-700 dark:text-sky-300 rounded-xl text-xs font-semibold hover:bg-sky-100 flex items-center justify-center gap-1.5 cursor-pointer">
                       📷 <span>Chụp ảnh</span>
                     </button>
                   </div>
@@ -801,12 +887,12 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                     </div>
                   </div>
                   <div class="mt-auto grid grid-cols-2 gap-3">
-                    <input type="file" id="pfile_after" accept="image/*" multiple class="hidden" @change="e => handleImageUpload(e, 'after')" />
-                    <input type="file" id="pcam_after" accept="image/*" capture="environment" class="hidden" @change="e => handleImageUpload(e, 'after')" />
-                    <button type="button" @click="triggerUpload('pfile_after')" class="py-2 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <input type="file" id="file_after" accept="image/*" multiple class="hidden" @change="e => handleImageUpload(e, 'after')" />
+                    <input type="file" id="cam_after" accept="image/*" capture="environment" class="hidden" @change="e => handleImageUpload(e, 'after')" />
+                    <button type="button" @click="triggerUpload('file_after')" class="py-2 px-3 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-xl text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-700 flex items-center justify-center gap-1.5 cursor-pointer">
                       📁 <span>Chọn ảnh</span>
                     </button>
-                    <button type="button" @click="triggerUpload('pcam_after')" class="py-2 px-3 bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-semibold hover:bg-emerald-100 flex items-center justify-center gap-1.5 cursor-pointer">
+                    <button type="button" @click="triggerUpload('cam_after')" class="py-2 px-3 bg-emerald-50 dark:bg-emerald-500/15 border border-emerald-200 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-300 rounded-xl text-xs font-semibold hover:bg-emerald-100 flex items-center justify-center gap-1.5 cursor-pointer">
                       📷 <span>Chụp ảnh</span>
                     </button>
                   </div>
@@ -826,24 +912,24 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
             </div>
             
             <div class="p-6 space-y-6">
-              <!-- Row 1: Group 5 (Chất lượng in sau xử lý) & Group 6 (Tình trạng sự cố) -->
+              <!-- Quality & Ticket Status (6 button groups: 5 & 6) -->
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Group 5: Chất lượng in sau xử lý (Single choice only) -->
+                <!-- Group 5: Chất lượng in sau xử lý -->
                 <div class="flex flex-col gap-2.5">
                   <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Chất lượng in sau xử lý</label>
                   <div class="flex gap-3">
                     <div class="relative flex-1">
-                      <input type="radio" name="public_chkQuality" id="pqa_ok" value="OK" v-model="form.chkQuality" class="toggle-radio-success hidden" />
+                      <input type="radio" name="public_chkQuality" id="qa_ok" value="OK" v-model="form.chkQuality" class="toggle-radio-success hidden" />
                       <label
-                        for="pqa_ok"
+                        for="qa_ok"
                         :class="form.chkQuality === 'OK' ? 'bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >✅ Đạt chuẩn</label>
                     </div>
                     <div class="relative flex-1">
-                      <input type="radio" name="public_chkQuality" id="pqa_ng" value="NG" v-model="form.chkQuality" class="toggle-radio-danger hidden" />
+                      <input type="radio" name="public_chkQuality" id="qa_ng" value="NG" v-model="form.chkQuality" class="toggle-radio-danger hidden" />
                       <label
-                        for="pqa_ng"
+                        for="qa_ng"
                         :class="form.chkQuality === 'NG' ? 'bg-red-600 text-white border-red-600 ring-2 ring-red-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-2 px-4 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >❌ Chưa đạt</label>
@@ -851,30 +937,30 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                   </div>
                 </div>
 
-                <!-- Group 6: Tình trạng sự cố (Single choice only) -->
+                <!-- Group 6: Tình trạng sự cố -->
                 <div class="flex flex-col gap-2.5">
                   <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Tình trạng sự cố</label>
                   <div class="flex flex-col sm:flex-row gap-3">
                     <div class="relative flex-1">
-                      <input type="radio" name="public_chkStatus" id="pst_done" value="DONE" v-model="form.chkStatus" class="toggle-radio-success hidden" />
+                      <input type="radio" name="public_chkStatus" id="st_done" value="DONE" v-model="form.chkStatus" class="toggle-radio-success hidden" />
                       <label
-                        for="pst_done"
+                        for="st_done"
                         :class="form.chkStatus === 'DONE' ? 'bg-emerald-600 text-white border-emerald-600 ring-2 ring-emerald-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >🟢 Đã khắc phục</label>
                     </div>
                     <div class="relative flex-1">
-                      <input type="radio" name="public_chkStatus" id="pst_monitor" value="MONITOR" v-model="form.chkStatus" class="toggle-radio-warning hidden" />
+                      <input type="radio" name="public_chkStatus" id="st_monitor" value="MONITOR" v-model="form.chkStatus" class="toggle-radio-warning hidden" />
                       <label
-                        for="pst_monitor"
+                        for="st_monitor"
                         :class="form.chkStatus === 'MONITOR' ? 'bg-amber-500 text-white border-amber-500 ring-2 ring-amber-300/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >🟡 Đang theo dõi</label>
                     </div>
                     <div class="relative flex-1">
-                      <input type="radio" name="public_chkStatus" id="pst_support" value="SUPPORT" v-model="form.chkStatus" class="toggle-radio-danger hidden" />
+                      <input type="radio" name="public_chkStatus" id="st_support" value="SUPPORT" v-model="form.chkStatus" class="toggle-radio-danger hidden" />
                       <label
-                        for="pst_support"
+                        for="st_support"
                         :class="form.chkStatus === 'SUPPORT' ? 'bg-red-600 text-white border-red-600 ring-2 ring-red-400/50 shadow font-bold' : 'text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'"
                         class="toggle-label flex items-center justify-center gap-2 px-3 py-2.5 border rounded-xl cursor-pointer text-xs sm:text-sm font-semibold w-full transition"
                       >🔴 Cần hỗ trợ</label>
@@ -883,62 +969,62 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
                 </div>
               </div>
 
-              <!-- Row 2: Quantities, Waste & Production Manager -->
+              <!-- Work Order & Waste metrics -->
               <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 pt-5 border-t border-slate-100 dark:border-slate-800">
                 <div class="flex flex-col gap-1.5 col-span-2 lg:col-span-1">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Work Order No.</label>
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Work order</label>
                   <input type="text" v-model="form.workOrder" placeholder="Số WO..." class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Sản lượng tổng</label>
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Total Qty</label>
                   <input type="number" v-model.number="form.woTotalQty" @input="calculateWastePercent" placeholder="0" class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Phế phẩm phát sinh</label>
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Waste</label>
                   <input type="number" v-model.number="form.wasteQty" @input="calculateWastePercent" placeholder="0" class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none" />
                 </div>
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Đơn vị phế phẩm</label>
-                  <select v-model="form.wasteUnit" class="input-box px-4 py-2.5 rounded-xl text-sm font-medium outline-none">
-                    <option value="Pcs">Pcs (Cái)</option>
-                    <option value="Tờ in">Tờ in</option>
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Đơn vị</label>
+                  <select v-model="form.wasteUnit" class="input-box px-3.5 py-2.5 rounded-xl text-sm font-medium outline-none cursor-pointer">
+                    <option value="Pcs">Pcs (Cái/Nhãn)</option>
                     <option value="Mét">Mét</option>
-                    <option value="Kg">Kg</option>
-                    <option value="Cuộn">Cuộn</option>
+                    <option value="Tờ in">Tờ in</option>
                   </select>
                 </div>
-                <div class="flex flex-col gap-1.5 col-span-2 lg:col-span-1">
-                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">% Phế phẩm</label>
-                  <input type="text" v-model="form.wastePercent" readonly placeholder="0%" class="input-box px-4 py-2.5 rounded-xl font-mono font-bold text-sm bg-slate-100 dark:bg-slate-900 outline-none text-indigo-600 dark:text-indigo-400" />
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">% Waste</label>
+                  <input type="text" v-model="form.wastePercent" readonly placeholder="0%" class="px-4 py-2.5 bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 text-indigo-600 dark:text-indigo-400 font-mono font-bold rounded-xl outline-none text-center" />
                 </div>
               </div>
 
-              <!-- Row 3: Production Handover Manager -->
-              <div class="flex flex-col gap-1.5 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Đại diện bộ phận sản xuất nhận bàn giao (Production Handover)</label>
-                <div class="relative max-w-md">
-                  <input
-                    type="text"
-                    v-model="form.prodMgr"
-                    list="employee_list"
-                    placeholder="Mã NV hoặc tên người nhận bàn giao..."
-                    class="input-box w-full pl-4 pr-10 py-2.5 rounded-xl text-sm font-medium outline-none transition"
-                  />
-                  <button
-                    type="button"
-                    @click="openPersonPicker('prodMgr')"
-                    class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300 transition"
-                    title="Chọn nhân sự"
-                  >
-                    🔍
-                  </button>
+              <!-- Prod Handover Sign -->
+              <div class="pt-5 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex flex-col gap-1.5 w-full md:w-1/2">
+                  <label class="text-xs font-bold text-slate-500 uppercase tracking-wide">Đại diện Sản Xuất ký nhận (Prod. Received By)</label>
+                  <div class="relative">
+                    <input
+                      type="text"
+                      v-model="form.prodMgr"
+                      list="employee_list"
+                      placeholder="Mã NV hoặc tên người nhận..."
+                      class="input-box w-full pl-4 pr-10 py-2.5 rounded-xl text-sm font-medium outline-none"
+                    />
+                    <button
+                      type="button"
+                      @click="openPersonPicker('prodMgr')"
+                      class="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 rounded-lg text-slate-600 dark:text-slate-300 transition"
+                      title="Chọn nhân sự"
+                    >
+                      🔍
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
 
-          <!-- SUBMIT ACTION BAR -->
-          <div class="glass-card rounded-2xl p-5 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 z-30 shadow-2xl border border-sky-500/20">
+          <!-- STICKY BOTTOM ACTION BAR -->
+          <div class="glass-card rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center justify-between gap-4 sticky bottom-4 z-30 shadow-2xl border border-sky-500/20 backdrop-blur-md">
             <div class="flex items-center gap-2 text-xs text-slate-500">
               <i class="fa-solid fa-shield-halved text-emerald-500"></i>
               <span>Dữ liệu được lưu trữ tự động vào cơ sở dữ liệu hệ thống Checkpoint</span>
@@ -947,18 +1033,36 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
               <button
                 type="button"
                 @click="clearForm"
-                class="flex-1 sm:flex-initial px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+                class="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-slate-700 dark:text-slate-300"
               >
                 Làm mới
               </button>
               <button
+                type="button"
+                @click="printForm"
+                class="flex-1 sm:flex-initial px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 font-bold text-xs hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer text-slate-700 dark:text-slate-300 flex items-center justify-center gap-1.5"
+              >
+                <i class="fa-solid fa-print"></i>
+                <span>In phiếu</span>
+              </button>
+              <button
+                type="button"
+                @click="generatePDF"
+                :disabled="exportingPDF"
+                class="flex-1 sm:flex-initial px-4 py-2.5 bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-500/25 border border-sky-200 dark:border-sky-500/30 rounded-xl font-bold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50"
+              >
+                <i v-if="exportingPDF" class="fa-solid fa-circle-notch fa-spin"></i>
+                <i v-else class="fa-solid fa-file-pdf"></i>
+                <span>{{ exportingPDF ? 'Đang xuất...' : 'Xuất PDF' }}</span>
+              </button>
+              <button
                 type="submit"
                 :disabled="submitting"
-                class="flex-1 sm:flex-initial px-6 py-3 bg-sky-600 hover:bg-sky-500 text-white rounded-xl font-bold text-sm shadow-lg shadow-sky-500/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
+                class="flex-1 sm:flex-initial px-6 py-2.5 bg-gradient-to-r from-sky-600 to-blue-600 hover:from-sky-500 hover:to-blue-500 text-white rounded-xl font-bold text-xs sm:text-sm shadow-lg shadow-sky-500/30 transition flex items-center justify-center gap-2 cursor-pointer active:scale-95 disabled:opacity-50"
               >
                 <i v-if="submitting" class="fa-solid fa-circle-notch fa-spin"></i>
                 <i v-else class="fa-solid fa-paper-plane"></i>
-                <span>{{ submitting ? 'Đang gửi phiếu...' : 'Gửi Phiếu Yêu Cầu Kỹ Thuật' }}</span>
+                <span>{{ submitting ? 'Đang gửi...' : 'Gửi Phiếu Yêu Cầu Kỹ Thuật' }}</span>
               </button>
             </div>
           </div>
@@ -993,15 +1097,25 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
             <span class="font-mono">{{ submittedTicket?.createdAt ? new Date(submittedTicket.createdAt).toLocaleTimeString('vi-VN') : form.reqTime }}</span>
           </div>
         </div>
-        <div class="flex flex-col gap-2.5 pt-2">
+        <div class="grid grid-cols-2 gap-2.5 pt-2">
           <button
             type="button"
             @click="generatePDF"
-            class="w-full py-2.5 bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 hover:bg-sky-100 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border border-sky-200 dark:border-sky-500/30"
+            class="w-full py-2.5 bg-sky-50 dark:bg-sky-500/15 text-sky-700 dark:text-sky-300 hover:bg-sky-100 dark:hover:bg-sky-500/25 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-sky-200 dark:border-sky-500/30"
           >
             <i class="fa-solid fa-file-pdf"></i>
-            <span>Tải phiếu PDF</span>
+            <span>Tải PDF</span>
           </button>
+          <button
+            type="button"
+            @click="printForm"
+            class="w-full py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer border border-slate-200 dark:border-slate-700"
+          >
+            <i class="fa-solid fa-print"></i>
+            <span>In phiếu</span>
+          </button>
+        </div>
+        <div>
           <button
             type="button"
             @click="startNewTicket"
@@ -1026,13 +1140,17 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
         <div class="p-6 space-y-6">
           <div class="flex items-center justify-center gap-4 text-3xl font-mono font-bold">
             <div class="flex flex-col items-center gap-1">
-              <span class="text-[10px] uppercase font-sans text-slate-400 font-bold">Giờ</span>
-              <input type="number" min="0" max="23" v-model="pickerHour" class="input-box w-20 text-center py-2 rounded-xl text-2xl font-mono" />
+              <span class="text-[10px] uppercase font-sans text-slate-400 font-bold">Giờ (00-23)</span>
+              <select v-model="pickerHour" class="input-box text-center font-mono text-xl font-bold p-2.5 rounded-xl w-24">
+                <option v-for="h in hourOptions" :key="h" :value="h">{{ h }}</option>
+              </select>
             </div>
             <span class="text-slate-400 pt-4">:</span>
             <div class="flex flex-col items-center gap-1">
-              <span class="text-[10px] uppercase font-sans text-slate-400 font-bold">Phút</span>
-              <input type="number" min="0" max="59" v-model="pickerMinute" class="input-box w-20 text-center py-2 rounded-xl text-2xl font-mono" />
+              <span class="text-[10px] uppercase font-sans text-slate-400 font-bold">Phút (00-59)</span>
+              <select v-model="pickerMinute" class="input-box text-center font-mono text-xl font-bold p-2.5 rounded-xl w-24">
+                <option v-for="m in minuteOptions" :key="m" :value="m">{{ m }}</option>
+              </select>
             </div>
           </div>
           <div class="flex justify-center gap-2">
@@ -1062,16 +1180,16 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
       <div class="bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800 max-h-[85vh] flex flex-col" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center flex-shrink-0">
           <h3 class="text-sm font-bold flex items-center gap-2">
-            <i class="fa-solid fa-users text-sky-500"></i> Chọn Nhân Sự ({{ activePersonField }})
+            <i class="fa-solid fa-users text-sky-500"></i> Chọn Nhân Sự
           </h3>
           <button @click="closePersonModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
         </div>
-        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0">
+        <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex-shrink-0 space-y-3">
           <input
             v-model="personFilterText"
             type="text"
             placeholder="Tìm theo tên hoặc mã nhân viên..."
-            class="input-box w-full px-4 py-2.5 rounded-xl text-xs outline-none"
+            class="input-box w-full px-4 py-2 rounded-xl text-xs outline-none"
           />
         </div>
         <div class="p-4 overflow-y-auto flex-1 space-y-1.5 custom-scrollbar">
@@ -1083,7 +1201,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           >
             <div>
               <div class="text-xs font-bold text-slate-800 dark:text-slate-200">{{ p.name }}</div>
-              <div class="text-[11px] font-mono text-slate-400">{{ p.mnv }} • {{ p.dept || 'Sản Xuất' }}</div>
+              <div class="text-[11px] font-mono text-slate-400">{{ p.mnv || 'NV' }} • {{ p.dept || 'Sản Xuất' }} ({{ p.area || 'Xưởng In' }})</div>
             </div>
             <span class="text-xs text-sky-600 dark:text-sky-400 font-semibold">Chọn →</span>
           </div>
@@ -1107,119 +1225,139 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
     <!-- TOAST CONTAINER -->
     <div id="toast-container" class="fixed bottom-6 right-6 z-[80] flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
 
-    <!-- PDF PRINT TEMPLATE -->
+    <!-- PDF PRINT TEMPLATE (STANDARD BM-KT-04 MATCHING DASHBOARD) -->
     <div id="pdf-template">
       <div id="pdf-render-area" class="pdf-page">
-        <div class="pdf-header-title">PHIẾU YÊU CẦU KỸ THUẬT</div>
-        <div style="text-align: center; font-size: 10px; color: #64748b; margin-top: 2px; margin-bottom: 8px;">
-          PRINTING DEPT. REPAIR REQUEST & DOWNTIME FORM
-        </div>
-
-        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid #0284c7; padding-bottom: 4px; margin-bottom: 8px;">
-          <div><strong>Đơn vị:</strong> Checkpoint Systems Printing Dept.</div>
-          <div><strong>Số phiếu (Doc No.):</strong> <span style="font-family: monospace; font-weight: bold; color: #0284c7;">{{ form.docNo }}</span></div>
-        </div>
-
-        <div class="pdf-section-title">1. Thông Tin Yêu Cầu (Requester)</div>
-        <table class="pdf-table">
-          <tr>
-            <td style="width: 20%; font-weight: bold;">Ngày yêu cầu:</td>
-            <td style="width: 30%;">{{ form.reqDate }}</td>
-            <td style="width: 20%; font-weight: bold;">Giờ yêu cầu:</td>
-            <td style="width: 30%;">{{ form.reqTime }}</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Người yêu cầu:</td>
-            <td>{{ form.reqBy }}</td>
-            <td style="font-weight: bold;">Công nghệ in:</td>
-            <td>{{ form.printTech }}</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Tên máy / Thiết bị:</td>
-            <td>{{ form.machineName }}</td>
-            <td style="font-weight: bold;">Số Work Order:</td>
-            <td>{{ form.workOrder || '—' }}</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Trạng thái sự cố:</td>
-            <td>{{ form.machineStatus }}</td>
-            <td style="font-weight: bold;">Mức độ ưu tiên:</td>
-            <td>{{ form.priority === 'Other' ? ('Khác: ' + form.priorityOther) : form.priority }}</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Mô tả sự cố:</td>
-            <td colspan="3">{{ form.problem }}</td>
-          </tr>
-        </table>
-
-        <div class="pdf-section-title">2. Tiếp Nhận & Xử Lý Sự Cố (Technical Support)</div>
-        <table class="pdf-table">
-          <tr>
-            <td style="width: 20%; font-weight: bold;">Người tiếp nhận:</td>
-            <td style="width: 30%;">{{ form.recvBy || '—' }}</td>
-            <td style="width: 20%; font-weight: bold;">Thời gian tiếp nhận:</td>
-            <td style="width: 30%;">{{ form.recvDate }} {{ form.recvTime }}</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Thời gian hoàn thành:</td>
-            <td>{{ form.finishDate }} {{ form.finishTime }}</td>
-            <td style="font-weight: bold;">Thời gian dừng (Downtime):</td>
-            <td style="font-weight: bold; color: #dc2626;">{{ form.downtime }} phút</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Phân loại lỗi (4M):</td>
-            <td>{{ form.errCat }}</td>
-            <td style="font-weight: bold;">Nhóm công đoạn:</td>
-            <td>{{ form.errType }}</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Nguyên nhân (Root cause):</td>
-            <td colspan="3">{{ form.rootCause || '—' }}</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Biện pháp xử lý:</td>
-            <td colspan="3">{{ form.actionTaken || '—' }}</td>
-          </tr>
-        </table>
-
-        <div class="pdf-section-title">3. Xác Nhận & Bàn Giao (Confirmation & Handover)</div>
-        <table class="pdf-table">
-          <tr>
-            <td style="width: 25%; font-weight: bold;">Chất lượng in sau xử lý:</td>
-            <td style="width: 25%;">{{ form.chkQuality === 'OK' ? '✅ Đạt chuẩn (OK)' : '❌ Chưa đạt (NG)' }}</td>
-            <td style="width: 25%; font-weight: bold;">Tình trạng sự cố:</td>
-            <td style="width: 25%;">{{ form.chkStatus }}</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Sản lượng tổng (Total):</td>
-            <td>{{ form.woTotalQty || '—' }}</td>
-            <td style="font-weight: bold;">Phế phẩm phát sinh:</td>
-            <td>{{ form.wasteQty || '0' }} {{ form.wasteUnit }} ({{ form.wastePercent || '0%' }})</td>
-          </tr>
-          <tr>
-            <td style="font-weight: bold;">Đại diện sản xuất nhận BG:</td>
-            <td colspan="3">{{ form.prodMgr || '—' }}</td>
-          </tr>
-        </table>
-
-        <div class="pdf-signatures">
-          <div class="pdf-signature-col">
-            <div style="font-weight: bold;">Người Yêu Cầu</div>
-            <div style="font-size: 9px; color: #64748b;">(Ký và ghi rõ họ tên)</div>
-            <div class="pdf-signature-line"></div>
-            <div>{{ form.reqBy }}</div>
+        <div class="pdf-border">
+          <!-- Header -->
+          <div class="pdf-header">
+            <div class="pdf-meta">
+              <div>Mã hiệu: BM-KT-04</div>
+              <div>Lần ban hành: 01</div>
+              <div>Ngày ban hành: 01/01/2026</div>
+              <div>Trang: 1/1</div>
+            </div>
+            <div class="pdf-title-box">
+              <div class="pdf-title">PHIẾU YÊU CẦU HỖ TRỢ KỸ THUẬT</div>
+              <div class="pdf-subtitle">TECHNICAL SUPPORT / REPAIR REQUEST</div>
+            </div>
           </div>
-          <div class="pdf-signature-col">
-            <div style="font-weight: bold;">Kỹ Thuật Xử Lý</div>
-            <div style="font-size: 9px; color: #64748b;">(Ký và ghi rõ họ tên)</div>
-            <div class="pdf-signature-line"></div>
-            <div>{{ form.recvBy || '' }}</div>
+
+          <!-- Section 1 -->
+          <div class="pdf-section-title" style="background-color: #dbeafe;">
+            <span>1. Thông Tin Yêu Cầu Sửa Chữa (Requester)</span>
+            <span style="font-weight: normal; font-size: 10px;">Số tài liệu / Doc No: <strong id="pdf_doc_no">{{ form.docNo }}</strong></span>
           </div>
-          <div class="pdf-signature-col">
-            <div style="font-weight: bold;">Đại Diện Bàn Giao</div>
-            <div style="font-size: 9px; color: #64748b;">(Ký và ghi rõ họ tên)</div>
-            <div class="pdf-signature-line"></div>
-            <div>{{ form.prodMgr || '' }}</div>
+          <div class="pdf-row">
+            <div class="pdf-field"><span class="pdf-label">Ngày (Date):</span><div class="pdf-value" id="pdf_req_date">{{ formatDisplayDate(form.reqDate) }}</div></div>
+            <div class="pdf-field ml-4"><span class="pdf-label">Giờ (Time):</span><div class="pdf-value w-16 text-center" id="pdf_req_time">{{ form.reqTime }}</div></div>
+          </div>
+          <div class="pdf-row">
+            <div class="pdf-field flex-1"><span class="pdf-label">Người yêu cầu (Requested By):</span><div class="pdf-value flex-1" id="pdf_req_by">{{ form.reqBy }}</div></div>
+            <div class="pdf-field ml-auto gap-4 items-center mb-1">
+              <div class="flex items-center gap-1.5"><div class="pdf-checkbox" :class="{ checked: form.machineStatus === 'First Bulk Print' }"></div> <span class="text-[10px]">Hàng SX lần đầu</span></div>
+              <div class="flex items-center gap-1.5"><div class="pdf-checkbox" :class="{ checked: form.machineStatus === 'Repeat Print' }"></div> <span class="text-[10px]">Hàng SX nhiều lần</span></div>
+            </div>
+          </div>
+          <div class="pdf-row">
+            <div class="pdf-field flex-1"><span class="pdf-label">Công Nghệ / Tên máy (Tech/Machine):</span><div class="pdf-value flex-1" id="pdf_machine">[{{ form.printTech || '—' }}] {{ form.machineName || '—' }}</div></div>
+            <div class="pdf-field ml-auto gap-3 items-center mb-1">
+              <div class="flex items-center gap-1"><div class="pdf-radio" :class="{ checked: form.priority === 'Immediate' }"></div> <span class="text-[10px] text-red-600 font-bold">Hỗ trợ ngay</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-radio" :class="{ checked: form.priority === 'Hold' }"></div> <span class="text-[10px] text-amber-600 font-bold">Chạy tạm</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-radio" :class="{ checked: form.priority === 'Other' }"></div> <span class="text-[10px] text-blue-600 font-bold">Khác: </span><div class="pdf-value min-w-[50px] inline-block">{{ form.priority === 'Other' ? form.priorityOther : '' }}</div></div>
+            </div>
+          </div>
+          <div class="pdf-row border-b-0 pb-1">
+            <div class="pdf-field w-full items-start"><span class="pdf-label pt-1">Mô tả sự cố (Problem):</span><div class="pdf-value flex-1" id="pdf_prob">{{ form.problem }}</div></div>
+          </div>
+
+          <!-- Section 2 -->
+          <div class="pdf-section-title" style="background-color: #dcfce7;">
+            <span>2. Thông Tin Xử Lý Của Kỹ Thuật (Technical Section)</span>
+          </div>
+          <div class="pdf-row">
+            <div class="pdf-field flex-1"><span class="pdf-label">Người nhận (Receive By):</span><div class="pdf-value flex-1" id="pdf_recv_by">{{ form.recvBy }}</div></div>
+            <div class="pdf-field ml-4"><span class="pdf-label">Downtime:</span><div class="pdf-value w-16 text-center font-bold text-red-600" id="pdf_downtime">{{ form.downtime || 0 }}</div><span class="text-[9px]">phút</span></div>
+          </div>
+          <div class="pdf-row">
+            <div class="pdf-field flex-1"><span class="pdf-label">Nhận:</span><div class="pdf-value flex-1 text-center" id="pdf_recv_time_full">{{ form.recvTime }} ({{ formatShortDate(form.recvDate) }})</div></div>
+            <div class="pdf-field flex-1 ml-4"><span class="pdf-label">Hoàn Thành:</span><div class="pdf-value flex-1 text-center" id="pdf_fin_time_full">{{ form.finishTime }} ({{ formatShortDate(form.finishDate) }})</div></div>
+          </div>
+          <div class="pdf-row">
+            <div class="pdf-field w-full items-start"><span class="pdf-label pt-1">Nguyên nhân (Root Cause):</span><div class="pdf-value flex-1" id="pdf_rc">{{ form.rootCause }}</div></div>
+          </div>
+          <div class="pdf-row">
+            <div class="pdf-field w-full items-start"><span class="pdf-label pt-1">Nội dung xử lý (Action Taken):</span><div class="pdf-value flex-1" id="pdf_act">{{ form.actionTaken }}</div></div>
+          </div>
+          <div class="pdf-row border-b-0 pb-1 flex justify-between bg-slate-50">
+            <div class="flex gap-4 items-center">
+              <div class="font-bold text-[10px] mr-2">PHÂN LOẠI LỖI:</div>
+              <div class="flex items-center gap-1"><div class="pdf-checkbox" :class="{ checked: form.errCat === 'MAN' }"></div> <span class="text-[10px]">MAN</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-checkbox" :class="{ checked: form.errCat === 'MACHINE' }"></div> <span class="text-[10px]">MACHINE</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-checkbox" :class="{ checked: form.errCat === 'MATERIAL' }"></div> <span class="text-[10px]">MATERIAL</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-checkbox" :class="{ checked: form.errCat === 'METHOD' }"></div> <span class="text-[10px]">METHOD</span></div>
+            </div>
+            <div class="flex gap-4 items-center border-l-2 pl-4 border-slate-300">
+              <div class="font-bold text-[10px] mr-2">NHÓM:</div>
+              <div class="flex items-center gap-1"><div class="pdf-checkbox" :class="{ checked: form.errType === 'Prepress' }"></div> <span class="text-[10px]">Trước in</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-checkbox" :class="{ checked: form.errType === 'Press' }"></div> <span class="text-[10px]">In</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-checkbox" :class="{ checked: form.errType === 'PostPress' }"></div> <span class="text-[10px]">GC sau in</span></div>
+            </div>
+          </div>
+
+          <!-- Section 3 & 4 -->
+          <div class="pdf-section-title" style="background-color: #f3f4f6;">
+            <span>3. Xác Nhận Bàn Giao</span>
+          </div>
+          <div class="pdf-row justify-between bg-slate-50 min-h-[40px]">
+            <div class="flex items-center gap-3">
+              <span class="pdf-label font-bold">Chất lượng in sau xử lý:</span>
+              <div class="flex items-center gap-1"><div class="pdf-radio" :class="{ checked: form.chkQuality === 'OK' }"></div> <span class="text-[10px]">Đạt chuẩn</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-radio" :class="{ checked: form.chkQuality === 'NG' }"></div> <span class="text-[10px]">Chưa đạt</span></div>
+            </div>
+            <div class="flex items-center gap-3">
+              <span class="pdf-label font-bold">Tình trạng sự cố:</span>
+              <div class="flex items-center gap-1"><div class="pdf-radio" :class="{ checked: form.chkStatus === 'DONE' }"></div> <span class="text-[10px]">Đã khắc phục</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-radio" :class="{ checked: form.chkStatus === 'MONITOR' }"></div> <span class="text-[10px]">Đang theo dõi</span></div>
+              <div class="flex items-center gap-1"><div class="pdf-radio" :class="{ checked: form.chkStatus === 'SUPPORT' }"></div> <span class="text-[10px]">Cần hỗ trợ</span></div>
+            </div>
+          </div>
+
+          <div class="pdf-row bg-slate-50 min-h-[30px] border-t-0 text-[10px] gap-2 flex-nowrap overflow-hidden">
+            <div class="pdf-field flex-[1.5]"><span class="pdf-label font-bold">Work Order:</span><div class="pdf-value flex-1">{{ form.workOrder }}</div></div>
+            <div class="pdf-field flex-1"><span class="pdf-label font-bold">Total Qty:</span><div class="pdf-value flex-1 text-center">{{ form.woTotalQty }}</div></div>
+            <div class="pdf-field flex-1"><span class="pdf-label font-bold">Waste:</span><div class="pdf-value flex-1 text-center">{{ form.wasteQty }}</div></div>
+            <div class="pdf-field flex-[0.8] min-w-[50px]"><span class="pdf-label font-bold">Đơn vị:</span><div class="pdf-value flex-1 text-center">{{ form.wasteUnit }}</div></div>
+            <div class="pdf-field flex-[0.8] min-w-[50px]"><span class="pdf-label font-bold">% Waste:</span><div class="pdf-value flex-1 text-center">{{ form.wastePercent }}</div></div>
+          </div>
+
+          <!-- Signatures -->
+          <div class="pdf-signature-box flex-1">
+            <div class="pdf-signature-col">
+              <div class="text-[10px] font-bold">SẢN XUẤT YÊU CẦU</div>
+              <div class="text-[9px] text-gray-500">(Ký & ghi rõ họ tên)</div>
+              <div class="pdf-signature-line mt-4"></div>
+              <div class="font-bold text-[11px]">{{ (form.reqBy || '').split('-')[0] }}</div>
+            </div>
+            <div class="pdf-signature-col">
+              <div class="text-[10px] font-bold">KỸ THUẬT THỰC HIỆN</div>
+              <div class="text-[9px] text-gray-500">(Ký & ghi rõ họ tên)</div>
+              <div class="pdf-signature-line mt-4"></div>
+              <div class="font-bold text-[11px]">{{ (form.recvBy || '').split('-')[0] }}</div>
+            </div>
+            <div class="pdf-signature-col">
+              <div class="text-[10px] font-bold">SẢN XUẤT NHẬN BÀN GIAO</div>
+              <div class="text-[9px] text-gray-500">(Ký & ghi rõ họ tên)</div>
+              <div class="pdf-signature-line mt-4"></div>
+              <div class="font-bold text-[11px]">{{ (form.prodMgr || '').split('-')[0] }}</div>
+            </div>
+          </div>
+
+          <!-- Footer -->
+          <div class="pdf-footer">
+            <span>Doc No: {{ form.docNo }}</span>
+            <span>Hệ thống Quản lý Yêu cầu Kỹ thuật Checkpoint Systems</span>
+            <span>Page 1/1</span>
           </div>
         </div>
       </div>
@@ -1233,8 +1371,9 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
 
     createApp({
       setup() {
-        const loadingStatus = ref(true);
-        const isPublicFormEnabled = ref(false);
+        const loadingStatus = ref(false);
+        const isPublicFormEnabled = ref(true);
+        const isAdminOrStaff = ref(false);
         const submitting = ref(false);
         const exportingPDF = ref(false);
         const currentTheme = ref('light');
@@ -1247,6 +1386,9 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
         const activeTimeLabel = ref('Chọn Giờ');
         const pickerHour = ref('08');
         const pickerMinute = ref('00');
+
+        const hourOptions = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0'));
+        const minuteOptions = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, '0'));
 
         const showPersonModal = ref(false);
         const activePersonField = ref('');
@@ -1389,7 +1531,8 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           return employeeDatalist.value.filter(e =>
             (e.name && e.name.toLowerCase().includes(q)) ||
             (e.mnv && e.mnv.toLowerCase().includes(q)) ||
-            (e.dept && e.dept.toLowerCase().includes(q))
+            (e.dept && e.dept.toLowerCase().includes(q)) ||
+            (e.area && e.area.toLowerCase().includes(q))
           );
         });
 
@@ -1484,6 +1627,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           const diffMs = end - start;
           form.value.downtime = diffMs > 0 ? Math.round(diffMs / 60000) : 0;
         };
+        const calcTotalTime = calculateDowntime;
 
         const calculateWastePercent = () => {
           const w = parseFloat(form.value.wasteQty) || 0;
@@ -1491,28 +1635,69 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           form.value.wastePercent = (t > 0 && w >= 0) ? ((w / t) * 100).toFixed(2) + '%' : '0%';
         };
 
-        // Check public form status
-        const checkPublicFormStatus = async () => {
-          loadingStatus.value = true;
+        // Get stored token helper
+        const getStoredToken = () => {
           try {
-            const res = await fetch('/api/public/form-status');
+            return localStorage.getItem('checkpoint_token') || '';
+          } catch (e) {
+            return '';
+          }
+        };
+
+        // Check if user is admin or staff to bypass locked state
+        const checkUserBypass = () => {
+          const token = getStoredToken();
+          let user = null;
+          try {
+            const raw = localStorage.getItem('checkpoint_user');
+            if (raw) user = JSON.parse(raw);
+          } catch (e) {}
+
+          const params = new URLSearchParams(window.location.search);
+          const isUrlBypass = params.get('admin') === '1' || params.get('from') === 'control-panel';
+
+          if (token || isUrlBypass || (user && user.role)) {
+            isAdminOrStaff.value = true;
+            isPublicFormEnabled.value = true;
+            return true;
+          }
+          return false;
+        };
+
+        // Check public form status with token bypass support
+        const checkPublicFormStatus = async () => {
+          if (checkUserBypass()) {
+            isPublicFormEnabled.value = true;
+            return;
+          }
+
+          try {
+            const token = getStoredToken();
+            const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+            const res = await fetch('/api/public/form-status', { headers, credentials: 'include' });
             if (res.ok) {
               const data = await res.json();
-              isPublicFormEnabled.value = !!(data.enabled ?? data.isPublicFormEnabled);
+              const isEnabled = !!(data.enabled ?? data.isPublicFormEnabled);
+              isPublicFormEnabled.value = isEnabled || checkUserBypass();
             } else {
-              isPublicFormEnabled.value = false;
+              if (!checkUserBypass()) {
+                isPublicFormEnabled.value = false;
+              }
             }
           } catch (e) {
-            isPublicFormEnabled.value = false;
-          } finally {
-            loadingStatus.value = false;
+            if (!checkUserBypass()) {
+              isPublicFormEnabled.value = false;
+            }
           }
         };
 
         // Load Catalogs for public form
         const loadPublicCatalogs = async () => {
+          const token = getStoredToken();
+          const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+
           try {
-            const res = await fetch('/api/public/catalogs');
+            const res = await fetch('/api/public/catalogs', { headers, credentials: 'include' });
             if (res.ok) {
               const data = await res.json();
               if (data.groupedMachines && Object.keys(data.groupedMachines).length) {
@@ -1527,10 +1712,10 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
 
           // Fallback to separate endpoints
           try {
-            const r1 = await fetch('/api/public/machines/grouped');
+            const r1 = await fetch('/api/public/machines/grouped', { credentials: 'include' });
             if (r1.ok) machineCatalog.value = await r1.json();
             else {
-              const r1b = await fetch('/api/public/machines');
+              const r1b = await fetch('/api/public/machines', { credentials: 'include' });
               if (r1b.ok) {
                 const list = await r1b.json();
                 const grouped = {};
@@ -1545,7 +1730,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           } catch(e) {}
 
           try {
-            const r2 = await fetch('/api/public/employees');
+            const r2 = await fetch('/api/public/employees', { credentials: 'include' });
             if (r2.ok) employeeDatalist.value = await r2.json();
           } catch(e) {}
         };
@@ -1559,9 +1744,16 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
 
           submitting.value = true;
           try {
+            const token = getStoredToken();
+            const headers = {
+              'Content-Type': 'application/json',
+              ...(token ? { 'Authorization': 'Bearer ' + token } : {})
+            };
+
             const res = await fetch('/api/public/technical-requests', {
               method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
+              headers,
+              credentials: 'include',
               body: JSON.stringify(form.value)
             });
 
@@ -1571,6 +1763,22 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
               showSuccessModal.value = true;
               showToast('Gửi phiếu yêu cầu kỹ thuật thành công!');
             } else if (res.status === 403) {
+              if (checkUserBypass()) {
+                // If logged in, retry via internal endpoint
+                const resInternal = await fetch('/api/technical-requests', {
+                  method: 'POST',
+                  headers,
+                  credentials: 'include',
+                  body: JSON.stringify(form.value)
+                });
+                if (resInternal.ok) {
+                  const record = await resInternal.json();
+                  submittedTicket.value = record;
+                  showSuccessModal.value = true;
+                  showToast('Gửi phiếu yêu cầu kỹ thuật thành công!');
+                  return;
+                }
+              }
               isPublicFormEnabled.value = false;
               showToast('Biểu mẫu công khai đã bị đóng bởi quản trị viên', true);
             } else {
@@ -1582,6 +1790,55 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           } finally {
             submitting.value = false;
           }
+        };
+
+        // Print Form via Browser Native Print
+        const printForm = () => {
+          window.print();
+        };
+
+        // Backup form to JSON file
+        const triggerBackup = () => {
+          const data = {
+            form: form.value,
+            exportedAt: new Date().toISOString()
+          };
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const a = document.createElement('a');
+          a.href = URL.createObjectURL(blob);
+          a.download = (form.value.docNo || 'Checkpoint') + '_Backup.json';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          showToast('Đã tải file sao lưu JSON');
+        };
+
+        // Restore form from JSON file
+        const triggerRestore = () => {
+          const el = document.getElementById('file_restore');
+          if (el) el.click();
+        };
+
+        const processRestoreFile = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            try {
+              const data = JSON.parse(evt.target.result);
+              if (data.form) {
+                form.value = { ...form.value, ...data.form };
+                showToast('Phục hồi dữ liệu biểu mẫu thành công!');
+              } else {
+                form.value = { ...form.value, ...data };
+                showToast('Phục hồi dữ liệu biểu mẫu thành công!');
+              }
+            } catch (err) {
+              showToast('Tệp sao lưu không đúng định dạng', true);
+            }
+          };
+          reader.readAsText(file);
+          e.target.value = '';
         };
 
         // Generate PDF
@@ -1609,6 +1866,19 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           }
         };
 
+        // Date format helpers
+        const formatDisplayDate = (d) => {
+          if (!d) return '—';
+          const p = String(d).split('-');
+          return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : d;
+        };
+
+        const formatShortDate = (d) => {
+          if (!d) return '';
+          const p = String(d).split('-');
+          return p.length === 3 ? p[2] + '/' + p[1] : d;
+        };
+
         // Theme management
         const setTheme = (theme) => {
           currentTheme.value = theme;
@@ -1626,15 +1896,15 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           const savedTheme = localStorage.getItem('checkpoint_theme') || 'light';
           currentTheme.value = savedTheme;
 
+          checkUserBypass();
           await checkPublicFormStatus();
-          if (isPublicFormEnabled.value) {
-            loadPublicCatalogs();
-          }
+          loadPublicCatalogs();
         });
 
         return {
           loadingStatus,
           isPublicFormEnabled,
+          isAdminOrStaff,
           submitting,
           exportingPDF,
           currentTheme,
@@ -1645,6 +1915,8 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           activeTimeLabel,
           pickerHour,
           pickerMinute,
+          hourOptions,
+          minuteOptions,
           showPersonModal,
           activePersonField,
           personFilterText,
@@ -1672,10 +1944,18 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           handleImageUpload,
           removePhoto,
           calculateDowntime,
+          calcTotalTime,
           calculateWastePercent,
+          checkUserBypass,
           checkPublicFormStatus,
           submitPublicForm,
+          printForm,
+          triggerBackup,
+          triggerRestore,
+          processRestoreFile,
           generatePDF,
+          formatDisplayDate,
+          formatShortDate,
           setTheme,
           toggleTheme
         };

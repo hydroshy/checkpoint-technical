@@ -222,7 +222,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private formLookupOptionsCache: FormLookupOptionRecord[] = [];
   private sheetListsCache: SheetListsRowRecord[] = [];
   private requestsCache: TechnicalRequestRecord[] = [];
-  private settingsCache: SystemSettingsRecord = { isPublicFormEnabled: false };
+  private settingsCache: SystemSettingsRecord = { isPublicFormEnabled: true };
 
   constructor() {
     this.dataDir = path.resolve(process.env.DATA_DIR || './data');
@@ -916,11 +916,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           updatedBy: settingsRes.rows[0].updated_by || undefined,
         };
       } else {
-        this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: false });
+        this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: true });
       }
     } catch (err: any) {
       this.logger.warn(`Could not load system_settings from PG (${err.message}). Using local JSON fallback.`);
-      this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: false });
+      this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: true });
     }
 
     this.logger.log(`📦 Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.formLookupOptionsCache.length} lookup options, ${this.requestsCache.length} v4 requests.`);
@@ -982,7 +982,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     this.sheetListsCache = this.readJson<SheetListsRowRecord[]>('sheet_lists_do_not_delete.json', []);
     this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', [])
       .filter(r => r.id !== '2f8c2b65-9660-4041-9c22-aeac7310fdce' && r.docNo !== 'REQ-20261003-1945');
-    this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: false });
+    this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: true });
 
     // Sync employeesCache from requesters
     if (this.requestersCache.length > 0) {
