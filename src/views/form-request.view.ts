@@ -22,26 +22,27 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background-color: #0f172a;
-      color: #f8fafc;
+      background-color: #f8fafc;
+      color: #0f172a;
     }
     [v-cloak] { display: none !important; }
     .font-brand { font-family: 'Host Grotesk', sans-serif; }
     .font-mono { font-family: 'Azeret Mono', monospace; }
 
     .card-panel {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
     }
     .input-field {
-      background-color: #0f172a;
-      border: 1px solid #334155;
-      color: #f8fafc;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
     }
     .input-field:focus {
-      border-color: #38bdf8;
+      border-color: #0284c7;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
     }
 
     /* Big Toggle Buttons */
@@ -57,38 +58,39 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
       align-items: center;
       justify-content: center;
       text-align: center;
-      border: 2px solid #334155;
-      background: #0f172a;
-      color: #94a3b8;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
       user-select: none;
     }
     .btn-toggle:hover {
-      border-color: #64748b;
-      color: #f1f5f9;
+      border-color: #94a3b8;
+      color: #0f172a;
+      background: #f8fafc;
     }
     .btn-toggle.active-primary {
       background-color: #0284c7 !important;
-      border-color: #38bdf8 !important;
+      border-color: #0284c7 !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
     }
     .btn-toggle.active-danger {
       background-color: #dc2626 !important;
-      border-color: #f87171 !important;
+      border-color: #dc2626 !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
     }
     .btn-toggle.active-warning {
       background-color: #d97706 !important;
-      border-color: #fbbf24 !important;
+      border-color: #d97706 !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.4);
+      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
     }
     .btn-toggle.active-slate {
       background-color: #475569 !important;
-      border-color: #94a3b8 !important;
+      border-color: #475569 !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(71, 85, 105, 0.4);
+      box-shadow: 0 4px 14px rgba(71, 85, 105, 0.35);
     }
 
     /* Big Submit Button */
@@ -102,7 +104,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
       background: #0284c7;
       color: #ffffff;
       border: none;
-      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
     }
     .btn-submit:hover:not(:disabled) {
       background: #0369a1;
@@ -121,56 +123,46 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
   <div id="app" v-cloak class="max-w-4xl mx-auto space-y-6">
 
     <!-- Top Navigation Header -->
-    <header class="card-panel rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <img src="/images/logo-full.png" alt="Checkpoint" class="h-8 object-contain" onerror="this.style.display='none'">
-        <div>
-          <div class="font-brand font-bold text-lg tracking-wide text-white">CHECKPOINT SYSTEMS</div>
-          <div class="text-xs text-sky-400 font-semibold tracking-wider uppercase">CPSR • Phiếu Yêu Cầu Kỹ Thuật</div>
-        </div>
+    <header class="card-panel rounded-2xl p-4 flex items-center shadow-sm">
+      <div class="flex items-center">
+        <img src="/images/logo-full.png" alt="Checkpoint Systems" class="h-8 sm:h-9 object-contain" />
       </div>
-      <nav class="flex flex-wrap items-center gap-2">
-        <a href="/form-request" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-600 text-white shadow-sm border border-sky-400">1. Yêu Cầu (CPSR)</a>
-        <a href="/technical-feedback" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition">2. Phản Hồi (CPST)</a>
-        <a href="/confirm-request" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition">3. Bàn Giao (CPSF)</a>
-        <a href="/control-panel" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-800 text-amber-300 hover:bg-slate-700 hover:text-amber-200 transition">Control Panel</a>
-      </nav>
     </header>
 
     <!-- Success Modal Notification -->
     <div v-if="successModal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
       <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-lg w-full text-center space-y-5 border-2 border-emerald-500 shadow-2xl">
-        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl font-bold">✓</div>
+        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl font-bold">✓</div>
         <div>
-          <h2 class="font-brand font-bold text-2xl text-white">Gửi Yêu Cầu Thành Công!</h2>
-          <p class="text-sm text-slate-300 mt-1">Phiếu CPSR đã được lưu vào hệ thống.</p>
+          <h2 class="font-brand font-bold text-2xl text-slate-900">Gửi Yêu Cầu Thành Công!</h2>
+          <p class="text-sm text-slate-600 mt-1">Phiếu CPSR đã được lưu vào hệ thống.</p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 text-left space-y-2">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-2">
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Số phiếu:</span>
-            <span class="font-mono text-base font-bold text-sky-400">{{ submittedDocNo }}</span>
+            <span class="text-xs text-slate-500">Số phiếu:</span>
+            <span class="font-mono text-base font-bold text-sky-600">{{ submittedDocNo }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Thời gian ghi nhận:</span>
-            <span class="text-xs text-slate-200">{{ submittedTime }}</span>
+            <span class="text-xs text-slate-500">Thời gian ghi nhận:</span>
+            <span class="text-xs text-slate-700">{{ submittedTime }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Người yêu cầu:</span>
-            <span class="text-xs text-slate-200 font-medium">{{ form.reqBy }}</span>
+            <span class="text-xs text-slate-500">Người yêu cầu:</span>
+            <span class="text-xs text-slate-700 font-medium">{{ form.reqBy }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Thiết bị:</span>
-            <span class="text-xs text-slate-200 font-medium">{{ form.printTech }} - {{ form.machineName }}</span>
+            <span class="text-xs text-slate-500">Thiết bị:</span>
+            <span class="text-xs text-slate-700 font-medium">{{ form.printTech }} - {{ form.machineName }}</span>
           </div>
         </div>
         <div class="flex flex-col gap-3 pt-2">
-          <a :href="'/technical-feedback?cpsr=' + submittedDocNo" class="w-full py-3.5 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition text-center shadow-lg">
+          <a :href="'/technical-feedback?cpsr=' + submittedDocNo" class="w-full py-3.5 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition text-center shadow-md">
             Tiếp Tục: Chuyển Sang Phản Hồi KT (CPST) →
           </a>
-          <button @click="resetForm" class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-800 hover:bg-slate-700 text-white transition">
+          <button @click="resetForm" class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition">
             + Tạo Phiếu Yêu Cầu Mới
           </button>
-          <a href="/control-panel" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition text-center">
+          <a href="/control-panel" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 transition text-center">
             Xem trên Control Panel
           </a>
         </div>
@@ -178,31 +170,31 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- Error Alert -->
-    <div v-if="errorMessage" class="p-4 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-sm flex items-center justify-between">
+    <div v-if="errorMessage" class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center justify-between shadow-sm">
       <span>{{ errorMessage }}</span>
-      <button @click="errorMessage = ''" class="text-rose-400 hover:text-white font-bold ml-2">✕</button>
+      <button @click="errorMessage = ''" class="text-rose-500 hover:text-rose-800 font-bold ml-2">✕</button>
     </div>
 
     <!-- Main Form Card -->
-    <main class="card-panel rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">
+    <main class="card-panel rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
 
       <!-- Form Title & Document Code Badge -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-700">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
         <div>
-          <h1 class="font-brand font-bold text-2xl text-white">PHIẾU YÊU CẦU KỸ THUẬT (CPSR)</h1>
-          <p class="text-xs text-slate-400 mt-1">Dành cho bộ phận sản xuất yêu cầu hỗ trợ kỹ thuật</p>
+          <h1 class="font-brand font-bold text-2xl text-slate-900">PHIẾU YÊU CẦU KỸ THUẬT (CPSR)</h1>
+          <p class="text-xs text-slate-500 mt-1">Dành cho bộ phận sản xuất yêu cầu hỗ trợ kỹ thuật</p>
         </div>
-        <div class="flex items-center gap-2 bg-slate-900 px-4 py-2.5 rounded-xl border border-sky-500/30">
-          <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Số phiếu:</span>
-          <span class="font-mono text-base font-bold text-sky-400">{{ docNo || 'Đang tải...' }}</span>
+        <div class="flex items-center gap-2 bg-sky-50 px-4 py-2.5 rounded-xl border border-sky-200">
+          <span class="text-xs text-slate-600 uppercase tracking-wider font-semibold">Số phiếu:</span>
+          <span class="font-mono text-base font-bold text-sky-700">{{ docNo || 'Đang tải...' }}</span>
         </div>
       </div>
 
       <!-- Field Group 1: Date & Time -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Ngày hiện tại <span class="text-rose-400">*</span>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Ngày hiện tại <span class="text-rose-500">*</span>
           </label>
           <input
             type="date"
@@ -212,8 +204,8 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Giờ yêu cầu <span class="text-rose-400">*</span>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Giờ yêu cầu <span class="text-rose-500">*</span>
           </label>
           <input
             type="time"
@@ -226,8 +218,8 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
 
       <!-- Field Group 2: Requester 3-line Searchable Droplist -->
       <div class="relative">
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-          Người yêu cầu (Tìm kiếm theo tên / mã NV) <span class="text-rose-400">*</span>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+          Người yêu cầu (Tìm kiếm theo tên / mã NV) <span class="text-rose-500">*</span>
         </label>
         
         <!-- Search Input -->
@@ -243,7 +235,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
             v-if="empSearch"
             type="button"
             @click="clearEmpSelection"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white font-bold"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-bold"
           >
             ✕
           </button>
@@ -252,35 +244,35 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
         <!-- 3-Line Droplist Dropdown -->
         <div
           v-if="showEmpDropdown && filteredEmployees.length > 0"
-          class="absolute z-30 left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl max-h-64 overflow-y-auto divide-y divide-slate-800"
+          class="absolute z-30 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-64 overflow-y-auto divide-y divide-slate-100"
         >
           <div
             v-for="emp in filteredEmployees"
             :key="emp.id || emp.mnv"
             @click="selectEmployee(emp)"
-            class="p-3 hover:bg-slate-800 cursor-pointer transition flex flex-col gap-0.5"
+            class="p-3 hover:bg-slate-50 cursor-pointer transition flex flex-col gap-0.5"
           >
             <!-- Line 1: Name -->
-            <div class="text-sm font-bold text-white">{{ emp.name }}</div>
+            <div class="text-sm font-bold text-slate-900">{{ emp.name }}</div>
             <!-- Line 2: MNV -->
-            <div class="text-xs font-mono font-semibold text-sky-400">Mã NV: {{ emp.mnv }}</div>
+            <div class="text-xs font-mono font-semibold text-sky-600">Mã NV: {{ emp.mnv }}</div>
             <!-- Line 3: Department & Role -->
-            <div class="text-xs text-slate-400">{{ emp.dept || 'Sản xuất' }} • {{ emp.role || emp.area || 'Nhân viên' }}</div>
+            <div class="text-xs text-slate-500">{{ emp.dept || 'Sản xuất' }} • {{ emp.role || emp.area || 'Nhân viên' }}</div>
           </div>
         </div>
 
         <!-- Selected Feedback Badge -->
-        <div v-if="form.reqBy" class="mt-2 text-xs text-emerald-400 flex items-center gap-1 font-medium">
+        <div v-if="form.reqBy" class="mt-2 text-xs text-emerald-600 flex items-center gap-1 font-medium">
           <span>✓ Đã chọn:</span>
-          <span class="text-white font-semibold">{{ form.reqBy }}</span>
+          <span class="text-slate-800 font-semibold">{{ form.reqBy }}</span>
         </div>
       </div>
 
       <!-- Field Group 3: Printing Tech & Machine -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Công nghệ in <span class="text-rose-400">*</span>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Công nghệ in <span class="text-rose-500">*</span>
           </label>
           <select
             v-model="form.printTech"
@@ -294,8 +286,8 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
           </select>
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Tên máy in <span class="text-rose-400">*</span>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Tên máy in <span class="text-rose-500">*</span>
           </label>
           <div v-if="!customMachineMode">
             <select
@@ -319,7 +311,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
             <button
               type="button"
               @click="customMachineMode = false"
-              class="px-3 py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 rounded-xl"
+              class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-xs text-slate-700 border border-slate-200 rounded-xl transition"
             >
               Chọn lại
             </button>
@@ -329,8 +321,8 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
 
       <!-- Field Group 4: Problem Description -->
       <div>
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-          Mô tả sự cố <span class="text-rose-400">*</span>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+          Mô tả sự cố <span class="text-rose-500">*</span>
         </label>
         <textarea
           v-model="form.problem"
@@ -343,8 +335,8 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
 
       <!-- Field Group 5: Problem Status (2 BIG BUTTONS) -->
       <div>
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
-          Trạng thái sự cố <span class="text-rose-400">*</span>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+          Trạng thái sự cố <span class="text-rose-500">*</span>
         </label>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
@@ -368,8 +360,8 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
 
       <!-- Field Group 6: Priority Level (3 BIG BUTTONS) -->
       <div>
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
-          Mức độ ưu tiên <span class="text-rose-400">*</span>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+          Mức độ ưu tiên <span class="text-rose-500">*</span>
         </label>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button

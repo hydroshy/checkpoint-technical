@@ -22,31 +22,32 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background-color: #0f172a;
-      color: #f8fafc;
+      background-color: #f8fafc;
+      color: #0f172a;
     }
     [v-cloak] { display: none !important; }
     .font-brand { font-family: 'Host Grotesk', sans-serif; }
     .font-mono { font-family: 'Azeret Mono', monospace; }
 
     .card-panel {
-      background: #1e293b;
-      border: 1px solid #334155;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
     }
     .input-field {
-      background-color: #0f172a;
-      border: 1px solid #334155;
-      color: #f8fafc;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #0f172a;
     }
     .input-field:focus {
-      border-color: #38bdf8;
+      border-color: #0284c7;
       outline: none;
-      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
     }
     .readonly-box {
-      background-color: #0c1322;
-      border: 1px solid #1e293b;
-      color: #cbd5e1;
+      background-color: #f8fafc;
+      border: 1px solid #e2e8f0;
+      color: #334155;
     }
 
     /* Big Toggle Buttons */
@@ -62,32 +63,33 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       align-items: center;
       justify-content: center;
       text-align: center;
-      border: 2px solid #334155;
-      background: #0f172a;
-      color: #94a3b8;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
       user-select: none;
     }
     .btn-toggle:hover {
-      border-color: #64748b;
-      color: #f1f5f9;
+      border-color: #94a3b8;
+      color: #0f172a;
+      background: #f8fafc;
     }
     .btn-toggle.active-success {
       background-color: #059669 !important;
-      border-color: #34d399 !important;
+      border-color: #059669 !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.4);
+      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
     }
     .btn-toggle.active-danger {
       background-color: #dc2626 !important;
-      border-color: #f87171 !important;
+      border-color: #dc2626 !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
     }
     .btn-toggle.active-primary {
       background-color: #0284c7 !important;
-      border-color: #38bdf8 !important;
+      border-color: #0284c7 !important;
       color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.4);
+      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
     }
 
     /* Big Submit Button */
@@ -101,7 +103,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       background: #0284c7;
       color: #ffffff;
       border: none;
-      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.4);
+      box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
     }
     .btn-submit:hover:not(:disabled) {
       background: #0369a1;
@@ -117,60 +119,50 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
   <div id="app" v-cloak class="max-w-4xl mx-auto space-y-6">
 
     <!-- Top Navigation Header -->
-    <header class="card-panel rounded-2xl p-4 flex flex-col md:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <img src="/images/logo-full.png" alt="Checkpoint" class="h-8 object-contain" onerror="this.style.display='none'">
-        <div>
-          <div class="font-brand font-bold text-lg tracking-wide text-white">CHECKPOINT SYSTEMS</div>
-          <div class="text-xs text-sky-400 font-semibold tracking-wider uppercase">CPSF • Xác Nhận Bàn Giao</div>
-        </div>
+    <header class="card-panel rounded-2xl p-4 flex items-center shadow-sm">
+      <div class="flex items-center">
+        <img src="/images/logo-full.png" alt="Checkpoint Systems" class="h-8 sm:h-9 object-contain" />
       </div>
-      <nav class="flex flex-wrap items-center gap-2">
-        <a href="/form-request" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition">1. Yêu Cầu (CPSR)</a>
-        <a href="/technical-feedback" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white transition">2. Phản Hồi (CPST)</a>
-        <a href="/confirm-request" class="px-3.5 py-2 rounded-xl text-xs font-bold bg-sky-600 text-white shadow-sm border border-sky-400">3. Bàn Giao (CPSF)</a>
-        <a href="/control-panel" class="px-3.5 py-2 rounded-xl text-xs font-medium bg-slate-800 text-amber-300 hover:bg-slate-700 hover:text-amber-200 transition">Control Panel</a>
-      </nav>
     </header>
 
     <!-- Success Modal Notification -->
-    <div v-if="successModal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+    <div v-if="successModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-lg w-full text-center space-y-5 border-2 border-emerald-500 shadow-2xl">
-        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl font-bold">✓</div>
+        <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl font-bold">✓</div>
         <div>
-          <h2 class="font-brand font-bold text-2xl text-white">Bàn Giao Hoàn Tất!</h2>
-          <p class="text-sm text-slate-300 mt-1">Đã hoàn thành toàn bộ quy trình 3 bước (CPSR → CPST → CPSF).</p>
+          <h2 class="font-brand font-bold text-2xl text-slate-900">Bàn Giao Hoàn Tất!</h2>
+          <p class="text-sm text-slate-600 mt-1">Đã hoàn thành toàn bộ quy trình 3 bước (CPSR → CPST → CPSF).</p>
         </div>
-        <div class="p-4 rounded-xl bg-slate-900 border border-slate-700 text-left space-y-2">
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-2">
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Số phiếu xác nhận:</span>
-            <span class="font-mono text-base font-bold text-sky-400">{{ submittedDocNo }}</span>
+            <span class="text-xs text-slate-500">Số phiếu xác nhận:</span>
+            <span class="font-mono text-base font-bold text-sky-600">{{ submittedDocNo }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Mã phản hồi KT:</span>
-            <span class="font-mono text-xs font-semibold text-emerald-400">{{ form.cpstDocNo }}</span>
+            <span class="text-xs text-slate-500">Mã phản hồi KT:</span>
+            <span class="font-mono text-xs font-semibold text-emerald-600">{{ form.cpstDocNo }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Chất lượng in:</span>
-            <span class="text-xs font-bold" :class="form.chkQuality === 'Đạt' ? 'text-emerald-400' : 'text-rose-400'">{{ form.chkQuality }}</span>
+            <span class="text-xs text-slate-500">Chất lượng in:</span>
+            <span class="text-xs font-bold" :class="form.chkQuality === 'Đạt' ? 'text-emerald-600' : 'text-rose-600'">{{ form.chkQuality }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Work Order:</span>
-            <span class="text-xs text-slate-200 font-mono">{{ form.workOrder || 'N/A' }}</span>
+            <span class="text-xs text-slate-500">Work Order:</span>
+            <span class="text-xs text-slate-700 font-mono">{{ form.workOrder || 'N/A' }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-400">Tỷ lệ phế:</span>
-            <span class="text-xs font-mono font-bold text-amber-400">{{ calculatedWastePercent }}</span>
+            <span class="text-xs text-slate-500">Tỷ lệ phế:</span>
+            <span class="text-xs font-mono font-bold text-amber-600">{{ calculatedWastePercent }}</span>
           </div>
         </div>
         <div class="flex flex-col gap-3 pt-2">
-          <a href="/control-panel" class="w-full py-3.5 px-4 rounded-xl text-sm font-bold bg-sky-600 hover:bg-sky-500 text-white transition text-center shadow-lg">
+          <a href="/control-panel" class="w-full py-3.5 px-4 rounded-xl text-sm font-bold bg-sky-600 hover:bg-sky-500 text-white transition text-center shadow-md">
             Vào Control Panel Quản Lý Chuỗi 1-1-1 →
           </a>
-          <button @click="resetForm" class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-800 hover:bg-slate-700 text-white transition">
+          <button @click="resetForm" class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition">
             + Tạo Xác Nhận Bàn Giao Mới
           </button>
-          <a href="/form-request" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition text-center">
+          <a href="/form-request" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 transition text-center">
             Tạo yêu cầu kỹ thuật mới (CPSR)
           </a>
         </div>
@@ -178,36 +170,36 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
     </div>
 
     <!-- Error Alert -->
-    <div v-if="errorMessage" class="p-4 rounded-xl bg-rose-500/20 border border-rose-500/40 text-rose-300 text-sm flex items-center justify-between">
+    <div v-if="errorMessage" class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-sm flex items-center justify-between shadow-sm">
       <span>{{ errorMessage }}</span>
-      <button @click="errorMessage = ''" class="text-rose-400 hover:text-white font-bold ml-2">✕</button>
+      <button @click="errorMessage = ''" class="text-rose-500 hover:text-rose-800 font-bold ml-2">✕</button>
     </div>
 
     <!-- Main Form Card -->
-    <main class="card-panel rounded-2xl p-6 sm:p-8 space-y-6 shadow-xl">
+    <main class="card-panel rounded-2xl p-6 sm:p-8 space-y-6 shadow-sm">
 
       <!-- Header & Next Code Badge -->
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-700">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
         <div>
-          <h1 class="font-brand font-bold text-2xl text-white">PHIẾU XÁC NHẬN BÀN GIAO (CPSF)</h1>
-          <p class="text-xs text-slate-400 mt-1">Dành cho đại diện sản xuất nghiệm thu chất lượng sau xử lý</p>
+          <h1 class="font-brand font-bold text-2xl text-slate-900">PHIẾU XÁC NHẬN BÀN GIAO (CPSF)</h1>
+          <p class="text-xs text-slate-500 mt-1">Dành cho đại diện sản xuất nghiệm thu chất lượng sau xử lý</p>
         </div>
-        <div class="flex items-center gap-2 bg-slate-900 px-4 py-2.5 rounded-xl border border-sky-500/30">
-          <span class="text-xs text-slate-400 uppercase tracking-wider font-semibold">Số phiếu:</span>
-          <span class="font-mono text-base font-bold text-sky-400">{{ docNo || 'Đang tải...' }}</span>
+        <div class="flex items-center gap-2 bg-sky-50 px-4 py-2.5 rounded-xl border border-sky-200">
+          <span class="text-xs text-slate-600 uppercase tracking-wider font-semibold">Số phiếu:</span>
+          <span class="font-mono text-base font-bold text-sky-700">{{ docNo || 'Đang tải...' }}</span>
         </div>
       </div>
 
       <!-- Field Group 1: Select Linked CPST Feedback -->
-      <div class="p-4 rounded-xl bg-slate-900/80 border border-slate-700 space-y-4">
+      <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
         <div>
-          <label class="block text-xs font-bold text-sky-400 uppercase tracking-wider mb-2">
-            Chọn mã phản hồi kỹ thuật CPST cần nghiệm thu <span class="text-rose-400">*</span>
+          <label class="block text-xs font-bold text-sky-700 uppercase tracking-wider mb-2">
+            Chọn mã phản hồi kỹ thuật CPST cần nghiệm thu <span class="text-rose-500">*</span>
           </label>
           <select
             v-model="form.cpstDocNo"
             @change="onCpstSelected"
-            class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono font-semibold cursor-pointer text-sky-300"
+            class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono font-semibold cursor-pointer text-slate-800"
             required
           >
             <option value="" disabled>-- Chọn mã phiếu CPST đã xử lý --</option>
@@ -220,34 +212,34 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
 
         <!-- Readonly Auto-filled Info from CPST -->
         <div v-if="selectedCpst" class="readonly-box p-4 rounded-xl space-y-3 text-xs">
-          <div class="font-semibold text-slate-300 uppercase tracking-wider text-[11px] pb-1 border-b border-slate-800">
+          <div class="font-semibold text-slate-600 uppercase tracking-wider text-[11px] pb-1 border-b border-slate-200">
             Thông tin tự động nạp từ phản hồi {{ selectedCpst.docNo }} (Read-only)
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
               <span class="text-slate-500 block">KTV tiếp nhận:</span>
-              <span class="font-medium text-white">{{ selectedCpst.recvBy }}</span>
+              <span class="font-medium text-slate-900">{{ selectedCpst.recvBy }}</span>
             </div>
             <div>
               <span class="text-slate-500 block">Mã yêu cầu CPSR gốc:</span>
-              <span class="font-mono font-medium text-sky-400">{{ selectedCpst.cpsrDocNo }}</span>
+              <span class="font-mono font-medium text-sky-600">{{ selectedCpst.cpsrDocNo }}</span>
             </div>
             <div>
               <span class="text-slate-500 block">Trạng thái kỹ thuật:</span>
-              <span class="font-bold text-emerald-400">{{ selectedCpst.chkStatus }}</span>
+              <span class="font-bold text-emerald-600">{{ selectedCpst.chkStatus }}</span>
             </div>
           </div>
           <div v-if="selectedCpst.actionTaken">
             <span class="text-slate-500 block">Hành động khắc phục:</span>
-            <p class="text-slate-200 mt-0.5 bg-slate-950 p-2.5 rounded-lg border border-slate-800 font-mono text-[11px]">{{ selectedCpst.actionTaken }}</p>
+            <p class="text-slate-800 mt-0.5 bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-[11px]">{{ selectedCpst.actionTaken }}</p>
           </div>
         </div>
       </div>
 
       <!-- Field Group 2: Print Quality (2 BIG BUTTONS) -->
       <div>
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
-          Đánh giá chất lượng in <span class="text-rose-400">*</span>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+          Đánh giá chất lượng in <span class="text-rose-500">*</span>
         </label>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <button
@@ -272,8 +264,8 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       <!-- Field Group 3: Work Order, Quantities & Unit -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Work Order (Lệnh SX) <span class="text-rose-400">*</span>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Work Order (Lệnh SX) <span class="text-rose-500">*</span>
           </label>
           <input
             type="text"
@@ -284,8 +276,8 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-            Tổng số lượng <span class="text-rose-400">*</span>
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            Tổng số lượng <span class="text-rose-500">*</span>
           </label>
           <input
             type="number"
@@ -297,9 +289,9 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           />
         </div>
         <div>
-          <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2 flex justify-between">
+          <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex justify-between">
             <span>Phế phát sinh</span>
-            <span class="text-amber-400 font-mono">{{ calculatedWastePercent }}</span>
+            <span class="text-amber-600 font-mono font-bold">{{ calculatedWastePercent }}</span>
           </label>
           <input
             type="number"
@@ -313,8 +305,8 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
 
       <!-- Field Group 4: Unit (3 BIG BUTTONS) -->
       <div>
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2.5">
-          Đơn vị tính <span class="text-rose-400">*</span>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
+          Đơn vị tính <span class="text-rose-500">*</span>
         </label>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
@@ -346,8 +338,8 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
 
       <!-- Field Group 5: Production Manager Signature / Droplist (3-line search) -->
       <div class="relative">
-        <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">
-          Đại diện sản xuất ký nhận <span class="text-rose-400">*</span>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+          Đại diện sản xuất ký nhận <span class="text-rose-500">*</span>
         </label>
         <div class="relative">
           <input
@@ -361,7 +353,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             v-if="mgrSearch"
             type="button"
             @click="clearMgrSelection"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-white font-bold"
+            class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 font-bold"
           >
             ✕
           </button>
@@ -370,23 +362,23 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
         <!-- 3-line Manager Dropdown -->
         <div
           v-if="showMgrDropdown && filteredManagers.length > 0"
-          class="absolute z-30 left-0 right-0 mt-2 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl max-h-64 overflow-y-auto divide-y divide-slate-800"
+          class="absolute z-30 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl max-h-64 overflow-y-auto divide-y divide-slate-100"
         >
           <div
             v-for="emp in filteredManagers"
             :key="emp.id || emp.mnv"
             @click="selectManager(emp)"
-            class="p-3 hover:bg-slate-800 cursor-pointer transition flex flex-col gap-0.5"
+            class="p-3 hover:bg-slate-50 cursor-pointer transition flex flex-col gap-0.5"
           >
-            <div class="text-sm font-bold text-white">{{ emp.name }}</div>
-            <div class="text-xs font-mono font-semibold text-sky-400">Mã NV: {{ emp.mnv }}</div>
-            <div class="text-xs text-slate-400">{{ emp.dept || 'Sản xuất' }} • {{ emp.role || 'Quản lý SX' }}</div>
+            <div class="text-sm font-bold text-slate-900">{{ emp.name }}</div>
+            <div class="text-xs font-mono font-semibold text-sky-600">Mã NV: {{ emp.mnv }}</div>
+            <div class="text-xs text-slate-500">{{ emp.dept || 'Sản xuất' }} • {{ emp.role || 'Quản lý SX' }}</div>
           </div>
         </div>
 
-        <div v-if="form.prodMgr" class="mt-2 text-xs text-emerald-400 flex items-center gap-1 font-medium">
+        <div v-if="form.prodMgr" class="mt-2 text-xs text-emerald-600 flex items-center gap-1 font-medium">
           <span>✓ Đại diện SX ký nhận:</span>
-          <span class="text-white font-semibold">{{ form.prodMgr }}</span>
+          <span class="text-slate-800 font-semibold">{{ form.prodMgr }}</span>
         </div>
       </div>
 
