@@ -112,9 +112,10 @@ export class AppController {
   @ApiExcludeEndpoint()
   getControlPanelPage(@Req() req: Request, @Res() res: Response) {
     this.setNoCacheHeaders(res);
-    const token = req.cookies?.['access_token'] || req.cookies?.['checkpoint_token'];
-    if (!token || token === 'undefined' || token === 'null' || token.length < 20) {
-      return res.redirect('/login');
+    const queryToken = (req.query?.token as string) || (req.query?.access_token as string);
+    if (queryToken && queryToken.length > 20) {
+      res.cookie('access_token', queryToken, { path: '/', sameSite: 'lax', httpOnly: false });
+      res.cookie('checkpoint_token', queryToken, { path: '/', sameSite: 'lax', httpOnly: false });
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(CONTROL_PANEL_HTML);

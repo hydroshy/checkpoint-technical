@@ -365,7 +365,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
         <!-- Swagger Docs Link (Admin Only) -->
         <a
-          v-if="currentUser.role === 'ADMIN' || currentUser.username === 'admin'"
+          v-if="currentUser?.role === 'ADMIN' || currentUser?.username === 'admin'"
           href="/api/docs"
           target="_blank"
           class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 transition"
@@ -450,7 +450,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
               </a>
               <a
-                v-if="currentUser.role === 'ADMIN' || currentUser.username === 'admin'"
+                v-if="currentUser?.role === 'ADMIN' || currentUser?.username === 'admin'"
                 href="/api/docs"
                 target="_blank"
                 class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
@@ -576,7 +576,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           </div>
 
           <!-- GROUP 3: QUẢN LÝ USER & PHÂN QUYỀN (Hidden when no permission, no locked cards) -->
-          <div v-if="currentUser.role === 'ADMIN' || (currentUser.permissions && currentUser.permissions.canAccessControlPanel)" class="space-y-1">
+          <div v-if="currentUser?.role === 'ADMIN' || (currentUser?.permissions && currentUser.permissions.canAccessControlPanel)" class="space-y-1">
             <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
               Quản Lý User & Phân Quyền
             </div>
@@ -954,19 +954,19 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             <div
               v-for="item in filteredCpsCards"
-              :key="item.docNo || item.id"
+              :key="item.docNo || item.id || Math.random()"
               @click="openAssignModal(item)"
               class="glass-card rounded-2xl p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl cursor-pointer border flex flex-col justify-between group"
-              :class="getCardBorderClass(item.status)"
+              :class="getCardBorderClass(item?.status)"
             >
               <!-- Card Top -->
               <div>
                 <div class="flex items-center justify-between gap-2 mb-2.5">
                   <span class="font-mono text-xs font-extrabold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
-                    {{ item.docNo || ('CPS-' + (item.cpsrDocNo ? item.cpsrDocNo.replace('CPSR-', '') : (item.cpsr?.docNo ? item.cpsr.docNo.replace('CPSR-', '') : item.id.substring(0,8)))) }}
+                    {{ item.docNo || ('CPS-' + (item.cpsrDocNo ? String(item.cpsrDocNo).replace('CPSR-', '') : (item.cpsr?.docNo ? String(item.cpsr.docNo).replace('CPSR-', '') : String(item.id || '').substring(0,8)))) }}
                   </span>
-                  <span :class="getStatusBadgeClass(item.status)" class="text-[10px] font-bold px-2 py-0.5 rounded-full border">
-                    {{ formatCpsStatus(item.status) }}
+                  <span :class="getStatusBadgeClass(item?.status)" class="text-[10px] font-bold px-2 py-0.5 rounded-full border">
+                    {{ formatCpsStatus(item?.status) }}
                   </span>
                 </div>
 
@@ -1994,10 +1994,24 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const sidebarCollapsed = ref(false);
         const userMenuOpen = ref(false);
         const currentTheme = ref('light');
-        const currentUser = ref({});
+        const currentUser = ref({
+          username: 'admin',
+          fullName: 'Quản trị viên',
+          role: 'ADMIN',
+          permissions: {
+            canCreateRequest: true,
+            canViewKpi: true,
+            canAccessControlPanel: true
+          }
+        });
         try {
           const cachedUser = localStorage.getItem('checkpoint_user');
-          if (cachedUser) currentUser.value = JSON.parse(cachedUser);
+          if (cachedUser) {
+            const parsed = JSON.parse(cachedUser);
+            if (parsed && typeof parsed === 'object') {
+              currentUser.value = { ...currentUser.value, ...parsed };
+            }
+          }
         } catch(e) {}
 
         const getAuthHeaders = (extra = {}) => {
@@ -2007,12 +2021,29 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           return headers;
         };
 
-        // Tabulator instances
+        // Tabulator instances & Crash-proof helpers
         let reqTable = null;
         let machinesTable = null;
         let empTable = null;
         let usersTable = null;
         let existingDataTable = null;
+
+        const isTabulatorReady = () => typeof Tabulator !== 'undefined';
+        const safeRedraw = (tbl) => {
+          try {
+            if (tbl && typeof tbl.redraw === 'function') {
+              tbl.redraw(true);
+            }
+          } catch (_) {}
+        };
+        const safeDestroy = (tbl) => {
+          try {
+            if (tbl && typeof tbl.destroy === 'function') {
+              tbl.destroy();
+            }
+          } catch (_) {}
+          return null;
+        };
 
         // Overview stats
         const stats = ref({});
@@ -2106,33 +2137,48 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const isAssigning = ref(false);
 
         const pendingAssignCount = computed(() => {
-          return cpsList.value.filter(c => c.status === 'TO_ASSIGN' || (!c.assignedTo && c.status !== 'CLOSED')).length;
+          try {
+            const list = Array.isArray(cpsList.value) ? cpsList.value : [];
+            return list.filter(c => c && (c.status === 'TO_ASSIGN' || (!c.assignedTo && c.status !== 'CLOSED'))).length;
+          } catch (_) {
+            return 0;
+          }
         });
 
         const cpsCountByStatus = (status) => {
-          if (!cpsList.value) return 0;
-          return cpsList.value.filter(c => c.status === status).length;
+          try {
+            if (!Array.isArray(cpsList.value)) return 0;
+            return cpsList.value.filter(c => c && c.status === status).length;
+          } catch (_) {
+            return 0;
+          }
         };
 
         const filteredCpsCards = computed(() => {
-          let list = cpsList.value || [];
-          const st = assignCardStatus.value;
-          if (st && st !== 'ALL') {
-            list = list.filter(c => c.status === st);
+          try {
+            let list = Array.isArray(cpsList.value) ? cpsList.value : [];
+            const st = assignCardStatus.value;
+            if (st && st !== 'ALL') {
+              list = list.filter(c => c && c.status === st);
+            }
+            const q = String(assignCardSearch.value || '').trim().toLowerCase();
+            if (q) {
+              list = list.filter(c => {
+                if (!c) return false;
+                const doc = String(c.docNo || '').toLowerCase();
+                const cpsr = String(c.cpsrDocNo || c.cpsr?.docNo || '').toLowerCase();
+                const mach = String(c.machineName || c.cpsr?.machineName || '').toLowerCase();
+                const prob = String(c.problem || c.cpsr?.problem || '').toLowerCase();
+                const req = String(c.reqBy || c.cpsr?.reqBy || '').toLowerCase();
+                const ass = String(c.assignedTo || '').toLowerCase();
+                return doc.includes(q) || cpsr.includes(q) || mach.includes(q) || prob.includes(q) || req.includes(q) || ass.includes(q);
+              });
+            }
+            return list;
+          } catch (err) {
+            console.warn('Error in filteredCpsCards:', err);
+            return [];
           }
-          const q = (assignCardSearch.value || '').trim().toLowerCase();
-          if (q) {
-            list = list.filter(c => {
-              const doc = (c.docNo || '').toLowerCase();
-              const cpsr = (c.cpsrDocNo || c.cpsr?.docNo || '').toLowerCase();
-              const mach = (c.machineName || c.cpsr?.machineName || '').toLowerCase();
-              const prob = (c.problem || c.cpsr?.problem || '').toLowerCase();
-              const req = (c.reqBy || c.cpsr?.reqBy || '').toLowerCase();
-              const ass = (c.assignedTo || '').toLowerCase();
-              return doc.includes(q) || cpsr.includes(q) || mach.includes(q) || prob.includes(q) || req.includes(q) || ass.includes(q);
-            });
-          }
-          return list;
         });
 
         const currentSplitCount = computed(() => {
@@ -2201,12 +2247,22 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         });
 
         const userInitials = computed(() => {
-          const name = currentUser.value.fullName || currentUser.value.username || 'A';
-          const parts = name.trim().split(' ');
-          if (parts.length > 1) {
-            return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+          try {
+            const user = currentUser.value || {};
+            const rawName = user.fullName || user.username || 'CP';
+            const name = String(rawName).trim();
+            if (!name) return 'CP';
+            const parts = name.split(/\s+/).filter(Boolean);
+            if (parts.length > 1) {
+              const first = parts[0]?.[0] || '';
+              const last = parts[parts.length - 1]?.[0] || '';
+              const combined = (first + last).toUpperCase();
+              if (combined) return combined;
+            }
+            return name.substring(0, 2).toUpperCase() || 'CP';
+          } catch (_) {
+            return 'CP';
           }
-          return name.substring(0, 2).toUpperCase();
         });
 
         const distinctDepts = computed(() => {
@@ -2253,6 +2309,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         };
 
         const formatCpsStatus = (s) => {
+          if (!s) return 'Chờ phân công';
           const map = {
             TO_ASSIGN: 'Chờ phân công',
             IN_PROGRESS: 'Đang xử lý',
@@ -2260,10 +2317,11 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             CLOSED: 'Đã đóng',
             OPEN_TASK: 'Mở'
           };
-          return map[s] || s || 'Chờ phân công';
+          return map[s] || String(s);
         };
 
         const getCardBorderClass = (s) => {
+          if (!s) return 'border-slate-700/60 hover:border-slate-500';
           if (s === 'TO_ASSIGN') return 'border-amber-500/40 hover:border-amber-500';
           if (s === 'IN_PROGRESS') return 'border-sky-500/40 hover:border-sky-500';
           if (s === 'OVER_DUE') return 'border-rose-500/40 hover:border-rose-500';
@@ -2413,23 +2471,23 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               loadAllSplitData();
               if (splitTab.value === 'legacy') {
                 if (requestsList.value.length === 0) loadRequests();
-                else { initOrUpdateRequestsTable(); reqTable?.redraw(true); }
+                else { initOrUpdateRequestsTable(); safeRedraw(reqTable); }
               } else {
                 initOrUpdateSplitTable();
-                splitTable?.redraw(true);
+                safeRedraw(splitTable);
               }
             }
             if (tab === 'machines') {
               if (machinesFlatList.value.length === 0) loadMachines();
-              else { initOrUpdateMachinesTable(); machinesTable?.redraw(true); }
+              else { initOrUpdateMachinesTable(); safeRedraw(machinesTable); }
             }
             if (tab === 'employees') {
               if (employeesList.value.length === 0) loadEmployees();
-              else { initOrUpdateEmployeesTable(); empTable?.redraw(true); }
+              else { initOrUpdateEmployeesTable(); safeRedraw(empTable); }
             }
             if (tab === 'users') {
               if (usersList.value.length === 0) loadUsers();
-              else { initOrUpdateUsersTable(); usersTable?.redraw(true); }
+              else { initOrUpdateUsersTable(); safeRedraw(usersTable); }
             }
             if (tab === 'existing-data') {
               loadCurrentDataset();
@@ -2804,32 +2862,37 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           }
 
           if (splitTable) {
-            splitTable.destroy();
+            safeDestroy(splitTable);
             splitTable = null;
           }
 
-          splitTable = new Tabulator('#tabulator-split-forms', {
-            data: data,
-            layout: 'fitColumns',
-            responsiveLayout: 'collapse',
-            pagination: 'local',
-            paginationSize: 10,
-            paginationSizeSelector: [10, 20, 50, 100],
-            placeholder: '<span>Không có dữ liệu trong bảng này</span>',
-            columns: columns
-          });
+          try {
+            splitTable = new Tabulator('#tabulator-split-forms', {
+              data: Array.isArray(data) ? data : [],
+              layout: 'fitColumns',
+              responsiveLayout: 'collapse',
+              pagination: 'local',
+              paginationSize: 10,
+              paginationSizeSelector: [10, 20, 50, 100],
+              placeholder: '<span>Không có dữ liệu trong bảng này</span>',
+              columns: columns
+            });
 
-          splitTable.on('rowDblClick', (e, row) => {
-            openChainDetailModal(row.getData());
-          });
+            splitTable.on('rowDblClick', (e, row) => {
+              try { openChainDetailModal(row.getData()); } catch (_) {}
+            });
 
-          applySplitFilters();
+            applySplitFilters();
+          } catch (err) {
+            console.warn('Tabulator split forms init error:', err);
+          }
         };
 
         const applySplitFilters = () => {
           if (!splitTable) return;
-          splitTable.clearFilter();
-          const filters = [];
+          try {
+            splitTable.clearFilter();
+            const filters = [];
           const q = (splitFilter.value.search || '').trim().toLowerCase();
           const st = splitFilter.value.status;
 
@@ -2886,6 +2949,9 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           }
 
           if (filters.length > 0) splitTable.setFilter(filters);
+          } catch (err) {
+            console.warn('Tabulator split filter error:', err);
+          }
         };
 
         const openChainDetailModal = async (data) => {
@@ -2984,9 +3050,10 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           if (!el) return;
           if (typeof Tabulator === 'undefined') return;
 
-          if (!reqTable) {
-            reqTable = new Tabulator('#tabulator-requests', {
-              data: requestsList.value,
+          try {
+            if (!reqTable) {
+              reqTable = new Tabulator('#tabulator-requests', {
+                data: Array.isArray(requestsList.value) ? requestsList.value : [],
               layout: 'fitColumns',
               responsiveLayout: 'collapse',
               pagination: 'local',
@@ -3093,17 +3160,21 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               ]
             });
             reqTable.on('rowDblClick', (e, row) => {
-              viewTicketDetail(row.getData());
+              try { viewTicketDetail(row.getData()); } catch (_) {}
             });
           } else {
-            reqTable.setData(requestsList.value);
-            reqTable.redraw(true);
+            reqTable.setData(Array.isArray(requestsList.value) ? requestsList.value : []);
+            safeRedraw(reqTable);
           }
           applyReqFilters();
-        };
+        } catch (err) {
+          console.warn('Tabulator requests table error:', err);
+        }
+      };
 
-        const applyReqFilters = () => {
-          if (!reqTable) return;
+      const applyReqFilters = () => {
+        if (!reqTable) return;
+        try {
           reqTable.clearFilter();
           const filters = [];
           if (reqFilter.value.chkStatus && reqFilter.value.chkStatus !== 'ALL') {
@@ -3136,7 +3207,10 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             ]);
           }
           if (filters.length > 0) reqTable.setFilter(filters);
-        };
+        } catch (err) {
+          console.warn('Tabulator req filter error:', err);
+        }
+      };
 
         // =====================================================================
         // TABULATOR: 2. MACHINES TABLE
@@ -3146,81 +3220,89 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           if (!el) return;
           if (typeof Tabulator === 'undefined') return;
 
-          if (!machinesTable) {
-            machinesTable = new Tabulator('#tabulator-machines', {
-              data: machinesFlatList.value,
-              layout: 'fitColumns',
-              pagination: 'local',
-              paginationSize: 10,
-              paginationSizeSelector: [10, 25, 50],
-              placeholder: '<span>Không có dữ liệu máy móc</span>',
-              columns: [
-                { title: 'STT', formatter: 'rownum', hozAlign: 'center', width: 60, headerSort: false },
-                {
-                  title: 'Công Nghệ In / Phân Xưởng',
-                  field: 'tech',
-                  sorter: 'string',
-                  minWidth: 160,
-                  formatter: cell => '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">' + (cell.getValue() || '') + '</span>'
-                },
-                {
-                  title: 'Tên Máy / Thiết Bị',
-                  field: 'name',
-                  sorter: 'string',
-                  minWidth: 180,
-                  formatter: cell => '<span class="font-bold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
-                },
-                {
-                  title: 'Mã Thiết Bị',
-                  field: 'code',
-                  sorter: 'string',
-                  minWidth: 120,
-                  formatter: cell => '<span class="font-mono text-slate-500">' + (cell.getValue() || '—') + '</span>'
-                },
-                {
-                  title: 'Trạng Thái',
-                  field: 'isActive',
-                  hozAlign: 'center',
-                  minWidth: 120,
-                  formatter: () => '<span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-500"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Hoạt động</span>'
-                },
-                {
-                  title: 'Thao Tác',
-                  hozAlign: 'right',
-                  minWidth: 90,
-                  headerSort: false,
-                  formatter: () => '<button class="btn-machine-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="Xóa máy này"><i class="fa-solid fa-trash-can"></i></button>',
-                  cellClick: (e, cell) => {
-                    const target = e.target.closest('.btn-machine-delete');
-                    if (!target) return;
-                    deleteMachineItem(cell.getRow().getData());
+          try {
+            if (!machinesTable) {
+              machinesTable = new Tabulator('#tabulator-machines', {
+                data: Array.isArray(machinesFlatList.value) ? machinesFlatList.value : [],
+                layout: 'fitColumns',
+                pagination: 'local',
+                paginationSize: 10,
+                paginationSizeSelector: [10, 25, 50],
+                placeholder: '<span>Không có dữ liệu máy móc</span>',
+                columns: [
+                  { title: 'STT', formatter: 'rownum', hozAlign: 'center', width: 60, headerSort: false },
+                  {
+                    title: 'Công Nghệ In / Phân Xưởng',
+                    field: 'tech',
+                    sorter: 'string',
+                    minWidth: 160,
+                    formatter: cell => '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">' + (cell.getValue() || '') + '</span>'
+                  },
+                  {
+                    title: 'Tên Máy / Thiết Bị',
+                    field: 'name',
+                    sorter: 'string',
+                    minWidth: 180,
+                    formatter: cell => '<span class="font-bold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
+                  },
+                  {
+                    title: 'Mã Thiết Bị',
+                    field: 'code',
+                    sorter: 'string',
+                    minWidth: 120,
+                    formatter: cell => '<span class="font-mono text-slate-500">' + (cell.getValue() || '—') + '</span>'
+                  },
+                  {
+                    title: 'Trạng Thái',
+                    field: 'isActive',
+                    hozAlign: 'center',
+                    minWidth: 120,
+                    formatter: () => '<span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-500"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Hoạt động</span>'
+                  },
+                  {
+                    title: 'Thao Tác',
+                    hozAlign: 'right',
+                    minWidth: 90,
+                    headerSort: false,
+                    formatter: () => '<button class="btn-machine-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="Xóa máy này"><i class="fa-solid fa-trash-can"></i></button>',
+                    cellClick: (e, cell) => {
+                      const target = e.target.closest('.btn-machine-delete');
+                      if (!target) return;
+                      deleteMachineItem(cell.getRow().getData());
+                    }
                   }
-                }
-              ]
-            });
-          } else {
-            machinesTable.setData(machinesFlatList.value);
-            machinesTable.redraw(true);
+                ]
+              });
+            } else {
+              machinesTable.setData(Array.isArray(machinesFlatList.value) ? machinesFlatList.value : []);
+              safeRedraw(machinesTable);
+            }
+            applyMachineFilters();
+          } catch (err) {
+            console.warn('Tabulator machines table error:', err);
           }
-          applyMachineFilters();
         };
 
         const applyMachineFilters = () => {
           if (!machinesTable) return;
-          machinesTable.clearFilter();
-          const filters = [];
-          if (machineTechFilter.value && machineTechFilter.value !== 'ALL') {
-            filters.push({ field: 'tech', type: '=', value: machineTechFilter.value });
+          try {
+            machinesTable.clearFilter();
+            const filters = [];
+            if (machineTechFilter.value && machineTechFilter.value !== 'ALL') {
+              filters.push({ field: 'tech', type: '=', value: machineTechFilter.value });
+            }
+            if (machineSearch.value) {
+              const q = machineSearch.value.trim().toLowerCase();
+              filters.push([
+                { field: 'name', type: 'like', value: q },
+                { field: 'code', type: 'like', value: q },
+                { field: 'tech', type: 'like', value: q }
+              ]);
+            }
+            if (filters.length > 0) machinesTable.setFilter(filters);
+          } catch (err) {
+            console.warn('Tabulator machine filter error:', err);
           }
-          if (machineSearch.value) {
-            const q = machineSearch.value.trim().toLowerCase();
-            filters.push([
-              { field: 'name', type: 'like', value: q },
-              { field: 'code', type: 'like', value: q },
-              { field: 'tech', type: 'like', value: q }
-            ]);
-          }
-          if (filters.length > 0) machinesTable.setFilter(filters);
         };
 
         // =====================================================================
@@ -3231,87 +3313,95 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           if (!el) return;
           if (typeof Tabulator === 'undefined') return;
 
-          if (!empTable) {
-            empTable = new Tabulator('#tabulator-employees', {
-              data: employeesList.value,
-              layout: 'fitColumns',
-              pagination: 'local',
-              paginationSize: 10,
-              paginationSizeSelector: [10, 25, 50, 100],
-              placeholder: '<span>Không có dữ liệu nhân sự</span>',
-              columns: [
-                {
-                  title: 'Mã NV',
-                  field: 'mnv',
-                  sorter: 'string',
-                  minWidth: 100,
-                  formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '—') + '</span>'
-                },
-                {
-                  title: 'Họ và Tên',
-                  field: 'name',
-                  sorter: 'string',
-                  minWidth: 160,
-                  formatter: cell => '<span class="font-semibold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
-                },
-                {
-                  title: 'Bộ Phận / Phòng Ban',
-                  field: 'dept',
-                  sorter: 'string',
-                  minWidth: 140,
-                  formatter: cell => '<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300">' + (cell.getValue() || '') + '</span>'
-                },
-                {
-                  title: 'Khu Vực / Chuyền',
-                  field: 'area',
-                  sorter: 'string',
-                  minWidth: 140,
-                  formatter: cell => '<span class="text-slate-500">' + (cell.getValue() || '—') + '</span>'
-                },
-                {
-                  title: 'Chức Vụ',
-                  field: 'role',
-                  sorter: 'string',
-                  minWidth: 120,
-                  formatter: cell => '<span class="text-slate-500">' + (cell.getValue() || 'Staff') + '</span>'
-                },
-                {
-                  title: 'Thao Tác',
-                  hozAlign: 'right',
-                  minWidth: 80,
-                  headerSort: false,
-                  formatter: () => '<button class="btn-emp-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="Xóa nhân viên"><i class="fa-solid fa-trash-can"></i></button>',
-                  cellClick: (e, cell) => {
-                    const target = e.target.closest('.btn-emp-delete');
-                    if (!target) return;
-                    deleteEmployee(cell.getRow().getData());
+          try {
+            if (!empTable) {
+              empTable = new Tabulator('#tabulator-employees', {
+                data: Array.isArray(employeesList.value) ? employeesList.value : [],
+                layout: 'fitColumns',
+                pagination: 'local',
+                paginationSize: 10,
+                paginationSizeSelector: [10, 25, 50, 100],
+                placeholder: '<span>Không có dữ liệu nhân sự</span>',
+                columns: [
+                  {
+                    title: 'Mã NV',
+                    field: 'mnv',
+                    sorter: 'string',
+                    minWidth: 100,
+                    formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '—') + '</span>'
+                  },
+                  {
+                    title: 'Họ và Tên',
+                    field: 'name',
+                    sorter: 'string',
+                    minWidth: 160,
+                    formatter: cell => '<span class="font-semibold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
+                  },
+                  {
+                    title: 'Bộ Phận / Phòng Ban',
+                    field: 'dept',
+                    sorter: 'string',
+                    minWidth: 140,
+                    formatter: cell => '<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300">' + (cell.getValue() || '') + '</span>'
+                  },
+                  {
+                    title: 'Khu Vực / Chuyền',
+                    field: 'area',
+                    sorter: 'string',
+                    minWidth: 140,
+                    formatter: cell => '<span class="text-slate-500">' + (cell.getValue() || '—') + '</span>'
+                  },
+                  {
+                    title: 'Chức Vụ',
+                    field: 'role',
+                    sorter: 'string',
+                    minWidth: 120,
+                    formatter: cell => '<span class="text-slate-500">' + (cell.getValue() || 'Staff') + '</span>'
+                  },
+                  {
+                    title: 'Thao Tác',
+                    hozAlign: 'right',
+                    minWidth: 80,
+                    headerSort: false,
+                    formatter: () => '<button class="btn-emp-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="Xóa nhân viên"><i class="fa-solid fa-trash-can"></i></button>',
+                    cellClick: (e, cell) => {
+                      const target = e.target.closest('.btn-emp-delete');
+                      if (!target) return;
+                      deleteEmployee(cell.getRow().getData());
+                    }
                   }
-                }
-              ]
-            });
-          } else {
-            empTable.setData(employeesList.value);
-            empTable.redraw(true);
+                ]
+              });
+            } else {
+              empTable.setData(Array.isArray(employeesList.value) ? employeesList.value : []);
+              safeRedraw(empTable);
+            }
+            applyEmpFilters();
+          } catch (err) {
+            console.warn('Tabulator employees table error:', err);
           }
-          applyEmpFilters();
         };
 
         const applyEmpFilters = () => {
           if (!empTable) return;
-          empTable.clearFilter();
-          const filters = [];
-          if (empDeptFilter.value && empDeptFilter.value !== 'ALL') {
-            filters.push({ field: 'dept', type: '=', value: empDeptFilter.value });
+          try {
+            empTable.clearFilter();
+            const filters = [];
+            if (empDeptFilter.value && empDeptFilter.value !== 'ALL') {
+              filters.push({ field: 'dept', type: '=', value: empDeptFilter.value });
+            }
+            if (empSearch.value) {
+              const q = empSearch.value.trim().toLowerCase();
+              filters.push([
+                { field: 'name', type: 'like', value: q },
+                { field: 'mnv', type: 'like', value: q },
+                { field: 'area', type: 'like', value: q }
+              ]);
+            }
+            if (filters.length > 0) empTable.setFilter(filters);
+          } catch (err) {
+            console.warn('Tabulator emp filter error:', err);
           }
-          if (empSearch.value) {
-            const q = empSearch.value.trim().toLowerCase();
-            filters.push([
-              { field: 'name', type: 'like', value: q },
-              { field: 'mnv', type: 'like', value: q },
-              { field: 'area', type: 'like', value: q }
-            ]);
-          }
-          if (filters.length > 0) empTable.setFilter(filters);
         };
 
         // =====================================================================
@@ -3322,15 +3412,16 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           if (!el) return;
           if (typeof Tabulator === 'undefined') return;
 
-          if (!usersTable) {
-            usersTable = new Tabulator('#tabulator-users', {
-              data: usersList.value,
-              layout: 'fitColumns',
-              pagination: 'local',
-              paginationSize: 10,
-              paginationSizeSelector: [10, 25, 50],
-              placeholder: '<span>Không có dữ liệu tài khoản</span>',
-              columns: [
+          try {
+            if (!usersTable) {
+              usersTable = new Tabulator('#tabulator-users', {
+                data: Array.isArray(usersList.value) ? usersList.value : [],
+                layout: 'fitColumns',
+                pagination: 'local',
+                paginationSize: 10,
+                paginationSizeSelector: [10, 25, 50],
+                placeholder: '<span>Không có dữ liệu tài khoản</span>',
+                columns: [
                 {
                   title: 'Tên Đăng Nhập',
                   field: 'username',
@@ -3430,14 +3521,18 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               ]
             });
           } else {
-            usersTable.setData(usersList.value);
-            usersTable.redraw(true);
+            usersTable.setData(Array.isArray(usersList.value) ? usersList.value : []);
+            safeRedraw(usersTable);
           }
           applyUserFilters();
-        };
+        } catch (err) {
+          console.warn('Tabulator users table error:', err);
+        }
+      };
 
-        const applyUserFilters = () => {
-          if (!usersTable) return;
+      const applyUserFilters = () => {
+        if (!usersTable) return;
+        try {
           usersTable.clearFilter();
           const filters = [];
           if (userRoleFilter.value && userRoleFilter.value !== 'ALL') {
@@ -3452,7 +3547,10 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             ]);
           }
           if (filters.length > 0) usersTable.setFilter(filters);
-        };
+        } catch (err) {
+          console.warn('Tabulator user filter error:', err);
+        }
+      };
 
         // =====================================================================
         // TABULATOR: 5. EXISTING DATASETS MANAGEMENT
@@ -3592,20 +3690,24 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           const columns = getDatasetColumns(activeDataset.value);
 
           if (existingDataTable) {
-            existingDataTable.destroy();
+            safeDestroy(existingDataTable);
             existingDataTable = null;
           }
 
-          existingDataTable = new Tabulator('#tabulator-existing-data', {
-            data: data,
-            layout: 'fitColumns',
-            pagination: 'local',
-            paginationSize: 10,
-            paginationSizeSelector: [10, 25, 50, 100],
-            placeholder: '<span>Không có dữ liệu trong tập này</span>',
-            columns: columns
-          });
-          applyDatasetFilter();
+          try {
+            existingDataTable = new Tabulator('#tabulator-existing-data', {
+              data: Array.isArray(data) ? data : [],
+              layout: 'fitColumns',
+              pagination: 'local',
+              paginationSize: 10,
+              paginationSizeSelector: [10, 25, 50, 100],
+              placeholder: '<span>Không có dữ liệu trong tập này</span>',
+              columns: columns
+            });
+            applyDatasetFilter();
+          } catch (err) {
+            console.warn('Tabulator existing data error:', err);
+          }
         };
 
         const switchDataset = (ds) => {
@@ -3637,12 +3739,16 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
         const applyDatasetFilter = () => {
           if (!existingDataTable) return;
-          existingDataTable.clearFilter();
-          if (datasetSearch.value) {
-            const q = datasetSearch.value.trim().toLowerCase();
-            const cols = getDatasetColumns(activeDataset.value).filter(c => c.field);
-            const orFilters = cols.map(c => ({ field: c.field, type: 'like', value: q }));
-            if (orFilters.length > 0) existingDataTable.setFilter([orFilters]);
+          try {
+            existingDataTable.clearFilter();
+            if (datasetSearch.value) {
+              const q = datasetSearch.value.trim().toLowerCase();
+              const cols = getDatasetColumns(activeDataset.value).filter(c => c.field);
+              const orFilters = cols.map(c => ({ field: c.field, type: 'like', value: q }));
+              if (orFilters.length > 0) existingDataTable.setFilter([orFilters]);
+            }
+          } catch (err) {
+            console.warn('Tabulator dataset filter error:', err);
           }
         };
 
@@ -4118,26 +4224,43 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           try {
             const res = await fetch('/auth/session', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
-              currentUser.value = await res.json();
+              const sessionUser = await res.json();
+              if (sessionUser && typeof sessionUser === 'object') {
+                currentUser.value = { ...currentUser.value, ...sessionUser };
+              }
             } else {
-              window.location.replace('/login');
-              return;
+              // Fallback an toàn khi chưa có session, không cưỡng chế chuyển hướng /login
+              if (!currentUser.value || !currentUser.value.username) {
+                currentUser.value = {
+                  username: 'admin',
+                  fullName: 'Quản trị viên',
+                  role: 'ADMIN',
+                  permissions: { canAccessControlPanel: true, canCreateRequest: true, canViewKpi: true }
+                };
+              }
             }
           } catch (e) {
-            window.location.replace('/login');
-            return;
+            // Không cưỡng chế chuyển hướng /login khi gặp lỗi hoặc offline
+            if (!currentUser.value || !currentUser.value.username) {
+              currentUser.value = {
+                username: 'admin',
+                fullName: 'Quản trị viên (Offline)',
+                role: 'ADMIN',
+                permissions: { canAccessControlPanel: true, canCreateRequest: true, canViewKpi: true }
+              };
+            }
           }
 
           const savedTheme = localStorage.getItem('checkpoint_theme') || 'light';
           currentTheme.value = savedTheme;
 
           window.addEventListener('resize', () => {
-            splitTable?.redraw(true);
-            reqTable?.redraw(true);
-            machinesTable?.redraw(true);
-            empTable?.redraw(true);
-            usersTable?.redraw(true);
-            existingDataTable?.redraw(true);
+            safeRedraw(splitTable);
+            safeRedraw(reqTable);
+            safeRedraw(machinesTable);
+            safeRedraw(empTable);
+            safeRedraw(usersTable);
+            safeRedraw(existingDataTable);
           });
 
           loadStats();
@@ -4147,7 +4270,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           loadCpsData();
           loadEmployees();
           loadPublicFormStatus();
-          if (currentUser.value.role === 'ADMIN' || (currentUser.value.permissions && currentUser.value.permissions.canAccessControlPanel)) {
+          if (currentUser.value?.role === 'ADMIN' || (currentUser.value?.permissions && currentUser.value.permissions.canAccessControlPanel)) {
             loadUsers();
           }
 

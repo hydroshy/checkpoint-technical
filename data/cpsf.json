@@ -1,5 +1,23 @@
 [
   {
+    "id": "3be350ba-4aa7-41ad-9ca1-42c124a2df71",
+    "docNo": "CPSF-20261005-008",
+    "cpstId": "b59a006e-e4c1-48b1-a6c7-f04f708da356",
+    "cpstDocNo": "CPST-20261005-011",
+    "cpsrDocNo": "CPSR-20261005-012",
+    "chkQuality": "Đạt",
+    "workOrder": "WO-20261005-99",
+    "woTotalQty": 2000,
+    "wasteQty": 50,
+    "wasteUnit": "PCS",
+    "wastePercent": "2.50%",
+    "prodMgr": "Trần Văn QL - VN3000",
+    "submittedAt": "2026-10-05T17:00:10.989Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T17:00:10.989Z",
+    "updatedAt": "2026-10-05T17:00:10.989Z"
+  },
+  {
     "id": "5a6d8ad9-5609-43b3-9e74-ed6fdcaa45b7",
     "docNo": "CPSF-20261005-007",
     "cpstId": "26c96c9f-aa3d-4204-b672-d11fa52f63df",

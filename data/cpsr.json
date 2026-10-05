@@ -1,5 +1,35 @@
 [
   {
+    "id": "88572888-a351-47b7-893e-dc123eb76d6e",
+    "docNo": "CPSR-20261005-012",
+    "reqDate": "2026-10-05",
+    "reqTime": "10:00",
+    "reqBy": "Nguyễn Văn Kiểm Thử - VN1111",
+    "printTech": "Woven",
+    "machineName": "Woven 2",
+    "problem": "Lệch khổ in và đứt chỉ lặp lại",
+    "priority": "Hỗ trợ ngay",
+    "submittedAt": "2026-10-05T17:00:09.852Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T17:00:09.852Z",
+    "updatedAt": "2026-10-05T17:00:09.852Z"
+  },
+  {
+    "id": "6e89a3dd-690b-4c97-b58d-a6a70b878c4b",
+    "docNo": "CPSR-20261005-011",
+    "reqDate": "2026-10-05",
+    "reqTime": "09:00",
+    "reqBy": "QA Tester - VN8888",
+    "printTech": "OFFSET",
+    "machineName": "SM 52",
+    "problem": "QA Payload Size & Chain Verification",
+    "priority": "Hỗ trợ ngay",
+    "submittedAt": "2026-10-05T17:00:07.632Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T17:00:07.632Z",
+    "updatedAt": "2026-10-05T17:00:07.632Z"
+  },
+  {
     "id": "ce181eda-4772-491d-bbb4-da2ebc61bdb2",
     "docNo": "CPSR-20261005-010",
     "reqDate": "2026-10-05",

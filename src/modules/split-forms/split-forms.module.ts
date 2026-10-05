@@ -7,6 +7,7 @@ import {
   CpsfController,
   CpsController,
   CpsrChainController,
+  ControlPanelApiController,
 } from './split-forms.controller';
 
 @Module({
@@ -17,6 +18,7 @@ import {
     CpsfController,
     CpsController,
     CpsrChainController,
+    ControlPanelApiController,
   ],
   providers: [SplitFormsService],
   exports: [SplitFormsService],

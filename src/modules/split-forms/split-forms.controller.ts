@@ -12,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import * as jwt from 'jsonwebtoken';
+import { DatabaseService } from '../database/database.service';
 import { SplitFormsService, FormFilterQuery } from './split-forms.service';
 import { CreateCpsrDto, UpdateCpsrDto } from './dto/cpsr.dto';
 import { CreateCpstDto, UpdateCpstDto } from './dto/cpst.dto';
@@ -287,6 +288,64 @@ export class CpsrChainController {
   @ApiOperation({ summary: 'Thống kê tổng quan trạng thái chuỗi phiếu CPSR / CPST / CPSF' })
   getStats() {
     return this.service.getStats();
+  }
+}
+
+// ==================== CONTROL PANEL BOOTSTRAP CONTROLLER ====================
+@ApiTags('Control Panel Bootstrap & Data Optimization')
+@Controller('api/control-panel')
+export class ControlPanelApiController {
+  constructor(private readonly dbService: DatabaseService) {}
+
+  @Get('init-data')
+  @ApiOperation({ summary: 'Nạp nhanh dữ liệu tổng hợp cho Control Panel' })
+  getInitData(@Req() req: any) {
+    const user = extractUser(req);
+    const isAdmin = user && (user.role === 'ADMIN' || user.userType === 'ADMIN' || user.permissions?.canAccessControlPanel);
+
+    const allReqs = this.dbService.getRequests();
+    let done = 0;
+    let monitor = 0;
+    let support = 0;
+    let totalDowntimeMinutes = 0;
+    let dtCount = 0;
+    for (const r of allReqs) {
+      if (r.chkStatus === 'DONE') done++;
+      else if (r.chkStatus === 'MONITOR') monitor++;
+      else if (r.chkStatus === 'SUPPORT') support++;
+      if (r.downtime && r.downtime > 0) {
+        totalDowntimeMinutes += r.downtime;
+        dtCount++;
+      }
+    }
+
+    const machines = this.dbService.getMachines();
+    const machinesGrouped: Record<string, string[]> = {};
+    for (const m of machines) {
+      if (m.isActive !== false) {
+        if (!machinesGrouped[m.tech]) machinesGrouped[m.tech] = [];
+        if (!machinesGrouped[m.tech].includes(m.name)) machinesGrouped[m.tech].push(m.name);
+      }
+    }
+
+    return {
+      success: true,
+      stats: {
+        total: allReqs.length,
+        done,
+        monitor,
+        support,
+        totalDowntimeMinutes,
+        avgDowntimeMinutes: dtCount > 0 ? Math.round(totalDowntimeMinutes / dtCount) : 0,
+      },
+      machines,
+      machinesGrouped,
+      cps: this.dbService.getCpsList(),
+      cpsrChain: this.dbService.getCpsrChainList(),
+      employees: this.dbService.getEmployees(),
+      publicFormEnabled: this.dbService.getSettings()?.isPublicFormEnabled ?? true,
+      users: isAdmin ? this.dbService.getUsers().map(({ passwordHash, ...u }) => u) : undefined,
+    };
   }
 }
 

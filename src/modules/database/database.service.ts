@@ -38,16 +38,21 @@ export function normalizePermissions(role: string = 'EMPLOYEE', perms?: any): Us
   if (!perms || typeof perms !== 'object') {
     return def;
   }
+  const isAdm = role === 'ADMIN';
   return {
     canCreateRequest: typeof perms.canCreateRequest === 'boolean'
       ? perms.canCreateRequest
       : (typeof perms.can_create_request === 'boolean' ? perms.can_create_request : def.canCreateRequest),
-    canViewKpi: typeof perms.canViewKpi === 'boolean'
-      ? perms.canViewKpi
-      : (typeof perms.can_view_kpi === 'boolean' ? perms.can_view_kpi : def.canViewKpi),
-    canAccessControlPanel: typeof perms.canAccessControlPanel === 'boolean'
-      ? perms.canAccessControlPanel
-      : (typeof perms.can_access_control_panel === 'boolean' ? perms.can_access_control_panel : def.canAccessControlPanel),
+    canViewKpi: isAdm
+      ? true
+      : (typeof perms.canViewKpi === 'boolean'
+        ? perms.canViewKpi
+        : (typeof perms.can_view_kpi === 'boolean' ? perms.can_view_kpi : def.canViewKpi)),
+    canAccessControlPanel: isAdm
+      ? true
+      : (typeof perms.canAccessControlPanel === 'boolean'
+        ? perms.canAccessControlPanel
+        : (typeof perms.can_access_control_panel === 'boolean' ? perms.can_access_control_panel : def.canAccessControlPanel)),
   };
 }
 
@@ -989,6 +994,21 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         } catch (tableErr: any) {
           this.logger.error(`Failed to initialize table ${t.name}: ${tableErr.message}`);
         }
+      }
+
+      // Ensure admin users always have full permissions (including canAccessControlPanel)
+      try {
+        await this.pgPool.query(`
+          UPDATE users 
+          SET permissions = jsonb_set(
+            jsonb_set(COALESCE(permissions, '{"canCreateRequest":true}'::jsonb), '{canAccessControlPanel}', 'true'::jsonb),
+            '{canViewKpi}', 'true'::jsonb
+          ),
+          updated_at = NOW()
+          WHERE role = 'ADMIN' OR username = 'admin';
+        `);
+      } catch (adminPermErr: any) {
+        this.logger.debug(`Auto-sync admin permissions in PG: ${adminPermErr.message}`);
       }
 
       this.logger.log('✅ PostgreSQL Schema verified / initialized (14 tables: users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests, system_settings, cpsr, cpst, cpsf, cps)');
@@ -2564,10 +2584,27 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   saveCpsList(): void { this.writeJson('cps.json', this.cpsCache); }
 
   getCpsList(): CpsRecord[] {
+    const cpsrMap = new Map<string, CpsrRecord>();
+    for (const x of this.cpsrCache) cpsrMap.set(x.docNo, x);
+
+    const cpstByDocNo = new Map<string, CpstRecord>();
+    const cpstByCpsr = new Map<string, CpstRecord>();
+    for (const x of this.cpstCache) {
+      cpstByDocNo.set(x.docNo, x);
+      if (x.cpsrDocNo) cpstByCpsr.set(x.cpsrDocNo, x);
+    }
+
+    const cpsfByDocNo = new Map<string, CpsfRecord>();
+    const cpsfByCpst = new Map<string, CpsfRecord>();
+    for (const x of this.cpsfCache) {
+      cpsfByDocNo.set(x.docNo, x);
+      if (x.cpstDocNo) cpsfByCpst.set(x.cpstDocNo, x);
+    }
+
     return this.cpsCache.map(r => {
-      const cpsr = this.cpsrCache.find(x => x.docNo === r.cpsrDocNo) || null;
-      const cpst = (r.cpstDocNo ? this.cpstCache.find(x => x.docNo === r.cpstDocNo) : (cpsr ? this.cpstCache.find(x => x.cpsrDocNo === cpsr.docNo) : null)) || null;
-      const cpsf = (r.cpsfDocNo ? this.cpsfCache.find(x => x.docNo === r.cpsfDocNo) : (cpst ? this.cpsfCache.find(x => x.cpstDocNo === cpst.docNo) : null)) || null;
+      const cpsr = (r.cpsrDocNo ? cpsrMap.get(r.cpsrDocNo) : null) || null;
+      const cpst = (r.cpstDocNo ? cpstByDocNo.get(r.cpstDocNo) : (cpsr ? cpstByCpsr.get(cpsr.docNo) : null)) || null;
+      const cpsf = (r.cpsfDocNo ? cpsfByDocNo.get(r.cpsfDocNo) : (cpst ? cpsfByCpst.get(cpst.docNo) : null)) || null;
 
       const cpstDocNo = r.cpstDocNo || cpst?.docNo || null;
       const cpsfDocNo = r.cpsfDocNo || cpsf?.docNo || null;
@@ -2603,8 +2640,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   getCpsByIdOrDocNo(id: string): CpsRecord | undefined {
     const clean = (id || '').trim();
+    if (!clean) return undefined;
+    const found = this.cpsCache.find(r => r.id === clean || r.docNo === clean || r.cpsrDocNo === clean);
+    if (!found) return undefined;
     const list = this.getCpsList();
-    return list.find(r => r.id === clean || r.docNo === clean || r.cpsrDocNo === clean);
+    return list.find(r => r.id === found.id || r.docNo === found.docNo);
   }
 
   getCpsByCpsrDocNo(cpsrDocNo: string): CpsRecord | undefined {
@@ -2909,9 +2949,17 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   getCpsrChainList(): CpsrChainRecord[] {
+    const cpstByCpsr = new Map<string, CpstRecord>();
+    for (const t of this.cpstCache) {
+      if (t.cpsrDocNo) cpstByCpsr.set(t.cpsrDocNo, t);
+    }
+    const cpsfByCpst = new Map<string, CpsfRecord>();
+    for (const f of this.cpsfCache) {
+      if (f.cpstDocNo) cpsfByCpst.set(f.cpstDocNo, f);
+    }
     return this.cpsrCache.map(cpsr => {
-      const cpst = this.cpstCache.find(t => t.cpsrDocNo === cpsr.docNo) || null;
-      const cpsf = cpst ? (this.cpsfCache.find(f => f.cpstDocNo === cpst.docNo) || null) : null;
+      const cpst = cpstByCpsr.get(cpsr.docNo) || null;
+      const cpsf = cpst ? (cpsfByCpst.get(cpst.docNo) || null) : null;
       return {
         cpsr,
         cpst,
