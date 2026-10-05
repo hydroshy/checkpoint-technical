@@ -600,10 +600,48 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           showRecvDropdown.value = true;
         }
 
-        // Photo handlers (Drag & Drop, File input)
+        // Compress image using canvas before converting to base64
+        function compressImage(file, maxWidth = 1280, maxHeight = 1280, quality = 0.75) {
+          return new Promise((resolve) => {
+            if (!file.type || !file.type.startsWith('image/')) {
+              resolve(null);
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = (e) => {
+              const img = new Image();
+              img.onload = () => {
+                let width = img.width;
+                let height = img.height;
+                if (width > maxWidth || height > maxHeight) {
+                  if (width / height > maxWidth / maxHeight) {
+                    height = Math.round((height * maxWidth) / width);
+                    width = maxWidth;
+                  } else {
+                    width = Math.round((width * maxHeight) / height);
+                    height = maxHeight;
+                  }
+                }
+                const canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                resolve(canvas.toDataURL('image/jpeg', quality));
+              };
+              img.onerror = () => resolve(e.target.result);
+              img.src = e.target.result;
+            };
+            reader.onerror = () => resolve(null);
+            reader.readAsDataURL(file);
+          });
+        }
+
+        // Photo handlers (Drag & Drop, File input) with client-side canvas compression
         function handleFileSelect(e, targetField) {
           const files = e.target.files;
           if (files) processFiles(files, targetField);
+          if (e.target) e.target.value = '';
         }
 
         function handleDrop(e, targetField) {
@@ -612,17 +650,19 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           if (files) processFiles(files, targetField);
         }
 
-        function processFiles(fileList, targetField) {
-          Array.from(fileList).forEach(file => {
-            if (!file.type.startsWith('image/')) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-              if (form.value[targetField].length < 6) {
-                form.value[targetField].push(e.target.result);
+        async function processFiles(fileList, targetField) {
+          const files = Array.from(fileList).filter(file => file.type && file.type.startsWith('image/'));
+          for (const file of files) {
+            if (form.value[targetField].length >= 6) break;
+            try {
+              const compressedBase64 = await compressImage(file, 1280, 1280, 0.75);
+              if (compressedBase64 && form.value[targetField].length < 6) {
+                form.value[targetField].push(compressedBase64);
               }
-            };
-            reader.readAsDataURL(file);
-          });
+            } catch (err) {
+              console.error('Image compression error:', err);
+            }
+          }
         }
 
         function removePhoto(targetField, index) {

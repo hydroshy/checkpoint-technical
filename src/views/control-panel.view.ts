@@ -518,6 +518,17 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               <span class="truncate">Tổng Quan & Phân Tích</span>
             </button>
             <button
+              @click="switchTab('assign-tasks')"
+              :class="{ active: activeTab === 'assign-tasks' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+            >
+              <i class="fa-solid fa-list-check w-4 text-center text-xs text-amber-500"></i>
+              <span class="truncate">Phân Công Kỹ Thuật (Cards)</span>
+              <span v-if="pendingAssignCount > 0" class="ml-auto px-1.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 rounded-full font-mono">
+                {{ pendingAssignCount }}
+              </span>
+            </button>
+            <button
               @click="switchTab('requests')"
               :class="{ active: activeTab === 'requests' }"
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
@@ -831,6 +842,225 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         </div>
 
         <!-- =====================================================================
+             VIEW 1.5: MODULE PHÂN CÔNG KỸ THUẬT (ASSIGN TASK - CARDS VIEW)
+             ===================================================================== -->
+        <div v-show="activeTab === 'assign-tasks'" class="space-y-5">
+          <!-- Top bar -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div>
+              <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-amber-500"></i>
+                <span>Phân Công Kỹ Thuật (Assign Task)</span>
+              </h1>
+              <p class="text-xs text-slate-500">Giao diện thẻ (Cards) phân công nhân viên xử lý sự cố CPS và theo dõi thời hạn xử lý</p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                @click="loadCpsData"
+                class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <i class="fa-solid fa-arrows-rotate"></i> Làm mới
+              </button>
+              <button
+                @click="switchTab('requests')"
+                class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer shadow-sm"
+              >
+                <i class="fa-solid fa-table"></i> Xem Dạng Bảng (Tabulator)
+              </button>
+            </div>
+          </div>
+
+          <!-- Status KPI Counter Cards -->
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            <div
+              @click="assignCardStatus = 'ALL'"
+              :class="assignCardStatus === 'ALL' ? 'ring-2 ring-sky-500 bg-sky-500/10' : 'bg-slate-900/40 hover:bg-slate-800/60'"
+              class="glass-card rounded-2xl p-3 border border-slate-700/60 cursor-pointer transition text-center"
+            >
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Tất Cả CPS</span>
+              <span class="font-mono text-xl font-extrabold text-slate-100">{{ cpsList.length }}</span>
+            </div>
+            <div
+              @click="assignCardStatus = 'TO_ASSIGN'"
+              :class="assignCardStatus === 'TO_ASSIGN' ? 'ring-2 ring-amber-500 bg-amber-500/10' : 'bg-slate-900/40 hover:bg-slate-800/60'"
+              class="glass-card rounded-2xl p-3 border border-amber-500/40 cursor-pointer transition text-center"
+            >
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-400 block">Chờ Phân Công</span>
+              <span class="font-mono text-xl font-extrabold text-amber-400">{{ cpsCountByStatus('TO_ASSIGN') }}</span>
+            </div>
+            <div
+              @click="assignCardStatus = 'IN_PROGRESS'"
+              :class="assignCardStatus === 'IN_PROGRESS' ? 'ring-2 ring-sky-500 bg-sky-500/10' : 'bg-slate-900/40 hover:bg-slate-800/60'"
+              class="glass-card rounded-2xl p-3 border border-sky-500/40 cursor-pointer transition text-center"
+            >
+              <span class="text-[10px] font-bold uppercase tracking-wider text-sky-400 block">Đang Xử Lý</span>
+              <span class="font-mono text-xl font-extrabold text-sky-400">{{ cpsCountByStatus('IN_PROGRESS') }}</span>
+            </div>
+            <div
+              @click="assignCardStatus = 'OVER_DUE'"
+              :class="assignCardStatus === 'OVER_DUE' ? 'ring-2 ring-rose-500 bg-rose-500/10' : 'bg-slate-900/40 hover:bg-slate-800/60'"
+              class="glass-card rounded-2xl p-3 border border-rose-500/40 cursor-pointer transition text-center"
+            >
+              <span class="text-[10px] font-bold uppercase tracking-wider text-rose-400 block">Quá Hạn</span>
+              <span class="font-mono text-xl font-extrabold text-rose-400">{{ cpsCountByStatus('OVER_DUE') }}</span>
+            </div>
+            <div
+              @click="assignCardStatus = 'CLOSED'"
+              :class="assignCardStatus === 'CLOSED' ? 'ring-2 ring-emerald-500 bg-emerald-500/10' : 'bg-slate-900/40 hover:bg-slate-800/60'"
+              class="glass-card rounded-2xl p-3 border border-emerald-500/40 cursor-pointer transition text-center"
+            >
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-400 block">Đã Đóng</span>
+              <span class="font-mono text-xl font-extrabold text-emerald-400">{{ cpsCountByStatus('CLOSED') }}</span>
+            </div>
+          </div>
+
+          <!-- Filter Toolbar for Cards -->
+          <div class="glass-card rounded-2xl p-3.5 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+              <input
+                type="text"
+                v-model="assignCardSearch"
+                placeholder="🔍 Tìm kiếm mã CPS, tên máy, sự cố, người yêu cầu, nhân viên phụ trách..."
+                class="input-box w-full pl-9 pr-4 py-2 rounded-xl text-xs outline-none"
+              />
+            </div>
+            <div class="flex items-center gap-2">
+              <select
+                v-model="assignCardStatus"
+                class="input-box px-3 py-2 rounded-xl text-xs outline-none cursor-pointer"
+              >
+                <option value="ALL">— Tất cả trạng thái —</option>
+                <option value="TO_ASSIGN">⏳ Chờ phân công (TO_ASSIGN)</option>
+                <option value="IN_PROGRESS">⚡ Đang xử lý (IN_PROGRESS)</option>
+                <option value="OVER_DUE">⚠️ Quá hạn (OVER_DUE)</option>
+                <option value="CLOSED">✅ Đã đóng (CLOSED)</option>
+                <option value="OPEN_TASK">📋 Mở (OPEN_TASK)</option>
+              </select>
+              <span class="text-xs text-slate-400 font-mono whitespace-nowrap pl-1">
+                Hiển thị: <b class="text-sky-400">{{ filteredCpsCards.length }}</b> / {{ cpsList.length }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div v-if="filteredCpsCards.length === 0" class="glass-card rounded-2xl p-12 text-center text-slate-400 space-y-3">
+            <i class="fa-solid fa-clipboard-check text-4xl text-slate-500"></i>
+            <p class="text-sm font-semibold text-slate-300">Không có phiếu CPS nào phù hợp với bộ lọc</p>
+            <p class="text-xs text-slate-500">Thử xóa bộ lọc tìm kiếm hoặc bấm Làm mới dữ liệu</p>
+          </div>
+
+          <!-- Cards Grid -->
+          <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+            <div
+              v-for="item in filteredCpsCards"
+              :key="item.docNo || item.id"
+              @click="openAssignModal(item)"
+              class="glass-card rounded-2xl p-4 transition-all duration-200 hover:-translate-y-1 hover:shadow-xl cursor-pointer border flex flex-col justify-between group"
+              :class="getCardBorderClass(item.status)"
+            >
+              <!-- Card Top -->
+              <div>
+                <div class="flex items-center justify-between gap-2 mb-2.5">
+                  <span class="font-mono text-xs font-extrabold text-sky-400 bg-sky-500/10 px-2 py-0.5 rounded border border-sky-500/20">
+                    {{ item.docNo || ('CPS-' + (item.cpsrDocNo ? item.cpsrDocNo.replace('CPSR-', '') : (item.cpsr?.docNo ? item.cpsr.docNo.replace('CPSR-', '') : item.id.substring(0,8)))) }}
+                  </span>
+                  <span :class="getStatusBadgeClass(item.status)" class="text-[10px] font-bold px-2 py-0.5 rounded-full border">
+                    {{ formatCpsStatus(item.status) }}
+                  </span>
+                </div>
+
+                <!-- Machine & Print Tech -->
+                <div class="space-y-1.5 mb-2.5">
+                  <div class="flex items-center gap-1.5 text-xs font-bold text-slate-200">
+                    <i class="fa-solid fa-print text-indigo-400 text-[11px]"></i>
+                    <span class="truncate">{{ item.machineName || item.cpsr?.machineName || 'Chưa xác định máy' }}</span>
+                    <span v-if="item.printTech || item.cpsr?.printTech" class="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-800 text-slate-400">
+                      {{ item.printTech || item.cpsr?.printTech }}
+                    </span>
+                  </div>
+                  <!-- Problem summary -->
+                  <p class="text-xs text-slate-300 line-clamp-2 bg-slate-800/40 p-2 rounded-lg border border-slate-700/50 min-h-[38px]">
+                    {{ item.problem || item.cpsr?.problem || 'Không có mô tả sự cố' }}
+                  </p>
+                </div>
+
+                <!-- Requester & Time -->
+                <div class="text-[11px] text-slate-400 space-y-1 mb-2.5">
+                  <div class="flex items-center justify-between">
+                    <span class="text-slate-500">Người YC:</span>
+                    <span class="text-slate-300 font-medium truncate max-w-[150px]">{{ item.reqBy || item.cpsr?.reqBy || '-' }}</span>
+                  </div>
+                  <div class="flex items-center justify-between font-mono text-[10px]">
+                    <span class="text-slate-500">Thời gian:</span>
+                    <span class="text-slate-400">{{ (item.reqDate || item.cpsr?.reqDate || '') + ' ' + (item.reqTime || item.cpsr?.reqTime || '') }}</span>
+                  </div>
+                  <div v-if="item.priority || item.cpsr?.priority" class="flex items-center justify-between">
+                    <span class="text-slate-500">Ưu tiên:</span>
+                    <span :class="(item.priority || item.cpsr?.priority) === 'Hỗ trợ ngay' ? 'text-rose-400 font-bold' : 'text-amber-400 font-medium'">
+                      {{ item.priority || item.cpsr?.priority }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Linkage Tags -->
+                <div class="flex items-center gap-1 text-[9px] font-mono text-slate-400 mb-2.5 flex-wrap">
+                  <span class="px-1.5 py-0.5 rounded bg-sky-950/60 border border-sky-800/40 text-sky-300">
+                    R: {{ item.cpsrDocNo || item.cpsr?.docNo || '-' }}
+                  </span>
+                  <span class="px-1.5 py-0.5 rounded border" :class="item.cpstDocNo || item.cpst?.docNo ? 'bg-emerald-950/60 border-emerald-800/40 text-emerald-300' : 'bg-slate-900 border-slate-800 text-slate-600'">
+                    T: {{ item.cpstDocNo || item.cpst?.docNo || 'None' }}
+                  </span>
+                  <span class="px-1.5 py-0.5 rounded border" :class="item.cpsfDocNo || item.cpsf?.docNo ? 'bg-purple-950/60 border-purple-800/40 text-purple-300' : 'bg-slate-900 border-slate-800 text-slate-600'">
+                    F: {{ item.cpsfDocNo || item.cpsf?.docNo || 'None' }}
+                  </span>
+                </div>
+
+                <!-- Metrics (Downtime & Scrap Rate) -->
+                <div v-if="(item.downtime != null && item.downtime > 0) || item.wastePercent" class="grid grid-cols-2 gap-2 text-[10px] font-mono bg-slate-900/60 p-2 rounded-xl border border-slate-800 mb-2.5">
+                  <div>
+                    <span class="text-slate-500 block text-[9px]">Downtime</span>
+                    <span class="text-amber-400 font-bold">{{ item.downtime }} phút</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-500 block text-[9px]">Tỉ lệ phế</span>
+                    <span class="text-rose-400 font-bold">{{ item.wastePercent || '-' }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Bottom: Assignee & Action -->
+              <div class="pt-2.5 border-t border-slate-700/60">
+                <div class="flex items-center justify-between text-xs mb-1.5">
+                  <span class="text-slate-400 text-[11px]">KTV:</span>
+                  <span v-if="item.assignedTo" class="font-semibold text-emerald-400 truncate max-w-[150px] flex items-center gap-1">
+                    <i class="fa-solid fa-user-check text-[10px]"></i> {{ item.assignedTo }}
+                  </span>
+                  <span v-else class="text-amber-400/80 italic text-[11px] flex items-center gap-1">
+                    <i class="fa-regular fa-clock text-[10px]"></i> Chưa giao
+                  </span>
+                </div>
+
+                <div v-if="item.deadline" class="flex items-center justify-between text-[11px] text-slate-400 mb-2 font-mono">
+                  <span class="text-slate-500 text-[10px]">Deadline:</span>
+                  <span class="text-sky-300 text-[10px]">{{ formatDateTimeDisplay(item.deadline) }}</span>
+                </div>
+
+                <button
+                  type="button"
+                  @click.stop="openAssignModal(item)"
+                  class="w-full py-1.5 px-3 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-sm group-hover:brightness-110 cursor-pointer"
+                  :class="item.status === 'TO_ASSIGN' || !item.assignedTo ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-sky-600 hover:bg-sky-500 text-white'"
+                >
+                  <i class="fa-solid fa-user-gear"></i>
+                  <span>{{ item.assignedTo ? 'Cập nhật phân công' : 'Phân công ngay' }}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =====================================================================
              VIEW 2: REQUESTS MASTER MANAGEMENT (TABULATOR INTEGRATED)
              ===================================================================== -->
         <div v-show="activeTab === 'requests'" class="space-y-5">
@@ -880,6 +1110,13 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               🔗 Chuỗi 1-1-1 (Chain)
             </button>
             <button
+              @click="switchTab('assign-tasks')"
+              class="px-3 py-2 rounded-xl text-xs font-bold transition cursor-pointer flex items-center gap-1.5 bg-amber-500/10 text-amber-400 hover:bg-amber-500/20 border border-amber-500/30"
+              title="Mở giao diện Cards phân công kỹ thuật"
+            >
+              <i class="fa-solid fa-list-check"></i> Phân Công (Cards)
+            </button>
+            <button
               @click="switchSplitTab('cpsr')"
               :class="splitTab === 'cpsr' ? 'bg-sky-600 text-white font-bold shadow' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
               class="px-4 py-2 rounded-xl text-xs transition cursor-pointer"
@@ -920,9 +1157,16 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             />
             <select v-model="splitFilter.status" @change="applySplitFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
               <option value="ALL">— Tất cả trạng thái / tiến độ —</option>
-              <option v-if="splitTab === 'chain'" value="3/3">🟢 Hoàn tất chuỗi (3/3)</option>
-              <option v-if="splitTab === 'chain'" value="2/3">🟡 Đang xử lý / Phản hồi (2/3)</option>
-              <option v-if="splitTab === 'chain'" value="1/3">🔵 Yêu cầu mới (1/3)</option>
+              <template v-if="splitTab === 'chain'">
+                <option value="TO_ASSIGN">⏳ Chờ phân công (TO_ASSIGN)</option>
+                <option value="IN_PROGRESS">⚡ Đang xử lý (IN_PROGRESS)</option>
+                <option value="OVER_DUE">⚠️ Quá hạn (OVER_DUE)</option>
+                <option value="CLOSED">✅ Đã đóng (CLOSED)</option>
+                <option value="OPEN_TASK">📋 Mở (OPEN_TASK)</option>
+                <option value="3/3">🟢 Hoàn tất chuỗi (3/3)</option>
+                <option value="2/3">🟡 Đang xử lý / Phản hồi (2/3)</option>
+                <option value="1/3">🔵 Yêu cầu mới (1/3)</option>
+              </template>
               <option v-if="splitTab === 'cpsr'" value="Hàng SX lần đầu">Hàng SX lần đầu</option>
               <option v-if="splitTab === 'cpsr'" value="Hàng SX nhiều lần">Hàng SX nhiều lần</option>
               <option v-if="splitTab === 'cpst'" value="Đã khắc phục">🟢 Đã khắc phục</option>
@@ -1314,6 +1558,134 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             </select>
           </div>
           <button @click="closeModal('modal-ticket-detail')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- =====================================================================
+         MODAL PHÂN CÔNG KỸ THUẬT (ASSIGN TASK MODAL)
+         ===================================================================== -->
+    <div
+      id="modal-assign-task"
+      v-if="showAssignModal"
+      class="modal-overlay fixed inset-0 bg-slate-950/75 z-[60] flex items-center justify-center p-4 backdrop-blur-sm"
+      @click="closeAssignModal"
+    >
+      <div
+        v-if="selectedCpsForAssign"
+        class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200 dark:border-slate-800"
+        @click.stop
+      >
+        <!-- Modal Header -->
+        <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-amber-500 flex items-center gap-1.5">
+              <i class="fa-solid fa-clipboard-user"></i> Module Phân Công Kỹ Thuật
+            </div>
+            <h2 class="text-base font-extrabold font-mono text-slate-800 dark:text-slate-100 flex items-center gap-2 mt-0.5">
+              <span>{{ selectedCpsForAssign.docNo || ('CPS-' + (selectedCpsForAssign.cpsrDocNo ? selectedCpsForAssign.cpsrDocNo.replace('CPSR-', '') : (selectedCpsForAssign.cpsr?.docNo ? selectedCpsForAssign.cpsr.docNo.replace('CPSR-', '') : ''))) }}</span>
+              <span :class="getStatusBadgeClass(selectedCpsForAssign.status)" class="text-[10px] font-bold px-2 py-0.5 rounded-full border">
+                {{ formatCpsStatus(selectedCpsForAssign.status) }}
+              </span>
+            </h2>
+          </div>
+          <button @click="closeAssignModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg cursor-pointer">✕</button>
+        </div>
+
+        <!-- Modal Body -->
+        <div class="p-6 space-y-4 text-xs">
+          <!-- Summary card -->
+          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
+            <div class="grid grid-cols-2 gap-2 text-slate-600 dark:text-slate-300">
+              <div><span class="text-slate-400 block text-[10px] font-bold">THIẾT BỊ / MÁY:</span> <span class="font-bold text-slate-800 dark:text-slate-100">{{ selectedCpsForAssign.machineName || selectedCpsForAssign.cpsr?.machineName || '-' }}</span></div>
+              <div><span class="text-slate-400 block text-[10px] font-bold">CÔNG NGHỆ:</span> <span class="font-mono">{{ selectedCpsForAssign.printTech || selectedCpsForAssign.cpsr?.printTech || '-' }}</span></div>
+              <div class="col-span-2">
+                <span class="text-slate-400 block text-[10px] font-bold">MÔ TẢ SỰ CỐ:</span>
+                <p class="mt-0.5 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-mono text-[11px] text-rose-500 dark:text-rose-400">
+                  {{ selectedCpsForAssign.problem || selectedCpsForAssign.cpsr?.problem || '-' }}
+                </p>
+              </div>
+              <div><span class="text-slate-400 block text-[10px] font-bold">NGƯỜI YÊU CẦU:</span> {{ selectedCpsForAssign.reqBy || selectedCpsForAssign.cpsr?.reqBy || '-' }}</div>
+              <div>
+                <span class="text-slate-400 block text-[10px] font-bold">ƯU TIÊN:</span>
+                <span :class="(selectedCpsForAssign.priority || selectedCpsForAssign.cpsr?.priority) === 'Hỗ trợ ngay' ? 'text-rose-500 font-bold' : 'text-amber-500 font-bold'">
+                  {{ selectedCpsForAssign.priority || selectedCpsForAssign.cpsr?.priority || 'Bình thường' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Form Fields -->
+          <form @submit.prevent="submitAssignTask" class="space-y-4">
+            <!-- 1. Dropdown Nhân Viên -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                Nhân viên kỹ thuật tiếp nhận <span class="text-rose-500">*</span>
+              </label>
+              <select
+                v-model="assignForm.employee"
+                required
+                class="input-box w-full px-3.5 py-2.5 rounded-xl text-xs outline-none cursor-pointer"
+              >
+                <option value="" disabled>-- Chọn nhân viên từ danh sách --</option>
+                <option
+                  v-for="emp in employeesList"
+                  :key="emp.id || emp.mnv"
+                  :value="emp"
+                >
+                  {{ emp.name }} {{ emp.mnv ? '(' + emp.mnv + ')' : '' }} - {{ emp.role || emp.dept || 'Kỹ thuật' }}
+                </option>
+              </select>
+            </div>
+
+            <!-- 2. Chọn Deadline (mặc định để trống) -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
+                  Thời hạn hoàn thành (Deadline)
+                </label>
+                <span class="text-[10px] text-slate-400 italic">Mặc định để trống</span>
+              </div>
+              <input
+                type="datetime-local"
+                v-model="assignForm.deadline"
+                class="input-box w-full px-3.5 py-2.5 rounded-xl text-xs outline-none font-mono"
+              />
+            </div>
+
+            <!-- 3. Ghi chú phân công (Optional) -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+                Ghi chú phân công (Tùy chọn)
+              </label>
+              <textarea
+                v-model="assignForm.notes"
+                rows="2"
+                placeholder="Nhập ghi chú yêu cầu xử lý, lưu ý kỹ thuật..."
+                class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"
+              ></textarea>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
+              <button
+                type="button"
+                @click="closeAssignModal"
+                class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
+              >
+                Hủy bỏ
+              </button>
+              <button
+                type="submit"
+                :disabled="isAssigning"
+                class="px-5 py-2 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-sky-600/30 cursor-pointer"
+              >
+                <i v-if="isAssigning" class="fa-solid fa-spinner fa-spin"></i>
+                <i v-else class="fa-solid fa-check"></i>
+                <span>Lưu Phân Công (IN_PROGRESS)</span>
+              </button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -1724,6 +2096,45 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const showChainModal = ref(false);
         let splitTable = null;
 
+        // CPS & Assign Task State (Module Phân Công Kỹ Thuật)
+        const cpsList = ref([]);
+        const assignCardStatus = ref('ALL');
+        const assignCardSearch = ref('');
+        const showAssignModal = ref(false);
+        const selectedCpsForAssign = ref(null);
+        const assignForm = ref({ employee: '', deadline: '', notes: '' });
+        const isAssigning = ref(false);
+
+        const pendingAssignCount = computed(() => {
+          return cpsList.value.filter(c => c.status === 'TO_ASSIGN' || (!c.assignedTo && c.status !== 'CLOSED')).length;
+        });
+
+        const cpsCountByStatus = (status) => {
+          if (!cpsList.value) return 0;
+          return cpsList.value.filter(c => c.status === status).length;
+        };
+
+        const filteredCpsCards = computed(() => {
+          let list = cpsList.value || [];
+          const st = assignCardStatus.value;
+          if (st && st !== 'ALL') {
+            list = list.filter(c => c.status === st);
+          }
+          const q = (assignCardSearch.value || '').trim().toLowerCase();
+          if (q) {
+            list = list.filter(c => {
+              const doc = (c.docNo || '').toLowerCase();
+              const cpsr = (c.cpsrDocNo || c.cpsr?.docNo || '').toLowerCase();
+              const mach = (c.machineName || c.cpsr?.machineName || '').toLowerCase();
+              const prob = (c.problem || c.cpsr?.problem || '').toLowerCase();
+              const req = (c.reqBy || c.cpsr?.reqBy || '').toLowerCase();
+              const ass = (c.assignedTo || '').toLowerCase();
+              return doc.includes(q) || cpsr.includes(q) || mach.includes(q) || prob.includes(q) || req.includes(q) || ass.includes(q);
+            });
+          }
+          return list;
+        });
+
         const currentSplitCount = computed(() => {
           if (splitTab.value === 'chain') return chainList.value.length;
           if (splitTab.value === 'cpsr') return cpsrList.value.length;
@@ -1779,6 +2190,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         const currentTabLabel = computed(() => {
           const map = {
             overview: 'Tổng quan & Phân tích',
+            'assign-tasks': 'Phân Công Kỹ Thuật (Cards)',
             requests: 'Phiếu yêu cầu kỹ thuật',
             machines: 'Máy móc & Thiết bị',
             employees: 'Nhân sự & Phân xưởng',
@@ -1822,6 +2234,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           else if (id === 'modal-add-employee') showAddEmployeeModal.value = true;
           else if (id === 'modal-add-user') showAddUserModal.value = true;
           else if (id === 'modal-excel') showExcelModal.value = true;
+          else if (id === 'modal-assign-task') showAssignModal.value = true;
           else document.getElementById(id)?.classList.add('show');
         };
 
@@ -1831,37 +2244,153 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           else if (id === 'modal-add-employee') showAddEmployeeModal.value = false;
           else if (id === 'modal-add-user') showAddUserModal.value = false;
           else if (id === 'modal-excel') showExcelModal.value = false;
+          else if (id === 'modal-assign-task') showAssignModal.value = false;
           else document.getElementById(id)?.classList.remove('show');
         };
 
-        const triggerUpload = (id) => document.getElementById(id)?.click();
-
-        const get4MLabel = (k) => {
-          const map = { MAN: 'Con người (MAN)', MACHINE: 'Máy móc (MACHINE)', MATERIAL: 'Vật tư (MATERIAL)', METHOD: 'Phương pháp (METHOD)' };
-          return map[k] || k;
+        const closeAssignModal = () => {
+          showAssignModal.value = false;
         };
 
-        const getPercent = (v, total) => {
-          if (!total || total === 0) return 0;
-          return Math.round((v / total) * 100);
+        const formatCpsStatus = (s) => {
+          const map = {
+            TO_ASSIGN: 'Chờ phân công',
+            IN_PROGRESS: 'Đang xử lý',
+            OVER_DUE: 'Quá hạn',
+            CLOSED: 'Đã đóng',
+            OPEN_TASK: 'Mở'
+          };
+          return map[s] || s || 'Chờ phân công';
         };
 
-        const setTheme = (theme) => {
-          currentTheme.value = theme;
-          localStorage.setItem('checkpoint_theme', theme);
-          document.documentElement.classList.remove('theme-light', 'theme-dark');
-          document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
-          nextTick(() => {
-            reqTable?.redraw(true);
-            machinesTable?.redraw(true);
-            empTable?.redraw(true);
-            usersTable?.redraw(true);
-            existingDataTable?.redraw(true);
-          });
+        const getCardBorderClass = (s) => {
+          if (s === 'TO_ASSIGN') return 'border-amber-500/40 hover:border-amber-500';
+          if (s === 'IN_PROGRESS') return 'border-sky-500/40 hover:border-sky-500';
+          if (s === 'OVER_DUE') return 'border-rose-500/40 hover:border-rose-500';
+          if (s === 'CLOSED') return 'border-emerald-500/40 hover:border-emerald-500';
+          return 'border-slate-700/60 hover:border-slate-500';
         };
 
-        const toggleTheme = () => {
-          setTheme(currentTheme.value === 'dark' ? 'light' : 'dark');
+        const formatDateTimeDisplay = (val) => {
+          if (!val) return '-';
+          try {
+            const d = new Date(val);
+            if (isNaN(d.getTime())) return val;
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            const hh = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            return dd + '/' + mm + '/' + yyyy + ' ' + hh + ':' + min;
+          } catch(e) {
+            return val;
+          }
+        };
+
+        const openAssignModal = (cps) => {
+          if (!cps) return;
+          selectedCpsForAssign.value = cps;
+          let initialDeadline = '';
+          if (cps.deadline) {
+            try {
+              const d = new Date(cps.deadline);
+              if (!isNaN(d.getTime())) {
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                const hh = String(d.getHours()).padStart(2, '0');
+                const mi = String(d.getMinutes()).padStart(2, '0');
+                initialDeadline = yyyy + '-' + mm + '-' + dd + 'T' + hh + ':' + mi;
+              }
+            } catch (_) {}
+          }
+
+          let foundEmp = '';
+          if (cps.assignedTo && employeesList.value.length > 0) {
+            foundEmp = employeesList.value.find(e => {
+              const fullStr = e.name + ' - ' + e.mnv;
+              return fullStr === cps.assignedTo || e.name === cps.assignedTo || e.mnv === cps.assignedToId;
+            }) || '';
+          }
+
+          assignForm.value = {
+            employee: foundEmp || '',
+            deadline: initialDeadline,
+            notes: cps.notes || ''
+          };
+          showAssignModal.value = true;
+          if (employeesList.value.length === 0) {
+            loadEmployees();
+          }
+        };
+
+        const submitAssignTask = async () => {
+          if (!selectedCpsForAssign.value) return;
+          if (!assignForm.value.employee) {
+            showToast('Vui lòng chọn nhân viên kỹ thuật tiếp nhận', true);
+            return;
+          }
+          isAssigning.value = true;
+          try {
+            const emp = assignForm.value.employee;
+            const empName = typeof emp === 'object' ? (emp.name + (emp.mnv ? ' - ' + emp.mnv : '')) : emp;
+            const empId = typeof emp === 'object' ? (emp.mnv || emp.id) : '';
+
+            const cpsTarget = selectedCpsForAssign.value.docNo || selectedCpsForAssign.value.id || (selectedCpsForAssign.value.cpsrDocNo ? selectedCpsForAssign.value.cpsrDocNo.replace('CPSR-', 'CPS-') : '');
+            const payload = {
+              assignedTo: empName,
+              assignee: empName,
+              assignedToId: empId,
+              employeeId: empId,
+              deadline: assignForm.value.deadline || null,
+              notes: assignForm.value.notes || '',
+              status: 'IN_PROGRESS'
+            };
+
+            let res = await fetch('/api/cps/' + encodeURIComponent(cpsTarget) + '/assign', {
+              method: 'POST',
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+              credentials: 'include',
+              body: JSON.stringify(payload)
+            });
+
+            if (!res.ok && (res.status === 404 || res.status === 405)) {
+              res = await fetch('/api/cps/' + encodeURIComponent(cpsTarget) + '/assign', {
+                method: 'PUT',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
+                body: JSON.stringify(payload)
+              });
+            }
+
+            if (!res.ok) {
+              const err = await res.json().catch(() => ({}));
+              throw new Error(err.message || ('Lỗi máy chủ (' + res.status + ')'));
+            }
+
+            showToast('Đã phân công ' + empName + ' cho phiếu ' + cpsTarget + ' (IN_PROGRESS)');
+            showAssignModal.value = false;
+            await loadCpsData();
+            await loadChainData();
+          } catch (err) {
+            showToast('Lỗi phân công: ' + err.message, true);
+          } finally {
+            isAssigning.value = false;
+          }
+        };
+
+        const loadCpsData = async () => {
+          try {
+            const res = await fetch('/api/cps', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data)) {
+                cpsList.value = data;
+              }
+            }
+          } catch (e) {
+            console.warn('Could not load cps data', e);
+          }
         };
 
         const switchTab = (tab) => {
@@ -1872,9 +2401,14 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           showAddEmployeeModal.value = false;
           showAddUserModal.value = false;
           showExcelModal.value = false;
+          showAssignModal.value = false;
 
           nextTick(() => {
             if (tab === 'overview') loadStats();
+            if (tab === 'assign-tasks') {
+              loadCpsData();
+              if (employeesList.value.length === 0) loadEmployees();
+            }
             if (tab === 'requests') {
               loadAllSplitData();
               if (splitTab.value === 'legacy') {
@@ -1904,11 +2438,23 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         };
 
         // =====================================================================
-        // TABULATOR: SPLIT FORMS (CPSR, CPST, CPSF, CHAIN 1-1-1)
+        // TABULATOR: SPLIT FORMS (CPSR, CPST, CPSF, CHAIN 1-1-1 & CPS)
         // =====================================================================
         const loadChainData = async () => {
           try {
-            const res = await fetch('/api/cpsr-chain', { headers: getAuthHeaders(), credentials: 'include' });
+            // First check /api/cps for enriched chain and assignment records
+            let res = await fetch('/api/cps', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data) && data.length > 0) {
+                chainList.value = data;
+                cpsList.value = data;
+                if (splitTab.value === 'chain') initOrUpdateSplitTable();
+                return;
+              }
+            }
+            // Fallback to /api/cpsr-chain
+            res = await fetch('/api/cpsr-chain', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               chainList.value = await res.json();
               if (splitTab.value === 'chain') initOrUpdateSplitTable();
@@ -1947,7 +2493,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         };
 
         const loadAllSplitData = async () => {
-          await Promise.all([loadChainData(), loadCpsrData(), loadCpstData(), loadCpsfData()]);
+          await Promise.all([loadCpsData(), loadChainData(), loadCpsrData(), loadCpstData(), loadCpsfData()]);
         };
 
         const switchSplitTab = (tab) => {
@@ -1975,12 +2521,38 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             data = chainList.value;
             columns = [
               {
+                title: 'Mã CPS',
+                field: 'docNo',
+                minWidth: 140,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  const code = r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '-'));
+                  return '<span class="font-mono font-bold text-sky-400">' + code + '</span>';
+                }
+              },
+              {
+                title: 'Trạng Thái Chuỗi',
+                field: 'status',
+                minWidth: 130,
+                hozAlign: 'center',
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  const s = r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+                  if (s === 'TO_ASSIGN') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-400 border border-amber-500/30">⏳ TO_ASSIGN</span>';
+                  if (s === 'IN_PROGRESS') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/15 text-sky-400 border border-sky-500/30">⚡ IN_PROGRESS</span>';
+                  if (s === 'OVER_DUE') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/15 text-rose-400 border border-rose-500/30">⚠️ OVER_DUE</span>';
+                  if (s === 'CLOSED') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">✅ CLOSED</span>';
+                  if (s === 'OPEN_TASK') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/15 text-slate-300 border border-slate-500/30">📋 OPEN_TASK</span>';
+                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-800 text-slate-400">' + s + '</span>';
+                }
+              },
+              {
                 title: 'Mã CPSR',
                 field: 'cpsr.docNo',
                 minWidth: 140,
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  return '<span class="font-mono font-bold text-sky-400">' + (r.cpsr?.docNo || '') + '</span>';
+                  return '<span class="font-mono font-bold text-slate-300">' + (r.cpsr?.docNo || r.cpsrDocNo || '') + '</span>';
                 }
               },
               {
@@ -1989,7 +2561,9 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                 minWidth: 120,
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  return '<div class="text-[11px] text-slate-300 font-medium">' + (r.cpsr?.reqDate || '') + ' <span class="font-mono text-slate-500 block text-[10px]">' + (r.cpsr?.reqTime || '') + '</span></div>';
+                  const d = r.cpsr?.reqDate || r.reqDate || '';
+                  const t = r.cpsr?.reqTime || r.reqTime || '';
+                  return '<div class="text-[11px] text-slate-300 font-medium">' + d + ' <span class="font-mono text-slate-500 block text-[10px]">' + t + '</span></div>';
                 }
               },
               {
@@ -1998,28 +2572,78 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                 minWidth: 160,
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  return '<div><strong class="text-slate-200">' + (r.cpsr?.reqBy || '') + '</strong><span class="block text-[10px] text-slate-400 font-mono">' + (r.cpsr?.printTech || '') + ' - ' + (r.cpsr?.machineName || '') + '</span></div>';
+                  const req = r.cpsr?.reqBy || r.reqBy || '';
+                  const tech = r.cpsr?.printTech || r.printTech || '';
+                  const mach = r.cpsr?.machineName || r.machineName || '';
+                  return '<div><strong class="text-slate-200">' + req + '</strong><span class="block text-[10px] text-slate-400 font-mono">' + tech + ' - ' + mach + '</span></div>';
+                }
+              },
+              {
+                title: 'Nhân Viên KT',
+                field: 'assignedTo',
+                minWidth: 140,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  const name = r.assignedTo || r.cpst?.recvBy;
+                  if (!name) return '<span class="text-amber-400/80 italic text-[11px]">Chưa giao</span>';
+                  return '<div class="text-xs font-semibold text-slate-200 flex items-center gap-1"><i class="fa-solid fa-user-check text-[10px] text-emerald-400"></i> ' + name + '</div>';
+                }
+              },
+              {
+                title: 'Deadline',
+                field: 'deadline',
+                minWidth: 120,
+                hozAlign: 'center',
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  if (!r.deadline) return '<span class="text-slate-500">-</span>';
+                  return '<span class="font-mono text-[11px] text-sky-300">' + formatDateTimeDisplay(r.deadline) + '</span>';
+                }
+              },
+              {
+                title: 'Downtime',
+                field: 'downtime',
+                minWidth: 95,
+                hozAlign: 'center',
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  const dt = r.downtime != null ? r.downtime : r.cpst?.downtime;
+                  if (dt == null || dt === '') return '<span class="text-slate-500">-</span>';
+                  return '<span class="font-mono font-bold text-amber-400">' + dt + ' phút</span>';
+                }
+              },
+              {
+                title: 'Tỉ Lệ Phế',
+                field: 'wastePercent',
+                minWidth: 90,
+                hozAlign: 'center',
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  const wp = r.wastePercent || r.cpsf?.wastePercent;
+                  if (!wp) return '<span class="text-slate-500">-</span>';
+                  return '<span class="font-mono font-bold text-rose-400">' + wp + '</span>';
                 }
               },
               {
                 title: 'Mã CPST (Phản Hồi)',
                 field: 'cpst.docNo',
-                minWidth: 140,
+                minWidth: 130,
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  if (!r.cpst) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">Chưa phản hồi</span>';
-                  return '<span class="font-mono font-bold text-emerald-400">' + r.cpst.docNo + '</span>';
+                  const doc = r.cpst?.docNo || r.cpstDocNo;
+                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">Chưa phản hồi</span>';
+                  return '<span class="font-mono font-bold text-emerald-400">' + doc + '</span>';
                 }
               },
               {
                 title: 'Trạng Thái KT',
                 field: 'cpst.chkStatus',
-                minWidth: 120,
+                minWidth: 110,
                 hozAlign: 'center',
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  if (!r.cpst) return '<span class="text-slate-500">-</span>';
-                  const s = r.cpst.chkStatus || '';
+                  const s = r.chkStatus || r.cpst?.chkStatus || '';
+                  if (!s) return '<span class="text-slate-500">-</span>';
                   if (s === 'Đã khắc phục') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Đã khắc phục</span>';
                   if (s === 'Hư hỏng nặng') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Hư hỏng nặng</span>';
                   return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">' + s + '</span>';
@@ -2028,11 +2652,12 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               {
                 title: 'Mã CPSF (Bàn Giao)',
                 field: 'cpsf.docNo',
-                minWidth: 140,
+                minWidth: 130,
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  if (!r.cpsf) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">Chưa bàn giao</span>';
-                  return '<span class="font-mono font-bold text-purple-400">' + r.cpsf.docNo + '</span>';
+                  const doc = r.cpsf?.docNo || r.cpsfDocNo;
+                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">Chưa bàn giao</span>';
+                  return '<span class="font-mono font-bold text-purple-400">' + doc + '</span>';
                 }
               },
               {
@@ -2042,43 +2667,47 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
                 hozAlign: 'center',
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  if (!r.cpsf) return '<span class="text-slate-500">-</span>';
-                  const q = r.cpsf.chkQuality || '';
+                  const q = r.chkQuality || r.cpsf?.chkQuality || '';
+                  if (!q) return '<span class="text-slate-500">-</span>';
                   return q === 'Đạt' ? '<span class="text-emerald-400 font-bold">ĐẠT</span>' : '<span class="text-rose-400 font-bold">CHƯA ĐẠT</span>';
                 }
               },
               {
                 title: 'Tiến Độ Chuỗi',
                 hozAlign: 'center',
-                minWidth: 110,
+                minWidth: 100,
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  const c = (r.cpsr ? 1 : 0) + (r.cpst ? 1 : 0) + (r.cpsf ? 1 : 0);
-                  if (c === 3) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🟢 3/3 Hoàn tất</span>';
-                  if (c === 2) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">🟡 2/3 Đã xử lý</span>';
-                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">🔵 1/3 Yêu cầu</span>';
+                  const c = ((r.cpsr || r.cpsrDocNo) ? 1 : 0) + ((r.cpst || r.cpstDocNo) ? 1 : 0) + ((r.cpsf || r.cpsfDocNo) ? 1 : 0);
+                  if (c === 3) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🟢 3/3</span>';
+                  if (c === 2) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">🟡 2/3</span>';
+                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">🔵 1/3</span>';
                 }
               },
               {
                 title: 'Thao Tác',
                 hozAlign: 'right',
-                minWidth: 150,
+                minWidth: 190,
                 headerSort: false,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   let h = '<div class="flex items-center justify-end gap-1.5">';
+                  h += '<button class="btn-chain-assign px-2 py-1 rounded bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 text-[11px] font-bold transition cursor-pointer" title="Phân công KTV"><i class="fa-solid fa-user-gear"></i> Phân công</button>';
                   h += '<button class="btn-chain-view px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-[11px] font-bold transition cursor-pointer">Xem</button>';
-                  if (!r.cpst) {
-                    h += '<a href="/technical-feedback?cpsr=' + encodeURIComponent(r.cpsr?.docNo || '') + '" target="_blank" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition cursor-pointer">+ CPST</a>';
-                  } else if (!r.cpsf) {
-                    h += '<a href="/confirm-request?cpst=' + encodeURIComponent(r.cpst.docNo) + '" target="_blank" class="px-2 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold transition cursor-pointer">+ CPSF</a>';
+                  if (!r.cpst && !r.cpstDocNo) {
+                    h += '<a href="/technical-feedback?cpsr=' + encodeURIComponent(r.cpsr?.docNo || r.cpsrDocNo || '') + '" target="_blank" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition cursor-pointer">+ CPST</a>';
+                  } else if (!r.cpsf && !r.cpsfDocNo) {
+                    h += '<a href="/confirm-request?cpst=' + encodeURIComponent(r.cpst?.docNo || r.cpstDocNo || '') + '" target="_blank" class="px-2 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold transition cursor-pointer">+ CPSF</a>';
                   }
                   h += '</div>';
                   return h;
                 },
                 cellClick: (e, cell) => {
-                  if (e.target.closest('.btn-chain-view')) {
-                    openChainDetailModal(cell.getRow().getData());
+                  const r = cell.getRow().getData();
+                  if (e.target.closest('.btn-chain-assign')) {
+                    openAssignModal(r);
+                  } else if (e.target.closest('.btn-chain-view')) {
+                    openChainDetailModal(r);
                   }
                 }
               }
@@ -2207,9 +2836,15 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           if (q) {
             if (splitTab.value === 'chain') {
               filters.push([
+                { field: 'docNo', type: 'like', value: q },
                 { field: 'cpsr.docNo', type: 'like', value: q },
+                { field: 'cpsrDocNo', type: 'like', value: q },
                 { field: 'cpsr.reqBy', type: 'like', value: q },
+                { field: 'reqBy', type: 'like', value: q },
                 { field: 'cpsr.machineName', type: 'like', value: q },
+                { field: 'machineName', type: 'like', value: q },
+                { field: 'problem', type: 'like', value: q },
+                { field: 'assignedTo', type: 'like', value: q },
                 { field: 'cpst.docNo', type: 'like', value: q },
                 { field: 'cpsf.docNo', type: 'like', value: q }
               ]);
@@ -2229,7 +2864,11 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               filters.push({
                 field: 'id',
                 type: (h, r, rowData) => {
-                  const count = (rowData.cpsr ? 1 : 0) + (rowData.cpst ? 1 : 0) + (rowData.cpsf ? 1 : 0);
+                  if (st === 'TO_ASSIGN' || st === 'IN_PROGRESS' || st === 'OVER_DUE' || st === 'CLOSED' || st === 'OPEN_TASK') {
+                    const rowStatus = rowData.status || (rowData.cpsf ? 'CLOSED' : (rowData.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+                    return rowStatus === st;
+                  }
+                  const count = ((rowData.cpsr || rowData.cpsrDocNo) ? 1 : 0) + ((rowData.cpst || rowData.cpstDocNo) ? 1 : 0) + ((rowData.cpsf || rowData.cpsfDocNo) ? 1 : 0);
                   if (st === '3/3') return count === 3;
                   if (st === '2/3') return count === 2;
                   if (st === '1/3') return count === 1;
@@ -2290,19 +2929,25 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           if (splitTab.value === 'chain') {
             filename += 'Chain_1-1-1';
             rows = chainList.value.map(r => ({
-              'Mã CPSR': r.cpsr?.docNo,
-              'Ngày Yêu Cầu': r.cpsr?.reqDate,
-              'Giờ Yêu Cầu': r.cpsr?.reqTime,
-              'Người Yêu Cầu': r.cpsr?.reqBy,
-              'Công Nghệ': r.cpsr?.printTech,
-              'Tên Máy': r.cpsr?.machineName,
-              'Sự Cố': r.cpsr?.problem,
-              'Mã CPST': r.cpst?.docNo || 'Chưa phản hồi',
-              'KTV Tiếp Nhận': r.cpst?.recvBy || '-',
-              'Trạng Thái KT': r.cpst?.chkStatus || '-',
-              'Mã CPSF': r.cpsf?.docNo || 'Chưa bàn giao',
-              'Chất Lượng In': r.cpsf?.chkQuality || '-',
-              'Work Order': r.cpsf?.workOrder || '-'
+              'Mã CPS': r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '')),
+              'Trạng Thái Chuỗi': r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN')),
+              'Mã CPSR': r.cpsr?.docNo || r.cpsrDocNo || '',
+              'Ngày Yêu Cầu': r.cpsr?.reqDate || r.reqDate || '',
+              'Giờ Yêu Cầu': r.cpsr?.reqTime || r.reqTime || '',
+              'Người Yêu Cầu': r.cpsr?.reqBy || r.reqBy || '',
+              'Công Nghệ': r.cpsr?.printTech || r.printTech || '',
+              'Tên Máy': r.cpsr?.machineName || r.machineName || '',
+              'Sự Cố': r.cpsr?.problem || r.problem || '',
+              'Nhân Viên KT': r.assignedTo || r.cpst?.recvBy || '-',
+              'Deadline': r.deadline || '-',
+              'Downtime (Phút)': r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : '-'),
+              'Tỉ Lệ Phế': r.wastePercent || r.cpsf?.wastePercent || '-',
+              'Mã CPST': r.cpst?.docNo || r.cpstDocNo || 'Chưa phản hồi',
+              'KTV Tiếp Nhận': r.cpst?.recvBy || r.assignedTo || '-',
+              'Trạng Thái KT': r.cpst?.chkStatus || r.chkStatus || '-',
+              'Mã CPSF': r.cpsf?.docNo || r.cpsfDocNo || 'Chưa bàn giao',
+              'Chất Lượng In': r.cpsf?.chkQuality || r.chkQuality || '-',
+              'Work Order': r.cpsf?.workOrder || r.workOrder || '-'
             }));
           } else if (splitTab.value === 'cpsr') {
             filename += 'CPSR';
@@ -3067,9 +3712,10 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
 
         const getStatusBadgeClass = (status) => {
           const s = (status || '').toLowerCase().trim();
-          if (s === 'open') return 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30';
-          if (s === 'in progress' || s === 'monitor') return 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30';
-          if (s === 'overdue' || s === 'support') return 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30';
+          if (s === 'open' || s === 'open_task') return 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30';
+          if (s === 'to_assign') return 'bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30';
+          if (s === 'in progress' || s === 'in_progress' || s === 'monitor') return 'bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30';
+          if (s === 'overdue' || s === 'over_due' || s === 'support') return 'bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-500/30';
           if (s === 'closed' || s === 'done' || s === 'completed') return 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30';
           return 'bg-slate-500/20 text-slate-600 dark:text-slate-400 border border-slate-500/30';
         };
@@ -3498,6 +4144,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           loadMachines();
           loadRequests();
           loadAllSplitData();
+          loadCpsData();
           loadEmployees();
           loadPublicFormStatus();
           if (currentUser.value.role === 'ADMIN' || (currentUser.value.permissions && currentUser.value.permissions.canAccessControlPanel)) {
@@ -3543,6 +4190,23 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           deleteSplitRecord,
           exportCurrentTabExcel,
           loadAllSplitData,
+          cpsList,
+          assignCardStatus,
+          assignCardSearch,
+          showAssignModal,
+          selectedCpsForAssign,
+          assignForm,
+          isAssigning,
+          pendingAssignCount,
+          cpsCountByStatus,
+          filteredCpsCards,
+          formatCpsStatus,
+          getCardBorderClass,
+          formatDateTimeDisplay,
+          openAssignModal,
+          closeAssignModal,
+          submitAssignTask,
+          loadCpsData,
           machineCatalog,
           machinesFlatList,
           machineTechFilter,

@@ -5,6 +5,7 @@ import {
   CpsrController,
   CpstController,
   CpsfController,
+  CpsController,
   CpsrChainController,
 } from './split-forms.controller';
 
@@ -14,6 +15,7 @@ import {
     CpsrController,
     CpstController,
     CpsfController,
+    CpsController,
     CpsrChainController,
   ],
   providers: [SplitFormsService],

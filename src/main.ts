@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import { json, urlencoded } from 'express';
 import * as cookieParser from 'cookie-parser';
 import * as path from 'path';
 import * as fs from 'fs';
@@ -9,7 +10,13 @@ import { AppModule } from './app.module';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    bodyParser: false,
+  });
+
+  // Tăng giới hạn payload Express lên 50MB (json, urlencoded) để không bị entity too large khi upload ảnh
+  app.use(json({ limit: '50mb' }));
+  app.use(urlencoded({ extended: true, limit: '50mb' }));
 
   // Resolve public directory reliably across dev (ts-node) and prod (dist)
   const candidatePublicDirs = [

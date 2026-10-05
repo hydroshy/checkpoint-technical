@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Put,
+  Patch,
   Delete,
   Body,
   Param,
@@ -15,6 +16,7 @@ import { SplitFormsService, FormFilterQuery } from './split-forms.service';
 import { CreateCpsrDto, UpdateCpsrDto } from './dto/cpsr.dto';
 import { CreateCpstDto, UpdateCpstDto } from './dto/cpst.dto';
 import { CreateCpsfDto, UpdateCpsfDto } from './dto/cpsf.dto';
+import { AssignCpsDto, UpdateCpsDto } from './dto/cps.dto';
 
 function extractUser(req?: any): any {
   if (!req) return null;
@@ -201,6 +203,71 @@ export class CpsfController {
   @ApiOperation({ summary: 'Xóa phiếu CPSF (Control Panel)' })
   remove(@Param('id') id: string) {
     return this.service.deleteCpsf(idOrDocNoClean(id));
+  }
+}
+
+// ==================== CPS CHAIN CONTROLLER ====================
+@ApiTags('CPS - Xâu chuỗi 1-1-1 & Quản lý Phân công nhiệm vụ (/api/cps)')
+@Controller('api/cps')
+export class CpsController {
+  constructor(private readonly service: SplitFormsService) {}
+
+  @Get('next-code')
+  @ApiOperation({ summary: 'Lấy mã phiếu CPS tự tăng tiếp theo (CPS-YYYYMMDD-XXX)' })
+  getNextCode() {
+    return this.service.getNextCpsDocNo();
+  }
+
+  @Get('stats')
+  @ApiOperation({ summary: 'Thống kê tổng quan trạng thái các thẻ CPS (OPEN_TASK, TO_ASSIGN, IN_PROGRESS, OVER_DUE, CLOSED)' })
+  getStats() {
+    return this.service.getCpsStats();
+  }
+
+  @Get()
+  @ApiOperation({ summary: 'Danh sách phiếu CPS xâu chuỗi kèm trạng thái, tính OVER_DUE, downtime & % phế' })
+  @ApiQuery({ name: 'search', required: false, type: String })
+  @ApiQuery({ name: 'status', required: false, type: String })
+  @ApiQuery({ name: 'printTech', required: false, type: String })
+  @ApiQuery({ name: 'assignedTo', required: false, type: String })
+  @ApiQuery({ name: 'dateFrom', required: false, type: String })
+  @ApiQuery({ name: 'dateTo', required: false, type: String })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'offset', required: false, type: Number })
+  @ApiQuery({ name: 'paginate', required: false, type: Boolean })
+  findAll(@Query() query: FormFilterQuery) {
+    return this.service.findAllCps(query);
+  }
+
+  @Get(':idOrDocNo')
+  @ApiOperation({ summary: 'Chi tiết phiếu CPS xâu chuỗi kèm CPSR, CPST, CPSF' })
+  findOne(@Param('idOrDocNo') idOrDocNo: string) {
+    return this.service.findCpsOne(idOrDocNoClean(idOrDocNo));
+  }
+
+  @Post(':docNo/assign')
+  @Put(':docNo/assign')
+  @Patch(':docNo/assign')
+  @ApiOperation({ summary: 'Phân công nhân viên và hạn chót (deadline) cho phiếu CPS' })
+  assignTask(
+    @Param('docNo') docNo: string,
+    @Body() dto: AssignCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.assignTask(idOrDocNoClean(docNo), dto, user);
+  }
+
+  @Put(':docNo')
+  @Patch(':docNo')
+  @ApiOperation({ summary: 'Cập nhật thông tin phiếu CPS' })
+  update(
+    @Param('docNo') docNo: string,
+    @Body() dto: UpdateCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.updateCps(idOrDocNoClean(docNo), dto, user);
   }
 }
 

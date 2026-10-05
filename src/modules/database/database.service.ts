@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as bcrypt from 'bcryptjs';
 import { Pool, PoolConfig } from 'pg';
+import { v4 as uuidv4 } from 'uuid';
 
 export interface UserPermissions {
   canCreateRequest: boolean;
@@ -285,6 +286,75 @@ export interface CpsrChainRecord {
   cpsf?: CpsfRecord | null;
 }
 
+export type CpsStatus = 'OPEN_TASK' | 'TO_ASSIGN' | 'IN_PROGRESS' | 'OVER_DUE' | 'CLOSED';
+
+export function computeCpsStatus(cps: {
+  status?: string;
+  cpsfDocNo?: string | null;
+  assignedTo?: string | null;
+  deadline?: string | Date | null;
+}): CpsStatus {
+  if (cps.cpsfDocNo && cps.cpsfDocNo.trim() !== '') {
+    return 'CLOSED';
+  }
+  if (cps.status === 'CLOSED') {
+    return 'CLOSED';
+  }
+  if (cps.deadline) {
+    const d = new Date(cps.deadline);
+    if (!isNaN(d.getTime()) && d.getTime() < Date.now()) {
+      return 'OVER_DUE';
+    }
+  }
+  if (cps.assignedTo && cps.assignedTo.trim() !== '') {
+    return 'IN_PROGRESS';
+  }
+  if (cps.status === 'OPEN_TASK') {
+    return 'OPEN_TASK';
+  }
+  return 'TO_ASSIGN';
+}
+
+export interface CpsRecord {
+  id: string;
+  docNo: string;
+  cpsrId?: string | null;
+  cpsrDocNo: string;
+  cpstId?: string | null;
+  cpstDocNo?: string | null;
+  cpsfId?: string | null;
+  cpsfDocNo?: string | null;
+  status: CpsStatus;
+  assignedTo?: string | null;
+  assignedToId?: string | null;
+  assignedToName?: string | null;
+  assignedBy?: string | null;
+  assignedAt?: string | null;
+  deadline?: string | null;
+  priority?: string;
+  printTech?: string;
+  machineName?: string;
+  problem?: string;
+  reqBy?: string;
+  reqDate?: string;
+  reqTime?: string;
+  downtime?: number;
+  woTotalQty?: number;
+  wasteQty?: number;
+  wastePercent?: string;
+  wasteUnit?: string | null;
+  workOrder?: string | null;
+  chkStatus?: string | null;
+  chkQuality?: string | null;
+  notes?: string | null;
+  closedAt?: string | null;
+  cpsr?: CpsrRecord | null;
+  cpst?: CpstRecord | null;
+  cpsf?: CpsfRecord | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
@@ -305,6 +375,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private cpsrCache: CpsrRecord[] = [];
   private cpstCache: CpstRecord[] = [];
   private cpsfCache: CpsfRecord[] = [];
+  private cpsCache: CpsRecord[] = [];
   private settingsCache: SystemSettingsRecord = { isPublicFormEnabled: true };
 
   constructor() {
@@ -831,6 +902,85 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             CREATE INDEX IF NOT EXISTS idx_cpsf_submitted_at ON cpsf(submitted_at);
           `,
         },
+        {
+          name: 'cps',
+          sql: `
+            CREATE TABLE IF NOT EXISTS cps (
+              id VARCHAR(255) PRIMARY KEY,
+              doc_no VARCHAR(255) UNIQUE NOT NULL,
+              cpsr_id VARCHAR(255) REFERENCES cpsr(id) ON DELETE SET NULL,
+              cpsr_doc_no VARCHAR(255) REFERENCES cpsr(doc_no) ON DELETE SET NULL,
+              cpst_id VARCHAR(255) REFERENCES cpst(id) ON DELETE SET NULL,
+              cpst_doc_no VARCHAR(255) REFERENCES cpst(doc_no) ON DELETE SET NULL,
+              cpsf_id VARCHAR(255) REFERENCES cpsf(id) ON DELETE SET NULL,
+              cpsf_doc_no VARCHAR(255) REFERENCES cpsf(doc_no) ON DELETE SET NULL,
+              status VARCHAR(50) NOT NULL DEFAULT 'TO_ASSIGN',
+              assigned_to VARCHAR(255),
+              assigned_to_id VARCHAR(255),
+              assigned_to_name VARCHAR(255),
+              assigned_by VARCHAR(255),
+              assigned_at TIMESTAMPTZ,
+              deadline TIMESTAMPTZ,
+              priority VARCHAR(100),
+              print_tech VARCHAR(255),
+              machine_name VARCHAR(255),
+              problem TEXT,
+              req_by VARCHAR(255),
+              req_date VARCHAR(50),
+              req_time VARCHAR(50),
+              downtime NUMERIC DEFAULT 0,
+              wo_total_qty NUMERIC DEFAULT 0,
+              waste_qty NUMERIC DEFAULT 0,
+              waste_percent VARCHAR(50),
+              waste_unit VARCHAR(50),
+              work_order VARCHAR(255),
+              chk_status VARCHAR(100),
+              chk_quality VARCHAR(50),
+              notes TEXT,
+              closed_at TIMESTAMPTZ,
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsr_id VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpst_id VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpst_doc_no VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsf_id VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsf_doc_no VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'TO_ASSIGN';
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to_id VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to_name VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_by VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS deadline TIMESTAMPTZ;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS problem TEXT;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(50);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS notes TEXT;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+            CREATE INDEX IF NOT EXISTS idx_cps_doc_no ON cps(doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cps_status ON cps(status);
+            CREATE INDEX IF NOT EXISTS idx_cps_cpsr_doc_no ON cps(cpsr_doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cps_cpst_doc_no ON cps(cpst_doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cps_cpsf_doc_no ON cps(cpsf_doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cps_deadline ON cps(deadline);
+          `,
+        },
       ];
 
       for (const t of tableStatements) {
@@ -841,7 +991,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      this.logger.log('✅ PostgreSQL Schema verified / initialized (13 tables: users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests, system_settings, cpsr, cpst, cpsf)');
+      this.logger.log('✅ PostgreSQL Schema verified / initialized (14 tables: users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests, system_settings, cpsr, cpst, cpsf, cps)');
     } catch (e: any) {
       this.logger.error(`Failed to initialize PostgreSQL schema: ${e.message}`);
     }
@@ -1171,7 +1321,54 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       this.cpsfCache = this.readJson<CpsfRecord[]>('cpsf.json', []);
     }
 
-    this.logger.log(`📦 Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.formLookupOptionsCache.length} lookup options, ${this.requestsCache.length} v4 requests, ${this.cpsrCache.length} cpsr, ${this.cpstCache.length} cpst, ${this.cpsfCache.length} cpsf.`);
+    // 14. CPS (Chain & Task Master)
+    try {
+      const cpsRes = await this.pgPool.query('SELECT * FROM cps ORDER BY created_at DESC');
+      this.cpsCache = cpsRes.rows.map(r => ({
+        id: r.id,
+        docNo: r.doc_no,
+        cpsrId: r.cpsr_id || null,
+        cpsrDocNo: r.cpsr_doc_no,
+        cpstId: r.cpst_id || null,
+        cpstDocNo: r.cpst_doc_no || null,
+        cpsfId: r.cpsf_id || null,
+        cpsfDocNo: r.cpsf_doc_no || null,
+        status: (r.status as CpsStatus) || 'TO_ASSIGN',
+        assignedTo: r.assigned_to || null,
+        assignedToId: r.assigned_to_id || null,
+        assignedToName: r.assigned_to_name || null,
+        assignedBy: r.assigned_by || null,
+        assignedAt: r.assigned_at ? new Date(r.assigned_at).toISOString() : null,
+        deadline: r.deadline ? new Date(r.deadline).toISOString() : null,
+        priority: r.priority || undefined,
+        printTech: r.print_tech || undefined,
+        machineName: r.machine_name || undefined,
+        problem: r.problem || undefined,
+        reqBy: r.req_by || undefined,
+        reqDate: r.req_date || undefined,
+        reqTime: r.req_time || undefined,
+        downtime: r.downtime !== null ? Number(r.downtime) : 0,
+        woTotalQty: r.wo_total_qty !== null ? Number(r.wo_total_qty) : 0,
+        wasteQty: r.waste_qty !== null ? Number(r.waste_qty) : 0,
+        wastePercent: r.waste_percent || undefined,
+        wasteUnit: r.waste_unit || undefined,
+        workOrder: r.work_order || undefined,
+        chkStatus: r.chk_status || undefined,
+        chkQuality: r.chk_quality || undefined,
+        notes: r.notes || undefined,
+        closedAt: r.closed_at ? new Date(r.closed_at).toISOString() : null,
+        createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+        updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+      }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load cps from PG (${err.message}). Using local JSON fallback.`);
+      this.cpsCache = this.readJson<CpsRecord[]>('cps.json', []);
+    }
+
+    // Auto-sync any CPSR chains into CPS table
+    await this.syncCpsFromChains();
+
+    this.logger.log(`📦 Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.formLookupOptionsCache.length} lookup options, ${this.requestsCache.length} v4 requests, ${this.cpsrCache.length} cpsr, ${this.cpstCache.length} cpst, ${this.cpsfCache.length} cpsf, ${this.cpsCache.length} cps.`);
   }
 
   private getFilePath(filename: string): string {
@@ -1236,7 +1433,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     this.cpsrCache = this.readJson<CpsrRecord[]>('cpsr.json', []);
     this.cpstCache = this.readJson<CpstRecord[]>('cpst.json', []);
     this.cpsfCache = this.readJson<CpsfRecord[]>('cpsf.json', []);
+    this.cpsCache = this.readJson<CpsRecord[]>('cps.json', []);
     this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: true });
+    this.syncCpsFromChains();
 
     // Sync employeesCache from requesters
     if (this.requestersCache.length > 0) {
@@ -2129,13 +2328,22 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     if (deletedCpst) {
       this.cpsfCache = this.cpsfCache.filter(f => f.cpstDocNo !== deletedCpst.docNo);
     }
+    const linkedCps = this.cpsCache.find(c => c.cpsrDocNo === target.docNo);
+    if (linkedCps) {
+      this.cpsCache = this.cpsCache.filter(c => c.cpsrDocNo !== target.docNo && c.id !== linkedCps.id);
+    }
     this.saveCpsrList();
     this.saveCpstList();
     this.saveCpsfList();
+    this.saveCpsList();
 
     if (this.isPgConnected && this.pgPool) {
       await this.pgPool.query('DELETE FROM cpsr WHERE id = $1 OR doc_no = $1', [target.id])
         .catch(err => this.logger.error(`PG Error deleting cpsr: ${err.message}`));
+      if (linkedCps) {
+        await this.pgPool.query('DELETE FROM cps WHERE id = $1 OR doc_no = $1 OR cpsr_doc_no = $2', [linkedCps.id, target.docNo])
+          .catch(err => this.logger.error(`PG Error deleting cps: ${err.message}`));
+      }
     }
     return true;
   }
@@ -2219,8 +2427,32 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     if (!target) return false;
     this.cpstCache = this.cpstCache.filter(r => r.id !== target.id && r.docNo !== target.docNo);
     this.cpsfCache = this.cpsfCache.filter(f => f.cpstDocNo !== target.docNo);
+
+    // Unlink CPST & CPSF in CPS
+    const linkedCps = this.cpsCache.find(c => c.cpsrDocNo === target.cpsrDocNo || c.cpstDocNo === target.docNo);
+    if (linkedCps) {
+      linkedCps.cpstId = null;
+      linkedCps.cpstDocNo = null;
+      linkedCps.cpsfId = null;
+      linkedCps.cpsfDocNo = null;
+      linkedCps.downtime = 0;
+      linkedCps.chkStatus = null;
+      linkedCps.chkQuality = null;
+      linkedCps.workOrder = null;
+      linkedCps.woTotalQty = 0;
+      linkedCps.wasteQty = 0;
+      linkedCps.wastePercent = '0%';
+      linkedCps.closedAt = null;
+      linkedCps.status = computeCpsStatus(linkedCps);
+      linkedCps.updatedAt = new Date().toISOString();
+      if (this.isPgConnected && this.pgPool) {
+        this.addCps(linkedCps).catch(() => {});
+      }
+    }
+
     this.saveCpstList();
     this.saveCpsfList();
+    this.saveCpsList();
 
     if (this.isPgConnected && this.pgPool) {
       await this.pgPool.query('DELETE FROM cpst WHERE id = $1 OR doc_no = $1', [target.id])
@@ -2299,7 +2531,27 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     const target = this.cpsfCache.find(r => r.id === id || r.docNo === id);
     if (!target) return false;
     this.cpsfCache = this.cpsfCache.filter(r => r.id !== target.id && r.docNo !== target.docNo);
+
+    // Unlink CPSF in CPS and reopen from CLOSED
+    const linkedCps = this.cpsCache.find(c => c.cpsfDocNo === target.docNo || c.cpstDocNo === target.cpstDocNo);
+    if (linkedCps) {
+      linkedCps.cpsfId = null;
+      linkedCps.cpsfDocNo = null;
+      linkedCps.chkQuality = null;
+      linkedCps.workOrder = null;
+      linkedCps.woTotalQty = 0;
+      linkedCps.wasteQty = 0;
+      linkedCps.wastePercent = '0%';
+      linkedCps.closedAt = null;
+      linkedCps.status = computeCpsStatus(linkedCps);
+      linkedCps.updatedAt = new Date().toISOString();
+      if (this.isPgConnected && this.pgPool) {
+        this.addCps(linkedCps).catch(() => {});
+      }
+    }
+
     this.saveCpsfList();
+    this.saveCpsList();
 
     if (this.isPgConnected && this.pgPool) {
       await this.pgPool.query('DELETE FROM cpsf WHERE id = $1 OR doc_no = $1', [target.id])
@@ -2308,7 +2560,283 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     return true;
   }
 
-  async getNextDocNo(prefix: 'CPSR' | 'CPST' | 'CPSF'): Promise<string> {
+  // ==================== CPS (CHAIN & ASSIGN TASK MASTER) ====================
+  saveCpsList(): void { this.writeJson('cps.json', this.cpsCache); }
+
+  getCpsList(): CpsRecord[] {
+    return this.cpsCache.map(r => {
+      const cpsr = this.cpsrCache.find(x => x.docNo === r.cpsrDocNo) || null;
+      const cpst = (r.cpstDocNo ? this.cpstCache.find(x => x.docNo === r.cpstDocNo) : (cpsr ? this.cpstCache.find(x => x.cpsrDocNo === cpsr.docNo) : null)) || null;
+      const cpsf = (r.cpsfDocNo ? this.cpsfCache.find(x => x.docNo === r.cpsfDocNo) : (cpst ? this.cpsfCache.find(x => x.cpstDocNo === cpst.docNo) : null)) || null;
+
+      const cpstDocNo = r.cpstDocNo || cpst?.docNo || null;
+      const cpsfDocNo = r.cpsfDocNo || cpsf?.docNo || null;
+      const downtime = (r.downtime !== undefined && r.downtime > 0) ? r.downtime : (cpst?.downtime || 0);
+      const woTotalQty = (r.woTotalQty !== undefined && r.woTotalQty > 0) ? r.woTotalQty : (cpsf?.woTotalQty || 0);
+      const wasteQty = (r.wasteQty !== undefined && r.wasteQty > 0) ? r.wasteQty : (cpsf?.wasteQty || 0);
+      const wastePercent = (woTotalQty > 0)
+        ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
+        : (r.wastePercent || cpsf?.wastePercent || '0%');
+
+      const evaluatedStatus = computeCpsStatus({
+        status: r.status,
+        cpsfDocNo,
+        assignedTo: r.assignedTo || cpst?.recvBy || null,
+        deadline: r.deadline,
+      });
+
+      return {
+        ...r,
+        cpstDocNo,
+        cpsfDocNo,
+        downtime,
+        woTotalQty,
+        wasteQty,
+        wastePercent,
+        status: evaluatedStatus,
+        cpsr,
+        cpst,
+        cpsf,
+      };
+    });
+  }
+
+  getCpsByIdOrDocNo(id: string): CpsRecord | undefined {
+    const clean = (id || '').trim();
+    const list = this.getCpsList();
+    return list.find(r => r.id === clean || r.docNo === clean || r.cpsrDocNo === clean);
+  }
+
+  getCpsByCpsrDocNo(cpsrDocNo: string): CpsRecord | undefined {
+    const clean = (cpsrDocNo || '').trim();
+    const list = this.getCpsList();
+    return list.find(r => r.cpsrDocNo === clean);
+  }
+
+  async addCps(req: CpsRecord): Promise<void> {
+    const idx = this.cpsCache.findIndex(r => r.id === req.id || r.docNo === req.docNo);
+    if (idx !== -1) {
+      this.cpsCache[idx] = req;
+    } else {
+      this.cpsCache.unshift(req);
+    }
+    this.saveCpsList();
+
+    if (this.isPgConnected && this.pgPool) {
+      try {
+        await this.pgPool.query(
+          `INSERT INTO cps (
+             id, doc_no, cpsr_id, cpsr_doc_no, cpst_id, cpst_doc_no, cpsf_id, cpsf_doc_no,
+             status, assigned_to, assigned_to_id, assigned_to_name, assigned_by, assigned_at,
+             deadline, priority, print_tech, machine_name, problem, req_by, req_date, req_time,
+             downtime, wo_total_qty, waste_qty, waste_percent, waste_unit, work_order,
+             chk_status, chk_quality, notes, closed_at, created_at, updated_at
+           ) VALUES (
+             $1, $2, $3, $4, $5, $6, $7, $8,
+             $9, $10, $11, $12, $13, $14,
+             $15, $16, $17, $18, $19, $20, $21, $22,
+             $23, $24, $25, $26, $27, $28,
+             $29, $30, $31, $32, $33, $34
+           )
+           ON CONFLICT (id) DO UPDATE SET
+             doc_no = EXCLUDED.doc_no,
+             cpsr_id = EXCLUDED.cpsr_id,
+             cpsr_doc_no = EXCLUDED.cpsr_doc_no,
+             cpst_id = EXCLUDED.cpst_id,
+             cpst_doc_no = EXCLUDED.cpst_doc_no,
+             cpsf_id = EXCLUDED.cpsf_id,
+             cpsf_doc_no = EXCLUDED.cpsf_doc_no,
+             status = EXCLUDED.status,
+             assigned_to = EXCLUDED.assigned_to,
+             assigned_to_id = EXCLUDED.assigned_to_id,
+             assigned_to_name = EXCLUDED.assigned_to_name,
+             assigned_by = EXCLUDED.assigned_by,
+             assigned_at = EXCLUDED.assigned_at,
+             deadline = EXCLUDED.deadline,
+             priority = EXCLUDED.priority,
+             print_tech = EXCLUDED.print_tech,
+             machine_name = EXCLUDED.machine_name,
+             problem = EXCLUDED.problem,
+             req_by = EXCLUDED.req_by,
+             req_date = EXCLUDED.req_date,
+             req_time = EXCLUDED.req_time,
+             downtime = EXCLUDED.downtime,
+             wo_total_qty = EXCLUDED.wo_total_qty,
+             waste_qty = EXCLUDED.waste_qty,
+             waste_percent = EXCLUDED.waste_percent,
+             waste_unit = EXCLUDED.waste_unit,
+             work_order = EXCLUDED.work_order,
+             chk_status = EXCLUDED.chk_status,
+             chk_quality = EXCLUDED.chk_quality,
+             notes = EXCLUDED.notes,
+             closed_at = EXCLUDED.closed_at,
+             updated_at = EXCLUDED.updated_at`,
+          [
+            req.id, req.docNo, req.cpsrId || null, req.cpsrDocNo, req.cpstId || null, req.cpstDocNo || null,
+            req.cpsfId || null, req.cpsfDocNo || null, req.status, req.assignedTo || null,
+            req.assignedToId || null, req.assignedToName || null, req.assignedBy || null,
+            req.assignedAt ? new Date(req.assignedAt).toISOString() : null,
+            req.deadline ? new Date(req.deadline).toISOString() : null,
+            req.priority || null, req.printTech || null, req.machineName || null, req.problem || null,
+            req.reqBy || null, req.reqDate || null, req.reqTime || null,
+            req.downtime || 0, req.woTotalQty || 0, req.wasteQty || 0,
+            req.wastePercent || null, req.wasteUnit || null, req.workOrder || null,
+            req.chkStatus || null, req.chkQuality || null, req.notes || null,
+            req.closedAt ? new Date(req.closedAt).toISOString() : null,
+            req.createdAt ? new Date(req.createdAt).toISOString() : new Date().toISOString(),
+            req.updatedAt ? new Date(req.updatedAt).toISOString() : new Date().toISOString(),
+          ]
+        );
+      } catch (err: any) {
+        this.logger.error(`PG Error inserting cps: ${err.message}`);
+        throw err;
+      }
+    }
+  }
+
+  async updateCps(id: string, updates: Partial<CpsRecord>): Promise<CpsRecord | undefined> {
+    const idx = this.cpsCache.findIndex(r => r.id === id || r.docNo === id || r.cpsrDocNo === id);
+    if (idx !== -1) {
+      const existing = this.cpsCache[idx];
+      const now = new Date().toISOString();
+      const updated: CpsRecord = {
+        ...existing,
+        ...updates,
+        updatedAt: now,
+      };
+      updated.status = computeCpsStatus(updated);
+      this.cpsCache[idx] = updated;
+      this.saveCpsList();
+      if (this.isPgConnected && this.pgPool) {
+        await this.addCps(updated);
+      }
+      return updated;
+    }
+    return undefined;
+  }
+
+  async deleteCps(id: string): Promise<boolean> {
+    const target = this.cpsCache.find(r => r.id === id || r.docNo === id);
+    if (!target) return false;
+    this.cpsCache = this.cpsCache.filter(r => r.id !== target.id && r.docNo !== target.docNo);
+    this.saveCpsList();
+
+    if (this.isPgConnected && this.pgPool) {
+      await this.pgPool.query('DELETE FROM cps WHERE id = $1 OR doc_no = $1', [target.id])
+        .catch(err => this.logger.error(`PG Error deleting cps: ${err.message}`));
+    }
+    return true;
+  }
+
+  public async syncCpsFromChains(): Promise<void> {
+    let changed = false;
+    for (const cpsr of this.cpsrCache) {
+      const existing = this.cpsCache.find(c => c.cpsrDocNo === cpsr.docNo);
+      const cpst = this.cpstCache.find(t => t.cpsrDocNo === cpsr.docNo);
+      const cpsf = cpst ? this.cpsfCache.find(f => f.cpstDocNo === cpst.docNo) : null;
+
+      const woTotalQty = (cpsf && cpsf.woTotalQty) ? Number(cpsf.woTotalQty) : (existing?.woTotalQty || 0);
+      const wasteQty = (cpsf && cpsf.wasteQty) ? Number(cpsf.wasteQty) : (existing?.wasteQty || 0);
+      const wastePercent = (woTotalQty > 0)
+        ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
+        : (cpsf?.wastePercent || existing?.wastePercent || '0%');
+      const downtime = (cpst && cpst.downtime !== undefined) ? Number(cpst.downtime) : (existing?.downtime || 0);
+
+      if (!existing) {
+        let docNo = cpsr.docNo.replace(/^CPSR-/, 'CPS-');
+        if (this.cpsCache.some(c => c.docNo === docNo)) {
+          docNo = await this.getNextDocNo('CPS');
+        }
+        const now = new Date().toISOString();
+        const newRecord: CpsRecord = {
+          id: uuidv4(),
+          docNo,
+          cpsrId: cpsr.id,
+          cpsrDocNo: cpsr.docNo,
+          cpstId: cpst?.id || null,
+          cpstDocNo: cpst?.docNo || null,
+          cpsfId: cpsf?.id || null,
+          cpsfDocNo: cpsf?.docNo || null,
+          status: 'TO_ASSIGN',
+          assignedTo: cpst?.recvBy || null,
+          deadline: null,
+          priority: cpsr.priority,
+          printTech: cpsr.printTech,
+          machineName: cpsr.machineName,
+          problem: cpsr.problem,
+          reqBy: cpsr.reqBy,
+          reqDate: cpsr.reqDate,
+          reqTime: cpsr.reqTime,
+          downtime,
+          woTotalQty,
+          wasteQty,
+          wastePercent,
+          wasteUnit: cpsf?.wasteUnit || null,
+          workOrder: cpsf?.workOrder || null,
+          chkStatus: cpst?.chkStatus || null,
+          chkQuality: cpsf?.chkQuality || null,
+          closedAt: cpsf ? (cpsf.submittedAt || now) : null,
+          createdAt: cpsr.createdAt || now,
+          updatedAt: now,
+        };
+        newRecord.status = computeCpsStatus(newRecord);
+        this.cpsCache.push(newRecord);
+        changed = true;
+        if (this.isPgConnected && this.pgPool) {
+          try {
+            await this.addCps(newRecord);
+          } catch (e: any) {
+            this.logger.warn(`Could not sync CPS ${newRecord.docNo} to PG: ${e.message}`);
+          }
+        }
+      } else {
+        let needUpdate = false;
+        if (cpst && existing.cpstDocNo !== cpst.docNo) {
+          existing.cpstId = cpst.id;
+          existing.cpstDocNo = cpst.docNo;
+          needUpdate = true;
+        }
+        if (cpsf && existing.cpsfDocNo !== cpsf.docNo) {
+          existing.cpsfId = cpsf.id;
+          existing.cpsfDocNo = cpsf.docNo;
+          existing.woTotalQty = woTotalQty;
+          existing.wasteQty = wasteQty;
+          existing.wastePercent = wastePercent;
+          existing.wasteUnit = cpsf.wasteUnit || null;
+          existing.workOrder = cpsf.workOrder || null;
+          existing.chkQuality = cpsf.chkQuality || null;
+          existing.closedAt = cpsf.submittedAt || new Date().toISOString();
+          needUpdate = true;
+        }
+        if (cpst && existing.downtime !== downtime) {
+          existing.downtime = downtime;
+          existing.chkStatus = cpst.chkStatus || null;
+          needUpdate = true;
+        }
+        const updatedStatus = computeCpsStatus(existing);
+        if (existing.status !== updatedStatus) {
+          existing.status = updatedStatus;
+          needUpdate = true;
+        }
+        if (needUpdate) {
+          existing.updatedAt = new Date().toISOString();
+          changed = true;
+          if (this.isPgConnected && this.pgPool) {
+            try {
+              await this.addCps(existing);
+            } catch (e: any) {
+              this.logger.warn(`Could not update CPS ${existing.docNo} in PG: ${e.message}`);
+            }
+          }
+        }
+      }
+    }
+    if (changed) {
+      this.saveCpsList();
+    }
+  }
+
+  async getNextDocNo(prefix: 'CPS' | 'CPSR' | 'CPST' | 'CPSF'): Promise<string> {
     const now = new Date();
     const yyyy = now.getFullYear();
     const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -2320,7 +2848,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     // 1. Check in cache
     let list: { docNo: string }[] = [];
-    if (prefix === 'CPSR') list = this.cpsrCache;
+    if (prefix === 'CPS') list = this.cpsCache;
+    else if (prefix === 'CPSR') list = this.cpsrCache;
     else if (prefix === 'CPST') list = this.cpstCache;
     else if (prefix === 'CPSF') list = this.cpsfCache;
 
