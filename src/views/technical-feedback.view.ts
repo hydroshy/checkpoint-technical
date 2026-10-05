@@ -140,6 +140,34 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       </div>
     </header>
 
+    <!-- Confirm Submit Modal Notification -->
+    <div v-if="showConfirmModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 border border-slate-200 shadow-2xl">
+        <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-3xl font-bold">?</div>
+        <div>
+          <h2 class="font-brand font-bold text-xl text-slate-900">Xác Nhận Gửi Phản Hồi</h2>
+          <p class="text-sm text-slate-600 mt-2 font-medium">Bạn có muốn gửi hay không?</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3 pt-2">
+          <button
+            type="button"
+            @click="showConfirmModal = false"
+            class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
+          >
+            Hủy / Cancel
+          </button>
+          <button
+            type="button"
+            @click="confirmSubmit"
+            :disabled="isSubmitting"
+            class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-sky-600 hover:bg-sky-500 text-white transition shadow-md"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Success Modal Notification -->
     <div v-if="successModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
       <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-lg w-full text-center space-y-5 border-2 border-emerald-500 shadow-2xl">
@@ -166,16 +194,14 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             <span class="text-xs font-bold" :class="form.chkStatus === 'Đã khắc phục' ? 'text-emerald-600' : (form.chkStatus === 'Hư hỏng nặng' ? 'text-rose-600' : 'text-amber-600')">{{ form.chkStatus }}</span>
           </div>
         </div>
-        <div class="flex flex-col gap-3 pt-2">
-          <a :href="'/confirm-request?cpst=' + submittedDocNo" class="w-full py-3.5 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition text-center shadow-md">
-            Tiếp Tục: Chuyển Sang Bàn Giao (CPSF) →
-          </a>
-          <button @click="resetForm" class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition">
-            + Tạo Phản Hồi Mới
+        <div class="pt-2">
+          <button
+            type="button"
+            @click="resetForm"
+            class="w-full py-3.5 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition text-center shadow-md"
+          >
+            Hoàn thành
           </button>
-          <a href="/control-panel" class="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-slate-500 hover:text-slate-800 transition text-center">
-            Xem trên Control Panel
-          </a>
         </div>
       </div>
     </div>
@@ -454,6 +480,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       setup() {
         const docNo = ref('');
         const isSubmitting = ref(false);
+        const showConfirmModal = ref(false);
         const successModal = ref(false);
         const submittedDocNo = ref('');
         const errorMessage = ref('');
@@ -602,8 +629,8 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           form.value[targetField].splice(index, 1);
         }
 
-        // Submit CPST Form
-        async function submitForm() {
+        // Validate and open confirm modal
+        function submitForm() {
           errorMessage.value = '';
           if (!form.value.cpsrDocNo) {
             errorMessage.value = 'Vui lòng chọn mã phiếu CPSR cần liên kết.';
@@ -622,6 +649,12 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             return;
           }
 
+          showConfirmModal.value = true;
+        }
+
+        // Confirmed -> Call API to save CPST
+        async function confirmSubmit() {
+          showConfirmModal.value = false;
           isSubmitting.value = true;
           const payload = {
             docNo: docNo.value || undefined,
@@ -685,6 +718,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           docNo,
           form,
           isSubmitting,
+          showConfirmModal,
           successModal,
           submittedDocNo,
           errorMessage,
@@ -702,6 +736,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           handleDrop,
           removePhoto,
           submitForm,
+          confirmSubmit,
           resetForm
         };
       }

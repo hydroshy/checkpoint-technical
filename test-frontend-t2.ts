@@ -24,7 +24,8 @@ async function runFrontendVerification() {
   assert.ok(FORM_REQUEST_HTML.includes('btn-toggle'), 'Must have big toggle button styling');
   assert.ok(FORM_REQUEST_HTML.includes('btn-submit'), 'Must have big submit button styling');
   assert.ok(FORM_REQUEST_HTML.includes('submittedAt'), 'Must save submission timestamp');
-  assert.ok(FORM_REQUEST_HTML.includes('/technical-feedback?cpsr='), 'Must support seamless transition to CPST');
+  assert.ok(FORM_REQUEST_HTML.includes('showConfirmModal') && FORM_REQUEST_HTML.includes('Bạn có muốn gửi hay không?'), 'Must have submit confirmation popup');
+  assert.ok(FORM_REQUEST_HTML.includes('Hoàn thành'), 'Must have single Hoàn thành button on success');
   console.log('   ✓ CPSR view structure, 3-line droplist, 2-button status, 3-button priority verified.');
 
   // 2. Verify /technical-feedback (CPST) View HTML Content & Structure
@@ -39,7 +40,8 @@ async function runFrontendVerification() {
   assert.ok(TECHNICAL_FEEDBACK_HTML.includes('upload-zone') && TECHNICAL_FEEDBACK_HTML.includes('dragover'), 'Must support drag-and-drop & file selection for photos');
   assert.ok(TECHNICAL_FEEDBACK_HTML.includes('Đã khắc phục') && TECHNICAL_FEEDBACK_HTML.includes('Theo dõi thêm') && TECHNICAL_FEEDBACK_HTML.includes('Hư hỏng nặng'), 'Must have 3 big buttons for chkStatus');
   assert.ok(TECHNICAL_FEEDBACK_HTML.includes('submittedAt'), 'Must save submission timestamp');
-  assert.ok(TECHNICAL_FEEDBACK_HTML.includes('/confirm-request?cpst='), 'Must support seamless transition to CPSF');
+  assert.ok(TECHNICAL_FEEDBACK_HTML.includes('showConfirmModal') && TECHNICAL_FEEDBACK_HTML.includes('Bạn có muốn gửi hay không?'), 'Must have submit confirmation popup');
+  assert.ok(TECHNICAL_FEEDBACK_HTML.includes('Hoàn thành'), 'Must have single Hoàn thành button on success');
   console.log('   ✓ CPST view structure, auto-fill CPSR read-only, 2-column photos, 3-button status verified.');
 
   // 3. Verify /confirm-request (CPSF) View HTML Content & Structure
@@ -55,6 +57,8 @@ async function runFrontendVerification() {
   assert.ok(CONFIRM_REQUEST_HTML.includes('PCS') && CONFIRM_REQUEST_HTML.includes('Mét') && CONFIRM_REQUEST_HTML.includes('Tờ in'), 'Must have 3 big buttons for wasteUnit');
   assert.ok(CONFIRM_REQUEST_HTML.includes('prodMgr') && CONFIRM_REQUEST_HTML.includes('filteredManagers'), 'Must have production manager 3-line droplist');
   assert.ok(CONFIRM_REQUEST_HTML.includes('submittedAt'), 'Must save submission timestamp');
+  assert.ok(CONFIRM_REQUEST_HTML.includes('showConfirmModal') && CONFIRM_REQUEST_HTML.includes('Bạn có muốn gửi hay không?'), 'Must have submit confirmation popup');
+  assert.ok(CONFIRM_REQUEST_HTML.includes('Hoàn thành'), 'Must have single Hoàn thành button on success');
   console.log('   ✓ CPSF view structure, auto-fill CPST read-only, 2-button quality, 3-button unit, % waste verified.');
 
   // 4. Verify Control Panel Tabulator Integration
