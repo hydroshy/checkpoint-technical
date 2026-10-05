@@ -2308,6 +2308,29 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           showAssignModal.value = false;
         };
 
+        const triggerUpload = (id) => document.getElementById(id)?.click();
+
+        const get4MLabel = (k) => {
+          const map = { MAN: 'Con người (MAN)', MACHINE: 'Máy móc (MACHINE)', MATERIAL: 'Vật tư (MATERIAL)', METHOD: 'Phương pháp (METHOD)' };
+          return map[k] || k;
+        };
+
+        const getPercent = (v, total) => {
+          if (!total || total === 0) return 0;
+          return Math.round((v / total) * 100);
+        };
+
+        const setTheme = (theme) => {
+          currentTheme.value = theme;
+          localStorage.setItem('checkpoint_theme', theme);
+          document.documentElement.classList.remove('theme-light', 'theme-dark');
+          document.documentElement.classList.add(theme === 'dark' ? 'theme-dark' : 'theme-light');
+        };
+
+        const toggleTheme = () => {
+          setTheme(currentTheme.value === 'dark' ? 'light' : 'dark');
+        };
+
         const formatCpsStatus = (s) => {
           if (!s) return 'Chờ phân công';
           const map = {
