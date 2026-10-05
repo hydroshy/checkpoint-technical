@@ -1,0 +1,34 @@
+[
+  {
+    "id": "89961c3c-844a-42cc-bf42-425456f22056",
+    "docNo": "CPSR-20261005-002",
+    "reqDate": "2026-10-05",
+    "reqTime": "10:00",
+    "reqBy": "Lê Minh Hoàng - VN5117",
+    "printTech": "OFFSET",
+    "machineName": "SM 52",
+    "problem": "Frontend Verification Test - Lỗi mực in trục 1",
+    "machineStatus": "Hàng SX lần đầu",
+    "priority": "Hỗ trợ ngay",
+    "submittedAt": "2026-10-05T14:01:49.522Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T14:01:49.522Z",
+    "updatedAt": "2026-10-05T14:01:49.522Z"
+  },
+  {
+    "id": "05aac73a-d6b7-4be9-b3b3-bc9677c5eab5",
+    "docNo": "CPSR-20261005-001",
+    "reqDate": "2026-10-05",
+    "reqTime": "10:00",
+    "reqBy": "Lê Minh Hoàng - VN5117",
+    "printTech": "OFFSET",
+    "machineName": "SM 52",
+    "problem": "Frontend Verification Test - Lỗi mực in trục 1",
+    "machineStatus": "Hàng SX lần đầu",
+    "priority": "Hỗ trợ ngay",
+    "submittedAt": "2026-10-05T14:01:12.351Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T14:01:12.351Z",
+    "updatedAt": "2026-10-05T14:01:12.351Z"
+  }
+]

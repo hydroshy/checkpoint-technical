@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1f307701-9a2b-47a0-8cbe-2ba7863898da",
+    "docNo": "CPSF-20261005-002",
+    "cpstId": "56302e41-90ba-4bac-b383-f74aa3be2c51",
+    "cpstDocNo": "CPST-20261005-002",
+    "cpsrDocNo": "CPSR-20261005-002",
+    "chkQuality": "Đạt",
+    "workOrder": "WO-20261005-01",
+    "woTotalQty": 5000,
+    "wasteQty": 12,
+    "wasteUnit": "PCS",
+    "wastePercent": "0.24%",
+    "prodMgr": "Phạm Hùng Sơn - VN5898",
+    "submittedAt": "2026-10-05T14:01:49.537Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T14:01:49.537Z",
+    "updatedAt": "2026-10-05T14:01:49.537Z"
+  },
+  {
+    "id": "270cd6e8-f237-4352-8146-6b6be3107704",
+    "docNo": "CPSF-20261005-001",
+    "cpstId": "e891f5fc-5d0e-43de-a26c-526cdb0c9489",
+    "cpstDocNo": "CPST-20261005-001",
+    "cpsrDocNo": "CPSR-20261005-001",
+    "chkQuality": "Đạt",
+    "workOrder": "WO-20261005-01",
+    "woTotalQty": 5000,
+    "wasteQty": 12,
+    "wasteUnit": "PCS",
+    "wastePercent": "0.24%",
+    "prodMgr": "Phạm Hùng Sơn - VN5898",
+    "submittedAt": "2026-10-05T14:01:12.368Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T14:01:12.368Z",
+    "updatedAt": "2026-10-05T14:01:12.368Z"
+  }
+]

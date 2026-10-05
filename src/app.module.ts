@@ -9,6 +9,7 @@ import { EmployeesModule } from './modules/employees/employees.module';
 import { UsersModule } from './modules/users/users.module';
 import { WeeklyDashboardModule } from './modules/weekly-dashboard/weekly-dashboard.module';
 import { SettingsModule } from './modules/settings/settings.module';
+import { SplitFormsModule } from './modules/split-forms/split-forms.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { SettingsModule } from './modules/settings/settings.module';
     UsersModule,
     WeeklyDashboardModule,
     SettingsModule,
+    SplitFormsModule,
   ],
   controllers: [AppController],
 })

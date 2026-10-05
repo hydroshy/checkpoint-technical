@@ -1,0 +1,52 @@
+[
+  {
+    "id": "56302e41-90ba-4bac-b383-f74aa3be2c51",
+    "docNo": "CPST-20261005-002",
+    "cpsrId": "89961c3c-844a-42cc-bf42-425456f22056",
+    "cpsrDocNo": "CPSR-20261005-002",
+    "recvBy": "KTV Trịnh Văn Thuận - VN5300",
+    "recvDate": "2026-10-05",
+    "recvTime": "10:15",
+    "finishDate": "2026-10-05",
+    "finishTime": "10:45",
+    "downtime": 30,
+    "rootCause": "Bụi bẩn bám cụm gạt mực",
+    "actionTaken": "Vệ sinh và cân chỉnh áp lực gạt mực",
+    "photosBefore": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    ],
+    "photosAfter": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    ],
+    "chkStatus": "Đã khắc phục",
+    "submittedAt": "2026-10-05T14:01:49.530Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T14:01:49.530Z",
+    "updatedAt": "2026-10-05T14:01:49.530Z"
+  },
+  {
+    "id": "e891f5fc-5d0e-43de-a26c-526cdb0c9489",
+    "docNo": "CPST-20261005-001",
+    "cpsrId": "05aac73a-d6b7-4be9-b3b3-bc9677c5eab5",
+    "cpsrDocNo": "CPSR-20261005-001",
+    "recvBy": "KTV Trịnh Văn Thuận - VN5300",
+    "recvDate": "2026-10-05",
+    "recvTime": "10:15",
+    "finishDate": "2026-10-05",
+    "finishTime": "10:45",
+    "downtime": 30,
+    "rootCause": "Bụi bẩn bám cụm gạt mực",
+    "actionTaken": "Vệ sinh và cân chỉnh áp lực gạt mực",
+    "photosBefore": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    ],
+    "photosAfter": [
+      "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="
+    ],
+    "chkStatus": "Đã khắc phục",
+    "submittedAt": "2026-10-05T14:01:12.359Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-05T14:01:12.359Z",
+    "updatedAt": "2026-10-05T14:01:12.359Z"
+  }
+]

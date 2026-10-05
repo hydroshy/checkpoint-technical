@@ -218,6 +218,73 @@ export interface SystemSettingsRecord {
   updatedBy?: string;
 }
 
+export interface CpsrRecord {
+  id: string;
+  docNo: string;
+  reqDate: string;
+  reqTime: string;
+  reqBy: string;
+  printTech: string;
+  machineName: string;
+  problem: string;
+  machineStatus?: string;
+  priority?: string;
+  priorityOther?: string;
+  submittedAt: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CpstRecord {
+  id: string;
+  docNo: string;
+  cpsrId?: string;
+  cpsrDocNo: string;
+  recvBy: string;
+  recvDate?: string;
+  recvTime?: string;
+  finishDate?: string;
+  finishTime?: string;
+  downtime?: number;
+  rootCause?: string;
+  actionTaken?: string;
+  errCat?: string;
+  errType?: string;
+  photosBefore?: string[];
+  photosAfter?: string[];
+  chkStatus?: string;
+  submittedAt: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CpsfRecord {
+  id: string;
+  docNo: string;
+  cpstId?: string;
+  cpstDocNo: string;
+  cpsrDocNo?: string;
+  chkQuality?: string;
+  workOrder?: string;
+  woTotalQty?: number;
+  wasteQty?: number;
+  wasteUnit?: string;
+  wastePercent?: string;
+  prodMgr?: string;
+  submittedAt: string;
+  createdBy?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CpsrChainRecord {
+  cpsr: CpsrRecord;
+  cpst?: CpstRecord | null;
+  cpsf?: CpsfRecord | null;
+}
+
 @Injectable()
 export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(DatabaseService.name);
@@ -235,6 +302,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private formLookupOptionsCache: FormLookupOptionRecord[] = [];
   private sheetListsCache: SheetListsRowRecord[] = [];
   private requestsCache: TechnicalRequestRecord[] = [];
+  private cpsrCache: CpsrRecord[] = [];
+  private cpstCache: CpstRecord[] = [];
+  private cpsfCache: CpsfRecord[] = [];
   private settingsCache: SystemSettingsRecord = { isPublicFormEnabled: true };
 
   constructor() {
@@ -680,6 +750,87 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             );
           `,
         },
+        {
+          name: 'cpsr',
+          sql: `
+            CREATE TABLE IF NOT EXISTS cpsr (
+              id VARCHAR(255) PRIMARY KEY,
+              doc_no VARCHAR(255) UNIQUE NOT NULL,
+              req_date VARCHAR(50),
+              req_time VARCHAR(50),
+              req_by VARCHAR(255),
+              print_tech VARCHAR(255),
+              machine_name VARCHAR(255),
+              problem TEXT,
+              machine_status VARCHAR(100),
+              priority VARCHAR(100),
+              priority_other TEXT,
+              submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              created_by VARCHAR(255) DEFAULT 'public',
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_cpsr_doc_no ON cpsr(doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cpsr_submitted_at ON cpsr(submitted_at);
+          `,
+        },
+        {
+          name: 'cpst',
+          sql: `
+            CREATE TABLE IF NOT EXISTS cpst (
+              id VARCHAR(255) PRIMARY KEY,
+              doc_no VARCHAR(255) UNIQUE NOT NULL,
+              cpsr_id VARCHAR(255) REFERENCES cpsr(id) ON DELETE CASCADE,
+              cpsr_doc_no VARCHAR(255) UNIQUE REFERENCES cpsr(doc_no) ON DELETE CASCADE,
+              recv_by VARCHAR(255),
+              recv_date VARCHAR(50),
+              recv_time VARCHAR(50),
+              finish_date VARCHAR(50),
+              finish_time VARCHAR(50),
+              downtime NUMERIC DEFAULT 0,
+              root_cause TEXT,
+              action_taken TEXT,
+              err_cat VARCHAR(100),
+              err_type VARCHAR(100),
+              photos_before JSONB DEFAULT '[]'::jsonb,
+              photos_after JSONB DEFAULT '[]'::jsonb,
+              chk_status VARCHAR(100),
+              submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              created_by VARCHAR(255) DEFAULT 'public',
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_cpst_doc_no ON cpst(doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cpst_cpsr_doc_no ON cpst(cpsr_doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cpst_submitted_at ON cpst(submitted_at);
+          `,
+        },
+        {
+          name: 'cpsf',
+          sql: `
+            CREATE TABLE IF NOT EXISTS cpsf (
+              id VARCHAR(255) PRIMARY KEY,
+              doc_no VARCHAR(255) UNIQUE NOT NULL,
+              cpst_id VARCHAR(255) REFERENCES cpst(id) ON DELETE CASCADE,
+              cpst_doc_no VARCHAR(255) UNIQUE REFERENCES cpst(doc_no) ON DELETE CASCADE,
+              cpsr_doc_no VARCHAR(255),
+              chk_quality VARCHAR(50),
+              work_order VARCHAR(255),
+              wo_total_qty NUMERIC DEFAULT 0,
+              waste_qty NUMERIC DEFAULT 0,
+              waste_unit VARCHAR(50),
+              waste_percent VARCHAR(50),
+              prod_mgr VARCHAR(255),
+              submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              created_by VARCHAR(255) DEFAULT 'public',
+              created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+              updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+            );
+            CREATE INDEX IF NOT EXISTS idx_cpsf_doc_no ON cpsf(doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_doc_no ON cpsf(cpst_doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cpsf_submitted_at ON cpsf(submitted_at);
+          `,
+        },
       ];
 
       for (const t of tableStatements) {
@@ -690,7 +841,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         }
       }
 
-      this.logger.log('✅ PostgreSQL Schema verified / initialized (10 tables: users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests, system_settings)');
+      this.logger.log('✅ PostgreSQL Schema verified / initialized (13 tables: users, requesters, machines, weekly_technical_requests, defect_logs, action_plans, form_lookup_options, sheet_lists_do_not_delete, technical_requests, system_settings, cpsr, cpst, cpsf)');
     } catch (e: any) {
       this.logger.error(`Failed to initialize PostgreSQL schema: ${e.message}`);
     }
@@ -938,7 +1089,89 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: true });
     }
 
-    this.logger.log(`📦 Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.formLookupOptionsCache.length} lookup options, ${this.requestsCache.length} v4 requests.`);
+    // 11. CPSR
+    try {
+      const cpsrRes = await this.pgPool.query('SELECT * FROM cpsr ORDER BY created_at DESC');
+      this.cpsrCache = cpsrRes.rows.map(r => ({
+        id: r.id,
+        docNo: r.doc_no,
+        reqDate: r.req_date || '',
+        reqTime: r.req_time || '',
+        reqBy: r.req_by || '',
+        printTech: r.print_tech || '',
+        machineName: r.machine_name || '',
+        problem: r.problem || '',
+        machineStatus: r.machine_status || undefined,
+        priority: r.priority || undefined,
+        priorityOther: r.priority_other || undefined,
+        submittedAt: r.submitted_at ? new Date(r.submitted_at).toISOString() : new Date().toISOString(),
+        createdBy: r.created_by || 'public',
+        createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+        updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+      }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load cpsr from PG (${err.message}). Using local JSON fallback.`);
+      this.cpsrCache = this.readJson<CpsrRecord[]>('cpsr.json', []);
+    }
+
+    // 12. CPST
+    try {
+      const cpstRes = await this.pgPool.query('SELECT * FROM cpst ORDER BY created_at DESC');
+      this.cpstCache = cpstRes.rows.map(r => ({
+        id: r.id,
+        docNo: r.doc_no,
+        cpsrId: r.cpsr_id || undefined,
+        cpsrDocNo: r.cpsr_doc_no,
+        recvBy: r.recv_by || '',
+        recvDate: r.recv_date || undefined,
+        recvTime: r.recv_time || undefined,
+        finishDate: r.finish_date || undefined,
+        finishTime: r.finish_time || undefined,
+        downtime: r.downtime !== null ? Number(r.downtime) : 0,
+        rootCause: r.root_cause || undefined,
+        actionTaken: r.action_taken || undefined,
+        errCat: r.err_cat || undefined,
+        errType: r.err_type || undefined,
+        photosBefore: Array.isArray(r.photos_before) ? r.photos_before : (r.photos_before ? JSON.parse(r.photos_before) : []),
+        photosAfter: Array.isArray(r.photos_after) ? r.photos_after : (r.photos_after ? JSON.parse(r.photos_after) : []),
+        chkStatus: r.chk_status || undefined,
+        submittedAt: r.submitted_at ? new Date(r.submitted_at).toISOString() : new Date().toISOString(),
+        createdBy: r.created_by || 'public',
+        createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+        updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+      }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load cpst from PG (${err.message}). Using local JSON fallback.`);
+      this.cpstCache = this.readJson<CpstRecord[]>('cpst.json', []);
+    }
+
+    // 13. CPSF
+    try {
+      const cpsfRes = await this.pgPool.query('SELECT * FROM cpsf ORDER BY created_at DESC');
+      this.cpsfCache = cpsfRes.rows.map(r => ({
+        id: r.id,
+        docNo: r.doc_no,
+        cpstId: r.cpst_id || undefined,
+        cpstDocNo: r.cpst_doc_no,
+        cpsrDocNo: r.cpsr_doc_no || undefined,
+        chkQuality: r.chk_quality || undefined,
+        workOrder: r.work_order || undefined,
+        woTotalQty: r.wo_total_qty !== null ? Number(r.wo_total_qty) : 0,
+        wasteQty: r.waste_qty !== null ? Number(r.waste_qty) : 0,
+        wasteUnit: r.waste_unit || undefined,
+        wastePercent: r.waste_percent || undefined,
+        prodMgr: r.prod_mgr || undefined,
+        submittedAt: r.submitted_at ? new Date(r.submitted_at).toISOString() : new Date().toISOString(),
+        createdBy: r.created_by || 'public',
+        createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
+        updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
+      }));
+    } catch (err: any) {
+      this.logger.warn(`Could not load cpsf from PG (${err.message}). Using local JSON fallback.`);
+      this.cpsfCache = this.readJson<CpsfRecord[]>('cpsf.json', []);
+    }
+
+    this.logger.log(`📦 Database loaded: ${this.usersCache.length} users, ${this.requestersCache.length} requesters, ${this.machinesCache.length} machines, ${this.weeklyRequestsCache.length} weekly reqs, ${this.defectLogsCache.length} defect logs, ${this.actionPlansCache.length} action plans, ${this.formLookupOptionsCache.length} lookup options, ${this.requestsCache.length} v4 requests, ${this.cpsrCache.length} cpsr, ${this.cpstCache.length} cpst, ${this.cpsfCache.length} cpsf.`);
   }
 
   private getFilePath(filename: string): string {
@@ -1000,6 +1233,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
     this.sheetListsCache = this.readJson<SheetListsRowRecord[]>('sheet_lists_do_not_delete.json', []);
     this.requestsCache = this.readJson<TechnicalRequestRecord[]>('technical_requests.json', [])
       .filter(r => r.id !== '2f8c2b65-9660-4041-9c22-aeac7310fdce' && r.docNo !== 'REQ-20261003-1945');
+    this.cpsrCache = this.readJson<CpsrRecord[]>('cpsr.json', []);
+    this.cpstCache = this.readJson<CpstRecord[]>('cpst.json', []);
+    this.cpsfCache = this.readJson<CpsfRecord[]>('cpsf.json', []);
     this.settingsCache = this.readJson<SystemSettingsRecord>('settings.json', { isPublicFormEnabled: true });
 
     // Sync employeesCache from requesters
@@ -1813,6 +2049,346 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       return true;
     }
     return false;
+  }
+
+  // ==================== CPSR / CPST / CPSF (1-1-1 SPLIT FORMS) ====================
+  saveCpsrList(): void { this.writeJson('cpsr.json', this.cpsrCache); }
+  saveCpstList(): void { this.writeJson('cpst.json', this.cpstCache); }
+  saveCpsfList(): void { this.writeJson('cpsf.json', this.cpsfCache); }
+
+  getCpsrList(): CpsrRecord[] { return this.cpsrCache; }
+
+  getCpsrByIdOrDocNo(id: string): CpsrRecord | undefined {
+    return this.cpsrCache.find(r => r.id === id || r.docNo === id);
+  }
+
+  async addCpsr(req: CpsrRecord): Promise<void> {
+    const idx = this.cpsrCache.findIndex(r => r.id === req.id || r.docNo === req.docNo);
+    if (idx !== -1) {
+      this.cpsrCache[idx] = req;
+    } else {
+      this.cpsrCache.unshift(req);
+    }
+    this.saveCpsrList();
+
+    if (this.isPgConnected && this.pgPool) {
+      try {
+        await this.pgPool.query(
+          `INSERT INTO cpsr (
+             id, doc_no, req_date, req_time, req_by, print_tech, machine_name,
+             problem, machine_status, priority, priority_other, submitted_at,
+             created_by, created_at, updated_at
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
+           ON CONFLICT (id) DO UPDATE SET
+             doc_no = EXCLUDED.doc_no,
+             req_date = EXCLUDED.req_date,
+             req_time = EXCLUDED.req_time,
+             req_by = EXCLUDED.req_by,
+             print_tech = EXCLUDED.print_tech,
+             machine_name = EXCLUDED.machine_name,
+             problem = EXCLUDED.problem,
+             machine_status = EXCLUDED.machine_status,
+             priority = EXCLUDED.priority,
+             priority_other = EXCLUDED.priority_other,
+             submitted_at = EXCLUDED.submitted_at,
+             created_by = EXCLUDED.created_by,
+             updated_at = EXCLUDED.updated_at`,
+          [
+            req.id, req.docNo, req.reqDate, req.reqTime, req.reqBy, req.printTech, req.machineName,
+            req.problem, req.machineStatus || null, req.priority || null, req.priorityOther || null,
+            req.submittedAt, req.createdBy || 'public', req.createdAt, req.updatedAt,
+          ]
+        );
+      } catch (err: any) {
+        this.logger.error(`PG Error inserting cpsr: ${err.message}`);
+        throw err;
+      }
+    }
+  }
+
+  async updateCpsr(id: string, updates: Partial<CpsrRecord>): Promise<CpsrRecord | undefined> {
+    const idx = this.cpsrCache.findIndex(r => r.id === id || r.docNo === id);
+    if (idx !== -1) {
+      this.cpsrCache[idx] = { ...this.cpsrCache[idx], ...updates, updatedAt: new Date().toISOString() };
+      const updated = this.cpsrCache[idx];
+      this.saveCpsrList();
+      if (this.isPgConnected && this.pgPool) {
+        await this.addCpsr(updated);
+      }
+      return updated;
+    }
+    return undefined;
+  }
+
+  async deleteCpsr(id: string): Promise<boolean> {
+    const target = this.cpsrCache.find(r => r.id === id || r.docNo === id);
+    if (!target) return false;
+    this.cpsrCache = this.cpsrCache.filter(r => r.id !== target.id && r.docNo !== target.docNo);
+    const deletedCpst = this.cpstCache.find(t => t.cpsrDocNo === target.docNo);
+    this.cpstCache = this.cpstCache.filter(t => t.cpsrDocNo !== target.docNo);
+    if (deletedCpst) {
+      this.cpsfCache = this.cpsfCache.filter(f => f.cpstDocNo !== deletedCpst.docNo);
+    }
+    this.saveCpsrList();
+    this.saveCpstList();
+    this.saveCpsfList();
+
+    if (this.isPgConnected && this.pgPool) {
+      await this.pgPool.query('DELETE FROM cpsr WHERE id = $1 OR doc_no = $1', [target.id])
+        .catch(err => this.logger.error(`PG Error deleting cpsr: ${err.message}`));
+    }
+    return true;
+  }
+
+  getCpstList(): CpstRecord[] { return this.cpstCache; }
+
+  getCpstByIdOrDocNo(id: string): CpstRecord | undefined {
+    return this.cpstCache.find(r => r.id === id || r.docNo === id);
+  }
+
+  async addCpst(req: CpstRecord): Promise<void> {
+    const idx = this.cpstCache.findIndex(r => r.id === req.id || r.docNo === req.docNo);
+    if (idx !== -1) {
+      this.cpstCache[idx] = req;
+    } else {
+      this.cpstCache.unshift(req);
+    }
+    this.saveCpstList();
+
+    if (this.isPgConnected && this.pgPool) {
+      try {
+        await this.pgPool.query(
+          `INSERT INTO cpst (
+             id, doc_no, cpsr_id, cpsr_doc_no, recv_by, recv_date, recv_time,
+             finish_date, finish_time, downtime, root_cause, action_taken,
+             err_cat, err_type, photos_before, photos_after, chk_status,
+             submitted_at, created_by, created_at, updated_at
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21)
+           ON CONFLICT (id) DO UPDATE SET
+             doc_no = EXCLUDED.doc_no,
+             cpsr_id = EXCLUDED.cpsr_id,
+             cpsr_doc_no = EXCLUDED.cpsr_doc_no,
+             recv_by = EXCLUDED.recv_by,
+             recv_date = EXCLUDED.recv_date,
+             recv_time = EXCLUDED.recv_time,
+             finish_date = EXCLUDED.finish_date,
+             finish_time = EXCLUDED.finish_time,
+             downtime = EXCLUDED.downtime,
+             root_cause = EXCLUDED.root_cause,
+             action_taken = EXCLUDED.action_taken,
+             err_cat = EXCLUDED.err_cat,
+             err_type = EXCLUDED.err_type,
+             photos_before = EXCLUDED.photos_before,
+             photos_after = EXCLUDED.photos_after,
+             chk_status = EXCLUDED.chk_status,
+             submitted_at = EXCLUDED.submitted_at,
+             created_by = EXCLUDED.created_by,
+             updated_at = EXCLUDED.updated_at`,
+          [
+            req.id, req.docNo, req.cpsrId || null, req.cpsrDocNo, req.recvBy,
+            req.recvDate || null, req.recvTime || null, req.finishDate || null, req.finishTime || null,
+            req.downtime || 0, req.rootCause || null, req.actionTaken || null,
+            req.errCat || null, req.errType || null,
+            JSON.stringify(req.photosBefore || []), JSON.stringify(req.photosAfter || []),
+            req.chkStatus || null, req.submittedAt, req.createdBy || 'public', req.createdAt, req.updatedAt,
+          ]
+        );
+      } catch (err: any) {
+        this.logger.error(`PG Error inserting cpst: ${err.message}`);
+        throw err;
+      }
+    }
+  }
+
+  async updateCpst(id: string, updates: Partial<CpstRecord>): Promise<CpstRecord | undefined> {
+    const idx = this.cpstCache.findIndex(r => r.id === id || r.docNo === id);
+    if (idx !== -1) {
+      this.cpstCache[idx] = { ...this.cpstCache[idx], ...updates, updatedAt: new Date().toISOString() };
+      const updated = this.cpstCache[idx];
+      this.saveCpstList();
+      if (this.isPgConnected && this.pgPool) {
+        await this.addCpst(updated);
+      }
+      return updated;
+    }
+    return undefined;
+  }
+
+  async deleteCpst(id: string): Promise<boolean> {
+    const target = this.cpstCache.find(r => r.id === id || r.docNo === id);
+    if (!target) return false;
+    this.cpstCache = this.cpstCache.filter(r => r.id !== target.id && r.docNo !== target.docNo);
+    this.cpsfCache = this.cpsfCache.filter(f => f.cpstDocNo !== target.docNo);
+    this.saveCpstList();
+    this.saveCpsfList();
+
+    if (this.isPgConnected && this.pgPool) {
+      await this.pgPool.query('DELETE FROM cpst WHERE id = $1 OR doc_no = $1', [target.id])
+        .catch(err => this.logger.error(`PG Error deleting cpst: ${err.message}`));
+    }
+    return true;
+  }
+
+  getCpsfList(): CpsfRecord[] { return this.cpsfCache; }
+
+  getCpsfByIdOrDocNo(id: string): CpsfRecord | undefined {
+    return this.cpsfCache.find(r => r.id === id || r.docNo === id);
+  }
+
+  async addCpsf(req: CpsfRecord): Promise<void> {
+    const idx = this.cpsfCache.findIndex(r => r.id === req.id || r.docNo === req.docNo);
+    if (idx !== -1) {
+      this.cpsfCache[idx] = req;
+    } else {
+      this.cpsfCache.unshift(req);
+    }
+    this.saveCpsfList();
+
+    if (this.isPgConnected && this.pgPool) {
+      try {
+        await this.pgPool.query(
+          `INSERT INTO cpsf (
+             id, doc_no, cpst_id, cpst_doc_no, cpsr_doc_no, chk_quality,
+             work_order, wo_total_qty, waste_qty, waste_unit, waste_percent,
+             prod_mgr, submitted_at, created_by, created_at, updated_at
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+           ON CONFLICT (id) DO UPDATE SET
+             doc_no = EXCLUDED.doc_no,
+             cpst_id = EXCLUDED.cpst_id,
+             cpst_doc_no = EXCLUDED.cpst_doc_no,
+             cpsr_doc_no = EXCLUDED.cpsr_doc_no,
+             chk_quality = EXCLUDED.chk_quality,
+             work_order = EXCLUDED.work_order,
+             wo_total_qty = EXCLUDED.wo_total_qty,
+             waste_qty = EXCLUDED.waste_qty,
+             waste_unit = EXCLUDED.waste_unit,
+             waste_percent = EXCLUDED.waste_percent,
+             prod_mgr = EXCLUDED.prod_mgr,
+             submitted_at = EXCLUDED.submitted_at,
+             created_by = EXCLUDED.created_by,
+             updated_at = EXCLUDED.updated_at`,
+          [
+            req.id, req.docNo, req.cpstId || null, req.cpstDocNo, req.cpsrDocNo || null,
+            req.chkQuality || null, req.workOrder || null, req.woTotalQty || 0,
+            req.wasteQty || 0, req.wasteUnit || null, req.wastePercent || null,
+            req.prodMgr || null, req.submittedAt, req.createdBy || 'public', req.createdAt, req.updatedAt,
+          ]
+        );
+      } catch (err: any) {
+        this.logger.error(`PG Error inserting cpsf: ${err.message}`);
+        throw err;
+      }
+    }
+  }
+
+  async updateCpsf(id: string, updates: Partial<CpsfRecord>): Promise<CpsfRecord | undefined> {
+    const idx = this.cpsfCache.findIndex(r => r.id === id || r.docNo === id);
+    if (idx !== -1) {
+      this.cpsfCache[idx] = { ...this.cpsfCache[idx], ...updates, updatedAt: new Date().toISOString() };
+      const updated = this.cpsfCache[idx];
+      this.saveCpsfList();
+      if (this.isPgConnected && this.pgPool) {
+        await this.addCpsf(updated);
+      }
+      return updated;
+    }
+    return undefined;
+  }
+
+  async deleteCpsf(id: string): Promise<boolean> {
+    const target = this.cpsfCache.find(r => r.id === id || r.docNo === id);
+    if (!target) return false;
+    this.cpsfCache = this.cpsfCache.filter(r => r.id !== target.id && r.docNo !== target.docNo);
+    this.saveCpsfList();
+
+    if (this.isPgConnected && this.pgPool) {
+      await this.pgPool.query('DELETE FROM cpsf WHERE id = $1 OR doc_no = $1', [target.id])
+        .catch(err => this.logger.error(`PG Error deleting cpsf: ${err.message}`));
+    }
+    return true;
+  }
+
+  async getNextDocNo(prefix: 'CPSR' | 'CPST' | 'CPSF'): Promise<string> {
+    const now = new Date();
+    const yyyy = now.getFullYear();
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const dateStr = `${yyyy}${mm}${dd}`;
+    const prefixPattern = `${prefix}-${dateStr}-`;
+
+    let maxNum = 0;
+
+    // 1. Check in cache
+    let list: { docNo: string }[] = [];
+    if (prefix === 'CPSR') list = this.cpsrCache;
+    else if (prefix === 'CPST') list = this.cpstCache;
+    else if (prefix === 'CPSF') list = this.cpsfCache;
+
+    for (const item of list) {
+      if (item.docNo && item.docNo.startsWith(prefixPattern)) {
+        const numPart = item.docNo.slice(prefixPattern.length);
+        const parsed = parseInt(numPart, 10);
+        if (!isNaN(parsed) && parsed > maxNum) {
+          maxNum = parsed;
+        }
+      }
+    }
+
+    // 2. Check in PG if connected
+    if (this.isPgConnected && this.pgPool) {
+      try {
+        const table = prefix.toLowerCase();
+        const res = await this.pgPool.query(
+          `SELECT doc_no FROM ${table} WHERE doc_no LIKE $1 ORDER BY doc_no DESC LIMIT 20`,
+          [`${prefixPattern}%`]
+        );
+        for (const row of res.rows) {
+          if (row.doc_no && row.doc_no.startsWith(prefixPattern)) {
+            const numPart = row.doc_no.slice(prefixPattern.length);
+            const parsed = parseInt(numPart, 10);
+            if (!isNaN(parsed) && parsed > maxNum) {
+              maxNum = parsed;
+            }
+          }
+        }
+      } catch (e: any) {
+        this.logger.error(`Error querying next doc_no from PG: ${e.message}`);
+      }
+    }
+
+    const nextSeq = maxNum + 1;
+    const seqStr = String(nextSeq).padStart(3, '0');
+    return `${prefixPattern}${seqStr}`;
+  }
+
+  getAvailableCpsrForCpst(): CpsrRecord[] {
+    const linkedDocNos = new Set(this.cpstCache.map(c => c.cpsrDocNo));
+    return this.cpsrCache.filter(r => !linkedDocNos.has(r.docNo));
+  }
+
+  getAvailableCpstForCpsf(): any[] {
+    const linkedDocNos = new Set(this.cpsfCache.map(c => c.cpstDocNo));
+    return this.cpstCache
+      .filter(r => !linkedDocNos.has(r.docNo))
+      .map(cpst => {
+        const cpsr = this.cpsrCache.find(r => r.docNo === cpst.cpsrDocNo);
+        return {
+          ...cpst,
+          cpsr: cpsr || null,
+        };
+      });
+  }
+
+  getCpsrChainList(): CpsrChainRecord[] {
+    return this.cpsrCache.map(cpsr => {
+      const cpst = this.cpstCache.find(t => t.cpsrDocNo === cpsr.docNo) || null;
+      const cpsf = cpst ? (this.cpsfCache.find(f => f.cpstDocNo === cpst.docNo) || null) : null;
+      return {
+        cpsr,
+        cpst,
+        cpsf,
+      };
+    });
   }
 
   getSettings(): SystemSettingsRecord {

@@ -7,6 +7,8 @@ import { LOGIN_HTML } from './views/login.view';
 import { DASHBOARD_HTML } from './views/dashboard.view';
 import { CONTROL_PANEL_HTML } from './views/control-panel.view';
 import { FORM_REQUEST_HTML } from './views/form-request.view';
+import { TECHNICAL_FEEDBACK_HTML } from './views/technical-feedback.view';
+import { CONFIRM_REQUEST_HTML } from './views/confirm-request.view';
 
 @Controller()
 export class AppController {
@@ -124,6 +126,22 @@ export class AppController {
     this.setNoCacheHeaders(res);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(FORM_REQUEST_HTML);
+  }
+
+  @Get('technical-feedback')
+  @ApiExcludeEndpoint()
+  getTechnicalFeedbackPage(@Req() req: Request, @Res() res: Response) {
+    this.setNoCacheHeaders(res);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(TECHNICAL_FEEDBACK_HTML);
+  }
+
+  @Get('confirm-request')
+  @ApiExcludeEndpoint()
+  getConfirmRequestPage(@Req() req: Request, @Res() res: Response) {
+    this.setNoCacheHeaders(res);
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.send(CONFIRM_REQUEST_HTML);
   }
 
   @Get('reset-session')

@@ -523,25 +523,22 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-table-list w-4 text-center text-xs text-emerald-500"></i>
-              <span class="truncate">Phiếu Yêu Cầu Kỹ Thuật</span>
+              <span class="truncate">Phiếu Kỹ Thuật (CPSR•CPST•CPSF)</span>
             </button>
-            <a
-              href="/form-request"
-              target="_blank"
-              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center justify-between transition text-left cursor-pointer"
-              title="Mở form chia sẻ công khai"
-            >
-              <div class="flex items-center gap-2.5 truncate">
-                <i class="fa-solid fa-share-nodes w-4 text-center text-xs text-sky-500"></i>
-                <span class="truncate">Form Công Khai</span>
-              </div>
-              <span
-                class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded uppercase"
-                :class="isPublicFormEnabled ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20' : 'bg-slate-500/10 text-slate-400 border border-slate-500/20'"
-              >
-                {{ isPublicFormEnabled ? 'Bật' : 'Tắt' }}
-              </span>
-            </a>
+            <div class="pl-5 space-y-0.5">
+              <a href="/form-request" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-400 hover:text-sky-400 hover:bg-slate-800/40 transition">
+                <span>1. Yêu Cầu (CPSR)</span>
+                <span class="text-[9px] font-mono opacity-60">↗</span>
+              </a>
+              <a href="/technical-feedback" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-400 hover:text-emerald-400 hover:bg-slate-800/40 transition">
+                <span>2. Phản Hồi (CPST)</span>
+                <span class="text-[9px] font-mono opacity-60">↗</span>
+              </a>
+              <a href="/confirm-request" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-400 hover:text-purple-400 hover:bg-slate-800/40 transition">
+                <span>3. Bàn Giao (CPSF)</span>
+                <span class="text-[9px] font-mono opacity-60">↗</span>
+              </a>
+            </div>
           </div>
 
           <!-- GROUP 2: DANH MỤC THIẾT BỊ & NHÂN SỰ -->
@@ -839,27 +836,107 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
         <div v-show="activeTab === 'requests'" class="space-y-5">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 class="text-xl font-bold tracking-tight">Danh Sách Toàn Bộ Phiếu Yêu Cầu Kỹ Thuật</h1>
-              <p class="text-xs text-slate-500">Bảng dữ liệu Tabulator hỗ trợ lọc nhiều tiêu chí, sắp xếp động, phân trang và xuất Excel</p>
+              <h1 class="text-xl font-bold tracking-tight">Quản Lý Phiếu Kỹ Thuật (CPSR • CPST • CPSF)</h1>
+              <p class="text-xs text-slate-500">Quản lý 3 form độc lập và chuỗi liên kết 1-1-1 qua bảng dữ liệu Tabulator v6</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <a
-                href="/dashboard"
-                class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-500/25"
+                href="/form-request"
+                target="_blank"
+                class="px-3 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm"
               >
-                <i class="fa-solid fa-plus"></i> Tạo Phiếu Mới
+                + Form CPSR
+              </a>
+              <a
+                href="/technical-feedback"
+                target="_blank"
+                class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm"
+              >
+                + Form CPST
+              </a>
+              <a
+                href="/confirm-request"
+                target="_blank"
+                class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm"
+              >
+                + Form CPSF
               </a>
               <button
-                @click="exportRequestsExcel"
-                class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/25 cursor-pointer"
+                @click="exportCurrentTabExcel"
+                class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
               >
                 <i class="fa-solid fa-file-excel"></i> Xuất Excel
               </button>
             </div>
           </div>
 
+          <!-- Split Forms Sub-Tab Switcher -->
+          <div class="glass-card rounded-2xl p-2 flex flex-wrap items-center gap-2">
+            <button
+              @click="switchSplitTab('chain')"
+              :class="splitTab === 'chain' ? 'bg-sky-600 text-white font-bold shadow' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
+              class="px-4 py-2 rounded-xl text-xs transition cursor-pointer"
+            >
+              🔗 Chuỗi 1-1-1 (Chain)
+            </button>
+            <button
+              @click="switchSplitTab('cpsr')"
+              :class="splitTab === 'cpsr' ? 'bg-sky-600 text-white font-bold shadow' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
+              class="px-4 py-2 rounded-xl text-xs transition cursor-pointer"
+            >
+              1. Phiếu Yêu Cầu (CPSR)
+            </button>
+            <button
+              @click="switchSplitTab('cpst')"
+              :class="splitTab === 'cpst' ? 'bg-sky-600 text-white font-bold shadow' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
+              class="px-4 py-2 rounded-xl text-xs transition cursor-pointer"
+            >
+              2. Phản Hồi KT (CPST)
+            </button>
+            <button
+              @click="switchSplitTab('cpsf')"
+              :class="splitTab === 'cpsf' ? 'bg-sky-600 text-white font-bold shadow' : 'text-slate-400 hover:text-white hover:bg-slate-800'"
+              class="px-4 py-2 rounded-xl text-xs transition cursor-pointer"
+            >
+              3. Bàn Giao (CPSF)
+            </button>
+            <button
+              @click="switchSplitTab('legacy')"
+              :class="splitTab === 'legacy' ? 'bg-slate-700 text-white font-bold shadow' : 'text-slate-500 hover:text-slate-300 hover:bg-slate-800/50'"
+              class="px-3 py-2 rounded-xl text-xs transition cursor-pointer ml-auto"
+            >
+              Dữ Liệu Cũ (Legacy)
+            </button>
+          </div>
+
           <!-- Filter Toolbar for Tabulator -->
-          <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+          <div v-show="splitTab !== 'legacy'" class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <input
+              type="text"
+              v-model="splitFilter.search"
+              @input="applySplitFilters"
+              placeholder="🔍 Tìm kiếm mã phiếu, người yêu cầu, KTV, thiết bị..."
+              class="input-box px-3.5 py-2 rounded-xl text-xs outline-none"
+            />
+            <select v-model="splitFilter.status" @change="applySplitFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
+              <option value="ALL">— Tất cả trạng thái / tiến độ —</option>
+              <option v-if="splitTab === 'chain'" value="3/3">🟢 Hoàn tất chuỗi (3/3)</option>
+              <option v-if="splitTab === 'chain'" value="2/3">🟡 Đang xử lý / Phản hồi (2/3)</option>
+              <option v-if="splitTab === 'chain'" value="1/3">🔵 Yêu cầu mới (1/3)</option>
+              <option v-if="splitTab === 'cpsr'" value="Hàng SX lần đầu">Hàng SX lần đầu</option>
+              <option v-if="splitTab === 'cpsr'" value="Hàng SX nhiều lần">Hàng SX nhiều lần</option>
+              <option v-if="splitTab === 'cpst'" value="Đã khắc phục">🟢 Đã khắc phục</option>
+              <option v-if="splitTab === 'cpst'" value="Theo dõi thêm">🟡 Theo dõi thêm</option>
+              <option v-if="splitTab === 'cpst'" value="Hư hỏng nặng">🔴 Hư hỏng nặng</option>
+              <option v-if="splitTab === 'cpsf'" value="Đạt">🟢 Đạt</option>
+              <option v-if="splitTab === 'cpsf'" value="Chưa đạt">🔴 Chưa đạt</option>
+            </select>
+            <div class="flex items-center justify-end text-xs text-slate-400 font-mono">
+              Tổng cộng: <span class="text-sky-400 font-bold ml-1.5">{{ currentSplitCount }}</span> bản ghi
+            </div>
+          </div>
+
+          <div v-show="splitTab === 'legacy'" class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <input
               type="text"
               v-model="reqFilter.search"
@@ -886,9 +963,10 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
             </select>
           </div>
 
-          <!-- Tabulator Container for Requests -->
+          <!-- Tabulator Containers -->
           <div class="glass-card rounded-2xl p-3 overflow-hidden">
-            <div id="tabulator-requests"></div>
+            <div v-show="splitTab !== 'legacy'" id="tabulator-split-forms"></div>
+            <div v-show="splitTab === 'legacy'" id="tabulator-requests"></div>
           </div>
         </div>
 
@@ -1240,6 +1318,142 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
       </div>
     </div>
 
+    <!-- 1-1-1 CHAIN & SPLIT FORM DETAIL MODAL -->
+    <div id="modal-chain-detail" v-if="showChainModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-chain-detail')">
+      <div v-if="selectedChain" class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800" @click.stop>
+        <div class="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10">
+          <div>
+            <div class="text-[10px] uppercase font-bold text-sky-500">Chuỗi Tiến Trình 1-1-1</div>
+            <h2 class="text-base font-extrabold font-mono text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <span>{{ selectedChain.cpsr?.docNo || selectedChain.docNo }}</span>
+              <span v-if="selectedChain.cpst" class="text-slate-400">→</span>
+              <span v-if="selectedChain.cpst" class="text-emerald-500 font-mono">{{ selectedChain.cpst.docNo }}</span>
+              <span v-if="selectedChain.cpsf" class="text-slate-400">→</span>
+              <span v-if="selectedChain.cpsf" class="text-purple-500 font-mono">{{ selectedChain.cpsf.docNo }}</span>
+            </h2>
+          </div>
+          <button @click="closeModal('modal-chain-detail')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+        </div>
+
+        <div class="p-6 space-y-6 text-xs">
+          <!-- BƯỚC 1: CPSR -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="font-bold text-sky-600 dark:text-sky-400 text-sm">1. Phiếu Yêu Cầu Kỹ Thuật (CPSR)</span>
+              <span class="font-mono font-bold text-xs bg-sky-500/10 text-sky-500 px-2 py-0.5 rounded">{{ (selectedChain.cpsr || selectedChain).docNo }}</span>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <div>
+                <span class="text-slate-400 block text-[10px] font-bold">NGÀY & GIỜ</span>
+                <span class="font-medium">{{ (selectedChain.cpsr || selectedChain).reqDate }} {{ (selectedChain.cpsr || selectedChain).reqTime }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px] font-bold">NGƯỜI YÊU CẦU</span>
+                <span class="font-medium text-slate-800 dark:text-slate-100">{{ (selectedChain.cpsr || selectedChain).reqBy }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px] font-bold">THIẾT BỊ / MÁY</span>
+                <span class="font-medium">{{ (selectedChain.cpsr || selectedChain).printTech }} - {{ (selectedChain.cpsr || selectedChain).machineName }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 block text-[10px] font-bold">ƯU TIÊN</span>
+                <span class="font-bold" :class="(selectedChain.cpsr || selectedChain).priority === 'Hỗ trợ ngay' ? 'text-rose-500' : 'text-amber-500'">{{ (selectedChain.cpsr || selectedChain).priority || 'N/A' }}</span>
+              </div>
+            </div>
+            <div>
+              <span class="text-slate-400 block text-[10px] font-bold">MÔ TẢ SỰ CỐ:</span>
+              <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-mono text-[11px] leading-relaxed">{{ (selectedChain.cpsr || selectedChain).problem }}</p>
+            </div>
+          </div>
+
+          <!-- BƯỚC 2: CPST -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm">2. Phản Hồi Kỹ Thuật (CPST)</span>
+              <span v-if="selectedChain.cpst" class="font-mono font-bold text-xs bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded">{{ selectedChain.cpst.docNo }}</span>
+              <span v-else class="text-xs text-slate-400">Chưa tạo phản hồi</span>
+            </div>
+
+            <div v-if="selectedChain.cpst" class="space-y-3">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">KTV TIẾP NHẬN</span>
+                  <span class="font-medium text-slate-800 dark:text-slate-100">{{ selectedChain.cpst.recvBy }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">TRẠNG THÁI KT</span>
+                  <span class="font-bold text-emerald-500">{{ selectedChain.cpst.chkStatus }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">THỜI GIAN GỬI</span>
+                  <span class="font-medium">{{ selectedChain.cpst.submittedAt ? new Date(selectedChain.cpst.submittedAt).toLocaleString('vi-VN') : '-' }}</span>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">NGUYÊN NHÂN GỐC:</span>
+                  <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">{{ selectedChain.cpst.rootCause || 'N/A' }}</p>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">HÀNH ĐỘNG KHẮC PHỤC:</span>
+                  <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">{{ selectedChain.cpst.actionTaken || 'N/A' }}</p>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="flex flex-col sm:flex-row items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 gap-3">
+              <span class="text-amber-500 font-medium">Yêu cầu này đang chờ kỹ thuật phản hồi.</span>
+              <a :href="'/technical-feedback?cpsr=' + encodeURIComponent((selectedChain.cpsr || selectedChain).docNo)" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition">
+                + Tạo Phản Hồi CPST Ngay →
+              </a>
+            </div>
+          </div>
+
+          <!-- BƯỚC 3: CPSF -->
+          <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
+            <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
+              <span class="font-bold text-purple-600 dark:text-purple-400 text-sm">3. Nghiệm Thu & Bàn Giao (CPSF)</span>
+              <span v-if="selectedChain.cpsf" class="font-mono font-bold text-xs bg-purple-500/10 text-purple-500 px-2 py-0.5 rounded">{{ selectedChain.cpsf.docNo }}</span>
+              <span v-else class="text-xs text-slate-400">Chưa bàn giao</span>
+            </div>
+
+            <div v-if="selectedChain.cpsf" class="space-y-3">
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">CHẤT LƯỢNG IN</span>
+                  <span class="font-bold text-xs" :class="selectedChain.cpsf.chkQuality === 'Đạt' ? 'text-emerald-500' : 'text-rose-500'">{{ selectedChain.cpsf.chkQuality }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">WORK ORDER</span>
+                  <span class="font-mono font-medium">{{ selectedChain.cpsf.workOrder || '-' }}</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">TỔNG SL / PHẾ</span>
+                  <span class="font-mono font-medium">{{ selectedChain.cpsf.woTotalQty }} / {{ selectedChain.cpsf.wasteQty }} ({{ selectedChain.cpsf.wastePercent || '0%' }})</span>
+                </div>
+                <div>
+                  <span class="text-slate-400 block text-[10px] font-bold">ĐẠI DIỆN SX KÝ NHẬN</span>
+                  <span class="font-medium text-slate-800 dark:text-slate-100">{{ selectedChain.cpsf.prodMgr }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-else-if="selectedChain.cpst" class="flex flex-col sm:flex-row items-center justify-between p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 gap-3">
+              <span class="text-purple-400 font-medium">Kỹ thuật đã phản hồi. Chờ sản xuất nghiệm thu bàn giao.</span>
+              <a :href="'/confirm-request?cpst=' + encodeURIComponent(selectedChain.cpst.docNo)" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow transition">
+                + Xác Nhận Bàn Giao CPSF Ngay →
+              </a>
+            </div>
+            <div v-else class="text-slate-400 italic">Cần hoàn thành bước 2 (CPST) trước khi bàn giao.</div>
+          </div>
+        </div>
+
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex justify-end">
+          <button @click="closeModal('modal-chain-detail')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
+        </div>
+      </div>
+    </div>
+
     <!-- ADD MACHINE MODAL -->
     <div id="modal-add-machine" v-if="showAddMachineModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-add-machine')">
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
@@ -1499,6 +1713,25 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           }
         };
 
+        // Split Forms (CPSR, CPST, CPSF, Chain)
+        const splitTab = ref('chain');
+        const chainList = ref([]);
+        const cpsrList = ref([]);
+        const cpstList = ref([]);
+        const cpsfList = ref([]);
+        const splitFilter = ref({ search: '', status: 'ALL' });
+        const selectedChain = ref(null);
+        const showChainModal = ref(false);
+        let splitTable = null;
+
+        const currentSplitCount = computed(() => {
+          if (splitTab.value === 'chain') return chainList.value.length;
+          if (splitTab.value === 'cpsr') return cpsrList.value.length;
+          if (splitTab.value === 'cpst') return cpstList.value.length;
+          if (splitTab.value === 'cpsf') return cpsfList.value.length;
+          return requestsList.value.length;
+        });
+
         // Requests Master Table
         const requestsList = ref([]);
         const reqFilter = ref({ search: '', chkStatus: 'ALL', printTech: 'ALL', priority: 'ALL' });
@@ -1643,8 +1876,14 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           nextTick(() => {
             if (tab === 'overview') loadStats();
             if (tab === 'requests') {
-              if (requestsList.value.length === 0) loadRequests();
-              else { initOrUpdateRequestsTable(); reqTable?.redraw(true); }
+              loadAllSplitData();
+              if (splitTab.value === 'legacy') {
+                if (requestsList.value.length === 0) loadRequests();
+                else { initOrUpdateRequestsTable(); reqTable?.redraw(true); }
+              } else {
+                initOrUpdateSplitTable();
+                splitTable?.redraw(true);
+              }
             }
             if (tab === 'machines') {
               if (machinesFlatList.value.length === 0) loadMachines();
@@ -1662,6 +1901,434 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
               loadCurrentDataset();
             }
           });
+        };
+
+        // =====================================================================
+        // TABULATOR: SPLIT FORMS (CPSR, CPST, CPSF, CHAIN 1-1-1)
+        // =====================================================================
+        const loadChainData = async () => {
+          try {
+            const res = await fetch('/api/cpsr-chain', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              chainList.value = await res.json();
+              if (splitTab.value === 'chain') initOrUpdateSplitTable();
+            }
+          } catch(e) { console.warn('Could not load chain data', e); }
+        };
+
+        const loadCpsrData = async () => {
+          try {
+            const res = await fetch('/api/cpsr', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              cpsrList.value = await res.json();
+              if (splitTab.value === 'cpsr') initOrUpdateSplitTable();
+            }
+          } catch(e) { console.warn('Could not load cpsr data', e); }
+        };
+
+        const loadCpstData = async () => {
+          try {
+            const res = await fetch('/api/cpst', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              cpstList.value = await res.json();
+              if (splitTab.value === 'cpst') initOrUpdateSplitTable();
+            }
+          } catch(e) { console.warn('Could not load cpst data', e); }
+        };
+
+        const loadCpsfData = async () => {
+          try {
+            const res = await fetch('/api/cpsf', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              cpsfList.value = await res.json();
+              if (splitTab.value === 'cpsf') initOrUpdateSplitTable();
+            }
+          } catch(e) { console.warn('Could not load cpsf data', e); }
+        };
+
+        const loadAllSplitData = async () => {
+          await Promise.all([loadChainData(), loadCpsrData(), loadCpstData(), loadCpsfData()]);
+        };
+
+        const switchSplitTab = (tab) => {
+          splitTab.value = tab;
+          splitFilter.value.search = '';
+          splitFilter.value.status = 'ALL';
+          nextTick(() => {
+            if (tab === 'legacy') {
+              initOrUpdateRequestsTable();
+              reqTable?.redraw(true);
+            } else {
+              initOrUpdateSplitTable();
+            }
+          });
+        };
+
+        const initOrUpdateSplitTable = () => {
+          const el = document.getElementById('tabulator-split-forms');
+          if (!el || typeof Tabulator === 'undefined') return;
+
+          let data = [];
+          let columns = [];
+
+          if (splitTab.value === 'chain') {
+            data = chainList.value;
+            columns = [
+              {
+                title: 'Mã CPSR',
+                field: 'cpsr.docNo',
+                minWidth: 140,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  return '<span class="font-mono font-bold text-sky-400">' + (r.cpsr?.docNo || '') + '</span>';
+                }
+              },
+              {
+                title: 'Thời Gian',
+                field: 'cpsr.reqDate',
+                minWidth: 120,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  return '<div class="text-[11px] text-slate-300 font-medium">' + (r.cpsr?.reqDate || '') + ' <span class="font-mono text-slate-500 block text-[10px]">' + (r.cpsr?.reqTime || '') + '</span></div>';
+                }
+              },
+              {
+                title: 'Người YC / Máy In',
+                field: 'cpsr.reqBy',
+                minWidth: 160,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  return '<div><strong class="text-slate-200">' + (r.cpsr?.reqBy || '') + '</strong><span class="block text-[10px] text-slate-400 font-mono">' + (r.cpsr?.printTech || '') + ' - ' + (r.cpsr?.machineName || '') + '</span></div>';
+                }
+              },
+              {
+                title: 'Mã CPST (Phản Hồi)',
+                field: 'cpst.docNo',
+                minWidth: 140,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  if (!r.cpst) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">Chưa phản hồi</span>';
+                  return '<span class="font-mono font-bold text-emerald-400">' + r.cpst.docNo + '</span>';
+                }
+              },
+              {
+                title: 'Trạng Thái KT',
+                field: 'cpst.chkStatus',
+                minWidth: 120,
+                hozAlign: 'center',
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  if (!r.cpst) return '<span class="text-slate-500">-</span>';
+                  const s = r.cpst.chkStatus || '';
+                  if (s === 'Đã khắc phục') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">Đã khắc phục</span>';
+                  if (s === 'Hư hỏng nặng') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-400 border border-rose-500/20">Hư hỏng nặng</span>';
+                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20">' + s + '</span>';
+                }
+              },
+              {
+                title: 'Mã CPSF (Bàn Giao)',
+                field: 'cpsf.docNo',
+                minWidth: 140,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  if (!r.cpsf) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-800 text-slate-400 border border-slate-700">Chưa bàn giao</span>';
+                  return '<span class="font-mono font-bold text-purple-400">' + r.cpsf.docNo + '</span>';
+                }
+              },
+              {
+                title: 'Chất Lượng In',
+                field: 'cpsf.chkQuality',
+                minWidth: 90,
+                hozAlign: 'center',
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  if (!r.cpsf) return '<span class="text-slate-500">-</span>';
+                  const q = r.cpsf.chkQuality || '';
+                  return q === 'Đạt' ? '<span class="text-emerald-400 font-bold">ĐẠT</span>' : '<span class="text-rose-400 font-bold">CHƯA ĐẠT</span>';
+                }
+              },
+              {
+                title: 'Tiến Độ Chuỗi',
+                hozAlign: 'center',
+                minWidth: 110,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  const c = (r.cpsr ? 1 : 0) + (r.cpst ? 1 : 0) + (r.cpsf ? 1 : 0);
+                  if (c === 3) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">🟢 3/3 Hoàn tất</span>';
+                  if (c === 2) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">🟡 2/3 Đã xử lý</span>';
+                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-400 border border-sky-500/30">🔵 1/3 Yêu cầu</span>';
+                }
+              },
+              {
+                title: 'Thao Tác',
+                hozAlign: 'right',
+                minWidth: 150,
+                headerSort: false,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  let h = '<div class="flex items-center justify-end gap-1.5">';
+                  h += '<button class="btn-chain-view px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-[11px] font-bold transition cursor-pointer">Xem</button>';
+                  if (!r.cpst) {
+                    h += '<a href="/technical-feedback?cpsr=' + encodeURIComponent(r.cpsr?.docNo || '') + '" target="_blank" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition cursor-pointer">+ CPST</a>';
+                  } else if (!r.cpsf) {
+                    h += '<a href="/confirm-request?cpst=' + encodeURIComponent(r.cpst.docNo) + '" target="_blank" class="px-2 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold transition cursor-pointer">+ CPSF</a>';
+                  }
+                  h += '</div>';
+                  return h;
+                },
+                cellClick: (e, cell) => {
+                  if (e.target.closest('.btn-chain-view')) {
+                    openChainDetailModal(cell.getRow().getData());
+                  }
+                }
+              }
+            ];
+          } else if (splitTab.value === 'cpsr') {
+            data = cpsrList.value;
+            columns = [
+              { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-sky-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Ngày Giờ', field: 'reqDate', minWidth: 120, formatter: cell => { const r = cell.getRow().getData(); return r.reqDate + ' ' + (r.reqTime || ''); } },
+              { title: 'Người Yêu Cầu', field: 'reqBy', minWidth: 150 },
+              { title: 'Công Nghệ / Máy', field: 'machineName', minWidth: 150, formatter: cell => { const r = cell.getRow().getData(); return (r.printTech || '') + ' - ' + (r.machineName || ''); } },
+              { title: 'Mô Tả Sự Cố', field: 'problem', minWidth: 180, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Trạng Thái', field: 'machineStatus', minWidth: 120, hozAlign: 'center', formatter: cell => '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-800 text-slate-300">' + (cell.getValue() || '-') + '</span>' },
+              { title: 'Mức Ưu Tiên', field: 'priority', minWidth: 110, hozAlign: 'center', formatter: cell => {
+                const p = cell.getValue() || '';
+                return p === 'Hỗ trợ ngay' ? '<span class="text-rose-400 font-bold">Hỗ trợ ngay</span>' : (p === 'Chạy tạm' ? '<span class="text-amber-400 font-bold">Chạy tạm</span>' : '<span class="text-slate-400">' + p + '</span>');
+              }},
+              {
+                title: 'Thao Tác',
+                hozAlign: 'right',
+                minWidth: 130,
+                headerSort: false,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  return '<div class="flex items-center justify-end gap-1.5">' +
+                    '<button class="btn-split-view px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-[11px] font-bold">Xem</button>' +
+                    '<a href="/technical-feedback?cpsr=' + encodeURIComponent(r.docNo) + '" target="_blank" class="px-2 py-1 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold">+ CPST</a>' +
+                    '<button class="btn-split-del p-1 rounded text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button>' +
+                  '</div>';
+                },
+                cellClick: (e, cell) => {
+                  const r = cell.getRow().getData();
+                  if (e.target.closest('.btn-split-view')) openChainDetailModal({ cpsr: r });
+                  else if (e.target.closest('.btn-split-del')) deleteSplitRecord('cpsr', r.id);
+                }
+              }
+            ];
+          } else if (splitTab.value === 'cpst') {
+            data = cpstList.value;
+            columns = [
+              { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-emerald-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Mã CPSR Gốc', field: 'cpsrDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-sky-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'KTV Tiếp Nhận', field: 'recvBy', minWidth: 140 },
+              { title: 'Trạng Thái', field: 'chkStatus', minWidth: 120, hozAlign: 'center', formatter: cell => {
+                const s = cell.getValue() || '';
+                return s === 'Đã khắc phục' ? '<span class="text-emerald-400 font-bold">Đã khắc phục</span>' : (s === 'Hư hỏng nặng' ? '<span class="text-rose-400 font-bold">Hư hỏng nặng</span>' : '<span class="text-amber-400 font-bold">' + s + '</span>');
+              }},
+              { title: 'Nguyên Nhân Gốc', field: 'rootCause', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Hành Động Khắc Phục', field: 'actionTaken', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              {
+                title: 'Thao Tác',
+                hozAlign: 'right',
+                minWidth: 130,
+                headerSort: false,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  return '<div class="flex items-center justify-end gap-1.5">' +
+                    '<button class="btn-split-view px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-[11px] font-bold">Xem</button>' +
+                    '<a href="/confirm-request?cpst=' + encodeURIComponent(r.docNo) + '" target="_blank" class="px-2 py-1 rounded bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold">+ CPSF</a>' +
+                    '<button class="btn-split-del p-1 rounded text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button>' +
+                  '</div>';
+                },
+                cellClick: (e, cell) => {
+                  const r = cell.getRow().getData();
+                  if (e.target.closest('.btn-split-view')) openChainDetailModal({ cpst: r, cpsr: { docNo: r.cpsrDocNo } });
+                  else if (e.target.closest('.btn-split-del')) deleteSplitRecord('cpst', r.id);
+                }
+              }
+            ];
+          } else if (splitTab.value === 'cpsf') {
+            data = cpsfList.value;
+            columns = [
+              { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-purple-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Mã CPST', field: 'cpstDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-emerald-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Chất Lượng', field: 'chkQuality', minWidth: 100, hozAlign: 'center', formatter: cell => (cell.getValue() === 'Đạt' ? '<span class="text-emerald-400 font-bold">ĐẠT</span>' : '<span class="text-rose-400 font-bold">CHƯA ĐẠT</span>') },
+              { title: 'Work Order', field: 'workOrder', minWidth: 110, formatter: cell => '<span class="font-mono">' + (cell.getValue() || '-') + '</span>' },
+              { title: 'Tổng SL', field: 'woTotalQty', minWidth: 90, hozAlign: 'right', formatter: cell => Number(cell.getValue() || 0).toLocaleString() },
+              { title: 'Phế & Tỷ Lệ', field: 'wasteQty', minWidth: 110, hozAlign: 'right', formatter: cell => { const r = cell.getRow().getData(); return r.wasteQty + ' (' + (r.wastePercent || '0%') + ')'; } },
+              { title: 'Đơn Vị', field: 'wasteUnit', minWidth: 70, hozAlign: 'center' },
+              { title: 'Đại Diện SX', field: 'prodMgr', minWidth: 140 },
+              {
+                title: 'Thao Tác',
+                hozAlign: 'right',
+                minWidth: 100,
+                headerSort: false,
+                formatter: () => '<div class="flex items-center justify-end gap-1.5"><button class="btn-split-view px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-sky-400 text-[11px] font-bold">Xem</button><button class="btn-split-del p-1 rounded text-slate-500 hover:text-rose-400"><i class="fa-solid fa-trash-can"></i></button></div>',
+                cellClick: (e, cell) => {
+                  const r = cell.getRow().getData();
+                  if (e.target.closest('.btn-split-view')) openChainDetailModal({ cpsf: r, cpst: { docNo: r.cpstDocNo }, cpsr: { docNo: r.cpsrDocNo } });
+                  else if (e.target.closest('.btn-split-del')) deleteSplitRecord('cpsf', r.id);
+                }
+              }
+            ];
+          }
+
+          if (splitTable) {
+            splitTable.destroy();
+            splitTable = null;
+          }
+
+          splitTable = new Tabulator('#tabulator-split-forms', {
+            data: data,
+            layout: 'fitColumns',
+            responsiveLayout: 'collapse',
+            pagination: 'local',
+            paginationSize: 10,
+            paginationSizeSelector: [10, 20, 50, 100],
+            placeholder: '<span>Không có dữ liệu trong bảng này</span>',
+            columns: columns
+          });
+
+          splitTable.on('rowDblClick', (e, row) => {
+            openChainDetailModal(row.getData());
+          });
+
+          applySplitFilters();
+        };
+
+        const applySplitFilters = () => {
+          if (!splitTable) return;
+          splitTable.clearFilter();
+          const filters = [];
+          const q = (splitFilter.value.search || '').trim().toLowerCase();
+          const st = splitFilter.value.status;
+
+          if (q) {
+            if (splitTab.value === 'chain') {
+              filters.push([
+                { field: 'cpsr.docNo', type: 'like', value: q },
+                { field: 'cpsr.reqBy', type: 'like', value: q },
+                { field: 'cpsr.machineName', type: 'like', value: q },
+                { field: 'cpst.docNo', type: 'like', value: q },
+                { field: 'cpsf.docNo', type: 'like', value: q }
+              ]);
+            } else {
+              filters.push([
+                { field: 'docNo', type: 'like', value: q },
+                { field: 'reqBy', type: 'like', value: q },
+                { field: 'recvBy', type: 'like', value: q },
+                { field: 'prodMgr', type: 'like', value: q },
+                { field: 'machineName', type: 'like', value: q }
+              ]);
+            }
+          }
+
+          if (st && st !== 'ALL') {
+            if (splitTab.value === 'chain') {
+              filters.push({
+                field: 'id',
+                type: (h, r, rowData) => {
+                  const count = (rowData.cpsr ? 1 : 0) + (rowData.cpst ? 1 : 0) + (rowData.cpsf ? 1 : 0);
+                  if (st === '3/3') return count === 3;
+                  if (st === '2/3') return count === 2;
+                  if (st === '1/3') return count === 1;
+                  return true;
+                },
+                value: st
+              });
+            } else if (splitTab.value === 'cpsr') {
+              filters.push({ field: 'machineStatus', type: '=', value: st });
+            } else if (splitTab.value === 'cpst') {
+              filters.push({ field: 'chkStatus', type: '=', value: st });
+            } else if (splitTab.value === 'cpsf') {
+              filters.push({ field: 'chkQuality', type: '=', value: st });
+            }
+          }
+
+          if (filters.length > 0) splitTable.setFilter(filters);
+        };
+
+        const openChainDetailModal = async (data) => {
+          if (!data) return;
+          if (data.cpsr && (data.cpst !== undefined || data.cpsf !== undefined)) {
+            selectedChain.value = data;
+          } else {
+            const doc = data.docNo || data.cpsrDocNo;
+            const found = chainList.value.find(c => c.cpsr?.docNo === doc || c.cpst?.docNo === doc || c.cpsf?.docNo === doc);
+            if (found) {
+              selectedChain.value = found;
+            } else {
+              selectedChain.value = { cpsr: data.cpsr || data, cpst: data.cpst || null, cpsf: data.cpsf || null };
+            }
+          }
+          showChainModal.value = true;
+        };
+
+        const deleteSplitRecord = async (type, id) => {
+          if (!confirm('Bạn có chắc chắn muốn xóa bản ghi này?')) return;
+          try {
+            const res = await fetch('/api/' + type + '/' + id, { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              showToast('Đã xóa thành công!');
+              await loadAllSplitData();
+            } else {
+              showToast('Xóa thất bại', true);
+            }
+          } catch(e) {
+            showToast('Lỗi khi xóa: ' + e.message, true);
+          }
+        };
+
+        const exportCurrentTabExcel = () => {
+          if (splitTab.value === 'legacy') {
+            exportRequestsExcel();
+            return;
+          }
+          let rows = [];
+          let filename = 'Checkpoint_';
+          if (splitTab.value === 'chain') {
+            filename += 'Chain_1-1-1';
+            rows = chainList.value.map(r => ({
+              'Mã CPSR': r.cpsr?.docNo,
+              'Ngày Yêu Cầu': r.cpsr?.reqDate,
+              'Giờ Yêu Cầu': r.cpsr?.reqTime,
+              'Người Yêu Cầu': r.cpsr?.reqBy,
+              'Công Nghệ': r.cpsr?.printTech,
+              'Tên Máy': r.cpsr?.machineName,
+              'Sự Cố': r.cpsr?.problem,
+              'Mã CPST': r.cpst?.docNo || 'Chưa phản hồi',
+              'KTV Tiếp Nhận': r.cpst?.recvBy || '-',
+              'Trạng Thái KT': r.cpst?.chkStatus || '-',
+              'Mã CPSF': r.cpsf?.docNo || 'Chưa bàn giao',
+              'Chất Lượng In': r.cpsf?.chkQuality || '-',
+              'Work Order': r.cpsf?.workOrder || '-'
+            }));
+          } else if (splitTab.value === 'cpsr') {
+            filename += 'CPSR';
+            rows = cpsrList.value;
+          } else if (splitTab.value === 'cpst') {
+            filename += 'CPST';
+            rows = cpstList.value;
+          } else if (splitTab.value === 'cpsf') {
+            filename += 'CPSF';
+            rows = cpsfList.value;
+          }
+
+          if (rows.length === 0) {
+            showToast('Không có dữ liệu để xuất', true);
+            return;
+          }
+
+          try {
+            const ws = XLSX.utils.json_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, splitTab.value.toUpperCase());
+            XLSX.writeFile(wb, filename + '_' + new Date().toISOString().slice(0, 10) + '.xlsx');
+            showToast('Đã xuất Excel thành công!');
+          } catch(e) {
+            showToast('Lỗi xuất Excel: ' + e.message, true);
+          }
         };
 
         // =====================================================================
@@ -2819,6 +3486,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           currentTheme.value = savedTheme;
 
           window.addEventListener('resize', () => {
+            splitTable?.redraw(true);
             reqTable?.redraw(true);
             machinesTable?.redraw(true);
             empTable?.redraw(true);
@@ -2829,6 +3497,7 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           loadStats();
           loadMachines();
           loadRequests();
+          loadAllSplitData();
           loadEmployees();
           loadPublicFormStatus();
           if (currentUser.value.role === 'ADMIN' || (currentUser.value.permissions && currentUser.value.permissions.canAccessControlPanel)) {
@@ -2859,6 +3528,21 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
           requestsList,
           reqFilter,
           selectedTicket,
+          splitTab,
+          chainList,
+          cpsrList,
+          cpstList,
+          cpsfList,
+          splitFilter,
+          currentSplitCount,
+          selectedChain,
+          showChainModal,
+          switchSplitTab,
+          applySplitFilters,
+          openChainDetailModal,
+          deleteSplitRecord,
+          exportCurrentTabExcel,
+          loadAllSplitData,
           machineCatalog,
           machinesFlatList,
           machineTechFilter,
