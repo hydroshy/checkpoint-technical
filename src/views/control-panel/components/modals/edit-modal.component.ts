@@ -166,8 +166,15 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nguyên Nhân Gốc (Root Cause)</label>
-              <textarea v-model="editForm.rootCause" rows="2" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"></textarea>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nguyên Nhân Gốc (Root Cause - 4M)</label>
+              <select v-model="editForm.rootCause" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
+                <option value="" disabled>-- Chọn nguyên nhân gốc rễ (4M) --</option>
+                <option value="Man">Man (Con người)</option>
+                <option value="Machine">Machine (Máy móc / Thiết bị)</option>
+                <option value="Material">Material (Nguyên vật liệu)</option>
+                <option value="Method">Method (Phương pháp / Quy trình)</option>
+                <option v-if="editForm.rootCause && !['Man', 'Machine', 'Material', 'Method'].includes(editForm.rootCause)" :value="editForm.rootCause">{{ editForm.rootCause }}</option>
+              </select>
             </div>
 
             <div>

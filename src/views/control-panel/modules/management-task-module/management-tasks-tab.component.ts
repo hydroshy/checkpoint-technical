@@ -5,8 +5,49 @@ export const CP_MANAGEMENT_TASKS_TAB_HTML = `        <!-- ======================
         <div v-show="activeTab === 'requests'" class="space-y-5 management-task-container">
           <!-- Top Header & Primary Action Buttons -->
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
-            <div>
+            <div class="flex items-center gap-3 flex-wrap">
               <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Quản Lý Phiếu Kỹ Thuật</h1>
+              <!-- Công tắc Bật/Tắt Form Public (/form-request) -->
+              <div class="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-xs" title="Bật/Tắt Form Public (/form-request)">
+                <span class="text-xs font-semibold text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
+                  <i class="fa-solid fa-share-nodes text-sky-500"></i>
+                  <span>Form Public:</span>
+                  <span class="font-bold text-[11px]" :class="isPublicFormEnabled ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'">
+                    {{ isPublicFormEnabled ? 'MỞ' : 'ĐÓNG' }}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  @click="togglePublicForm"
+                  :disabled="togglingPublicForm"
+                  :title="isPublicFormEnabled ? 'Nhấn để tắt form công khai' : 'Nhấn để bật form công khai'"
+                  class="relative inline-flex h-5 w-10 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none select-none"
+                  :class="isPublicFormEnabled ? 'bg-emerald-600' : 'bg-slate-300 dark:bg-slate-600'"
+                >
+                  <span
+                    class="pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow-sm ring-0 transition duration-200 ease-in-out"
+                    :class="isPublicFormEnabled ? 'translate-x-5' : 'translate-x-0'"
+                  ></span>
+                </button>
+                <button
+                  type="button"
+                  v-if="isPublicFormEnabled"
+                  @click="copyPublicFormLink"
+                  class="text-slate-400 hover:text-sky-500 text-xs ml-0.5 cursor-pointer"
+                  title="Sao chép link Form Public"
+                >
+                  <i :class="copySuccess ? 'fa-solid fa-check text-emerald-500' : 'fa-regular fa-copy'"></i>
+                </button>
+                <a
+                  v-if="isPublicFormEnabled"
+                  :href="publicFormUrl"
+                  target="_blank"
+                  class="text-slate-400 hover:text-sky-500 text-xs cursor-pointer"
+                  title="Mở form công khai"
+                >
+                  <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                </a>
+              </div>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <a

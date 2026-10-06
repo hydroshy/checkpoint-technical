@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "id": "70105fa0-9877-4e53-9609-f02b39934a1f",
+    "docNo": "CPSF-20261006-002",
+    "cpstId": "4e94301f-518e-4413-88fc-17dc32713c7e",
+    "cpstDocNo": "CPST-20261006-001",
+    "cpsrDocNo": "CPSR-20261006-004",
+    "chkQuality": "Đạt",
+    "workOrder": "123123",
+    "woTotalQty": 12,
+    "wasteQty": 3,
+    "wasteUnit": "PCS",
+    "wastePercent": "25.00%",
+    "prodMgr": "Lê Minh Hoàng - VN5117",
+    "submittedAt": "2026-10-06T14:57:23.382Z",
+    "createdBy": "admin",
+    "createdAt": "2026-10-06T14:57:23.382Z",
+    "updatedAt": "2026-10-06T14:57:23.382Z"
+  },
+  {
+    "id": "6266c86f-ff8e-47b8-9493-664bdfe4f25e",
+    "docNo": "CPSF-20261006-001",
+    "cpstId": "eb1d45d1-c0ce-4571-9ee0-e326d62b3254",
+    "cpstDocNo": "CPST-20261006-002",
+    "cpsrDocNo": "CPSR-20261006-005",
+    "chkQuality": "Đạt",
+    "workOrder": "WS123123",
+    "woTotalQty": 123,
+    "wasteQty": 1,
+    "wasteUnit": "Mét",
+    "wastePercent": "0.81%",
+    "prodMgr": "Lê Minh Hoàng - VN5117",
+    "submittedAt": "2026-10-06T14:57:09.959Z",
+    "createdBy": "admin",
+    "createdAt": "2026-10-06T14:57:09.959Z",
+    "updatedAt": "2026-10-06T14:57:09.959Z"
+  }
+]

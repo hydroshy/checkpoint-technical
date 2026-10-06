@@ -10,6 +10,8 @@ import { CP_LINK_MODAL_HTML } from '../src/views/control-panel/components/modals
 import { CP_CREATE_CPS_MODAL_HTML } from '../src/views/control-panel/components/modals/create-cps-modal.component';
 import { CP_ASSIGN_MODAL_HTML } from '../src/views/control-panel/components/modals/assign-modal.component';
 import { CP_ENTITY_MODALS_HTML } from '../src/views/control-panel/components/modals/entity-modals.component';
+import { CP_MANAGEMENT_TASKS_TAB_HTML } from '../src/views/control-panel/modules/management-task-module';
+import { TECHNICAL_FEEDBACK_HTML } from '../src/views/technical-feedback.view';
 import { CONTROL_PANEL_SCRIPT } from '../src/views/control-panel/scripts/control-panel.script';
 
 console.log('🧪 BẮT ĐẦU KIỂM THỬ GIAO DIỆN & TƯƠNG TÁC (FRONTEND NAVIGATION & MODALS SPEC):');
@@ -19,11 +21,10 @@ console.log('🧪 BẮT ĐẦU KIỂM THỬ GIAO DIỆN & TƯƠNG TÁC (FRONTEND
 // =========================================================================
 console.log('\n--- 1. Kiểm tra Đầy Đủ Các Mục Menu Quản Lý Trên Sidebar Control Panel ---');
 
-// Kiểm tra 4 nhóm quản trị và các mục menu chính
+// Kiểm tra 4 nhóm quản trị và các mục menu chính (Report Technical lên đầu, bỏ Overview)
 const expectedTabs = [
+  { tab: 'report-technical', label: 'Report Technical' },
   { tab: 'requests', label: 'Quản lý phiếu kỹ thuật' },
-  { tab: 'overview', label: 'Tổng quan & phân tích' },
-  { tab: 'report-technical', label: 'Báo cáo kỹ thuật' },
   { tab: 'assign-tasks', label: 'Phân công kỹ thuật' },
   { tab: 'machines', label: 'Máy móc & thiết bị' },
   { tab: 'employees', label: 'Nhân viên kỹ thuật' },
@@ -38,6 +39,16 @@ for (const item of expectedTabs) {
   );
   console.log(`  ✅ [PASS] Sidebar chứa mục: [${item.tab}] - ${item.label}`);
 }
+
+// Kiểm tra lược bỏ Tổng quan & phân tích khỏi sidebar
+assert.ok(!CP_SIDEBAR_HTML.includes("switchTab('overview')"), 'Sidebar đã lược bỏ mục Tổng quan & phân tích');
+console.log('  ✅ [PASS] Sidebar đã loại bỏ hoàn toàn mục Tổng quan & phân tích');
+
+// Kiểm tra vị trí: Report Technical đứng trước Quản lý phiếu kỹ thuật
+const reportTechIdx = CP_SIDEBAR_HTML.indexOf("switchTab('report-technical')");
+const requestsIdx = CP_SIDEBAR_HTML.indexOf("switchTab('requests')");
+assert.ok(reportTechIdx < requestsIdx, 'Report Technical phải nằm ở vị trí đầu tiên trong sidebar');
+console.log('  ✅ [PASS] Report Technical nằm ở vị trí đầu tiên trong sidebar trái');
 
 // Kiểm tra 3 link mở form tạo nhanh phiếu
 assert.ok(CP_SIDEBAR_HTML.includes('href="/form-request"'), 'Sidebar có liên kết mở form CPSR');
@@ -186,5 +197,32 @@ assert.ok(CONTROL_PANEL_SCRIPT.includes("'Mã CPSR':"), 'Export Excel có cột 
 assert.ok(CONTROL_PANEL_SCRIPT.includes("'Mã CPST':"), 'Export Excel có cột Mã CPST');
 assert.ok(CONTROL_PANEL_SCRIPT.includes("'Mã CPSF':"), 'Export Excel có cột Mã CPSF');
 console.log('  ✅ [PASS] Xuất Excel đồng bộ đầy đủ 4 cột mã phiếu');
+
+// =========================================================================
+// PHẦN 5: KIỂM TRA FORM CPST CHỌN 4M & TOGGLE PUBLIC FORM TRÊN QUẢN LÝ PHIẾU
+// =========================================================================
+console.log('\n--- 5. Kiểm tra Form CPST Chọn 4M & Toggle Public Form trên Quản Lý Phiếu ---');
+
+// 5.1 Kiểm tra Form CPST (/technical-feedback) có dropdown chọn 4M root_cause
+assert.ok(TECHNICAL_FEEDBACK_HTML.includes('v-model="form.rootCause"'), 'Form CPST có v-model form.rootCause');
+assert.ok(TECHNICAL_FEEDBACK_HTML.includes('<select'), 'Form CPST sử dụng dropdown select cho root_cause');
+assert.ok(TECHNICAL_FEEDBACK_HTML.includes('value="Man"'), 'Form CPST có option Man');
+assert.ok(TECHNICAL_FEEDBACK_HTML.includes('value="Machine"'), 'Form CPST có option Machine');
+assert.ok(TECHNICAL_FEEDBACK_HTML.includes('value="Material"'), 'Form CPST có option Material');
+assert.ok(TECHNICAL_FEEDBACK_HTML.includes('value="Method"'), 'Form CPST có option Method');
+console.log('  ✅ [PASS] Form CPST (/technical-feedback) có dropdown chọn 4M (Man, Machine, Material, Method)');
+
+// 5.2 Kiểm tra Modal CPST (edit-modal) có dropdown chọn 4M root_cause
+assert.ok(CP_EDIT_MODAL_HTML.includes('v-model="editForm.rootCause"'), 'Modal CPST có v-model editForm.rootCause');
+assert.ok(CP_EDIT_MODAL_HTML.includes('value="Man"'), 'Modal CPST có option Man');
+assert.ok(CP_EDIT_MODAL_HTML.includes('value="Machine"'), 'Modal CPST có option Machine');
+assert.ok(CP_EDIT_MODAL_HTML.includes('value="Material"'), 'Modal CPST có option Material');
+assert.ok(CP_EDIT_MODAL_HTML.includes('value="Method"'), 'Modal CPST có option Method');
+console.log('  ✅ [PASS] Modal CPST có dropdown chọn 4M (Man, Machine, Material, Method)');
+
+// 5.3 Kiểm tra công tắc Bật/Tắt Form Public chuyển vào header/toolbar của Quản Lý Phiếu Kỹ Thuật
+assert.ok(CP_MANAGEMENT_TASKS_TAB_HTML.includes('togglePublicForm'), 'Toolbar Quản Lý Phiếu Kỹ Thuật có nút togglePublicForm');
+assert.ok(CP_MANAGEMENT_TASKS_TAB_HTML.includes('isPublicFormEnabled'), 'Toolbar Quản Lý Phiếu Kỹ Thuật có trạng thái isPublicFormEnabled');
+console.log('  ✅ [PASS] Công tắc Bật/Tắt Form Public đã được tích hợp vào header/toolbar của Quản Lý Phiếu Kỹ Thuật');
 
 console.log('\n🎉 TOÀN BỘ CÁC MỤC KIỂM THỬ GIAO DIỆN & TƯƠNG TÁC ĐÃ ĐẠT CHUẨN XUẤT SẮC 100%!');

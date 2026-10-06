@@ -30,6 +30,15 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               Vận Hành & Phiếu
             </div>
             <button
+              @click="switchTab('report-technical')"
+              :class="{ active: activeTab === 'report-technical' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+              title="Report Technical"
+            >
+              <i class="fa-solid fa-chart-line w-4 text-center text-xs text-emerald-500"></i>
+              <span class="truncate">Report Technical</span>
+            </button>
+            <button
               @click="switchTab('requests')"
               :class="{ active: activeTab === 'requests' }"
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
@@ -43,23 +52,6 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               <a href="/technical-feedback"></a>
               <a href="/confirm-request"></a>
             </span>
-            <button
-              @click="switchTab('overview')"
-              :class="{ active: activeTab === 'overview' }"
-              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
-            >
-              <i class="fa-solid fa-chart-pie w-4 text-center text-xs text-indigo-500"></i>
-              <span class="truncate">Tổng quan & phân tích</span>
-            </button>
-            <button
-              @click="switchTab('report-technical')"
-              :class="{ active: activeTab === 'report-technical' }"
-              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
-              title="Report Technical"
-            >
-              <i class="fa-solid fa-chart-line w-4 text-center text-xs text-emerald-500"></i>
-              <span class="truncate">Báo cáo kỹ thuật</span>
-            </button>
             <button
               @click="switchTab('assign-tasks')"
               :class="{ active: activeTab === 'assign-tasks' }"

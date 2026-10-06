@@ -14,6 +14,7 @@ const tests = [
   'test/cpsr-display-and-edit.spec.ts',
   'test/dynamic-downtime.spec.ts',
   'test/ui-popup-cleanup.spec.ts',
+  'test/report-technical-layout-4m-gantt.spec.ts',
 ];
 
 console.log('================================================================');

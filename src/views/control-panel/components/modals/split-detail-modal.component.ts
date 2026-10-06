@@ -88,6 +88,73 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                   <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">{{ selectedChain.cpst.actionTaken || 'N/A' }}</p>
                 </div>
               </div>
+
+              <!-- HÌNH ẢNH KỸ THUẬT VIÊN ĐÃ LƯU (CPST) -->
+              <div v-if="(selectedChain.cpst?.photosBefore && selectedChain.cpst.photosBefore.length > 0) || (selectedChain.cpst?.photosAfter && selectedChain.cpst.photosAfter.length > 0) || (selectedChain.photosBefore && selectedChain.photosBefore.length > 0) || (selectedChain.photosAfter && selectedChain.photosAfter.length > 0)" class="pt-3 border-t border-slate-200 dark:border-slate-700/80 space-y-3">
+                <div class="font-bold text-slate-700 dark:text-slate-300 text-xs flex items-center gap-2">
+                  <i class="fa-solid fa-camera text-sky-500"></i> Hình Ảnh Kỹ Thuật Viên Đã Lưu (CPST):
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <!-- Trước sửa chữa -->
+                  <div class="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
+                      <span>📸 Trước Sửa Chữa</span>
+                      <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        {{ ((selectedChain.cpst?.photosBefore || selectedChain.photosBefore) || []).length }} ảnh
+                      </span>
+                    </div>
+                    <div v-if="((selectedChain.cpst?.photosBefore || selectedChain.photosBefore) || []).length === 0" class="text-xs text-slate-400 italic py-3 text-center">
+                      Không có ảnh
+                    </div>
+                    <div v-else class="grid grid-cols-3 gap-2">
+                      <a
+                        v-for="(img, idx) in (selectedChain.cpst?.photosBefore || selectedChain.photosBefore)"
+                        :key="'before-'+idx"
+                        :href="img"
+                        target="_blank"
+                        class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group hover:opacity-90 transition relative"
+                        title="Bấm để xem ảnh phóng to"
+                      >
+                        <img :src="img" class="w-full h-full object-cover" />
+                        <span class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition">
+                          <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        </span>
+                      </a>
+                    </div>
+                  </div>
+
+                  <!-- Sau sửa chữa -->
+                  <div class="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
+                    <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
+                      <span>✨ Sau Sửa Chữa</span>
+                      <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                        {{ ((selectedChain.cpst?.photosAfter || selectedChain.photosAfter) || []).length }} ảnh
+                      </span>
+                    </div>
+                    <div v-if="((selectedChain.cpst?.photosAfter || selectedChain.photosAfter) || []).length === 0" class="text-xs text-slate-400 italic py-3 text-center">
+                      Không có ảnh
+                    </div>
+                    <div v-else class="grid grid-cols-3 gap-2">
+                      <a
+                        v-for="(img, idx) in (selectedChain.cpst?.photosAfter || selectedChain.photosAfter)"
+                        :key="'after-'+idx"
+                        :href="img"
+                        target="_blank"
+                        class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group hover:opacity-90 transition relative"
+                        title="Bấm để xem ảnh phóng to"
+                      >
+                        <img :src="img" class="w-full h-full object-cover" />
+                        <span class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition">
+                          <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        </span>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div v-else class="text-[11px] text-slate-400 italic pt-1">
+                <i class="fa-solid fa-camera text-slate-400 mr-1"></i> Kỹ thuật viên chưa đính kèm hình ảnh cho phiếu CPST này
+              </div>
             </div>
 
             <div v-else class="flex flex-col sm:flex-row items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 gap-3">

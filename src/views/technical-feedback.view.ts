@@ -323,15 +323,20 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-            Nguyên nhân gốc rễ (Root Cause) <span class="text-rose-500">*</span>
+            Nguyên nhân gốc rễ (Root Cause - 4M) <span class="text-rose-500">*</span>
           </label>
-          <textarea
+          <select
             v-model="form.rootCause"
-            rows="3"
-            placeholder="Phân tích nguyên nhân cốt lõi gây ra sự cố kỹ thuật..."
-            class="input-field w-full p-4 rounded-xl text-sm font-medium resize-y"
+            class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium cursor-pointer"
             required
-          ></textarea>
+          >
+            <option value="" disabled>-- Chọn nguyên nhân gốc rễ (4M) --</option>
+            <option value="Man">Man (Con người)</option>
+            <option value="Machine">Machine (Máy móc / Thiết bị)</option>
+            <option value="Material">Material (Nguyên vật liệu)</option>
+            <option value="Method">Method (Phương pháp / Quy trình)</option>
+            <option v-if="form.rootCause && !['Man', 'Machine', 'Material', 'Method'].includes(form.rootCause)" :value="form.rootCause">{{ form.rootCause }}</option>
+          </select>
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
@@ -681,7 +686,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             return;
           }
           if (!form.value.rootCause || !form.value.rootCause.trim()) {
-            errorMessage.value = 'Vui lòng nhập nguyên nhân gốc rễ.';
+            errorMessage.value = 'Vui lòng chọn nguyên nhân gốc rễ (4M).';
             return;
           }
           if (!form.value.actionTaken || !form.value.actionTaken.trim()) {
