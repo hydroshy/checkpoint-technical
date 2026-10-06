@@ -1,4 +1,6 @@
 import * as assert from 'assert';
+import * as fs from 'fs';
+import * as path from 'path';
 import {
   parseCpsStartTime,
   computeCpsDowntime,
@@ -35,6 +37,7 @@ async function runDynamicDowntimeTests() {
   const now = Date.now();
   const start35m = new Date(now - 35 * 60000).toISOString();
 
+  // 2.1 IN_PROGRESS chưa assign: tính động
   const runningDowntime = computeCpsDowntime({
     status: 'IN_PROGRESS',
     createdAt: start35m,
@@ -42,6 +45,7 @@ async function runDynamicDowntimeTests() {
   });
   assert.strictEqual(runningDowntime, 35, 'Downtime phải tính động từ thời điểm bắt đầu đến hiện tại (35 phút)');
 
+  // 2.2 TO_ASSIGN: tính động
   const toAssignDowntime = computeCpsDowntime({
     status: 'TO_ASSIGN',
     createdAt: new Date(now - 20 * 60000).toISOString(),
@@ -49,15 +53,27 @@ async function runDynamicDowntimeTests() {
   });
   assert.strictEqual(toAssignDowntime, 20, 'Downtime TO_ASSIGN phải tính động (20 phút)');
 
-  // Khi có downtime cố định (ví dụ nhập tay trên CPST), giữ nguyên
-  const fixedRunning = computeCpsDowntime({
+  // 2.3 IN_PROGRESS kể cả khi ĐÃ ASSIGN: vẫn tiếp tục tính downtime theo thời gian thực Date.now()
+  const assignedRunning = computeCpsDowntime({
     status: 'IN_PROGRESS',
+    assignedTo: 'Tech A',
+    technician: 'Tech A',
+    assignedAt: new Date(now - 10 * 60000).toISOString(),
     createdAt: start35m,
-    downtime: 50,
-  });
-  assert.strictEqual(fixedRunning, 50, 'Phiếu có downtime cố định phải giữ nguyên giá trị cố định');
+    downtime: 25, // Giá trị downtime đã lưu tại thời điểm gán trước đó không được làm đóng băng
+  } as any);
+  assert.strictEqual(assignedRunning, 35, 'IN_PROGRESS kể cả khi đã assign vẫn tiếp tục tính downtime theo thời gian thực (35 phút)');
 
-  console.log('  ✅ [PASS] Downtime động tăng theo thời gian thực (Date.now()) khi phiếu đang mở');
+  // 2.4 IN_PROGRESS có CPST liên kết: vẫn tiếp tục tính downtime theo thời gian thực Date.now()
+  const inProgressWithCpst = computeCpsDowntime({
+    status: 'IN_PROGRESS',
+    assignedTo: 'Tech B',
+    createdAt: start35m,
+    cpst: { downtime: 15 },
+  } as any);
+  assert.strictEqual(inProgressWithCpst, 35, 'IN_PROGRESS có CPST vẫn tiếp tục tính downtime theo thời gian thực (35 phút)');
+
+  console.log('  ✅ [PASS] Downtime động tăng theo thời gian thực (Date.now()) khi IN_PROGRESS (kể cả khi đã assign)');
 
   // =========================================================================
   // 3. Kiểm thử dừng tính downtime khi OVER_DUE (tính đến deadline)
@@ -110,9 +126,9 @@ async function runDynamicDowntimeTests() {
   console.log('  ✅ [PASS] Phiếu CLOSED dừng tính downtime tại closedAt / giữ downtime cố định');
 
   // =========================================================================
-  // 5. Kiểm thử tích hợp DatabaseService & CpsService
+  // 5. Kiểm thử tích hợp DatabaseService & CpsService khi Assign phiếu
   // =========================================================================
-  console.log('\n--- 5. Kiểm thử tích hợp qua CpsService & DatabaseService ---');
+  console.log('\n--- 5. Kiểm thử tích hợp qua CpsService & DatabaseService khi phân công ---');
   const dbService = new DatabaseService();
   const cpsService = new CpsService(dbService);
 
@@ -141,17 +157,47 @@ async function runDynamicDowntimeTests() {
   assert.ok(cps, 'Tạo CPS thành công');
   assert.strictEqual(cps.status, 'TO_ASSIGN');
 
+  // Phân công kỹ thuật viên (Chuyển sang IN_PROGRESS)
+  const assignedCps = await cpsService.assignTask(cps.id, {
+    assignedTo: 'tech01',
+    assignedToName: 'Kỹ Thuật Viên Trưởng',
+    technician: 'Kỹ Thuật Viên Trưởng',
+  });
+  assert.strictEqual(assignedCps.status, 'IN_PROGRESS', 'Trạng thái chuyển thành IN_PROGRESS sau khi phân công');
+
   // Đọc danh sách qua DatabaseService.getCpsList()
   const list = dbService.getCpsList();
   const found = list.find(c => c.docNo === cps.docNo);
   assert.ok(found, 'Tìm thấy CPS trong danh sách');
-  assert.ok(found!.downtime !== undefined && found!.downtime >= 0, 'Downtime phải được tính toán tự động');
+  assert.strictEqual(found!.status, 'IN_PROGRESS');
+  assert.ok(found!.downtime !== undefined && found!.downtime >= 24, 'Downtime IN_PROGRESS vẫn tính động theo thời gian thực (>= 24 phút)');
 
-  // Dọn dẹp
+  // Dọn dẹp bản ghi kiểm thử
   await dbService.deleteCps(cps.id);
   await dbService.deleteCpsr(cpsrRecord.id);
 
-  console.log('  ✅ [PASS] Tích hợp DatabaseService và CpsService hoạt động đồng bộ hoàn hảo');
+  console.log('  ✅ [PASS] Tích hợp CpsService phân công: IN_PROGRESS tiếp tục tính downtime theo thời gian thực');
+
+  // =========================================================================
+  // 6. Kiểm tra an toàn dữ liệu cơ sở dữ liệu: Tuyệt đối không xóa/truncate
+  // =========================================================================
+  console.log('\n--- 6. Kiểm tra an toàn bảo vệ 100% dữ liệu database (PostgreSQL / JSON) ---');
+  const dbServiceFilePath = path.resolve(__dirname, '../src/modules/database/database.service.ts');
+  const dbServiceCode = fs.readFileSync(dbServiceFilePath, 'utf-8');
+
+  // Tuyệt đối không có lệnh TRUNCATE TABLE hoặc DROP TABLE trong database.service.ts
+  assert.ok(!dbServiceCode.includes('TRUNCATE TABLE'), 'Mã nguồn DatabaseService không được chứa câu lệnh TRUNCATE TABLE');
+  assert.ok(!dbServiceCode.includes('DROP TABLE'), 'Mã nguồn DatabaseService không được chứa câu lệnh DROP TABLE');
+
+  // Kiểm tra master data không bị rỗng sau khi khởi động
+  const users = dbService.getUsers();
+  assert.ok(users.length > 0, 'Dữ liệu users phải được bảo toàn');
+  const machines = dbService.getMachines();
+  assert.ok(machines.length > 0, 'Dữ liệu machines phải được bảo toàn');
+  const requesters = dbService.getRequesters();
+  assert.ok(requesters.length > 0, 'Dữ liệu requesters phải được bảo toàn');
+
+  console.log('  ✅ [PASS] Dữ liệu database được bảo vệ toàn vẹn 100%, không bị xóa hay truncate khi khởi động/test');
   console.log('\n🎉 TOÀN BỘ KIỂM THỬ DYNAMIC DOWNTIME ĐẠT 100%!');
 }
 

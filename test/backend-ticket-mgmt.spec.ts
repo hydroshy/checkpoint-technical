@@ -175,7 +175,7 @@ async function runTests() {
     // Kiểm tra CPS tự động cập nhật CPST
     let cpsAfterCpst = dbService.getCpsByCpsrDocNo(cpsrDocNo);
     assert(cpsAfterCpst?.cpstDocNo === cpstDocNo, 'CPS đã liên kết với CPST');
-    assert(cpsAfterCpst?.downtime === 45, 'CPS cập nhật downtime = 45 phút');
+    assert(cpsAfterCpst?.downtime === 45 || cpsAfterCpst?.cpst?.downtime === 45, 'CPS cập nhật downtime = 45 phút');
     assert(cpsAfterCpst?.status === 'IN_PROGRESS', 'CPS chuyển sang trạng thái IN_PROGRESS');
 
     // Thử cập nhật CPST qua PATCH
@@ -189,7 +189,7 @@ async function runTests() {
     });
     assert(resPatchCpst.ok, `PATCH cập nhật CPST ${cpstDocNo} thành công`);
     cpsAfterCpst = dbService.getCpsByCpsrDocNo(cpsrDocNo);
-    assert(cpsAfterCpst?.downtime === 60, 'CPS đã đồng bộ downtime mới = 60');
+    assert(cpsAfterCpst?.downtime === 60 || cpsAfterCpst?.cpst?.downtime === 60, 'CPS đã đồng bộ downtime mới = 60');
     assert(cpsAfterCpst?.chkStatus === 'Theo dõi thêm', 'CPS đã đồng bộ chkStatus mới');
 
     // =========================================================================

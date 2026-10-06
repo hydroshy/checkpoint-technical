@@ -396,7 +396,7 @@ export function computeCpsDowntime(cps: {
 
   const startTime = parseCpsStartTime(cps);
 
-  // 1. Trạng thái CLOSED: Dừng tính khi phiếu ở trạng thái CLOSED (tính đến closedAt/downtime cố định)
+  // 1. Trạng thái CLOSED: Dừng tính khi phiếu ở trạng thái CLOSED (tính đến closedAt / downtime cố định)
   if (cps.status === 'CLOSED') {
     if (fixedDowntime !== null) {
       return fixedDowntime;
@@ -410,7 +410,7 @@ export function computeCpsDowntime(cps: {
     return 0;
   }
 
-  // 2. Trạng thái OVER_DUE: Dừng tính khi phiếu ở trạng thái OVER_DUE (tính đến deadline)
+  // 2. Trạng thái OVER_DUE: Dừng tính khi phiếu ở trạng thái OVER_DUE (chốt theo deadline)
   if (cps.status === 'OVER_DUE') {
     if (cps.deadline) {
       const deadlineTime = new Date(cps.deadline).getTime();
@@ -427,14 +427,14 @@ export function computeCpsDowntime(cps: {
     return 0;
   }
 
-  // 3. Trạng thái đang chạy (TO_ASSIGN, IN_PROGRESS, OPEN_TASK...):
-  if (fixedDowntime !== null) {
-    return fixedDowntime;
-  }
-
-  // Tính downtime động theo thời gian thực đến Date.now()
+  // 3. Trạng thái đang chạy (TO_ASSIGN, IN_PROGRESS, OPEN_TASK... kể cả khi đã assign):
+  // Luôn tính downtime động theo thời gian thực Date.now() - startTime
   if (startTime) {
     return Math.max(0, Math.round((Date.now() - startTime) / 60000));
+  }
+
+  if (fixedDowntime !== null) {
+    return fixedDowntime;
   }
 
   return 0;
@@ -520,6 +520,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         this.logger.warn(`Could not create data directory ${this.dataDir}: ${e.message}`);
       }
     }
+    this.loadAll();
   }
 
   async onModuleInit() {
@@ -2919,7 +2920,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         updatedAt: now,
       };
       updated.status = computeCpsStatus(updated);
-      if (updated.status === 'CLOSED' && (!updated.downtime || updated.downtime === 0)) {
+      if (updated.status === 'CLOSED' && updates.downtime === undefined) {
         updated.downtime = computeCpsDowntime(updated);
       }
       this.cpsCache[idx] = updated;

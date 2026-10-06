@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "id": "eb1d45d1-c0ce-4571-9ee0-e326d62b3254",
+    "docNo": "CPST-20261006-002",
+    "cpsrId": "3e9f1956-f3fb-41dc-9b3e-43a697598d10",
+    "cpsrDocNo": "CPSR-20261006-005",
+    "recvBy": "Technician Nguyễn Văn A",
+    "downtime": 40,
+    "photosBefore": [],
+    "photosAfter": [],
+    "chkStatus": "Đã khắc phục",
+    "submittedAt": "2026-10-06T11:42:53.863Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-06T11:42:53.863Z",
+    "updatedAt": "2026-10-06T11:42:53.863Z"
+  },
+  {
+    "id": "4e94301f-518e-4413-88fc-17dc32713c7e",
+    "docNo": "CPST-20261006-001",
+    "cpsrId": "e98e7fc8-5fd7-4fd9-b68d-2ba715d64a60",
+    "cpsrDocNo": "CPSR-20261006-004",
+    "recvBy": "KTV Trần Văn B - KT02",
+    "recvDate": "2026-10-06",
+    "recvTime": "08:45",
+    "finishDate": "2026-10-06",
+    "finishTime": "09:30",
+    "downtime": 45,
+    "rootCause": "Bụi giấy làm tắc mắt đọc cảm biến",
+    "actionTaken": "Thổi bụi và vệ sinh cảm biến nạp giấy",
+    "photosBefore": [],
+    "photosAfter": [],
+    "chkStatus": "Đã khắc phục",
+    "submittedAt": "2026-10-06T11:40:40.077Z",
+    "createdBy": "public",
+    "createdAt": "2026-10-06T11:40:40.077Z",
+    "updatedAt": "2026-10-06T11:40:40.077Z"
+  }
+]

@@ -372,7 +372,7 @@ export class CpsService {
     updates.status = nextStatus;
 
     if (updates.status === 'CLOSED') {
-      if (updates.downtime === undefined && (!existing.downtime || existing.downtime === 0)) {
+      if (updates.downtime === undefined) {
         updates.downtime = computeCpsDowntime({
           ...existing,
           ...updates,

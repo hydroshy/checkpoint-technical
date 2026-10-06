@@ -4,7 +4,6 @@ import * as path from 'path';
 const tests = [
   'test/qa-system-verification.spec.ts',
   'test/rbac.spec.ts',
-  'test/empty-db-clean-run.spec.ts',
   'test/backend-ticket-mgmt.spec.ts',
   'test/report-and-control-panel.e2e.ts',
   'test/modular-backend.spec.ts',

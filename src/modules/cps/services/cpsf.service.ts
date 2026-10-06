@@ -70,7 +70,7 @@ export class CpsfService {
           ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
           : (record.wastePercent || '0%');
         const closedAt = record.submittedAt || now;
-        let downtime = existingCps.downtime || cpst.downtime || 0;
+        let downtime = cpst.downtime || 0;
         if (!downtime || downtime === 0) {
           downtime = computeCpsDowntime({
             ...existingCps,
