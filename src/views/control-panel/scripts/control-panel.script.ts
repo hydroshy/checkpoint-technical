@@ -1,4 +1,10 @@
-export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMounted, nextTick, toRaw, markRaw } = Vue;
+export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
+      var _vueErr = new Error('Vue 3 framework chưa được tải hoặc bị lỗi');
+      if (window.__CP_REPORT_ERROR__) window.__CP_REPORT_ERROR__(_vueErr, 'Vue Bootstrap');
+      throw _vueErr;
+    }
+
+    const { createApp, ref, computed, onMounted, nextTick, toRaw, markRaw } = Vue;
 
     const toPlainObject = (obj) => {
       if (!obj) return null;
@@ -9,8 +15,11 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
       }
     };
 
-    createApp({
+    const app = createApp({
       setup() {
+        if (window.__CP_DEBUG__) {
+          window.__CP_DEBUG__.log('Vue', 'Initializing Control Panel Vue application setup');
+        }
         const activeTab = ref('requests');
         const showTicketDetailModal = ref(false);
         const showAddMachineModal = ref(false);
@@ -554,7 +563,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               const doc = item.docNo || (item.cpsr?.docNo ? item.cpsr.docNo.replace('CPSR-', 'CPS-') : (item.cpsrDocNo ? item.cpsrDocNo.replace('CPSR-', 'CPS-') : 'CPS'));
               const prob = item.problem || item.cpsr?.problem || 'Không có mô tả';
               const tech = formatTechnicianName(item.assignedToName || item.assignedTo || item.cpst?.recvBy || '') || 'Chưa giao';
-              const tooltip = '[' + doc + '] ' + mach + '\nDowntime: ' + (dtVal > 0 ? dtVal + 'p' : 'Đang xử lý') + '\nTừ: ' + fmtDt(startMs) + ' → Đến: ' + fmtDt(endMs) + '\nSự cố: ' + prob + '\nTechnician: ' + tech;
+              const tooltip = '[' + doc + '] ' + mach + '\\nDowntime: ' + (dtVal > 0 ? dtVal + 'p' : 'Đang xử lý') + '\\nTừ: ' + fmtDt(startMs) + ' → Đến: ' + fmtDt(endMs) + '\\nSự cố: ' + prob + '\\nTechnician: ' + tech;
 
               mData.bars.push({
                 left: Math.round(left * 10) / 10,
@@ -805,7 +814,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
         const formatTechnicianName = (val) => {
           if (!val) return '';
           let str = String(val).trim();
-          str = str.replace(/^(KTV|ktv|Technician|technician)\s*[-:]?\s*/i, '').trim();
+          str = str.replace(/^(KTV|ktv|Technician|technician)\\s*[-:]?\\s*/i, '').trim();
           if (str.includes(' - ')) {
             const parts = str.split(' - ');
             if (parts[0] && parts[0].trim()) {
@@ -1511,6 +1520,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               height: 'auto',
               placeholder: '<div class="p-8 text-center text-slate-400 text-xs">Không tìm thấy phiếu kỹ thuật nào trong khoảng thời gian đã chọn</div>'
             });
+            if (window.__CP_DEBUG__) {
+              window.__CP_DEBUG__.markMounted('report-technical', 'mounted');
+              window.__CP_DEBUG__.log('Tabulator', 'reportTableInstance mounted');
+            }
           } catch (err) {
             console.warn('Error init report table:', err);
           }
@@ -2061,6 +2074,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               placeholder: '<span>Không có dữ liệu trong bảng này</span>',
               columns: columns
             });
+            if (window.__CP_DEBUG__) {
+              window.__CP_DEBUG__.markMounted('split-tables', 'mounted');
+              window.__CP_DEBUG__.log('Tabulator', 'splitTable mounted');
+            }
 
             splitTable.on('rowDblClick', (e, row) => {
               try { openChainDetailModal(toPlainObject(row.getData())); } catch (_) {}
@@ -2368,6 +2385,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             reqTable.on('rowDblClick', (e, row) => {
               try { viewTicketDetail(row.getData()); } catch (_) {}
             });
+            if (window.__CP_DEBUG__) {
+              window.__CP_DEBUG__.markMounted('requests-table', 'mounted');
+              window.__CP_DEBUG__.log('Tabulator', 'reqTable mounted');
+            }
           } else {
             reqTable.setData(Array.isArray(requestsList.value) ? requestsList.value : []);
             safeRedraw(reqTable);
@@ -2484,6 +2505,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               safeRedraw(machinesTable);
             }
             applyMachineFilters();
+            if (window.__CP_DEBUG__) {
+              window.__CP_DEBUG__.markMounted('master-tables', 'mounted');
+              window.__CP_DEBUG__.log('Tabulator', 'machinesTable mounted');
+            }
           } catch (err) {
             console.warn('Tabulator machines table error:', err);
           }
@@ -3429,6 +3454,16 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
         };
 
         onMounted(async () => {
+          if (window.__CP_DEBUG__) {
+            window.__CP_DEBUG__.log('Vue:Lifecycle', 'onMounted initiated');
+            window.__CP_DEBUG__.markMounted('app-root', 'mounted');
+            window.__CP_DEBUG__.markMounted('header', 'mounted');
+            window.__CP_DEBUG__.markMounted('sidebar', 'mounted');
+            window.__CP_DEBUG__.markMounted('overview-hub', 'mounted');
+            window.__CP_DEBUG__.markMounted('assign-tasks', 'mounted');
+            window.__CP_DEBUG__.markMounted('management-tasks', 'mounted');
+            window.__CP_DEBUG__.markMounted('modals', 'mounted');
+          }
           try {
             const res = await fetch('/auth/session', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
@@ -3661,4 +3696,28 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           copyPublicFormLink
         };
       }
-    }).mount('#app');`;
+    });
+
+    app.config.errorHandler = function(err, instance, info) {
+      console.error('[Vue Error Boundary]', err, info);
+      if (window.__CP_REPORT_ERROR__) {
+        window.__CP_REPORT_ERROR__(err, 'Vue: ' + (info || 'Component'));
+      }
+    };
+
+    try {
+      app.mount('#app');
+      if (window.__CP_DEBUG__) {
+        window.__CP_DEBUG__.markMounted('app-root', 'mounted');
+        window.__CP_DEBUG__.log('Vue', 'App successfully mounted to #app');
+      }
+    } catch (mountErr) {
+      console.error('[Vue Mount Error]', mountErr);
+      if (window.__CP_REPORT_ERROR__) {
+        window.__CP_REPORT_ERROR__(mountErr, 'Vue App Mount Error');
+      }
+      if (window.__CP_DEBUG__) {
+        window.__CP_DEBUG__.markMounted('app-root', 'failed');
+        window.__CP_DEBUG__.log('Vue', 'App failed to mount to #app', mountErr);
+      }
+    };`;

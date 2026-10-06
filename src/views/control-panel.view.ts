@@ -17,6 +17,7 @@ import { CP_EDIT_MODAL_HTML } from './control-panel/components/modals/edit-modal
 import { CP_LINK_MODAL_HTML } from './control-panel/components/modals/link-modal.component';
 import { CP_CREATE_CPS_MODAL_HTML } from './control-panel/components/modals/create-cps-modal.component';
 import { CP_ENTITY_MODALS_HTML } from './control-panel/components/modals/entity-modals.component';
+import { CP_ERROR_AND_DEBUG_HEAD_SCRIPT } from './control-panel/scripts/error-boundary.script';
 import { CONTROL_PANEL_SCRIPT } from './control-panel/scripts/control-panel.script';
 
 export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
@@ -32,6 +33,12 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png?v=3" />
   <link rel="shortcut icon" href="/images/favicon.ico?v=3" />
   <link rel="apple-touch-icon" href="/images/favicon.png?v=3" />
+  
+  <!-- Global Error Boundary & Debug Handler (Chống trắng màn hình & Debug Mount) -->
+  <script>
+${CP_ERROR_AND_DEBUG_HEAD_SCRIPT}
+  </script>
+
   <script>
     tailwind = {
       darkMode: 'class'

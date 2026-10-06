@@ -2,6 +2,7 @@ import { execSync } from 'child_process';
 import * as path from 'path';
 
 const tests = [
+  'test/view-syntax-check.spec.ts',
   'test/qa-system-verification.spec.ts',
   'test/rbac.spec.ts',
   'test/backend-ticket-mgmt.spec.ts',
