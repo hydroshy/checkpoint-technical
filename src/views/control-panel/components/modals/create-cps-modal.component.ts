@@ -41,16 +41,16 @@ export const CP_CREATE_CPS_MODAL_HTML = `    <!-- ==============================
             </select>
           </div>
 
-          <!-- KTV Assigned -->
+          <!-- Technician Assigned -->
           <div class="space-y-1.5">
             <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-              Kỹ Thuật Viên Tiếp Nhận / Phân Công
+              Technician Tiếp Nhận / Phân Công
             </label>
             <input
               type="text"
               v-model="createCpsForm.assignedTo"
               list="list-ktv-create-cps"
-              placeholder="Chọn hoặc nhập tên KTV..."
+              placeholder="Chọn hoặc nhập tên Technician..."
               class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-medium"
             />
             <datalist id="list-ktv-create-cps">

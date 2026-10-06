@@ -39,6 +39,8 @@ export class CpsService {
         (r.machineName && r.machineName.toLowerCase().includes(q)) ||
         (r.reqBy && r.reqBy.toLowerCase().includes(q)) ||
         (r.assignedTo && r.assignedTo.toLowerCase().includes(q)) ||
+        (r.assignedToName && r.assignedToName.toLowerCase().includes(q)) ||
+        (r.technician && r.technician.toLowerCase().includes(q)) ||
         (r.problem && r.problem.toLowerCase().includes(q)) ||
         (r.printTech && r.printTech.toLowerCase().includes(q)) ||
         (r.workOrder && r.workOrder.toLowerCase().includes(q))
@@ -54,9 +56,14 @@ export class CpsService {
       list = list.filter(r => r.printTech === query.printTech);
     }
 
-    if (query?.assignedTo && query.assignedTo !== 'ALL') {
-      const a = query.assignedTo.toLowerCase().trim();
-      list = list.filter(r => r.assignedTo && r.assignedTo.toLowerCase().includes(a));
+    const techFilter = (query?.technician || query?.assignedTo)?.trim();
+    if (techFilter && techFilter !== 'ALL') {
+      const a = techFilter.toLowerCase();
+      list = list.filter(r =>
+        (r.assignedTo && r.assignedTo.toLowerCase().includes(a)) ||
+        (r.assignedToName && r.assignedToName.toLowerCase().includes(a)) ||
+        (r.technician && r.technician.toLowerCase().includes(a))
+      );
     }
 
     if (query?.dateFrom) {
@@ -115,9 +122,10 @@ export class CpsService {
     }
 
     const now = new Date().toISOString();
-    const assignedTo = (dto.assignedTo || '').trim() || null;
+    const assignedTo = (dto.assignedTo || dto.technician || '').trim() || null;
     const assignedToId = (dto.assignedToId || '').trim() || null;
     const assignedToName = (dto.assignedToName || assignedTo || '').trim() || null;
+    const technician = assignedToName || assignedTo;
 
     let deadlineIso: string | null = null;
     if (dto.deadline && dto.deadline.trim() !== '') {
@@ -138,6 +146,7 @@ export class CpsService {
       assignedTo,
       assignedToId,
       assignedToName,
+      technician,
       assignedBy: creator?.username || creator?.fullName || 'system',
       assignedAt: assignedTo ? now : null,
       deadline: deadlineIso,
@@ -220,9 +229,10 @@ export class CpsService {
       throw new NotFoundException(`Không tìm thấy phiếu CPS với mã hoặc ID: ${idOrDocNo}`);
     }
 
-    const assignedTo = (dto.assignedTo || dto.assignee || '').trim();
+    const assignedTo = (dto.assignedTo || dto.assignee || dto.technician || '').trim();
     const assignedToId = (dto.assignedToId || dto.employeeId || '').trim() || null;
     const assignedToName = (dto.assignedToName || assignedTo).trim() || null;
+    const technician = assignedToName || assignedTo || null;
     const now = new Date().toISOString();
 
     let deadlineIso: string | null = null;
@@ -239,6 +249,7 @@ export class CpsService {
       assignedTo: assignedTo || existing.assignedTo || null,
       assignedToId: assignedToId || existing.assignedToId || null,
       assignedToName: assignedToName || existing.assignedToName || null,
+      technician: technician || existing.technician || null,
       assignedBy: user?.username || user?.fullName || 'admin',
       assignedAt: now,
       deadline: deadlineIso !== null ? deadlineIso : existing.deadline,
@@ -270,6 +281,12 @@ export class CpsService {
       throw new NotFoundException(`Không tìm thấy phiếu CPS với mã hoặc ID: ${idOrDocNo}`);
     }
     const updates: Partial<CpsRecord> = { ...dto } as any;
+    if (dto.technician && !updates.assignedTo) {
+      updates.assignedTo = dto.technician;
+    }
+    if (updates.assignedTo && !updates.technician) {
+      updates.technician = updates.assignedToName || updates.assignedTo;
+    }
     if (dto.deadline && dto.deadline.trim() !== '') {
       const d = new Date(dto.deadline);
       if (!isNaN(d.getTime())) updates.deadline = d.toISOString();
@@ -396,9 +413,29 @@ export class CpsService {
       updates.chkStatus = cpst.chkStatus || existing.chkStatus || null;
       if (!existing.assignedTo && cpst.recvBy) {
         updates.assignedTo = cpst.recvBy;
+        updates.technician = cpst.recvBy;
       }
       if (existing.status === 'TO_ASSIGN' || existing.status === 'OPEN_TASK') {
         updates.status = 'IN_PROGRESS';
+      }
+
+      // Tự động kéo luôn CPSF nếu CPST này đã có nghiệm thu CPSF và chưa có CPSF trên CPS
+      if (!dto.cpsfDocNo && !dto.cpsfId && !existing.cpsfDocNo) {
+        const autoCpsf = this.dbService.getCpsfList().find(f => f.cpstDocNo === cpst.docNo);
+        if (autoCpsf) {
+          updates.cpsfId = autoCpsf.id;
+          updates.cpsfDocNo = autoCpsf.docNo;
+          updates.chkQuality = autoCpsf.chkQuality || null;
+          updates.workOrder = autoCpsf.workOrder || null;
+          updates.woTotalQty = autoCpsf.woTotalQty || 0;
+          updates.wasteQty = autoCpsf.wasteQty || 0;
+          updates.wasteUnit = autoCpsf.wasteUnit || null;
+          const total = updates.woTotalQty || 0;
+          const waste = updates.wasteQty || 0;
+          updates.wastePercent = total > 0 ? ((waste / total) * 100).toFixed(2) + '%' : (autoCpsf.wastePercent || '0%');
+          updates.status = 'CLOSED';
+          updates.closedAt = autoCpsf.submittedAt || now;
+        }
       }
 
       // Đồng bộ hai chiều: Cập nhật CPST trỏ về CPSR của CPS này
@@ -429,6 +466,21 @@ export class CpsService {
       updates.wastePercent = total > 0 ? ((waste / total) * 100).toFixed(2) + '%' : (cpsf.wastePercent || '0%');
       updates.status = 'CLOSED';
       updates.closedAt = cpsf.submittedAt || now;
+
+      // Tự động kéo luôn CPST nếu CPSF có trỏ về CPST mà CPS chưa có CPST
+      if (!updates.cpstDocNo && !existing.cpstDocNo && cpsf.cpstDocNo) {
+        const autoCpst = this.dbService.getCpstByIdOrDocNo(cpsf.cpstDocNo);
+        if (autoCpst) {
+          updates.cpstId = autoCpst.id;
+          updates.cpstDocNo = autoCpst.docNo;
+          if (updates.downtime === undefined) updates.downtime = autoCpst.downtime || 0;
+          if (!updates.chkStatus) updates.chkStatus = autoCpst.chkStatus || null;
+          if (!existing.assignedTo && autoCpst.recvBy) {
+            updates.assignedTo = autoCpst.recvBy;
+            updates.technician = autoCpst.recvBy;
+          }
+        }
+      }
 
       // Đồng bộ hai chiều: Cập nhật CPSF trỏ về CPST & CPSR
       const cpstDoc = updates.cpstDocNo || existing.cpstDocNo || cpsf.cpstDocNo;

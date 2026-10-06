@@ -289,6 +289,22 @@ export interface CpsrChainRecord {
   cpsr: CpsrRecord;
   cpst?: CpstRecord | null;
   cpsf?: CpsfRecord | null;
+  cps?: CpsRecord | null;
+  id?: string;
+  docNo?: string;
+  cpsrDocNo?: string;
+  cpstDocNo?: string | null;
+  cpsfDocNo?: string | null;
+  status?: string;
+  assignedTo?: string | null;
+  assignedToId?: string | null;
+  assignedToName?: string | null;
+  technician?: string | null;
+  deadline?: string | null;
+  downtime?: number;
+  wastePercent?: string;
+  chkStatus?: string | null;
+  chkQuality?: string | null;
 }
 
 export type CpsStatus = 'OPEN_TASK' | 'TO_ASSIGN' | 'IN_PROGRESS' | 'OVER_DUE' | 'CLOSED';
@@ -333,6 +349,7 @@ export interface CpsRecord {
   assignedTo?: string | null;
   assignedToId?: string | null;
   assignedToName?: string | null;
+  technician?: string | null;
   assignedBy?: string | null;
   assignedAt?: string | null;
   deadline?: string | null;
@@ -381,7 +398,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   private cpstCache: CpstRecord[] = [];
   private cpsfCache: CpsfRecord[] = [];
   private cpsCache: CpsRecord[] = [];
+  private enrichedCpsCache: CpsRecord[] | null = null;
+  private enrichedCpsrChainCache: CpsrChainRecord[] | null = null;
   private settingsCache: SystemSettingsRecord = { isPublicFormEnabled: true };
+
+  public invalidateCpsCache(): void {
+    this.enrichedCpsCache = null;
+    this.enrichedCpsrChainCache = null;
+  }
 
   constructor() {
     this.dataDir = path.resolve(process.env.DATA_DIR || './data');
@@ -2271,9 +2295,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ==================== CPSR / CPST / CPSF (1-1-1 SPLIT FORMS) ====================
-  saveCpsrList(): void { this.writeJson('cpsr.json', this.cpsrCache); }
-  saveCpstList(): void { this.writeJson('cpst.json', this.cpstCache); }
-  saveCpsfList(): void { this.writeJson('cpsf.json', this.cpsfCache); }
+  saveCpsrList(): void { this.invalidateCpsCache(); this.writeJson('cpsr.json', this.cpsrCache); }
+  saveCpstList(): void { this.invalidateCpsCache(); this.writeJson('cpst.json', this.cpstCache); }
+  saveCpsfList(): void { this.invalidateCpsCache(); this.writeJson('cpsf.json', this.cpsfCache); }
 
   getCpsrList(): CpsrRecord[] { return this.cpsrCache; }
 
@@ -2581,9 +2605,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   // ==================== CPS (CHAIN & ASSIGN TASK MASTER) ====================
-  saveCpsList(): void { this.writeJson('cps.json', this.cpsCache); }
+  saveCpsList(): void { this.invalidateCpsCache(); this.writeJson('cps.json', this.cpsCache); }
 
   getCpsList(): CpsRecord[] {
+    if (this.enrichedCpsCache) {
+      return this.enrichedCpsCache;
+    }
+
     const cpsrMap = new Map<string, CpsrRecord>();
     for (const x of this.cpsrCache) cpsrMap.set(x.docNo, x);
 
@@ -2596,59 +2624,81 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     const cpsfByDocNo = new Map<string, CpsfRecord>();
     const cpsfByCpst = new Map<string, CpsfRecord>();
+    const cpsfByCpsr = new Map<string, CpsfRecord>();
     for (const x of this.cpsfCache) {
       cpsfByDocNo.set(x.docNo, x);
       if (x.cpstDocNo) cpsfByCpst.set(x.cpstDocNo, x);
+      if (x.cpsrDocNo) cpsfByCpsr.set(x.cpsrDocNo, x);
     }
 
-    return this.cpsCache.map(r => {
+    this.enrichedCpsCache = this.cpsCache.map(r => {
       const cpsr = (r.cpsrDocNo ? cpsrMap.get(r.cpsrDocNo) : null) || null;
       const cpst = (r.cpstDocNo ? cpstByDocNo.get(r.cpstDocNo) : (cpsr ? cpstByCpsr.get(cpsr.docNo) : null)) || null;
-      const cpsf = (r.cpsfDocNo ? cpsfByDocNo.get(r.cpsfDocNo) : (cpst ? cpsfByCpst.get(cpst.docNo) : null)) || null;
+      const cpsf = (r.cpsfDocNo ? cpsfByDocNo.get(r.cpsfDocNo) : (cpst ? cpsfByCpst.get(cpst.docNo) : (cpsr ? cpsfByCpsr.get(cpsr.docNo) : null))) || null;
 
       const cpstDocNo = r.cpstDocNo || cpst?.docNo || null;
+      const cpstId = r.cpstId || cpst?.id || null;
       const cpsfDocNo = r.cpsfDocNo || cpsf?.docNo || null;
+      const cpsfId = r.cpsfId || cpsf?.id || null;
       const downtime = (r.downtime !== undefined && r.downtime > 0) ? r.downtime : (cpst?.downtime || 0);
       const woTotalQty = (r.woTotalQty !== undefined && r.woTotalQty > 0) ? r.woTotalQty : (cpsf?.woTotalQty || 0);
       const wasteQty = (r.wasteQty !== undefined && r.wasteQty > 0) ? r.wasteQty : (cpsf?.wasteQty || 0);
       const wastePercent = (woTotalQty > 0)
         ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
         : (r.wastePercent || cpsf?.wastePercent || '0%');
+      const wasteUnit = r.wasteUnit || cpsf?.wasteUnit || null;
+      const workOrder = r.workOrder || cpsf?.workOrder || null;
+      const chkStatus = r.chkStatus || cpst?.chkStatus || null;
+      const chkQuality = r.chkQuality || cpsf?.chkQuality || null;
+
+      const assignedTo = r.assignedTo || cpst?.recvBy || null;
+      const assignedToName = r.assignedToName || assignedTo;
+      const technician = assignedToName || assignedTo;
 
       const evaluatedStatus = computeCpsStatus({
         status: r.status,
         cpsfDocNo,
-        assignedTo: r.assignedTo || cpst?.recvBy || null,
+        assignedTo,
         deadline: r.deadline,
       });
 
       return {
         ...r,
         cpstDocNo,
+        cpstId,
         cpsfDocNo,
+        cpsfId,
         downtime,
         woTotalQty,
         wasteQty,
         wastePercent,
+        wasteUnit,
+        workOrder,
+        chkStatus,
+        chkQuality,
+        assignedTo,
+        assignedToName,
+        technician,
         status: evaluatedStatus,
         cpsr,
         cpst,
         cpsf,
       };
     });
+
+    return this.enrichedCpsCache;
   }
 
   getCpsByIdOrDocNo(id: string): CpsRecord | undefined {
     const clean = (id || '').trim();
     if (!clean) return undefined;
-    const found = this.cpsCache.find(r => r.id === clean || r.docNo === clean || r.cpsrDocNo === clean);
-    if (!found) return undefined;
     const list = this.getCpsList();
-    return list.find(r => r.id === found.id || r.docNo === found.docNo);
+    return list.find(r => r.id === clean || r.docNo === clean || r.cpsrDocNo === clean);
   }
 
   getCpsByCpsrDocNo(cpsrDocNo: string): CpsRecord | undefined {
     const clean = (cpsrDocNo || '').trim();
+    if (!clean) return undefined;
     const list = this.getCpsList();
     return list.find(r => r.cpsrDocNo === clean);
   }
@@ -2773,10 +2823,23 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   public async syncCpsFromChains(): Promise<void> {
     let changed = false;
+    const cpsByCpsr = new Map<string, CpsRecord>();
+    for (const c of this.cpsCache) {
+      if (c.cpsrDocNo) cpsByCpsr.set(c.cpsrDocNo, c);
+    }
+    const cpstByCpsr = new Map<string, CpstRecord>();
+    for (const t of this.cpstCache) {
+      if (t.cpsrDocNo) cpstByCpsr.set(t.cpsrDocNo, t);
+    }
+    const cpsfByCpst = new Map<string, CpsfRecord>();
+    for (const f of this.cpsfCache) {
+      if (f.cpstDocNo) cpsfByCpst.set(f.cpstDocNo, f);
+    }
+
     for (const cpsr of this.cpsrCache) {
-      const existing = this.cpsCache.find(c => c.cpsrDocNo === cpsr.docNo);
-      const cpst = this.cpstCache.find(t => t.cpsrDocNo === cpsr.docNo);
-      const cpsf = cpst ? this.cpsfCache.find(f => f.cpstDocNo === cpst.docNo) : null;
+      const existing = cpsByCpsr.get(cpsr.docNo);
+      const cpst = cpstByCpsr.get(cpsr.docNo);
+      const cpsf = cpst ? cpsfByCpst.get(cpst.docNo) : null;
 
       const woTotalQty = (cpsf && cpsf.woTotalQty) ? Number(cpsf.woTotalQty) : (existing?.woTotalQty || 0);
       const wasteQty = (cpsf && cpsf.wasteQty) ? Number(cpsf.wasteQty) : (existing?.wasteQty || 0);
@@ -2802,6 +2865,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           cpsfDocNo: cpsf?.docNo || null,
           status: 'TO_ASSIGN',
           assignedTo: cpst?.recvBy || null,
+          technician: cpst?.recvBy || null,
           deadline: null,
           priority: cpsr.priority,
           printTech: cpsr.printTech,
@@ -2854,6 +2918,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         if (cpst && existing.downtime !== downtime) {
           existing.downtime = downtime;
           existing.chkStatus = cpst.chkStatus || null;
+          needUpdate = true;
+        }
+        if (cpst && !existing.assignedTo && cpst.recvBy) {
+          existing.assignedTo = cpst.recvBy;
+          existing.technician = cpst.recvBy;
           needUpdate = true;
         }
         const updatedStatus = computeCpsStatus(existing);
@@ -2940,35 +3009,87 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
   getAvailableCpstForCpsf(): any[] {
     const linkedDocNos = new Set(this.cpsfCache.map(c => c.cpstDocNo));
+    const cpsrMap = new Map<string, CpsrRecord>();
+    for (const r of this.cpsrCache) cpsrMap.set(r.docNo, r);
     return this.cpstCache
       .filter(r => !linkedDocNos.has(r.docNo))
-      .map(cpst => {
-        const cpsr = this.cpsrCache.find(r => r.docNo === cpst.cpsrDocNo);
-        return {
-          ...cpst,
-          cpsr: cpsr || null,
-        };
-      });
+      .map(cpst => ({
+        ...cpst,
+        cpsr: cpsrMap.get(cpst.cpsrDocNo) || null,
+      }));
   }
 
   getCpsrChainList(): CpsrChainRecord[] {
+    if (this.enrichedCpsrChainCache) {
+      return this.enrichedCpsrChainCache;
+    }
+
+    const cpstByDocNo = new Map<string, CpstRecord>();
     const cpstByCpsr = new Map<string, CpstRecord>();
     for (const t of this.cpstCache) {
+      cpstByDocNo.set(t.docNo, t);
       if (t.cpsrDocNo) cpstByCpsr.set(t.cpsrDocNo, t);
     }
+
+    const cpsfByDocNo = new Map<string, CpsfRecord>();
     const cpsfByCpst = new Map<string, CpsfRecord>();
+    const cpsfByCpsr = new Map<string, CpsfRecord>();
     for (const f of this.cpsfCache) {
+      cpsfByDocNo.set(f.docNo, f);
       if (f.cpstDocNo) cpsfByCpst.set(f.cpstDocNo, f);
+      if (f.cpsrDocNo) cpsfByCpsr.set(f.cpsrDocNo, f);
     }
-    return this.cpsrCache.map(cpsr => {
+
+    const cpsByCpsr = new Map<string, CpsRecord>();
+    for (const c of this.cpsCache) {
+      if (c.cpsrDocNo) cpsByCpsr.set(c.cpsrDocNo, c);
+    }
+
+    this.enrichedCpsrChainCache = this.cpsrCache.map(cpsr => {
       const cpst = cpstByCpsr.get(cpsr.docNo) || null;
-      const cpsf = cpst ? (cpsfByCpst.get(cpst.docNo) || null) : null;
+      const cpsf = (cpst ? cpsfByCpst.get(cpst.docNo) : null) || cpsfByCpsr.get(cpsr.docNo) || null;
+      const cps = cpsByCpsr.get(cpsr.docNo) || null;
+
+      const docNo = cps?.docNo || cpsr.docNo.replace(/^CPSR-/, 'CPS-');
+      const cpstDocNo = cps?.cpstDocNo || cpst?.docNo || null;
+      const cpsfDocNo = cps?.cpsfDocNo || cpsf?.docNo || null;
+      const assignedTo = cps?.assignedTo || cpst?.recvBy || null;
+      const assignedToName = cps?.assignedToName || assignedTo;
+      const technician = assignedToName || assignedTo;
+      const downtime = (cps?.downtime !== undefined && cps.downtime > 0) ? cps.downtime : (cpst?.downtime || 0);
+      const woTotalQty = (cps?.woTotalQty !== undefined && cps.woTotalQty > 0) ? cps.woTotalQty : (cpsf?.woTotalQty || 0);
+      const wasteQty = (cps?.wasteQty !== undefined && cps.wasteQty > 0) ? cps.wasteQty : (cpsf?.wasteQty || 0);
+      const wastePercent = (woTotalQty > 0)
+        ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
+        : (cps?.wastePercent || cpsf?.wastePercent || '0%');
+      const chkStatus = cps?.chkStatus || cpst?.chkStatus || null;
+      const chkQuality = cps?.chkQuality || cpsf?.chkQuality || null;
+      const status = cps?.status || (cpsf ? 'CLOSED' : (cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+
       return {
+        id: cps?.id || cpsr.id,
+        docNo,
+        cpsrDocNo: cpsr.docNo,
+        cpstDocNo,
+        cpsfDocNo,
+        status,
+        assignedTo,
+        assignedToId: cps?.assignedToId || null,
+        assignedToName,
+        technician,
+        deadline: cps?.deadline || null,
+        downtime,
+        wastePercent,
+        chkStatus,
+        chkQuality,
         cpsr,
         cpst,
         cpsf,
+        cps,
       };
     });
+
+    return this.enrichedCpsrChainCache;
   }
 
   getSettings(): SystemSettingsRecord {

@@ -6,12 +6,12 @@ import { CP_OVERVIEW_HEADER_HTML } from './control-panel/components/cards/overvi
 import { CP_PUBLIC_SHARE_CARD_HTML } from './control-panel/components/cards/public-share-card.component';
 import { CP_KPI_CARDS_HTML } from './control-panel/components/cards/kpi-cards.component';
 import { CP_ANALYTICAL_BREAKDOWN_CARDS_HTML } from './control-panel/components/cards/analytical-breakdown-cards.component';
-import { CP_ASSIGN_TASKS_TAB_HTML } from './control-panel/components/cards/assign-tasks-tab.component';
+import { CP_ASSIGN_TASKS_TAB_HTML, CP_ASSIGN_MODAL_HTML } from './control-panel/modules/assign-task-module';
+import { CP_MANAGEMENT_TASKS_TAB_HTML } from './control-panel/modules/management-task-module';
 import { CP_SPLIT_TABLES_HTML } from './control-panel/components/tables/split-tables.component';
 import { CP_MASTER_TABLES_HTML } from './control-panel/components/tables/master-tables.component';
 import { CP_REPORT_TECHNICAL_TAB_HTML } from './control-panel/components/charts/analytics-charts.component';
 import { CP_TICKET_DETAIL_MODAL_HTML } from './control-panel/components/modals/ticket-detail-modal.component';
-import { CP_ASSIGN_MODAL_HTML } from './control-panel/components/modals/assign-modal.component';
 import { CP_SPLIT_DETAIL_MODAL_HTML } from './control-panel/components/modals/split-detail-modal.component';
 import { CP_EDIT_MODAL_HTML } from './control-panel/components/modals/edit-modal.component';
 import { CP_LINK_MODAL_HTML } from './control-panel/components/modals/link-modal.component';
@@ -97,7 +97,7 @@ ${CP_ANALYTICAL_BREAKDOWN_CARDS_HTML}
 
 ${CP_ASSIGN_TASKS_TAB_HTML}
 
-${CP_SPLIT_TABLES_HTML}
+${CP_MANAGEMENT_TASKS_TAB_HTML}
 
 ${CP_MASTER_TABLES_HTML}
 

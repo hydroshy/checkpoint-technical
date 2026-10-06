@@ -37,17 +37,22 @@ export class CreateCpsDto {
   @IsString()
   cpsfId?: string;
 
-  @ApiPropertyOptional({ example: 'KTV Đỗ Đức Nhật - VN5944', description: 'Kỹ thuật viên tiếp nhận / phân công' })
+  @ApiPropertyOptional({ example: 'Technician Đỗ Đức Nhật - VN5944', description: 'Technician tiếp nhận / phân công' })
   @IsOptional()
   @IsString()
   assignedTo?: string;
 
-  @ApiPropertyOptional({ example: 'VN5944', description: 'Mã nhân viên KTV' })
+  @ApiPropertyOptional({ example: 'Technician Đỗ Đức Nhật - VN5944', description: 'Alias cho assignedTo (Technician)' })
+  @IsOptional()
+  @IsString()
+  technician?: string;
+
+  @ApiPropertyOptional({ example: 'VN5944', description: 'Mã nhân viên Technician' })
   @IsOptional()
   @IsString()
   assignedToId?: string;
 
-  @ApiPropertyOptional({ example: 'Đỗ Đức Nhật', description: 'Tên KTV' })
+  @ApiPropertyOptional({ example: 'Đỗ Đức Nhật', description: 'Tên Technician' })
   @IsOptional()
   @IsString()
   assignedToName?: string;
@@ -99,16 +104,21 @@ export class CreateCpsDto {
 }
 
 export class AssignCpsDto {
-  @ApiPropertyOptional({ example: 'KTV Trần Văn B - KT02', description: 'Tên hoặc thông tin KTV phân công' })
+  @ApiPropertyOptional({ example: 'Technician Trần Văn B - KT02', description: 'Tên hoặc thông tin Technician phân công' })
   @IsOptional()
   @IsString()
   assignedTo?: string;
 
-  // Support frontend sending 'assignee' as alias
-  @ApiPropertyOptional({ example: 'KTV Trần Văn B - KT02', description: 'Alias cho assignedTo' })
+  // Support frontend sending 'assignee' or 'technician' as alias
+  @ApiPropertyOptional({ example: 'Technician Trần Văn B - KT02', description: 'Alias cho assignedTo' })
   @IsOptional()
   @IsString()
   assignee?: string;
+
+  @ApiPropertyOptional({ example: 'Technician Trần Văn B - KT02', description: 'Alias cho assignedTo (Technician)' })
+  @IsOptional()
+  @IsString()
+  technician?: string;
 
   @ApiPropertyOptional({ example: 'EMP-002', description: 'Mã NV hoặc ID nhân viên' })
   @IsOptional()
@@ -147,17 +157,22 @@ export class UpdateCpsDto {
   @IsString()
   status?: string;
 
-  @ApiPropertyOptional({ example: 'KTV Đỗ Đức Nhật - VN5944' })
+  @ApiPropertyOptional({ example: 'Technician Đỗ Đức Nhật - VN5944', description: 'Technician tiếp nhận / phân công' })
   @IsOptional()
   @IsString()
   assignedTo?: string;
 
-  @ApiPropertyOptional({ example: 'VN5944' })
+  @ApiPropertyOptional({ example: 'Technician Đỗ Đức Nhật - VN5944', description: 'Alias cho assignedTo (Technician)' })
+  @IsOptional()
+  @IsString()
+  technician?: string;
+
+  @ApiPropertyOptional({ example: 'VN5944', description: 'Mã nhân viên Technician' })
   @IsOptional()
   @IsString()
   assignedToId?: string;
 
-  @ApiPropertyOptional({ example: 'Đỗ Đức Nhật' })
+  @ApiPropertyOptional({ example: 'Đỗ Đức Nhật', description: 'Tên Technician' })
   @IsOptional()
   @IsString()
   assignedToName?: string;

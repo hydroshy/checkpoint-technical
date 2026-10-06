@@ -243,7 +243,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <span class="text-slate-500 block">KTV tiếp nhận:</span>
+              <span class="text-slate-500 block">Technician tiếp nhận:</span>
               <span class="font-medium text-slate-900">{{ selectedCpst.recvBy }}</span>
             </div>
             <div>

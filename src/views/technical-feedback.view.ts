@@ -219,7 +219,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
         <div>
           <h1 class="font-brand font-bold text-2xl text-slate-900">PHIẾU PHẢN HỒI KỸ THUẬT (CPST)</h1>
-          <p class="text-xs text-slate-500 mt-1">Dành cho kỹ thuật viên tiếp nhận, xử lý và phản hồi sự cố</p>
+          <p class="text-xs text-slate-500 mt-1">Dành cho Technician tiếp nhận, xử lý và phản hồi sự cố</p>
         </div>
         <div class="flex items-center gap-2 bg-sky-50 px-4 py-2.5 rounded-xl border border-sky-200">
           <span class="text-xs text-slate-600 uppercase tracking-wider font-semibold">Số phiếu:</span>
@@ -276,14 +276,14 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <!-- Field Group 2: Technician Droplist (3-line search) -->
       <div class="relative">
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-          Kỹ thuật viên tiếp nhận <span class="text-rose-500">*</span>
+          Technician tiếp nhận <span class="text-rose-500">*</span>
         </label>
         <div class="relative">
           <input
             type="text"
             v-model="recvSearch"
             @focus="showRecvDropdown = true"
-            placeholder="Nhập tên hoặc mã KTV tiếp nhận..."
+            placeholder="Nhập tên hoặc mã Technician tiếp nhận..."
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium pr-10"
           />
           <button
@@ -314,7 +314,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
         </div>
 
         <div v-if="form.recvBy" class="mt-2 text-xs text-emerald-600 flex items-center gap-1 font-medium">
-          <span>✓ KTV tiếp nhận:</span>
+          <span>✓ Technician tiếp nhận:</span>
           <span class="text-slate-800 font-semibold">{{ form.recvBy }}</span>
         </div>
       </div>
@@ -677,7 +677,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             return;
           }
           if (!form.value.recvBy) {
-            errorMessage.value = 'Vui lòng chọn kỹ thuật viên tiếp nhận.';
+            errorMessage.value = 'Vui lòng chọn Technician tiếp nhận.';
             return;
           }
           if (!form.value.rootCause || !form.value.rootCause.trim()) {

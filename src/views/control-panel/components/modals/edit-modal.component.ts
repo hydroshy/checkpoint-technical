@@ -41,8 +41,8 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">KTV Phụ Trách</label>
-                <input type="text" v-model="editForm.assignedTo" list="list-ktv-edit" placeholder="Chọn hoặc nhập tên KTV" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Technician Phụ Trách</label>
+                <input type="text" v-model="editForm.assignedTo" list="list-ktv-edit" placeholder="Chọn hoặc nhập tên Technician" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
                 <datalist id="list-ktv-edit">
                   <option v-for="e in employeesList" :key="e.id || e.mnv" :value="e.name + (e.mnv ? ' - ' + e.mnv : '')"></option>
                 </datalist>
@@ -119,8 +119,8 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
           <template v-else-if="editForm.type === 'cpst'">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">KTV Tiếp Nhận</label>
-                <input type="text" v-model="editForm.recvBy" list="list-ktv-edit" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Technician Tiếp Nhận</label>
+                <input type="text" v-model="editForm.recvBy" list="list-ktv-edit" placeholder="Chọn hoặc nhập tên Technician tiếp nhận" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
               </div>
               <div>
                 <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Trạng Thái Kỹ Thuật</label>

@@ -474,7 +474,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
         const currentTabLabel = computed(() => {
           const map = {
             overview: 'Tổng quan & Phân tích',
-            'assign-tasks': 'Phân Công Kỹ Thuật (Cards)',
+            'assign-tasks': 'Phân Công Kỹ Thuật',
             requests: 'Quản Lý Phiếu Kỹ Thuật',
             'report-technical': 'Report Technical',
             machines: 'Máy móc & Thiết bị',
@@ -601,13 +601,40 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           return map[s] || String(s);
         };
 
+        const formatTechnicianName = (val) => {
+          if (!val) return '';
+          let str = String(val).trim();
+          str = str.replace(/^(KTV|ktv|Technician|technician)\s*[-:]?\s*/i, '').trim();
+          if (str.includes(' - ')) {
+            const parts = str.split(' - ');
+            if (parts[0] && parts[0].trim()) {
+              str = parts[0].trim();
+            }
+          }
+          return str;
+        };
+
+        const getTechnicianDisplayName = (item) => {
+          if (!item) return '';
+          if (item.assignedToName) {
+            return formatTechnicianName(item.assignedToName);
+          }
+          if (item.assignedTo) {
+            return formatTechnicianName(item.assignedTo);
+          }
+          if (item.assignee) {
+            return formatTechnicianName(item.assignee);
+          }
+          return '';
+        };
+
         const getCardBorderClass = (s) => {
-          if (!s) return 'border-slate-700/60 hover:border-slate-500';
-          if (s === 'TO_ASSIGN') return 'border-amber-500/40 hover:border-amber-500';
-          if (s === 'IN_PROGRESS') return 'border-sky-500/40 hover:border-sky-500';
-          if (s === 'OVER_DUE') return 'border-rose-500/40 hover:border-rose-500';
-          if (s === 'CLOSED') return 'border-emerald-500/40 hover:border-emerald-500';
-          return 'border-slate-700/60 hover:border-slate-500';
+          const status = (s || '').toUpperCase().trim();
+          if (status === 'TO_ASSIGN') return 'border-amber-300 dark:border-amber-500/40 hover:border-amber-500';
+          if (status === 'IN_PROGRESS') return 'border-sky-300 dark:border-sky-500/40 hover:border-sky-500';
+          if (status === 'OVER_DUE') return 'border-rose-300 dark:border-rose-500/40 hover:border-rose-500';
+          if (status === 'CLOSED') return 'border-emerald-300 dark:border-emerald-500/40 hover:border-emerald-500';
+          return 'border-slate-200 dark:border-slate-700/60 hover:border-slate-400 dark:hover:border-slate-500';
         };
 
         const formatDateTimeDisplay = (val) => {
@@ -643,9 +670,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
 
           let foundEmp = '';
           if (raw.assignedTo && employeesList.value.length > 0) {
+            const rawTechName = formatTechnicianName(raw.assignedToName || raw.assignedTo);
             foundEmp = employeesList.value.find(e => {
               const fullStr = e.name + ' - ' + e.mnv;
-              return fullStr === raw.assignedTo || e.name === raw.assignedTo || e.mnv === raw.assignedToId;
+              return fullStr === raw.assignedTo || e.name === raw.assignedTo || e.name === rawTechName || e.mnv === raw.assignedToId;
             }) || '';
           }
 
@@ -663,19 +691,20 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
         const submitAssignTask = async () => {
           if (!selectedCpsForAssign.value) return;
           if (!assignForm.value.employee) {
-            showToast('Vui lòng chọn nhân viên kỹ thuật tiếp nhận', true);
+            showToast('Vui lòng chọn Technician tiếp nhận', true);
             return;
           }
           isAssigning.value = true;
           try {
             const emp = assignForm.value.employee;
-            const empName = typeof emp === 'object' ? (emp.name + (emp.mnv ? ' - ' + emp.mnv : '')) : emp;
+            const empDisplayName = typeof emp === 'object' ? emp.name : formatTechnicianName(emp);
             const empId = typeof emp === 'object' ? (emp.mnv || emp.id) : '';
 
             const cpsTarget = selectedCpsForAssign.value.docNo || selectedCpsForAssign.value.id || (selectedCpsForAssign.value.cpsrDocNo ? selectedCpsForAssign.value.cpsrDocNo.replace('CPSR-', 'CPS-') : '');
             const payload = {
-              assignedTo: empName,
-              assignee: empName,
+              assignedTo: empDisplayName,
+              assignee: empDisplayName,
+              assignedToName: empDisplayName,
               assignedToId: empId,
               employeeId: empId,
               deadline: assignForm.value.deadline ? new Date(assignForm.value.deadline).toISOString() : null,
@@ -704,7 +733,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               throw new Error(err.message || ('Lỗi máy chủ (' + res.status + ')'));
             }
 
-            showToast('Đã phân công ' + empName + ' cho phiếu ' + cpsTarget + ' (IN_PROGRESS)');
+            showToast('Đã phân công Technician ' + empDisplayName + ' cho phiếu ' + cpsTarget + ' (IN_PROGRESS)');
             showAssignModal.value = false;
             await loadAllSplitData();
           } catch (err) {
@@ -1125,13 +1154,14 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               }
             },
             {
-              title: 'KTV Tiếp Nhận',
+              title: 'Technician',
               minWidth: 140,
               formatter: cell => {
                 const r = cell.getRow().getData();
                 const ass = r.assignedTo || r.cpst?.recvBy;
-                if (!ass) return '<span class="text-amber-600 dark:text-amber-400 italic text-[11px]">Chưa giao</span>';
-                return '<div class="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1"><i class="fa-solid fa-user-check text-[10px] text-emerald-600 dark:text-emerald-400"></i> ' + ass + '</div>';
+                const techName = formatTechnicianName(r.assignedToName || ass);
+                if (!techName) return '<span class="text-amber-600 dark:text-amber-400 italic text-[11px]">Chưa giao</span>';
+                return '<div class="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1"><i class="fa-solid fa-user-check text-[10px] text-emerald-600 dark:text-emerald-400"></i> ' + techName + '</div>';
               }
             },
             {
@@ -1212,7 +1242,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             'Tên Máy': r.cpsr?.machineName || r.machineName || '',
             'Công Nghệ': r.cpsr?.printTech || r.printTech || '',
             'Sự Cố': r.cpsr?.problem || r.problem || '',
-            'KTV Phụ Trách': r.assignedTo || r.cpst?.recvBy || '',
+            'Technician Phụ Trách': formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || ''),
             'Hạn Chót (Deadline)': r.deadline || '',
             'Downtime (Phút)': r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : ''),
             'Mã CPST': r.cpst?.docNo || r.cpstDocNo || '',
@@ -1481,7 +1511,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                 minWidth: 140,
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  const name = r.assignedTo || r.cpst?.recvBy;
+                  const name = formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy);
                   if (!name) return '<span class="text-amber-600 dark:text-amber-400/80 italic text-[11px] font-semibold">Chưa giao</span>';
                   return '<div class="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1"><i class="fa-solid fa-user-check text-[10px] text-emerald-600 dark:text-emerald-400"></i> ' + name + '</div>';
                 }
@@ -1567,7 +1597,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   let h = '<div class="flex items-center justify-end gap-1">';
-                  h += '<button class="btn-chain-assign px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-[11px] font-bold transition cursor-pointer" title="Phân công KTV"><i class="fa-solid fa-user-gear"></i> Giao</button>';
+                  h += '<button class="btn-chain-assign px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-[11px] font-bold transition cursor-pointer" title="Phân công Technician"><i class="fa-solid fa-user-gear"></i> Giao</button>';
                   h += '<button class="btn-chain-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="Chỉnh sửa phiếu CPS"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>';
                   h += '<button class="btn-chain-link px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30 text-[11px] font-bold transition cursor-pointer" title="Ghép nối CPST/CPSF"><i class="fa-solid fa-link"></i> Ghép</button>';
                   h += '<button class="btn-chain-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold transition cursor-pointer" title="Xem chi tiết chuỗi 1-1-1"><i class="fa-solid fa-eye"></i></button>';
@@ -1638,7 +1668,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             columns = [
               { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
               { title: 'Mã CPSR Gốc', field: 'cpsrDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-sky-700 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'KTV Tiếp Nhận', field: 'recvBy', minWidth: 140 },
+              { title: 'Technician Tiếp Nhận', field: 'recvBy', minWidth: 140, formatter: cell => formatTechnicianName(cell.getValue()) },
               { title: 'Trạng Thái', field: 'chkStatus', minWidth: 120, hozAlign: 'center', formatter: cell => {
                 const s = cell.getValue() || '';
                 return s === 'Đã khắc phục' ? '<span class="text-emerald-700 dark:text-emerald-400 font-bold">Đã khắc phục</span>' : (s === 'Hư hỏng nặng' ? '<span class="text-rose-700 dark:text-rose-400 font-bold">Hư hỏng nặng</span>' : '<span class="text-amber-700 dark:text-amber-400 font-bold">' + s + '</span>');
@@ -1704,6 +1734,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
 
           if (splitTable) {
             try {
+              splitTable.setColumns(columns);
               splitTable.setData(rawData);
               applySplitFilters();
               safeRedraw(splitTable);
@@ -1719,6 +1750,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               data: rawData,
               layout: 'fitDataStretch',
               responsiveLayout: false,
+              renderHorizontal: 'virtual',
+              renderVertical: 'virtual',
               pagination: 'local',
               paginationSize: 10,
               paginationSizeSelector: [10, 20, 50, 100],
@@ -1734,6 +1767,14 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           } catch (err) {
             console.warn('Tabulator split forms init error:', err);
           }
+        };
+
+        let splitFilterTimer = null;
+        const debouncedApplySplitFilters = () => {
+          if (splitFilterTimer) clearTimeout(splitFilterTimer);
+          splitFilterTimer = setTimeout(() => {
+            applySplitFilters();
+          }, 150);
         };
 
         const applySplitFilters = () => {
@@ -1856,11 +1897,11 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               'Công Nghệ': r.cpsr?.printTech || r.printTech || '',
               'Tên Máy': r.cpsr?.machineName || r.machineName || '',
               'Sự Cố': r.cpsr?.problem || r.problem || '',
-              'Nhân Viên KT': r.assignedTo || r.cpst?.recvBy || '-',
+              'Nhân Viên KT': formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || '') || '-',
               'Deadline': r.deadline || '-',
               'Downtime (Phút)': r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : '-'),
               'Tỉ Lệ Phế': r.wastePercent || r.cpsf?.wastePercent || '-',
-              'KTV Tiếp Nhận': r.cpst?.recvBy || r.assignedTo || '-',
+              'Technician Tiếp Nhận': formatTechnicianName(r.cpst?.recvBy || r.assignedToName || r.assignedTo || '') || '-',
               'Trạng Thái KT': r.cpst?.chkStatus || r.chkStatus || '-',
               'Chất Lượng In': r.cpsf?.chkQuality || r.chkQuality || '-',
               'Work Order': r.cpsf?.workOrder || r.workOrder || '-'
@@ -3164,6 +3205,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           closeTicketDetailModal,
           switchSplitTab,
           applySplitFilters,
+          debouncedApplySplitFilters,
           openChainDetailModal,
           deleteSplitRecord,
           exportCurrentTabExcel,
@@ -3179,6 +3221,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           cpsCountByStatus,
           filteredCpsCards,
           formatCpsStatus,
+          formatTechnicianName,
+          getTechnicianDisplayName,
           getCardBorderClass,
           formatDateTimeDisplay,
           openAssignModal,

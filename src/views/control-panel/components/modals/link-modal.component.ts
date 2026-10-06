@@ -70,7 +70,7 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
               <select v-model="linkForm.selectedCpst" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none cursor-pointer">
                 <option value="">-- Chọn phiếu CPST khả dụng --</option>
                 <option v-for="t in cpstList" :key="t.docNo || t.id" :value="t.docNo">
-                  {{ t.docNo }} (KTV: {{ t.recvBy || 'N/A' }} • {{ t.chkStatus || 'N/A' }})
+                  {{ t.docNo }} (Technician: {{ formatTechnicianName(t.recvBy) || 'N/A' }} • {{ t.chkStatus || 'N/A' }})
                 </option>
               </select>
             </div>

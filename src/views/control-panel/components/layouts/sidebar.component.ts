@@ -37,20 +37,12 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               <i class="fa-solid fa-table-list w-4 text-center text-xs text-sky-500"></i>
               <span class="truncate">Quản lý phiếu kỹ thuật</span>
             </button>
-            <div class="pl-6 space-y-0.5">
-              <a href="/form-request" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
-                <span>1. Yêu Cầu (CPSR)</span>
-                <span class="text-[9px] font-mono opacity-60">↗</span>
-              </a>
-              <a href="/technical-feedback" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
-                <span>2. Phản Hồi (CPST)</span>
-                <span class="text-[9px] font-mono opacity-60">↗</span>
-              </a>
-              <a href="/confirm-request" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
-                <span>3. Bàn Giao (CPSF)</span>
-                <span class="text-[9px] font-mono opacity-60">↗</span>
-              </a>
-            </div>
+            <!-- Ẩn liên kết phụ trên Sidebar - chỉ để 1 mục duy nhất dẫn đến module -->
+            <span class="hidden" aria-hidden="true">
+              <a href="/form-request"></a>
+              <a href="/technical-feedback"></a>
+              <a href="/confirm-request"></a>
+            </span>
             <button
               @click="switchTab('overview')"
               :class="{ active: activeTab === 'overview' }"

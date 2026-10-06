@@ -7,6 +7,7 @@ export interface FormFilterQuery {
   chkQuality?: string;
   status?: string;
   assignedTo?: string;
+  technician?: string;
   dateFrom?: string;
   dateTo?: string;
   limit?: number;

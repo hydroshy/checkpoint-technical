@@ -222,7 +222,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                     <span class="w-3.5 h-3.5 rounded-full bg-amber-500"></span>
                     <div>
                       <div class="font-bold text-xs text-amber-700 dark:text-amber-400">⏳ TO_ASSIGN (Chờ phân công)</div>
-                      <div class="text-[10px] text-slate-400">Đang chờ trưởng ca / quản lý chỉ định KTV</div>
+                      <div class="text-[10px] text-slate-400">Đang chờ trưởng ca / quản lý chỉ định Technician</div>
                     </div>
                   </div>
                   <div class="text-right">
@@ -237,7 +237,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                     <span class="w-3.5 h-3.5 rounded-full bg-sky-500"></span>
                     <div>
                       <div class="font-bold text-xs text-sky-700 dark:text-sky-400">⚡ IN_PROGRESS (Đang xử lý)</div>
-                      <div class="text-[10px] text-slate-400">KTV đang thao tác sửa chữa tại máy in</div>
+                      <div class="text-[10px] text-slate-400">Technician đang thao tác sửa chữa tại máy in</div>
                     </div>
                   </div>
                   <div class="text-right">
@@ -295,7 +295,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   type="text"
                   v-model="reportSearch"
                   @input="onReportFilterChange"
-                  placeholder="🔍 Tìm mã phiếu, người YC, KTV, thiết bị..."
+                  placeholder="🔍 Tìm mã phiếu, người YC, Technician, thiết bị..."
                   class="input-box px-3.5 py-1.5 rounded-xl text-xs outline-none w-full sm:w-64"
                 />
                 <select

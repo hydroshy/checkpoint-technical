@@ -131,9 +131,20 @@ export class CpsrService {
     const total = list.length;
     const offset = query?.offset ? Number(query.offset) : 0;
     const limit = query?.limit ? Number(query.limit) : 1000;
-    const data = list.slice(offset, offset + limit).map(cpsr => {
-      const cpst = this.dbService.getCpstList().find(t => t.cpsrDocNo === cpsr.docNo) || null;
-      const cpsf = cpst ? (this.dbService.getCpsfList().find(f => f.cpstDocNo === cpst.docNo) || null) : null;
+    const paged = list.slice(offset, offset + limit);
+
+    const cpstByCpsr = new Map<string, any>();
+    for (const t of this.dbService.getCpstList()) {
+      if (t.cpsrDocNo) cpstByCpsr.set(t.cpsrDocNo, t);
+    }
+    const cpsfByCpst = new Map<string, any>();
+    for (const f of this.dbService.getCpsfList()) {
+      if (f.cpstDocNo) cpsfByCpst.set(f.cpstDocNo, f);
+    }
+
+    const data = paged.map(cpsr => {
+      const cpst = cpstByCpsr.get(cpsr.docNo) || null;
+      const cpsf = cpst ? (cpsfByCpst.get(cpst.docNo) || null) : null;
       return {
         ...cpsr,
         cpst,

@@ -1,3 +1,6 @@
+import { ASSIGN_TASK_CSS } from '../modules/assign-task-module/assign-task.style';
+import { MANAGEMENT_TASK_CSS } from '../modules/management-task-module/management-task.style';
+
 export const CONTROL_PANEL_CSS = `    body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       margin: 0;
@@ -58,6 +61,15 @@ export const CONTROL_PANEL_CSS = `    body {
     }
 
     /* Light Mode High Contrast Overrides */
+    html.theme-light .text-slate-100 {
+      color: #0f172a !important;
+    }
+    html.theme-light .text-slate-200 {
+      color: #1e293b !important;
+    }
+    html.theme-light .text-slate-300 {
+      color: #334155 !important;
+    }
     html.theme-light .text-slate-400 {
       color: #475569 !important;
     }
@@ -371,4 +383,6 @@ export const CONTROL_PANEL_CSS = `    body {
     html.theme-dark .tabulator .btn-chain-del:hover,
     html.theme-dark .tabulator .btn-split-del:hover {
       background-color: rgba(244, 63, 94, 0.15) !important;
-    }`;
+    }
+${ASSIGN_TASK_CSS}
+${MANAGEMENT_TASK_CSS}`;

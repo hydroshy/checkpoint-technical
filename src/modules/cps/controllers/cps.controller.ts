@@ -45,6 +45,7 @@ export class CpsController {
   @ApiQuery({ name: 'status', required: false, type: String })
   @ApiQuery({ name: 'printTech', required: false, type: String })
   @ApiQuery({ name: 'assignedTo', required: false, type: String })
+  @ApiQuery({ name: 'technician', required: false, type: String })
   @ApiQuery({ name: 'dateFrom', required: false, type: String })
   @ApiQuery({ name: 'dateTo', required: false, type: String })
   @ApiQuery({ name: 'limit', required: false, type: Number })

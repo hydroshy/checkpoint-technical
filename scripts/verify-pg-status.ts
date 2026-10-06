@@ -42,7 +42,7 @@ async function runVerification() {
     const allowedStatuses = ['Open', 'In Progress', 'Overdue', 'Closed'];
     const invalidWeeklyStatuses = weeklyStatuses.filter(r => !allowedStatuses.includes(r.status));
 
-    const weeklyStatusValid = invalidWeeklyStatuses.length === 0 && weeklyStatuses.length > 0;
+    const weeklyStatusValid = invalidWeeklyStatuses.length === 0;
     results.push({
       step: '2. Bảng weekly_technical_requests chỉ chứa 4 trạng thái chuẩn',
       passed: weeklyStatusValid,
@@ -92,22 +92,22 @@ async function runVerification() {
   }
 
   // 3. Kiểm tra code frontend view: Dashboard và Control Panel
-  const dashboardSource = fs.readFileSync(path.join(__dirname, '..', 'src', 'views', 'dashboard.view.ts'), 'utf-8');
-  const controlPanelSource = fs.readFileSync(path.join(__dirname, '..', 'src', 'views', 'control-panel.view.ts'), 'utf-8');
+  const { DASHBOARD_HTML } = require('../src/views/dashboard.view');
+  const { CONTROL_PANEL_HTML } = require('../src/views/control-panel.view');
 
-  const has4StatusesFilter = dashboardSource.includes('value="Open"') &&
-    dashboardSource.includes('value="In Progress"') &&
-    dashboardSource.includes('value="Overdue"') &&
-    dashboardSource.includes('value="Closed"');
+  const has4StatusesFilter = DASHBOARD_HTML.includes('value="Open"') &&
+    DASHBOARD_HTML.includes('value="In Progress"') &&
+    DASHBOARD_HTML.includes('value="Overdue"') &&
+    DASHBOARD_HTML.includes('value="Closed"');
 
-  const hasNoPendingInFilter = !dashboardSource.includes('<option value="Pending">Pending</option>');
+  const hasNoPendingInFilter = !DASHBOARD_HTML.includes('<option value="Pending">Pending</option>');
 
-  const hasStatusColors = dashboardSource.includes("'open'") &&
-    dashboardSource.includes("'in progress'") &&
-    dashboardSource.includes("'overdue'") &&
-    dashboardSource.includes("'closed'");
+  const hasStatusColors = DASHBOARD_HTML.includes("'open'") &&
+    DASHBOARD_HTML.includes("'in progress'") &&
+    DASHBOARD_HTML.includes("'overdue'") &&
+    DASHBOARD_HTML.includes("'closed'");
 
-  const hasChart4Statuses = dashboardSource.includes("labels: ['Open', 'In Progress', 'Overdue', 'Closed']");
+  const hasChart4Statuses = DASHBOARD_HTML.includes("labels: ['Open', 'In Progress', 'Overdue', 'Closed']");
 
   const frontendDashboardValid = has4StatusesFilter && hasNoPendingInFilter && hasStatusColors && hasChart4Statuses;
   results.push({
@@ -117,10 +117,10 @@ async function runVerification() {
   });
   console.log(`[${frontendDashboardValid ? 'PASS' : 'FAIL'}] 5. Dashboard View: Đã tích hợp đầy đủ 4 trạng thái (Open, In Progress, Overdue, Closed) và màu sắc tương ứng.`);
 
-  const cpHas4Statuses = controlPanelSource.includes('value="Open"') &&
-    controlPanelSource.includes('value="In Progress"') &&
-    controlPanelSource.includes('value="Overdue"') &&
-    controlPanelSource.includes('value="Closed"');
+  const cpHas4Statuses = CONTROL_PANEL_HTML.includes('value="Open"') &&
+    CONTROL_PANEL_HTML.includes('value="In Progress"') &&
+    CONTROL_PANEL_HTML.includes('value="Overdue"') &&
+    CONTROL_PANEL_HTML.includes('value="Closed"');
 
   results.push({
     step: '6. Control Panel View chuẩn hóa 4 trạng thái',
@@ -129,16 +129,16 @@ async function runVerification() {
   });
   console.log(`[${cpHas4Statuses ? 'PASS' : 'FAIL'}] 6. Control Panel View: Bộ lọc chkStatus cập nhật 4 trạng thái chuẩn.`);
 
-  // 4. Kiểm tra JSON fallback files đã được đồng bộ với DB thực tế (loại bỏ fake)
+  // 4. Kiểm tra JSON fallback files đã được đồng bộ với DB thực tế (sạch hoàn toàn mock data)
   const techReqJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'technical_requests.json'), 'utf-8'));
   const weeklyJson = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'data', 'weekly_technical_requests.json'), 'utf-8'));
   const invalidWeeklyJsonStatus = weeklyJson.filter((r: any) => !['Open', 'In Progress', 'Overdue', 'Closed'].includes(r.status));
 
-  const jsonStorageClean = invalidWeeklyJsonStatus.length === 0 && techReqJson.length === 4;
+  const jsonStorageClean = invalidWeeklyJsonStatus.length === 0 && techReqJson.length === 0 && weeklyJson.length === 0;
   results.push({
-    step: '7. Local data fallback sạch và chuẩn hóa 4 trạng thái',
+    step: '7. Local data fallback sạch và chuẩn hóa 4 trạng thái (0 mock data)',
     passed: jsonStorageClean,
-    details: { techReqCount: techReqJson.length, invalidWeeklyCount: invalidWeeklyJsonStatus.length }
+    details: { techReqCount: techReqJson.length, weeklyCount: weeklyJson.length }
   });
   console.log(`[${jsonStorageClean ? 'PASS' : 'FAIL'}] 7. File data JSON lưu trữ local đồng bộ dữ liệu thực tế và 4 trạng thái.`);
 

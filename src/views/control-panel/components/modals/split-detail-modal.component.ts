@@ -57,8 +57,8 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
             <div v-if="selectedChain.cpst" class="space-y-3">
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">KTV TIẾP NHẬN</span>
-                  <span class="font-medium text-slate-800 dark:text-slate-100">{{ selectedChain.cpst.recvBy }}</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">TECHNICIAN TIẾP NHẬN</span>
+                  <span class="font-medium text-slate-800 dark:text-slate-100">{{ formatTechnicianName(selectedChain.cpst.recvBy) }}</span>
                 </div>
                 <div>
                   <span class="text-slate-400 block text-[10px] font-bold">TRẠNG THÁI KT</span>
