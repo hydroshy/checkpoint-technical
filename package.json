@@ -8,6 +8,10 @@
   "scripts": {
     "prebuild": "node -e \"try { require('fs').rmSync('dist', { recursive: true, force: true }); } catch(e) {}\"",
     "build": "nest build && node -e \"try { require('fs').cpSync('public', 'dist/public', { recursive: true }); } catch(e) {}\"",
+    "test": "ts-node test/run-all.ts",
+    "test:qa": "ts-node test/qa-system-verification.spec.ts",
+    "test:backend": "ts-node test/backend-ticket-mgmt.spec.ts",
+    "test:e2e": "ts-node test/report-and-control-panel.e2e.ts",
     "start": "node dist/main",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --debug --watch",
