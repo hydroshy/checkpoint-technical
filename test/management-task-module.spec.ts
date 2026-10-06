@@ -60,13 +60,33 @@ assert.ok(CP_MANAGEMENT_TASKS_TAB_HTML.includes("switchSplitTab('cpsr')"), 'Có 
 assert.ok(CP_MANAGEMENT_TASKS_TAB_HTML.includes("switchSplitTab('cpst')"), 'Có tab Phản Hồi KT (CPST)');
 assert.ok(CP_MANAGEMENT_TASKS_TAB_HTML.includes("switchSplitTab('cpsf')"), 'Có tab Bàn Giao (CPSF)');
 
-// 3.2 Kiểm tra banner hướng dẫn liên kết CPS
+// 3.2 Kiểm tra loại bỏ hoàn toàn banner rườm rà, loại bỏ tab legacy và chỉ còn 1 table container
 assert.ok(
-  CP_MANAGEMENT_TASKS_TAB_HTML.includes('Điều phối trung tâm liên kết cả 3 phiếu'),
-  'Có banner giải thích rõ ràng CPS liên kết cả 3 phiếu CPSR, CPST, CPSF'
+  !CP_MANAGEMENT_TASKS_TAB_HTML.includes('Điều phối trung tâm liên kết cả 3 phiếu'),
+  'Đã loại bỏ hoàn toàn banner hướng dẫn rườm rà'
+);
+assert.ok(
+  !CP_MANAGEMENT_TASKS_TAB_HTML.includes("switchSplitTab('legacy')"),
+  'Đã loại bỏ tab Legacy/Dữ liệu cũ thừa'
+);
+assert.ok(
+  !CP_MANAGEMENT_TASKS_TAB_HTML.includes('id="tabulator-requests"'),
+  'Đã loại bỏ container tabulator-requests thừa khỏi module Quản Lý Phiếu Kỹ Thuật'
+);
+assert.ok(
+  CP_MANAGEMENT_TASKS_TAB_HTML.includes('id="tabulator-split-forms"'),
+  'Chỉ giữ lại đúng 1 container table duy nhất (tabulator-split-forms)'
 );
 
-// 3.3 Kiểm tra logic helper getCpsChainProgress
+// 3.3 Kiểm tra loại bỏ các nút hành động trùng lặp trên thanh subtab (chỉ có ở header)
+const cpsrBtnCount = (CP_MANAGEMENT_TASKS_TAB_HTML.match(/href="\/form-request"/g) || []).length;
+const cpstBtnCount = (CP_MANAGEMENT_TASKS_TAB_HTML.match(/href="\/technical-feedback"/g) || []).length;
+const cpsfBtnCount = (CP_MANAGEMENT_TASKS_TAB_HTML.match(/href="\/confirm-request"/g) || []).length;
+assert.strictEqual(cpsrBtnCount, 1, 'Nút mở Form CPSR chỉ xuất hiện 1 lần duy nhất trên giao diện');
+assert.strictEqual(cpstBtnCount, 1, 'Nút mở Form CPST chỉ xuất hiện 1 lần duy nhất trên giao diện');
+assert.strictEqual(cpsfBtnCount, 1, 'Nút mở Form CPSF chỉ xuất hiện 1 lần duy nhất trên giao diện');
+
+// 3.4 Kiểm tra logic helper getCpsChainProgress
 const fullChain = {
   cpsrDocNo: 'CPSR-20261006-001',
   cpstDocNo: 'CPST-20261006-001',
@@ -82,7 +102,7 @@ const progressPartial = getCpsChainProgress(partialChain);
 assert.strictEqual(progressPartial.count, 1);
 assert.strictEqual(progressPartial.label, '1/3');
 
-// 3.4 Kiểm tra helper getCpsLinkedDocNos
+// 3.5 Kiểm tra helper getCpsLinkedDocNos
 const linkedDocs = getCpsLinkedDocNos(fullChain);
 assert.strictEqual(linkedDocs.cpsrDocNo, 'CPSR-20261006-001');
 assert.strictEqual(linkedDocs.cpstDocNo, 'CPST-20261006-001');
@@ -141,5 +161,40 @@ assert.ok(
 );
 
 console.log('  ✅ [PASS] Tối ưu hóa toàn diện hiệu năng load và phản hồi của giao diện phiếu');
+
+// =========================================================================
+// 6. KIỂM THỬ QUY TRÌNH RESET / ĐỔI TAB CPS ĐẢM BẢO DUY NHẤT 1 TABLE & SẠCH CODE GIẢ
+// =========================================================================
+console.log('\n--- 6. Kiểm thử Quy trình Reset / Đổi Tab CPS Duy Nhất 1 Table & Sạch Code Giả ---');
+
+// 6.1 switchTab('requests') chỉ cập nhật splitTable, triệt để loại bỏ reqTable / initOrUpdateRequestsTable
+assert.ok(
+  !CONTROL_PANEL_SCRIPT.includes("if (tab === 'requests') {\n              loadAllSplitData();\n              if (splitTab.value === 'legacy')"),
+  'Đã loại bỏ phân nhánh legacy trong switchTab("requests")'
+);
+
+// 6.2 switchSplitTab chỉ cập nhật splitTable tại chỗ
+assert.ok(
+  !CONTROL_PANEL_SCRIPT.includes("if (tab === 'legacy') {\n              initOrUpdateRequestsTable();"),
+  'switchSplitTab không còn gọi initOrUpdateRequestsTable'
+);
+
+// 6.3 Triệt tiêu hoàn toàn khả năng xuất hiện table thứ 2 trong template
+assert.ok(
+  !CP_MANAGEMENT_TASKS_TAB_HTML.includes('id="tabulator-requests"'),
+  'Template Quản Lý Phiếu Kỹ Thuật không còn thẻ tabulator-requests'
+);
+assert.ok(
+  CP_MANAGEMENT_TASKS_TAB_HTML.includes('id="tabulator-split-forms"'),
+  'Template Quản Lý Phiếu Kỹ Thuật chỉ có đúng 1 thẻ tabulator-split-forms'
+);
+
+// 6.4 Xuất Excel cho module Quản Lý Phiếu không còn phân nhánh legacy
+assert.ok(
+  !CONTROL_PANEL_SCRIPT.includes("if (splitTab.value === 'legacy') {\n            exportRequestsExcel();"),
+  'exportCurrentTabExcel đã dọn sạch phân nhánh legacy'
+);
+
+console.log('  ✅ [PASS] Đảm bảo chỉ duy nhất 1 table trong mọi quy trình reset / chuyển tab, loại bỏ sạch code thừa');
 
 console.log('\n🎉 TOÀN BỘ KIỂM THỬ CHO MANAGEMENT-TASK-MODULE ĐÃ ĐẠT 100%!');

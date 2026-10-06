@@ -424,7 +424,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           if (splitTab.value === 'cpsr') return cpsrList.value.length;
           if (splitTab.value === 'cpst') return cpstList.value.length;
           if (splitTab.value === 'cpsf') return cpsfList.value.length;
-          return requestsList.value.length;
+          return 0;
         });
 
         // Requests Master Table
@@ -1302,13 +1302,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             }
             if (tab === 'requests') {
               loadAllSplitData();
-              if (splitTab.value === 'legacy') {
-                if (requestsList.value.length === 0) loadRequests();
-                else { initOrUpdateRequestsTable(); safeRedraw(reqTable); }
-              } else {
-                initOrUpdateSplitTable();
-                safeRedraw(splitTable);
-              }
+              initOrUpdateSplitTable();
+              safeRedraw(splitTable);
             }
             if (tab === 'machines') {
               if (machinesFlatList.value.length === 0) loadMachines();
@@ -1344,21 +1339,21 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
         // =====================================================================
         const loadChainData = async () => {
           try {
-            // First check /api/cps for enriched chain and assignment records
+            // Check /api/cps for enriched chain and assignment records
             let res = await fetch('/api/cps', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               const data = await res.json();
-              if (Array.isArray(data) && data.length > 0) {
+              if (Array.isArray(data)) {
                 chainList.value = data;
                 cpsList.value = data;
                 if (splitTab.value === 'chain') initOrUpdateSplitTable();
                 return;
               }
             }
-            // Fallback to /api/cpsr-chain
             res = await fetch('/api/cpsr-chain', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
-              chainList.value = await res.json();
+              const data = await res.json();
+              chainList.value = Array.isArray(data) ? data : [];
               if (splitTab.value === 'chain') initOrUpdateSplitTable();
             }
           } catch(e) { console.warn('Could not load chain data', e); }
@@ -1406,12 +1401,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           splitFilter.value.search = '';
           splitFilter.value.status = 'ALL';
           nextTick(() => {
-            if (tab === 'legacy') {
-              initOrUpdateRequestsTable();
-              reqTable?.redraw(true);
-            } else {
-              initOrUpdateSplitTable();
-            }
+            initOrUpdateSplitTable();
+            safeRedraw(splitTable);
           });
         };
 
@@ -1877,10 +1868,6 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
         };
 
         const exportCurrentTabExcel = () => {
-          if (splitTab.value === 'legacy') {
-            exportRequestsExcel();
-            return;
-          }
           let rows = [];
           let filename = 'Checkpoint_';
           if (splitTab.value === 'chain') {
@@ -2675,7 +2662,9 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             if (res.ok) {
               const data = await res.json();
               requestsList.value = data.items || [];
-              initOrUpdateRequestsTable();
+              if (document.getElementById('tabulator-requests')) {
+                initOrUpdateRequestsTable();
+              }
             }
           } catch (e) {
             console.error(e);
@@ -3148,7 +3137,6 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
 
           window.addEventListener('resize', () => {
             safeRedraw(splitTable);
-            safeRedraw(reqTable);
             safeRedraw(machinesTable);
             safeRedraw(empTable);
             safeRedraw(usersTable);

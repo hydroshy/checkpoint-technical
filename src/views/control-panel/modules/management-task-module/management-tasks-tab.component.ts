@@ -1,6 +1,6 @@
 export const CP_MANAGEMENT_TASKS_TAB_HTML = `        <!-- =====================================================================
              VIEW 2: MODULE QUẢN LÝ PHIẾU KỸ THUẬT (MANAGEMENT-TASK-MODULE)
-             Chia rõ 4 mục CPS, CPSR, CPST, CPSF (CPS link cả 3 phiếu)
+             4 mục tinh gọn: CPS, CPSR, CPST, CPSF
              ===================================================================== -->
         <div v-show="activeTab === 'requests'" class="space-y-5 management-task-container">
           <!-- Top Header & Primary Action Buttons -->
@@ -61,118 +61,57 @@ export const CP_MANAGEMENT_TASKS_TAB_HTML = `        <!-- ======================
             </div>
           </div>
 
-          <!-- 4 Core Sections Sub-Tab Switcher (CPS Link cả 3 phiếu, CPSR, CPST, CPSF) -->
-          <div class="glass-card rounded-2xl p-2 flex flex-wrap items-center justify-between gap-2 border border-slate-200 dark:border-slate-800">
+          <!-- 4 Core Sections Sub-Tab Switcher (CPS, CPSR, CPST, CPSF) -->
+          <div class="glass-card rounded-2xl p-2 flex flex-wrap items-center gap-2 border border-slate-200 dark:border-slate-800">
             <div class="flex flex-wrap items-center gap-1.5">
-              <!-- Mục 1: CPS - Link cả 3 phiếu CPSR, CPST, CPSF -->
+              <!-- Mục 1: CPS -->
               <button
                 @click="switchSplitTab('chain')"
                 :class="splitTab === 'chain' ? 'bg-sky-600 text-white font-bold shadow-md' : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'"
                 class="px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 management-subtab-btn"
-                title="Mục 1: Phiếu CPS - Chuỗi 1-1-1 liên kết toàn diện CPSR, CPST, CPSF"
+                title="Mục 1: Phiếu CPS - Chuỗi liên kết điều phối trung tâm"
               >
                 <i class="fa-solid fa-link text-sky-300"></i>
-                <span>🔗 Phiếu CPS (Chuỗi 1-1-1)</span>
+                <span>CPS</span>
               </button>
 
-              <!-- Mục 2: CPSR - Phiếu Yêu Cầu Kỹ Thuật -->
+              <!-- Mục 2: CPSR -->
               <button
                 @click="switchSplitTab('cpsr')"
                 :class="splitTab === 'cpsr' ? 'bg-sky-600 text-white font-bold shadow-md' : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'"
                 class="px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 management-subtab-btn"
-                title="Mục 2: Phiếu Yêu Cầu Kỹ Thuật Ban Đầu (CPSR)"
+                title="Mục 2: Phiếu yêu cầu kỹ thuật ban đầu (CPSR)"
               >
                 <i class="fa-solid fa-file-circle-plus text-sky-300"></i>
-                <span>1. Phiếu Yêu Cầu (CPSR)</span>
+                <span>CPSR</span>
               </button>
 
-              <!-- Mục 3: CPST - Phiếu Phản Hồi Kỹ Thuật -->
+              <!-- Mục 3: CPST -->
               <button
                 @click="switchSplitTab('cpst')"
                 :class="splitTab === 'cpst' ? 'bg-sky-600 text-white font-bold shadow-md' : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'"
                 class="px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 management-subtab-btn"
-                title="Mục 3: Phiếu Phản Hồi Xử Lý Kỹ Thuật (CPST)"
+                title="Mục 3: Phiếu phản hồi xử lý kỹ thuật (CPST)"
               >
                 <i class="fa-solid fa-screwdriver-wrench text-emerald-300"></i>
-                <span>2. Phản Hồi KT (CPST)</span>
+                <span>CPST</span>
               </button>
 
-              <!-- Mục 4: CPSF - Phiếu Bàn Giao & Nghiệm Thu -->
+              <!-- Mục 4: CPSF -->
               <button
                 @click="switchSplitTab('cpsf')"
                 :class="splitTab === 'cpsf' ? 'bg-sky-600 text-white font-bold shadow-md' : 'text-slate-700 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800'"
                 class="px-3.5 py-2 rounded-xl text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 management-subtab-btn"
-                title="Mục 4: Phiếu Nghiệm Thu & Bàn Giao Sản Xuất (CPSF)"
+                title="Mục 4: Phiếu nghiệm thu & bàn giao sản xuất (CPSF)"
               >
                 <i class="fa-solid fa-circle-check text-purple-300"></i>
-                <span>3. Bàn Giao (CPSF)</span>
-              </button>
-
-              <!-- Mục Phụ: Dữ Liệu Cũ (Legacy) -->
-              <button
-                @click="switchSplitTab('legacy')"
-                :class="splitTab === 'legacy' ? 'bg-slate-700 text-white font-bold shadow' : 'text-slate-700 dark:text-slate-500 hover:text-slate-900 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/50'"
-                class="px-3 py-2 rounded-xl text-xs font-semibold transition cursor-pointer"
-              >
-                Dữ Liệu Cũ
+                <span>CPSF</span>
               </button>
             </div>
-
-            <!-- Form Action Buttons Directly on Tabulator Bar -->
-            <div class="flex flex-wrap items-center gap-1.5">
-              <a
-                href="/form-request"
-                target="_blank"
-                class="px-2.5 py-1.5 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm cursor-pointer"
-                title="Mở biểu mẫu tạo mới phiếu yêu cầu kỹ thuật CPSR"
-              >
-                <i class="fa-solid fa-file-circle-plus"></i> + CPSR
-              </a>
-              <a
-                href="/technical-feedback"
-                target="_blank"
-                class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm cursor-pointer"
-                title="Mở biểu mẫu phản hồi kỹ thuật CPST"
-              >
-                <i class="fa-solid fa-screwdriver-wrench"></i> + CPST
-              </a>
-              <a
-                href="/confirm-request"
-                target="_blank"
-                class="px-2.5 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm cursor-pointer"
-                title="Mở biểu mẫu nghiệm thu & bàn giao CPSF"
-              >
-                <i class="fa-solid fa-circle-check"></i> + CPSF
-              </a>
-              <button
-                type="button"
-                @click="openCreateCpsModal"
-                class="px-2.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm cursor-pointer"
-                title="Tạo mới phiếu CPS (Bắt buộc chọn CPSR)"
-              >
-                <i class="fa-solid fa-plus"></i> + Tạo CPS
-              </button>
-              <button
-                type="button"
-                @click="openLinkModal()"
-                class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1 shadow-sm cursor-pointer"
-                title="Ghép nối chuỗi tiến trình CPS"
-              >
-                <i class="fa-solid fa-link"></i> Ghép Nối
-              </button>
-            </div>
-          </div>
-
-          <!-- Section Guide Banner: Giúp người dùng nắm rõ liên kết của mục hiện tại -->
-          <div v-show="splitTab === 'chain'" class="px-4 py-2 bg-sky-50/70 dark:bg-sky-500/10 border border-sky-200 dark:border-sky-500/20 rounded-xl flex items-center justify-between text-xs text-sky-800 dark:text-sky-300">
-            <span class="flex items-center gap-2">
-              <i class="fa-solid fa-circle-info text-sky-500"></i>
-              <span><strong>Mục CPS:</strong> Điều phối trung tâm liên kết cả 3 phiếu (CPSR: Yêu cầu • CPST: Phản hồi • CPSF: Bàn giao). Click mã phiếu để xem chi tiết.</span>
-            </span>
           </div>
 
           <!-- Filter Toolbar for Tabulator (Tối ưu phản hồi với debounced input) -->
-          <div v-show="splitTab !== 'legacy'" class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border border-slate-200 dark:border-slate-800">
+          <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 border border-slate-200 dark:border-slate-800">
             <input
               type="text"
               v-model="splitFilter.search"
@@ -205,36 +144,8 @@ export const CP_MANAGEMENT_TASKS_TAB_HTML = `        <!-- ======================
             </div>
           </div>
 
-          <div v-show="splitTab === 'legacy'" class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 border border-slate-200 dark:border-slate-800">
-            <input
-              type="text"
-              v-model="reqFilter.search"
-              @input="applyReqFilters"
-              placeholder="🔍 Tìm mã phiếu, tên máy, người yêu cầu, lỗi..."
-              class="input-box px-3.5 py-2 rounded-xl text-xs outline-none"
-            />
-            <select v-model="reqFilter.chkStatus" @change="applyReqFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-              <option value="ALL">— Tất cả trạng thái —</option>
-              <option value="Open">🔵 Open</option>
-              <option value="In Progress">🟡 In Progress</option>
-              <option value="Overdue">🔴 Overdue</option>
-              <option value="Closed">🟢 Closed</option>
-            </select>
-            <select v-model="reqFilter.printTech" @change="applyReqFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-              <option value="ALL">— Tất cả công nghệ in —</option>
-              <option v-for="(machines, tech) in machineCatalog" :key="tech" :value="tech">{{ tech }}</option>
-            </select>
-            <select v-model="reqFilter.priority" @change="applyReqFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-              <option value="ALL">— Tất cả mức ưu tiên —</option>
-              <option value="Immediate">🔴 Hỗ trợ ngay (Immediate)</option>
-              <option value="Hold">🟡 Chạy tạm (Hold)</option>
-              <option value="Other">📌 Khác</option>
-            </select>
-          </div>
-
-          <!-- Tabulator Containers -->
+          <!-- Tabulator Container -->
           <div class="glass-card rounded-2xl p-3 overflow-hidden border border-slate-200 dark:border-slate-800">
-            <div v-show="splitTab !== 'legacy'" id="tabulator-split-forms"></div>
-            <div v-show="splitTab === 'legacy'" id="tabulator-requests"></div>
+            <div id="tabulator-split-forms"></div>
           </div>
         </div>`;
