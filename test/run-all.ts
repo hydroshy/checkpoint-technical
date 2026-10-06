@@ -12,6 +12,9 @@ const tests = [
   'test/assign-task-module.spec.ts',
   'test/backend-perf-and-chain.spec.ts',
   'test/management-task-module.spec.ts',
+  'test/cpsr-display-and-edit.spec.ts',
+  'test/dynamic-downtime.spec.ts',
+  'test/ui-popup-cleanup.spec.ts',
 ];
 
 console.log('================================================================');

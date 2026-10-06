@@ -7,9 +7,6 @@ export const CP_MANAGEMENT_TASKS_TAB_HTML = `        <!-- ======================
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Quản Lý Phiếu Kỹ Thuật</h1>
-              <p class="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
-                Điều phối toàn diện: Phiếu CPS (liên kết CPSR • CPST • CPSF) và 3 biểu mẫu độc lập qua Tabulator v6
-              </p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <a

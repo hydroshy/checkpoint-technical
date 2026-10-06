@@ -8,7 +8,7 @@ export const CP_CREATE_CPS_MODAL_HTML = `    <!-- ==============================
             <div class="text-[10px] uppercase font-bold text-sky-500">Tạo Phiếu Kỹ Thuật</div>
             <h2 class="text-base font-extrabold font-mono text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <i class="fa-solid fa-plus-circle text-sky-500"></i>
-              <span>Tạo Mới Phiếu CPS (Chuỗi 1-1-1)</span>
+              <span>Tạo Mới Phiếu CPS</span>
             </h2>
           </div>
           <button @click="closeCreateCpsModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg cursor-pointer">✕</button>

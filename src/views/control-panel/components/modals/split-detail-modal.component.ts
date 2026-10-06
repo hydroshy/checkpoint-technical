@@ -3,7 +3,6 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
       <div v-if="selectedChain" class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10">
           <div>
-            <div class="text-[10px] uppercase font-bold text-sky-500">Chuỗi Tiến Trình 1-1-1</div>
             <h2 class="text-base font-extrabold font-mono text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <span>{{ selectedChain.cpsr?.docNo || selectedChain.docNo }}</span>
               <span v-if="selectedChain.cpst" class="text-slate-400">→</span>
@@ -20,7 +19,17 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
               <span class="font-bold text-sky-600 dark:text-sky-400 text-sm">1. Phiếu Yêu Cầu Kỹ Thuật (CPSR)</span>
-              <span class="font-mono font-bold text-xs bg-sky-500/10 text-sky-500 px-2 py-0.5 rounded">{{ (selectedChain.cpsr || selectedChain).docNo }}</span>
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-xs bg-sky-500/10 text-sky-500 px-2 py-0.5 rounded">{{ (selectedChain.cpsr || selectedChain).docNo }}</span>
+                <button
+                  type="button"
+                  @click="openEditModal('cpsr', selectedChain.cpsr || selectedChain)"
+                  class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer flex items-center gap-1"
+                  title="Chỉnh sửa phiếu CPSR"
+                >
+                  <i class="fa-solid fa-pen-to-square"></i> Sửa CPSR
+                </button>
+              </div>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
@@ -136,6 +145,14 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               class="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow transition flex items-center gap-1.5 cursor-pointer"
             >
               <i class="fa-solid fa-pen-to-square"></i> Chỉnh Sửa
+            </button>
+            <button
+              type="button"
+              @click="openEditModal('cpsr', selectedChain.cpsr || selectedChain)"
+              class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow transition flex items-center gap-1.5 cursor-pointer"
+              title="Chỉnh sửa phiếu CPSR ban đầu"
+            >
+              <i class="fa-solid fa-file-pen"></i> Sửa CPSR
             </button>
             <button
               type="button"

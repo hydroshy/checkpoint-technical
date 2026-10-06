@@ -359,6 +359,9 @@ async function runTests() {
     assert(resDelCpsr.ok, `DELETE phiếu CPSR ${cpsrDocNo} thành công`);
     assert(!dbService.getCpsrByIdOrDocNo(cpsrDocNo), 'CPSR đã bị xóa khỏi DB');
 
+    // 8.4 Xác nhận CPS đã tự động xóa theo cascade của CPSR
+    assert(!dbService.getCpsByIdOrDocNo(newCpsRecord.docNo), 'CPS đã bị xóa khỏi DB theo cascade của CPSR');
+
     console.log(`\n🎉 TẤT CẢ ${testPassed} KIỂM THỬ ĐÃ VƯỢT QUA XUẤT SẮC! (0 lỗi)\n`);
   } catch (err: any) {
     console.error('\n❌ GẶP LỖI TRONG QUÁ TRÌNH KIỂM THỬ:', err.message);

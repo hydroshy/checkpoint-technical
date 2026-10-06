@@ -6,7 +6,6 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
         <!-- Modal Header -->
         <div class="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10">
           <div>
-            <div class="text-[10px] uppercase font-bold text-purple-500">Chuỗi Tiến Trình 1-1-1</div>
             <h2 class="text-base font-extrabold font-mono text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <i class="fa-solid fa-link text-purple-500"></i>
               <span>Ghép Nối Phiếu: {{ linkForm.cpsDocNo }}</span>

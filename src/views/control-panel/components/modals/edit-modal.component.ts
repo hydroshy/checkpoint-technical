@@ -24,7 +24,18 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
           <template v-if="editForm.type === 'cps'">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mã CPSR Gốc (Liên kết)</label>
+                <div class="flex items-center justify-between mb-1">
+                  <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Mã CPSR Gốc (Liên kết)</label>
+                  <button
+                    type="button"
+                    v-if="editForm.cpsrDocNo"
+                    @click="openEditModal('cpsr', { docNo: editForm.cpsrDocNo })"
+                    class="text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 text-[11px] font-bold cursor-pointer inline-flex items-center gap-1"
+                    title="Chuyển sang sửa thông tin phiếu CPSR này"
+                  >
+                    <i class="fa-solid fa-pen-to-square"></i> Sửa CPSR này
+                  </button>
+                </div>
                 <input type="text" :value="editForm.cpsrDocNo" disabled class="input-box w-full px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800/80 text-slate-500 cursor-not-allowed" />
               </div>
               <div>
@@ -70,6 +81,17 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
 
           <!-- Type = CPSR -->
           <template v-else-if="editForm.type === 'cpsr'">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Ngày Yêu Cầu</label>
+                <input type="date" v-model="editForm.reqDate" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
+              </div>
+              <div>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Giờ Yêu Cầu</label>
+                <input type="time" v-model="editForm.reqTime" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
+              </div>
+            </div>
+
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Người Yêu Cầu</label>

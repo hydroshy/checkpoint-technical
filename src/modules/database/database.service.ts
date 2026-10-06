@@ -336,6 +336,110 @@ export function computeCpsStatus(cps: {
   return 'TO_ASSIGN';
 }
 
+export function parseCpsStartTime(cps: {
+  reqDate?: string;
+  reqTime?: string;
+  createdAt?: string;
+  cpsr?: { reqDate?: string; reqTime?: string; createdAt?: string } | null;
+}): number | null {
+  const reqDate = (cps.reqDate || cps.cpsr?.reqDate || '').trim();
+  const reqTime = (cps.reqTime || cps.cpsr?.reqTime || '').trim();
+  const createdAt = (cps.createdAt || cps.cpsr?.createdAt || '').trim();
+
+  if (reqDate && reqDate.includes('T')) {
+    const tIso = new Date(reqDate).getTime();
+    if (!isNaN(tIso)) return tIso;
+  }
+
+  if (reqDate && reqTime) {
+    const formattedTime = reqTime.length === 5 ? `${reqTime}:00` : reqTime;
+    let t = new Date(`${reqDate}T${formattedTime}`).getTime();
+    if (!isNaN(t)) return t;
+    t = new Date(`${reqDate} ${reqTime}`).getTime();
+    if (!isNaN(t)) return t;
+    const parts = reqDate.split(/[/-]/);
+    if (parts.length === 3 && parts[0].length <= 2 && parts[2].length === 4) {
+      t = new Date(`${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}T${formattedTime}`).getTime();
+      if (!isNaN(t)) return t;
+    }
+  }
+
+  if (createdAt) {
+    const tCreated = new Date(createdAt).getTime();
+    if (!isNaN(tCreated)) return tCreated;
+  }
+
+  if (reqDate) {
+    const tDate = new Date(reqDate).getTime();
+    if (!isNaN(tDate)) return tDate;
+  }
+
+  return null;
+}
+
+export function computeCpsDowntime(cps: {
+  status?: string;
+  reqDate?: string;
+  reqTime?: string;
+  createdAt?: string;
+  closedAt?: string | null;
+  deadline?: string | Date | null;
+  downtime?: number;
+  cpsr?: { reqDate?: string; reqTime?: string; createdAt?: string } | null;
+  cpst?: { downtime?: number } | null;
+}): number {
+  const fixedDowntime = (cps.downtime !== undefined && cps.downtime !== null && Number(cps.downtime) > 0)
+    ? Number(cps.downtime)
+    : (cps.cpst?.downtime !== undefined && cps.cpst.downtime !== null && Number(cps.cpst.downtime) > 0
+        ? Number(cps.cpst.downtime)
+        : null);
+
+  const startTime = parseCpsStartTime(cps);
+
+  // 1. Trạng thái CLOSED: Dừng tính khi phiếu ở trạng thái CLOSED (tính đến closedAt/downtime cố định)
+  if (cps.status === 'CLOSED') {
+    if (fixedDowntime !== null) {
+      return fixedDowntime;
+    }
+    if (cps.closedAt) {
+      const closedTime = new Date(cps.closedAt).getTime();
+      if (!isNaN(closedTime) && startTime && closedTime >= startTime) {
+        return Math.max(0, Math.round((closedTime - startTime) / 60000));
+      }
+    }
+    return 0;
+  }
+
+  // 2. Trạng thái OVER_DUE: Dừng tính khi phiếu ở trạng thái OVER_DUE (tính đến deadline)
+  if (cps.status === 'OVER_DUE') {
+    if (cps.deadline) {
+      const deadlineTime = new Date(cps.deadline).getTime();
+      if (!isNaN(deadlineTime) && startTime && deadlineTime >= startTime) {
+        return Math.max(0, Math.round((deadlineTime - startTime) / 60000));
+      }
+    }
+    if (fixedDowntime !== null) {
+      return fixedDowntime;
+    }
+    if (startTime) {
+      return Math.max(0, Math.round((Date.now() - startTime) / 60000));
+    }
+    return 0;
+  }
+
+  // 3. Trạng thái đang chạy (TO_ASSIGN, IN_PROGRESS, OPEN_TASK...):
+  if (fixedDowntime !== null) {
+    return fixedDowntime;
+  }
+
+  // Tính downtime động theo thời gian thực đến Date.now()
+  if (startTime) {
+    return Math.max(0, Math.round((Date.now() - startTime) / 60000));
+  }
+
+  return 0;
+}
+
 export interface CpsRecord {
   id: string;
   docNo: string;
@@ -2608,85 +2712,102 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   saveCpsList(): void { this.invalidateCpsCache(); this.writeJson('cps.json', this.cpsCache); }
 
   getCpsList(): CpsRecord[] {
-    if (this.enrichedCpsCache) {
-      return this.enrichedCpsCache;
+    if (!this.enrichedCpsCache) {
+      const cpsrMap = new Map<string, CpsrRecord>();
+      for (const x of this.cpsrCache) cpsrMap.set(x.docNo, x);
+
+      const cpstByDocNo = new Map<string, CpstRecord>();
+      const cpstByCpsr = new Map<string, CpstRecord>();
+      for (const x of this.cpstCache) {
+        cpstByDocNo.set(x.docNo, x);
+        if (x.cpsrDocNo) cpstByCpsr.set(x.cpsrDocNo, x);
+      }
+
+      const cpsfByDocNo = new Map<string, CpsfRecord>();
+      const cpsfByCpst = new Map<string, CpsfRecord>();
+      const cpsfByCpsr = new Map<string, CpsfRecord>();
+      for (const x of this.cpsfCache) {
+        cpsfByDocNo.set(x.docNo, x);
+        if (x.cpstDocNo) cpsfByCpst.set(x.cpstDocNo, x);
+        if (x.cpsrDocNo) cpsfByCpsr.set(x.cpsrDocNo, x);
+      }
+
+      this.enrichedCpsCache = this.cpsCache.map(r => {
+        const cpsr = (r.cpsrDocNo ? cpsrMap.get(r.cpsrDocNo) : null) || null;
+        const cpst = (r.cpstDocNo === null) ? null : (r.cpstDocNo ? cpstByDocNo.get(r.cpstDocNo) : (cpsr ? cpstByCpsr.get(cpsr.docNo) : null)) || null;
+        const cpsf = (r.cpsfDocNo === null) ? null : (r.cpsfDocNo ? cpsfByDocNo.get(r.cpsfDocNo) : (cpst ? cpsfByCpst.get(cpst.docNo) : (cpsr ? cpsfByCpsr.get(cpsr.docNo) : null))) || null;
+
+        const cpstDocNo = r.cpstDocNo === null ? null : (r.cpstDocNo || cpst?.docNo || null);
+        const cpstId = r.cpstId === null ? null : (r.cpstId || cpst?.id || null);
+        const cpsfDocNo = r.cpsfDocNo === null ? null : (r.cpsfDocNo || cpsf?.docNo || null);
+        const cpsfId = r.cpsfId === null ? null : (r.cpsfId || cpsf?.id || null);
+        const downtime = (r.downtime !== undefined && r.downtime > 0) ? r.downtime : (cpst?.downtime || 0);
+        const woTotalQty = (r.woTotalQty !== undefined && r.woTotalQty > 0) ? r.woTotalQty : (cpsf?.woTotalQty || 0);
+        const wasteQty = (r.wasteQty !== undefined && r.wasteQty > 0) ? r.wasteQty : (cpsf?.wasteQty || 0);
+        const wastePercent = (woTotalQty > 0)
+          ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
+          : (r.wastePercent || cpsf?.wastePercent || '0%');
+        const wasteUnit = r.wasteUnit || cpsf?.wasteUnit || null;
+        const workOrder = r.workOrder || cpsf?.workOrder || null;
+        const chkStatus = r.chkStatus || cpst?.chkStatus || null;
+        const chkQuality = r.chkQuality || cpsf?.chkQuality || null;
+
+        const assignedTo = r.assignedTo || cpst?.recvBy || null;
+        const assignedToName = r.assignedToName || assignedTo;
+        const technician = assignedToName || assignedTo;
+        const closedAt = r.closedAt || cpsf?.submittedAt || null;
+
+        return {
+          ...r,
+          cpstDocNo,
+          cpstId,
+          cpsfDocNo,
+          cpsfId,
+          downtime,
+          woTotalQty,
+          wasteQty,
+          wastePercent,
+          wasteUnit,
+          workOrder,
+          chkStatus,
+          chkQuality,
+          assignedTo,
+          assignedToName,
+          technician,
+          closedAt,
+          cpsr,
+          cpst,
+          cpsf,
+        };
+      });
     }
 
-    const cpsrMap = new Map<string, CpsrRecord>();
-    for (const x of this.cpsrCache) cpsrMap.set(x.docNo, x);
-
-    const cpstByDocNo = new Map<string, CpstRecord>();
-    const cpstByCpsr = new Map<string, CpstRecord>();
-    for (const x of this.cpstCache) {
-      cpstByDocNo.set(x.docNo, x);
-      if (x.cpsrDocNo) cpstByCpsr.set(x.cpsrDocNo, x);
-    }
-
-    const cpsfByDocNo = new Map<string, CpsfRecord>();
-    const cpsfByCpst = new Map<string, CpsfRecord>();
-    const cpsfByCpsr = new Map<string, CpsfRecord>();
-    for (const x of this.cpsfCache) {
-      cpsfByDocNo.set(x.docNo, x);
-      if (x.cpstDocNo) cpsfByCpst.set(x.cpstDocNo, x);
-      if (x.cpsrDocNo) cpsfByCpsr.set(x.cpsrDocNo, x);
-    }
-
-    this.enrichedCpsCache = this.cpsCache.map(r => {
-      const cpsr = (r.cpsrDocNo ? cpsrMap.get(r.cpsrDocNo) : null) || null;
-      const cpst = (r.cpstDocNo ? cpstByDocNo.get(r.cpstDocNo) : (cpsr ? cpstByCpsr.get(cpsr.docNo) : null)) || null;
-      const cpsf = (r.cpsfDocNo ? cpsfByDocNo.get(r.cpsfDocNo) : (cpst ? cpsfByCpst.get(cpst.docNo) : (cpsr ? cpsfByCpsr.get(cpsr.docNo) : null))) || null;
-
-      const cpstDocNo = r.cpstDocNo || cpst?.docNo || null;
-      const cpstId = r.cpstId || cpst?.id || null;
-      const cpsfDocNo = r.cpsfDocNo || cpsf?.docNo || null;
-      const cpsfId = r.cpsfId || cpsf?.id || null;
-      const downtime = (r.downtime !== undefined && r.downtime > 0) ? r.downtime : (cpst?.downtime || 0);
-      const woTotalQty = (r.woTotalQty !== undefined && r.woTotalQty > 0) ? r.woTotalQty : (cpsf?.woTotalQty || 0);
-      const wasteQty = (r.wasteQty !== undefined && r.wasteQty > 0) ? r.wasteQty : (cpsf?.wasteQty || 0);
-      const wastePercent = (woTotalQty > 0)
-        ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
-        : (r.wastePercent || cpsf?.wastePercent || '0%');
-      const wasteUnit = r.wasteUnit || cpsf?.wasteUnit || null;
-      const workOrder = r.workOrder || cpsf?.workOrder || null;
-      const chkStatus = r.chkStatus || cpst?.chkStatus || null;
-      const chkQuality = r.chkQuality || cpsf?.chkQuality || null;
-
-      const assignedTo = r.assignedTo || cpst?.recvBy || null;
-      const assignedToName = r.assignedToName || assignedTo;
-      const technician = assignedToName || assignedTo;
-
+    return this.enrichedCpsCache.map(r => {
       const evaluatedStatus = computeCpsStatus({
         status: r.status,
-        cpsfDocNo,
-        assignedTo,
+        cpsfDocNo: r.cpsfDocNo,
+        assignedTo: r.assignedTo,
         deadline: r.deadline,
+      });
+
+      const dynamicDowntime = computeCpsDowntime({
+        status: evaluatedStatus,
+        reqDate: r.reqDate || r.cpsr?.reqDate,
+        reqTime: r.reqTime || r.cpsr?.reqTime,
+        createdAt: r.createdAt || r.cpsr?.createdAt,
+        closedAt: r.closedAt,
+        deadline: r.deadline,
+        downtime: r.downtime,
+        cpsr: r.cpsr,
+        cpst: r.cpst,
       });
 
       return {
         ...r,
-        cpstDocNo,
-        cpstId,
-        cpsfDocNo,
-        cpsfId,
-        downtime,
-        woTotalQty,
-        wasteQty,
-        wastePercent,
-        wasteUnit,
-        workOrder,
-        chkStatus,
-        chkQuality,
-        assignedTo,
-        assignedToName,
-        technician,
         status: evaluatedStatus,
-        cpsr,
-        cpst,
-        cpsf,
+        downtime: dynamicDowntime,
       };
     });
-
-    return this.enrichedCpsCache;
   }
 
   getCpsByIdOrDocNo(id: string): CpsRecord | undefined {
@@ -2798,12 +2919,15 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         updatedAt: now,
       };
       updated.status = computeCpsStatus(updated);
+      if (updated.status === 'CLOSED' && (!updated.downtime || updated.downtime === 0)) {
+        updated.downtime = computeCpsDowntime(updated);
+      }
       this.cpsCache[idx] = updated;
       this.saveCpsList();
       if (this.isPgConnected && this.pgPool) {
         await this.addCps(updated);
       }
-      return updated;
+      return this.getCpsByIdOrDocNo(updated.id) || updated;
     }
     return undefined;
   }
@@ -3020,76 +3144,102 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   getCpsrChainList(): CpsrChainRecord[] {
-    if (this.enrichedCpsrChainCache) {
-      return this.enrichedCpsrChainCache;
+    if (!this.enrichedCpsrChainCache) {
+      const cpstByDocNo = new Map<string, CpstRecord>();
+      const cpstByCpsr = new Map<string, CpstRecord>();
+      for (const t of this.cpstCache) {
+        cpstByDocNo.set(t.docNo, t);
+        if (t.cpsrDocNo) cpstByCpsr.set(t.cpsrDocNo, t);
+      }
+
+      const cpsfByDocNo = new Map<string, CpsfRecord>();
+      const cpsfByCpst = new Map<string, CpsfRecord>();
+      const cpsfByCpsr = new Map<string, CpsfRecord>();
+      for (const f of this.cpsfCache) {
+        cpsfByDocNo.set(f.docNo, f);
+        if (f.cpstDocNo) cpsfByCpst.set(f.cpstDocNo, f);
+        if (f.cpsrDocNo) cpsfByCpsr.set(f.cpsrDocNo, f);
+      }
+
+      const cpsByCpsr = new Map<string, CpsRecord>();
+      for (const c of this.cpsCache) {
+        if (c.cpsrDocNo) cpsByCpsr.set(c.cpsrDocNo, c);
+      }
+
+      this.enrichedCpsrChainCache = this.cpsrCache.map(cpsr => {
+        const cpst = cpstByCpsr.get(cpsr.docNo) || null;
+        const cpsf = (cpst ? cpsfByCpst.get(cpst.docNo) : null) || cpsfByCpsr.get(cpsr.docNo) || null;
+        const cps = cpsByCpsr.get(cpsr.docNo) || null;
+
+        const docNo = cps?.docNo || cpsr.docNo.replace(/^CPSR-/, 'CPS-');
+        const cpstDocNo = cps?.cpstDocNo === null ? null : (cps?.cpstDocNo || cpst?.docNo || null);
+        const cpsfDocNo = cps?.cpsfDocNo === null ? null : (cps?.cpsfDocNo || cpsf?.docNo || null);
+        const assignedTo = cps?.assignedTo || cpst?.recvBy || null;
+        const assignedToName = cps?.assignedToName || assignedTo;
+        const technician = assignedToName || assignedTo;
+        const downtime = (cps?.downtime !== undefined && cps.downtime > 0) ? cps.downtime : (cpst?.downtime || 0);
+        const woTotalQty = (cps?.woTotalQty !== undefined && cps.woTotalQty > 0) ? cps.woTotalQty : (cpsf?.woTotalQty || 0);
+        const wasteQty = (cps?.wasteQty !== undefined && cps.wasteQty > 0) ? cps.wasteQty : (cpsf?.wasteQty || 0);
+        const wastePercent = (woTotalQty > 0)
+          ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
+          : (cps?.wastePercent || cpsf?.wastePercent || '0%');
+        const chkStatus = cps?.chkStatus || cpst?.chkStatus || null;
+        const chkQuality = cps?.chkQuality || cpsf?.chkQuality || null;
+        const status = cps?.status || (cpsf ? 'CLOSED' : (cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+
+        return {
+          id: cps?.id || cpsr.id,
+          docNo,
+          cpsrDocNo: cpsr.docNo,
+          cpstDocNo,
+          cpsfDocNo,
+          status,
+          assignedTo,
+          assignedToId: cps?.assignedToId || null,
+          assignedToName,
+          technician,
+          deadline: cps?.deadline || null,
+          downtime,
+          wastePercent,
+          chkStatus,
+          chkQuality,
+          cpsr,
+          cpst,
+          cpsf,
+          cps,
+        };
+      });
     }
 
-    const cpstByDocNo = new Map<string, CpstRecord>();
-    const cpstByCpsr = new Map<string, CpstRecord>();
-    for (const t of this.cpstCache) {
-      cpstByDocNo.set(t.docNo, t);
-      if (t.cpsrDocNo) cpstByCpsr.set(t.cpsrDocNo, t);
-    }
+    return this.enrichedCpsrChainCache.map(item => {
+      const cpsfDocNo = item.cpsfDocNo || item.cps?.cpsfDocNo || null;
+      const assignedTo = item.assignedTo || item.cps?.assignedTo || item.cpst?.recvBy || null;
+      const deadline = item.deadline || item.cps?.deadline || null;
+      const evaluatedStatus = computeCpsStatus({
+        status: item.status || item.cps?.status,
+        cpsfDocNo,
+        assignedTo,
+        deadline,
+      });
 
-    const cpsfByDocNo = new Map<string, CpsfRecord>();
-    const cpsfByCpst = new Map<string, CpsfRecord>();
-    const cpsfByCpsr = new Map<string, CpsfRecord>();
-    for (const f of this.cpsfCache) {
-      cpsfByDocNo.set(f.docNo, f);
-      if (f.cpstDocNo) cpsfByCpst.set(f.cpstDocNo, f);
-      if (f.cpsrDocNo) cpsfByCpsr.set(f.cpsrDocNo, f);
-    }
-
-    const cpsByCpsr = new Map<string, CpsRecord>();
-    for (const c of this.cpsCache) {
-      if (c.cpsrDocNo) cpsByCpsr.set(c.cpsrDocNo, c);
-    }
-
-    this.enrichedCpsrChainCache = this.cpsrCache.map(cpsr => {
-      const cpst = cpstByCpsr.get(cpsr.docNo) || null;
-      const cpsf = (cpst ? cpsfByCpst.get(cpst.docNo) : null) || cpsfByCpsr.get(cpsr.docNo) || null;
-      const cps = cpsByCpsr.get(cpsr.docNo) || null;
-
-      const docNo = cps?.docNo || cpsr.docNo.replace(/^CPSR-/, 'CPS-');
-      const cpstDocNo = cps?.cpstDocNo || cpst?.docNo || null;
-      const cpsfDocNo = cps?.cpsfDocNo || cpsf?.docNo || null;
-      const assignedTo = cps?.assignedTo || cpst?.recvBy || null;
-      const assignedToName = cps?.assignedToName || assignedTo;
-      const technician = assignedToName || assignedTo;
-      const downtime = (cps?.downtime !== undefined && cps.downtime > 0) ? cps.downtime : (cpst?.downtime || 0);
-      const woTotalQty = (cps?.woTotalQty !== undefined && cps.woTotalQty > 0) ? cps.woTotalQty : (cpsf?.woTotalQty || 0);
-      const wasteQty = (cps?.wasteQty !== undefined && cps.wasteQty > 0) ? cps.wasteQty : (cpsf?.wasteQty || 0);
-      const wastePercent = (woTotalQty > 0)
-        ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
-        : (cps?.wastePercent || cpsf?.wastePercent || '0%');
-      const chkStatus = cps?.chkStatus || cpst?.chkStatus || null;
-      const chkQuality = cps?.chkQuality || cpsf?.chkQuality || null;
-      const status = cps?.status || (cpsf ? 'CLOSED' : (cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+      const dynamicDowntime = computeCpsDowntime({
+        status: evaluatedStatus,
+        reqDate: item.cpsr?.reqDate,
+        reqTime: item.cpsr?.reqTime,
+        createdAt: item.cpsr?.createdAt,
+        closedAt: item.cps?.closedAt || item.cpsf?.submittedAt,
+        deadline,
+        downtime: item.downtime,
+        cpsr: item.cpsr,
+        cpst: item.cpst,
+      });
 
       return {
-        id: cps?.id || cpsr.id,
-        docNo,
-        cpsrDocNo: cpsr.docNo,
-        cpstDocNo,
-        cpsfDocNo,
-        status,
-        assignedTo,
-        assignedToId: cps?.assignedToId || null,
-        assignedToName,
-        technician,
-        deadline: cps?.deadline || null,
-        downtime,
-        wastePercent,
-        chkStatus,
-        chkQuality,
-        cpsr,
-        cpst,
-        cpsf,
-        cps,
+        ...item,
+        status: evaluatedStatus,
+        downtime: dynamicDowntime,
       };
     });
-
-    return this.enrichedCpsrChainCache;
   }
 
   getSettings(): SystemSettingsRecord {

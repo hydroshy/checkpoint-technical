@@ -228,7 +228,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               const doc = c.cpsrDocNo || c.cpsr?.docNo;
               if (doc) usedCpsr.add(doc);
             });
-            return (cpsrList.value || []).filter(r => r && r.docNo && !usedCpsr.has(r.docNo));
+            const list = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
+            return list.filter(r => r && r.docNo && !usedCpsr.has(r.docNo));
           } catch (_) {
             return [];
           }
@@ -420,10 +421,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
         });
 
         const currentSplitCount = computed(() => {
-          if (splitTab.value === 'chain') return chainList.value.length;
-          if (splitTab.value === 'cpsr') return cpsrList.value.length;
-          if (splitTab.value === 'cpst') return cpstList.value.length;
-          if (splitTab.value === 'cpsf') return cpsfList.value.length;
+          if (splitTab.value === 'chain') return (chainList.value || []).length;
+          if (splitTab.value === 'cpsr') return (Array.isArray(cpsrList.value) ? cpsrList.value : (cpsrList.value?.data || [])).length;
+          if (splitTab.value === 'cpst') return (Array.isArray(cpstList.value) ? cpstList.value : (cpstList.value?.data || [])).length;
+          if (splitTab.value === 'cpsf') return (Array.isArray(cpsfList.value) ? cpsfList.value : (cpsfList.value?.data || [])).length;
           return 0;
         });
 
@@ -746,16 +747,41 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
         // =====================================================================
         // CRUD & LINK METHODS FOR CPSR, CPST, CPSF, CPS (MODAL & ACTIONS)
         // =====================================================================
-        const openEditModal = (type, data) => {
+        const openEditModal = async (type, data) => {
           if (!data) return;
-          const raw = toPlainObject(data);
+          let raw = toPlainObject(data) || {};
+
+          if (type === 'cpsr') {
+            const targetDocNo = raw.cpsr?.docNo || raw.cpsrDocNo || (typeof raw.docNo === 'string' && raw.docNo.startsWith('CPSR-') ? raw.docNo : (raw.cpsr || raw.docNo));
+            let found = null;
+            if (targetDocNo && typeof targetDocNo === 'string') {
+              const currentList = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
+              found = currentList.find(c => c && (c.docNo === targetDocNo || c.id === targetDocNo));
+              if (!found) {
+                try {
+                  const res = await fetch('/api/cpsr/' + encodeURIComponent(targetDocNo), { headers: getAuthHeaders(), credentials: 'include' });
+                  if (res.ok) {
+                    found = await res.json();
+                  }
+                } catch (_) {}
+              }
+            }
+            if (found) {
+              raw = toPlainObject(found);
+            } else if (raw.cpsr && typeof raw.cpsr === 'object') {
+              raw = toPlainObject(raw.cpsr);
+            } else if (raw.cpsrDocNo) {
+              raw = { ...raw, docNo: raw.cpsrDocNo };
+            }
+          }
+
           let deadlineStr = '';
           if (raw.deadline) {
             try {
               const d = new Date(raw.deadline);
               if (!isNaN(d.getTime())) {
                 const pad = (n) => String(n).padStart(2, '0');
-            deadlineStr = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
+                deadlineStr = d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()) + "T" + pad(d.getHours()) + ":" + pad(d.getMinutes());
               }
             } catch (_) {}
           }
@@ -775,6 +801,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             printTech: raw.printTech || raw.cpsr?.printTech || '',
             machineStatus: raw.machineStatus || raw.cpsr?.machineStatus || '',
             problem: raw.problem || raw.cpsr?.problem || '',
+            reqDate: raw.reqDate || raw.cpsr?.reqDate || '',
+            reqTime: raw.reqTime || raw.cpsr?.reqTime || '',
             // CPST
             recvBy: raw.recvBy || raw.cpst?.recvBy || raw.assignedTo || '',
             chkStatus: raw.chkStatus || raw.cpst?.chkStatus || 'Đã khắc phục',
@@ -820,7 +848,9 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                 printTech: editForm.value.printTech,
                 machineStatus: editForm.value.machineStatus,
                 priority: editForm.value.priority,
-                problem: editForm.value.problem
+                problem: editForm.value.problem,
+                ...(editForm.value.reqDate ? { reqDate: editForm.value.reqDate } : {}),
+                ...(editForm.value.reqTime ? { reqTime: editForm.value.reqTime } : {})
               };
             } else if (type === 'cpst') {
               body = {
@@ -852,6 +882,13 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               showToast("Đã cập nhật phiếu " + docNo + " thành công!");
               showEditModal.value = false;
               await loadAllSplitData();
+              if (showChainModal.value && selectedChain.value) {
+                const refreshedDoc = selectedChain.value.docNo || selectedChain.value.cpsrDocNo || selectedChain.value.cpsr?.docNo;
+                if (refreshedDoc) {
+                  const updatedChain = (chainList.value || []).find(c => c.docNo === refreshedDoc || c.cpsrDocNo === refreshedDoc || c.cpsr?.docNo === refreshedDoc);
+                  if (updatedChain) selectedChain.value = updatedChain;
+                }
+              }
             } else {
               const err = await res.json().catch(() => ({}));
               showToast(err.message || 'Cập nhật phiếu thất bại', true);
@@ -1271,9 +1308,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             const res = await fetch('/api/cps', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               const data = await res.json();
-              if (Array.isArray(data)) {
-                cpsList.value = data;
-              }
+              cpsList.value = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
             }
           } catch (e) {
             console.warn('Could not load cps data', e);
@@ -1301,9 +1336,12 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               if (employeesList.value.length === 0) loadEmployees();
             }
             if (tab === 'requests') {
-              loadAllSplitData();
-              initOrUpdateSplitTable();
-              safeRedraw(splitTable);
+              loadAllSplitData().then(() => {
+                nextTick(() => {
+                  initOrUpdateSplitTable();
+                  safeRedraw(splitTable);
+                });
+              });
             }
             if (tab === 'machines') {
               if (machinesFlatList.value.length === 0) loadMachines();
@@ -1348,12 +1386,17 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                 cpsList.value = data;
                 if (splitTab.value === 'chain') initOrUpdateSplitTable();
                 return;
+              } else if (Array.isArray(data?.data)) {
+                chainList.value = data.data;
+                cpsList.value = data.data;
+                if (splitTab.value === 'chain') initOrUpdateSplitTable();
+                return;
               }
             }
             res = await fetch('/api/cpsr-chain', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
               const data = await res.json();
-              chainList.value = Array.isArray(data) ? data : [];
+              chainList.value = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
               if (splitTab.value === 'chain') initOrUpdateSplitTable();
             }
           } catch(e) { console.warn('Could not load chain data', e); }
@@ -1363,7 +1406,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           try {
             const res = await fetch('/api/cpsr', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
-              cpsrList.value = await res.json();
+              const resJson = await res.json();
+              cpsrList.value = Array.isArray(resJson) ? resJson : (Array.isArray(resJson?.data) ? resJson.data : []);
               if (splitTab.value === 'cpsr') initOrUpdateSplitTable();
             }
           } catch(e) { console.warn('Could not load cpsr data', e); }
@@ -1373,7 +1417,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           try {
             const res = await fetch('/api/cpst', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
-              cpstList.value = await res.json();
+              const resJson = await res.json();
+              cpstList.value = Array.isArray(resJson) ? resJson : (Array.isArray(resJson?.data) ? resJson.data : []);
               if (splitTab.value === 'cpst') initOrUpdateSplitTable();
             }
           } catch(e) { console.warn('Could not load cpst data', e); }
@@ -1383,7 +1428,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           try {
             const res = await fetch('/api/cpsf', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
-              cpsfList.value = await res.json();
+              const resJson = await res.json();
+              cpsfList.value = Array.isArray(resJson) ? resJson : (Array.isArray(resJson?.data) ? resJson.data : []);
               if (splitTab.value === 'cpsf') initOrUpdateSplitTable();
             }
           } catch(e) { console.warn('Could not load cpsf data', e); }
@@ -1394,12 +1440,25 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           if (activeTab.value === 'report-technical') {
             onReportFilterChange();
           }
+          if (activeTab.value === 'requests') {
+            initOrUpdateSplitTable();
+            safeRedraw(splitTable);
+          }
         };
 
-        const switchSplitTab = (tab) => {
+        const switchSplitTab = async (tab) => {
           splitTab.value = tab;
           splitFilter.value.search = '';
           splitFilter.value.status = 'ALL';
+          if (tab === 'cpsr') {
+            await loadCpsrData();
+          } else if (tab === 'cpst') {
+            await loadCpstData();
+          } else if (tab === 'cpsf') {
+            await loadCpsfData();
+          } else if (tab === 'chain' || tab === 'cps') {
+            await Promise.all([loadChainData(), loadCpsData()]);
+          }
           nextTick(() => {
             initOrUpdateSplitTable();
             safeRedraw(splitTable);
@@ -1429,10 +1488,26 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               {
                 title: 'Mã CPSR',
                 field: 'cpsr.docNo',
-                minWidth: 140,
+                minWidth: 160,
                 formatter: cell => {
                   const r = cell.getRow().getData();
-                  return '<span class="font-mono font-bold text-slate-800 dark:text-slate-200">' + (r.cpsr?.docNo || r.cpsrDocNo || '') + '</span>';
+                  const doc = r.cpsr?.docNo || r.cpsrDocNo || '';
+                  if (!doc) return '<span class="text-slate-400">-</span>';
+                  return '<div class="flex items-center gap-1.5">' +
+                    '<button class="btn-cps-view-cpsr font-mono font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer" title="Xem chi tiết CPSR ' + doc + '">' + doc + '</button>' +
+                    '<button class="btn-cps-edit-cpsr p-1 text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition cursor-pointer" title="Sửa CPSR ' + doc + '"><i class="fa-solid fa-pen-to-square"></i></button>' +
+                  '</div>';
+                },
+                cellClick: (e, cell) => {
+                  const r = toPlainObject(cell.getRow().getData());
+                  const cpsrData = r.cpsr || { docNo: r.cpsrDocNo, ...r };
+                  if (e.target.closest('.btn-cps-edit-cpsr')) {
+                    e.stopPropagation();
+                    openEditModal('cpsr', cpsrData);
+                  } else if (e.target.closest('.btn-cps-view-cpsr')) {
+                    e.stopPropagation();
+                    openChainDetailModal({ cpsr: cpsrData });
+                  }
                 }
               },
               {
@@ -1569,29 +1644,18 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                 }
               },
               {
-                title: 'Tiến Độ Chuỗi',
-                hozAlign: 'center',
-                minWidth: 100,
-                formatter: cell => {
-                  const r = cell.getRow().getData();
-                  const c = ((r.cpsr || r.cpsrDocNo) ? 1 : 0) + ((r.cpst || r.cpstDocNo) ? 1 : 0) + ((r.cpsf || r.cpsfDocNo) ? 1 : 0);
-                  if (c === 3) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">🟢 3/3</span>';
-                  if (c === 2) return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30">🟡 2/3</span>';
-                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/15 text-sky-700 dark:text-sky-400 border border-sky-500/30">🔵 1/3</span>';
-                }
-              },
-              {
                 title: 'Thao Tác',
                 hozAlign: 'right',
-                minWidth: 260,
+                minWidth: 320,
                 headerSort: false,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   let h = '<div class="flex items-center justify-end gap-1">';
                   h += '<button class="btn-chain-assign px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-[11px] font-bold transition cursor-pointer" title="Phân công Technician"><i class="fa-solid fa-user-gear"></i> Giao</button>';
                   h += '<button class="btn-chain-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="Chỉnh sửa phiếu CPS"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>';
+                  h += '<button class="btn-chain-edit-cpsr px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="Chỉnh sửa CPSR gốc"><i class="fa-solid fa-pen-to-square"></i> Sửa CPSR</button>';
                   h += '<button class="btn-chain-link px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30 text-[11px] font-bold transition cursor-pointer" title="Ghép nối CPST/CPSF"><i class="fa-solid fa-link"></i> Ghép</button>';
-                  h += '<button class="btn-chain-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold transition cursor-pointer" title="Xem chi tiết chuỗi 1-1-1"><i class="fa-solid fa-eye"></i></button>';
+                  h += '<button class="btn-chain-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold transition cursor-pointer" title="Xem chi tiết phiếu CPS"><i class="fa-solid fa-eye"></i></button>';
                   if (!r.cpst && !r.cpstDocNo) {
                     h += '<a href="/technical-feedback?cpsr=' + encodeURIComponent(r.cpsr?.docNo || r.cpsrDocNo || '') + '" target="_blank" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition cursor-pointer shadow-xs">+ CPST</a>';
                   } else if (!r.cpsf && !r.cpsfDocNo) {
@@ -1608,6 +1672,9 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                     openAssignModal(r);
                   } else if (e.target.closest('.btn-chain-edit')) {
                     openEditModal('cps', r);
+                  } else if (e.target.closest('.btn-chain-edit-cpsr')) {
+                    const cpsrData = r.cpsr || { docNo: r.cpsrDocNo, ...r };
+                    openEditModal('cpsr', cpsrData);
                   } else if (e.target.closest('.btn-chain-link')) {
                     openLinkModal(r);
                   } else if (e.target.closest('.btn-chain-view')) {
@@ -1619,7 +1686,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               }
             ];
           } else if (splitTab.value === 'cpsr') {
-            data = cpsrList.value;
+            data = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
             columns = [
               { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
               { title: 'Ngày Giờ', field: 'reqDate', minWidth: 120, formatter: cell => { const r = cell.getRow().getData(); return r.reqDate + ' ' + (r.reqTime || ''); } },
@@ -1655,7 +1722,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               }
             ];
           } else if (splitTab.value === 'cpst') {
-            data = cpstList.value;
+            data = Array.isArray(cpstList.value) ? cpstList.value : (Array.isArray(cpstList.value?.data) ? cpstList.value.data : []);
             columns = [
               { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
               { title: 'Mã CPSR Gốc', field: 'cpsrDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-sky-700 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
@@ -1690,7 +1757,7 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               }
             ];
           } else if (splitTab.value === 'cpsf') {
-            data = cpsfList.value;
+            data = Array.isArray(cpsfList.value) ? cpsfList.value : (Array.isArray(cpsfList.value?.data) ? cpsfList.value.data : []);
             columns = [
               { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-purple-700 dark:text-purple-400">' + (cell.getValue() || '') + '</span>' },
               { title: 'Mã CPST', field: 'cpstDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
@@ -1841,12 +1908,14 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           if (data.cpsr && (data.cpst !== undefined || data.cpsf !== undefined)) {
             selectedChain.value = data;
           } else {
-            const doc = data.docNo || data.cpsrDocNo;
-            const found = chainList.value.find(c => c.cpsr?.docNo === doc || c.cpst?.docNo === doc || c.cpsf?.docNo === doc);
+            const doc = data.docNo || data.cpsrDocNo || data.cpsr?.docNo;
+            const found = (chainList.value || []).find(c => c.cpsr?.docNo === doc || c.cpsrDocNo === doc || c.docNo === doc || c.cpst?.docNo === doc || c.cpsf?.docNo === doc);
             if (found) {
               selectedChain.value = found;
             } else {
-              selectedChain.value = { cpsr: data.cpsr || data, cpst: data.cpst || null, cpsf: data.cpsf || null };
+              const currentCpsrList = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
+              const cpsrItem = data.cpsr || currentCpsrList.find(r => r && (r.docNo === doc || r.id === doc)) || data;
+              selectedChain.value = { cpsr: cpsrItem, cpst: data.cpst || null, cpsf: data.cpsf || null };
             }
           }
           showChainModal.value = true;
@@ -1895,13 +1964,13 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             }));
           } else if (splitTab.value === 'cpsr') {
             filename += 'CPSR';
-            rows = cpsrList.value;
+            rows = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
           } else if (splitTab.value === 'cpst') {
             filename += 'CPST';
-            rows = cpstList.value;
+            rows = Array.isArray(cpstList.value) ? cpstList.value : (Array.isArray(cpstList.value?.data) ? cpstList.value.data : []);
           } else if (splitTab.value === 'cpsf') {
             filename += 'CPSF';
-            rows = cpsfList.value;
+            rows = Array.isArray(cpsfList.value) ? cpsfList.value : (Array.isArray(cpsfList.value?.data) ? cpsfList.value.data : []);
           }
 
           if (rows.length === 0) {

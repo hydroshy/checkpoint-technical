@@ -4,6 +4,8 @@ import {
   DatabaseService,
   CpsRecord,
   computeCpsStatus,
+  computeCpsDowntime,
+  parseCpsStartTime,
   CpsrChainRecord,
 } from '../../database/database.service';
 import {
@@ -217,6 +219,7 @@ export class CpsService {
     }
 
     record.status = computeCpsStatus(record);
+    record.downtime = computeCpsDowntime(record);
 
     await this.dbService.addCps(record);
     this.logger.log(`📌 CPS created: ${record.docNo} strictly bound to CPSR ${cpsr.docNo}`);
@@ -269,6 +272,12 @@ export class CpsService {
         updates.status = 'IN_PROGRESS';
       }
     }
+
+    updates.downtime = computeCpsDowntime({
+      ...existing,
+      ...updates,
+      status: updates.status || existing.status,
+    });
 
     const updated = await this.dbService.updateCps(existing.id, updates);
     this.logger.log(`📌 CPS task assigned: ${existing.docNo} -> ${updates.assignedTo} (deadline: ${updates.deadline || 'none'}, status: ${updated?.status})`);
@@ -354,6 +363,28 @@ export class CpsService {
       updates.closedAt = null;
     }
 
+    const nextStatus = computeCpsStatus({
+      status: updates.status || existing.status,
+      cpsfDocNo: updates.cpsfDocNo !== undefined ? updates.cpsfDocNo : existing.cpsfDocNo,
+      assignedTo: updates.assignedTo || existing.assignedTo,
+      deadline: updates.deadline !== undefined ? updates.deadline : existing.deadline,
+    });
+    updates.status = nextStatus;
+
+    if (updates.status === 'CLOSED') {
+      if (updates.downtime === undefined && (!existing.downtime || existing.downtime === 0)) {
+        updates.downtime = computeCpsDowntime({
+          ...existing,
+          ...updates,
+          status: 'CLOSED',
+        });
+      }
+    } else if (existing.status === 'CLOSED') {
+      if (updates.downtime === undefined) {
+        updates.downtime = 0;
+      }
+    }
+
     const updated = await this.dbService.updateCps(existing.id, updates);
     this.logger.log(`✏️ CPS updated: ${existing.docNo} by ${user?.username || 'system'}`);
     return updated!;
@@ -435,6 +466,13 @@ export class CpsService {
           updates.wastePercent = total > 0 ? ((waste / total) * 100).toFixed(2) + '%' : (autoCpsf.wastePercent || '0%');
           updates.status = 'CLOSED';
           updates.closedAt = autoCpsf.submittedAt || now;
+          if (updates.downtime === undefined || updates.downtime === 0) {
+            updates.downtime = computeCpsDowntime({
+              ...existing,
+              ...updates,
+              status: 'CLOSED',
+            });
+          }
         }
       }
 
@@ -466,6 +504,13 @@ export class CpsService {
       updates.wastePercent = total > 0 ? ((waste / total) * 100).toFixed(2) + '%' : (cpsf.wastePercent || '0%');
       updates.status = 'CLOSED';
       updates.closedAt = cpsf.submittedAt || now;
+      if (updates.downtime === undefined || updates.downtime === 0) {
+        updates.downtime = computeCpsDowntime({
+          ...existing,
+          ...updates,
+          status: 'CLOSED',
+        });
+      }
 
       // Tự động kéo luôn CPST nếu CPSF có trỏ về CPST mà CPS chưa có CPST
       if (!updates.cpstDocNo && !existing.cpstDocNo && cpsf.cpstDocNo) {
@@ -527,6 +572,7 @@ export class CpsService {
       if (existing.status === 'CLOSED') {
         updates.status = existing.assignedTo ? 'IN_PROGRESS' : 'TO_ASSIGN';
       }
+      updates.downtime = 0;
     }
 
     const updated = await this.dbService.updateCps(existing.id, updates);

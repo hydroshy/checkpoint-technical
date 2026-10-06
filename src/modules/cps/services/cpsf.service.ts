@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
-import { DatabaseService, CpsfRecord } from '../../database/database.service';
+import { DatabaseService, CpsfRecord, computeCpsDowntime } from '../../database/database.service';
 import { CreateCpsfDto, UpdateCpsfDto, FormFilterQuery } from '../dto';
 
 @Injectable()
@@ -69,7 +69,15 @@ export class CpsfService {
         const calcPercent = woTotalQty > 0
           ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
           : (record.wastePercent || '0%');
-        const downtime = existingCps.downtime || cpst.downtime || 0;
+        const closedAt = record.submittedAt || now;
+        let downtime = existingCps.downtime || cpst.downtime || 0;
+        if (!downtime || downtime === 0) {
+          downtime = computeCpsDowntime({
+            ...existingCps,
+            closedAt,
+            status: 'CLOSED',
+          });
+        }
 
         await this.dbService.updateCps(existingCps.id, {
           cpsfId: record.id,
@@ -82,7 +90,7 @@ export class CpsfService {
           wasteUnit: record.wasteUnit,
           downtime,
           status: 'CLOSED',
-          closedAt: now,
+          closedAt,
         });
         this.logger.log(`🔗 CPS ${existingCps.docNo} CLOSED with CPSF ${record.docNo} (total: ${woTotalQty}, waste: ${wasteQty}, rate: ${calcPercent}, downtime: ${downtime}m)`);
       }

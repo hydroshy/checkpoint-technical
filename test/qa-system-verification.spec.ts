@@ -2,6 +2,14 @@ import * as assert from 'assert';
 import * as fs from 'fs';
 import * as path from 'path';
 import { CONTROL_PANEL_HTML } from '../src/views/control-panel.view';
+import { CONTROL_PANEL_SCRIPT } from '../src/views/control-panel/scripts/control-panel.script';
+import { CP_MANAGEMENT_TASKS_TAB_HTML } from '../src/views/control-panel/modules/management-task-module/management-tasks-tab.component';
+import { CP_LINK_MODAL_HTML } from '../src/views/control-panel/components/modals/link-modal.component';
+import { CP_SPLIT_DETAIL_MODAL_HTML } from '../src/views/control-panel/components/modals/split-detail-modal.component';
+import { CP_CREATE_CPS_MODAL_HTML } from '../src/views/control-panel/components/modals/create-cps-modal.component';
+import { CP_EDIT_MODAL_HTML } from '../src/views/control-panel/components/modals/edit-modal.component';
+import { CP_TICKET_DETAIL_MODAL_HTML } from '../src/views/control-panel/components/modals/ticket-detail-modal.component';
+import { computeCpsDowntime, parseCpsStartTime } from '../src/modules/database/database.service';
 
 console.log('🧪 BẮT ĐẦU KIỂM THỬ HỆ THỐNG TOÀN DIỆN (QA SYSTEM VERIFICATION):');
 
@@ -77,5 +85,86 @@ assert.ok(CONTROL_PANEL_HTML.includes("unlinkItem('cpsf')"), 'Có chức năng u
 assert.ok(CONTROL_PANEL_HTML.includes('deleteSplitRecord'), 'Có hàm deleteSplitRecord');
 assert.ok(CONTROL_PANEL_HTML.includes('deleteCpsRecord'), 'Có hàm deleteCpsRecord');
 console.log('  ✅ [PASS] Đầy đủ modal chỉnh sửa, ghép nối, xóa phiếu');
+
+// 7. Kiểm tra Hiển thị & Sửa CPSR trong tab riêng
+console.log('\n--- 7. Kiểm tra Hiển Thị & Sửa CPSR Trong Tab Riêng ---');
+assert.ok(CP_MANAGEMENT_TASKS_TAB_HTML.includes("@click=\"switchSplitTab('cpsr')\""), 'Có subtab riêng cho CPSR');
+assert.ok(
+  CONTROL_PANEL_SCRIPT.includes('cpsrList.value = Array.isArray(resJson) ? resJson : (Array.isArray(resJson?.data) ? resJson.data : []);'),
+  'loadCpsrData unwrap chuẩn từ format { data: [...] }'
+);
+assert.ok(CONTROL_PANEL_SCRIPT.includes("loadCpsrData"), 'Tự động gọi loadCpsrData khi đổi tab');
+assert.ok(CONTROL_PANEL_SCRIPT.includes("splitTab.value === 'cpsr'"), 'Có cấu hình bảng Tabulator riêng cho CPSR');
+assert.ok(CP_EDIT_MODAL_HTML.includes("v-else-if=\"editForm.type === 'cpsr'\""), 'Có modal form chỉnh sửa phiếu CPSR');
+assert.ok(CP_EDIT_MODAL_HTML.includes('v-model="editForm.reqDate"'), 'Modal CPSR có trường Ngày yêu cầu');
+assert.ok(CP_EDIT_MODAL_HTML.includes('v-model="editForm.reqTime"'), 'Modal CPSR có trường Giờ yêu cầu');
+assert.ok(CP_SPLIT_DETAIL_MODAL_HTML.includes("openEditModal('cpsr'"), 'Có nút mở sửa CPSR trực tiếp từ chi tiết chuỗi');
+console.log('  ✅ [PASS] Hiển thị và chỉnh sửa CPSR trong tab riêng hoàn chỉnh');
+
+// 8. Kiểm tra Tính Downtime Động Theo Thời Gian Thực (Dừng khi CLOSED hoặc OVER_DUE)
+console.log('\n--- 8. Kiểm tra Tính Downtime Động Theo Thời Gian Thực ---');
+const now = Date.now();
+const past60m = new Date(now - 60 * 60000).toISOString();
+const past40m = new Date(now - 40 * 60000).toISOString();
+const past20m = new Date(now - 20 * 60000).toISOString();
+
+// 8.1 Phiếu đang mở tính động theo thời gian thực tới Date.now()
+const dynamicDt = computeCpsDowntime({
+  status: 'IN_PROGRESS',
+  createdAt: past60m,
+});
+assert.ok(dynamicDt >= 59 && dynamicDt <= 61, `Downtime động phiếu mở phải xấp xỉ 60 phút (thực tế: ${dynamicDt})`);
+
+// 8.2 Dừng tính khi CLOSED (tính tới closedAt)
+const closedDt = computeCpsDowntime({
+  status: 'CLOSED',
+  createdAt: past60m,
+  closedAt: past20m,
+});
+assert.strictEqual(closedDt, 40, 'Phiếu CLOSED phải dừng tính tại closedAt (60 - 20 = 40 phút)');
+
+// 8.3 Dừng tính khi CLOSED có downtime cố định
+const fixedClosedDt = computeCpsDowntime({
+  status: 'CLOSED',
+  createdAt: past60m,
+  downtime: 25,
+});
+assert.strictEqual(fixedClosedDt, 25, 'Phiếu CLOSED có downtime cố định giữ nguyên 25 phút');
+
+// 8.4 Dừng tính khi OVER_DUE (tính tới deadline)
+const overdueDt = computeCpsDowntime({
+  status: 'OVER_DUE',
+  createdAt: past60m,
+  deadline: past40m,
+});
+assert.strictEqual(overdueDt, 20, 'Phiếu OVER_DUE phải dừng tính tại deadline (60 - 40 = 20 phút)');
+console.log('  ✅ [PASS] Tính downtime động thời gian thực dừng chuẩn khi CLOSED hoặc OVER_DUE');
+
+// 9. Kiểm tra Bỏ Cột Tiến Độ Chuỗi & Text Mô Tả Thừa
+console.log('\n--- 9. Kiểm tra Bỏ Cột Tiến Độ Chuỗi & Text Mô Tả Thừa ---');
+assert.ok(
+  !CONTROL_PANEL_SCRIPT.includes("title: 'Tiến Độ Chuỗi'"),
+  'Đã bỏ cột "Tiến Độ Chuỗi" trên bảng Tabulator CPS'
+);
+assert.ok(
+  !CP_MANAGEMENT_TASKS_TAB_HTML.includes('Điều phối toàn diện: Phiếu CPS (liên kết CPSR • CPST • CPSF) và 3 biểu mẫu độc lập qua Tabulator v6'),
+  'Đã bỏ dòng mô tả thừa trên header Quản lý phiếu kỹ thuật'
+);
+console.log('  ✅ [PASS] Đã loại bỏ cột Tiến độ chuỗi và text mô tả thừa');
+
+// 10. Kiểm tra Popup Không Còn Nhãn Chuỗi Tiến Trình 1-1-1
+console.log('\n--- 10. Kiểm tra Popup Không Còn Nhãn Chuỗi Tiến Trình 1-1-1 ---');
+const modals = [
+  { name: 'link-modal', html: CP_LINK_MODAL_HTML },
+  { name: 'split-detail-modal', html: CP_SPLIT_DETAIL_MODAL_HTML },
+  { name: 'create-cps-modal', html: CP_CREATE_CPS_MODAL_HTML },
+  { name: 'edit-modal', html: CP_EDIT_MODAL_HTML },
+  { name: 'ticket-detail-modal', html: CP_TICKET_DETAIL_MODAL_HTML },
+];
+for (const m of modals) {
+  assert.ok(!m.html.includes('Chuỗi Tiến Trình 1-1-1'), `Modal ${m.name} không còn nhãn "Chuỗi Tiến Trình 1-1-1"`);
+  assert.ok(!m.html.includes('(Chuỗi 1-1-1)'), `Modal ${m.name} không còn nhãn "(Chuỗi 1-1-1)"`);
+}
+console.log('  ✅ [PASS] Toàn bộ các popup modal sạch nhãn "Chuỗi Tiến Trình 1-1-1"');
 
 console.log('\n🎉 TOÀN BỘ CÁC MỤC KIỂM THỬ QA SYSTEM VERIFICATION ĐÃ VƯỢT QUA 100%!');

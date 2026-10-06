@@ -218,6 +218,8 @@ export async function runBackendPerfAndChainTests() {
     // Dọn dẹp dữ liệu kiểm thử
     await dbService.deleteCpsr(cpsr.id);
     await dbService.deleteCpsr(cpsrDoc2);
+    await dbService.deleteCpst(cpst.id);
+    await dbService.deleteCpsf(cpsf.id);
 
     console.log('\n🎉 TOÀN BỘ KIỂM THỬ TỐI ƯU BACKEND & CHUỖI PHIẾU ĐÃ VƯỢT QUA 100%!');
   } finally {
