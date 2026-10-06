@@ -1,5 +1,5 @@
 export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DETAIL MODAL -->
-    <div id="modal-chain-detail" v-if="showChainModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeModal('modal-chain-detail')">
+    <div id="modal-chain-detail" v-if="showChainModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeChainModal">
       <div v-if="selectedChain" class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10">
           <div>
@@ -12,7 +12,7 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               <span v-if="selectedChain.cpsf" class="text-purple-500 font-mono">{{ selectedChain.cpsf.docNo }}</span>
             </h2>
           </div>
-          <button @click="closeModal('modal-chain-detail')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeChainModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
         </div>
 
         <div class="p-6 space-y-6 text-xs">
@@ -145,7 +145,7 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               <i class="fa-solid fa-link"></i> Ghép Nối
             </button>
           </div>
-          <button @click="closeModal('modal-chain-detail')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
+          <button type="button" @click="closeChainModal" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
         </div>
       </div>
     </div>`;

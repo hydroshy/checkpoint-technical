@@ -23,15 +23,114 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
             <i class="fa-solid fa-gauge-high text-[11px] text-sky-400"></i>
           </a>
 
-          <!-- SIDEBAR NAVIGATION MENU (Streamlined: Only Quản lý phiếu kỹ thuật) -->
-          <div class="space-y-1.5">
+          <!-- SIDEBAR NAVIGATION MENU: 4 CORE GROUPS WITH FULL MODULES -->
+          <!-- GROUP 1: VẬN HÀNH & PHIẾU KỸ THUẬT -->
+          <div class="space-y-1">
+            <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+              Vận Hành & Phiếu
+            </div>
             <button
               @click="switchTab('requests')"
               :class="{ active: activeTab === 'requests' }"
-              class="nav-item w-full py-2.5 px-3 rounded-xl text-xs font-bold flex items-center gap-2.5 transition text-left cursor-pointer"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-table-list w-4 text-center text-xs text-sky-500"></i>
               <span class="truncate">Quản lý phiếu kỹ thuật</span>
+            </button>
+            <div class="pl-6 space-y-0.5">
+              <a href="/form-request" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-500 dark:text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
+                <span>1. Yêu Cầu (CPSR)</span>
+                <span class="text-[9px] font-mono opacity-60">↗</span>
+              </a>
+              <a href="/technical-feedback" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-500 dark:text-slate-400 hover:text-emerald-600 dark:hover:text-emerald-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
+                <span>2. Phản Hồi (CPST)</span>
+                <span class="text-[9px] font-mono opacity-60">↗</span>
+              </a>
+              <a href="/confirm-request" target="_blank" class="flex items-center justify-between py-1 px-2.5 rounded-lg text-[11px] text-slate-500 dark:text-slate-400 hover:text-purple-600 dark:hover:text-purple-400 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition">
+                <span>3. Bàn Giao (CPSF)</span>
+                <span class="text-[9px] font-mono opacity-60">↗</span>
+              </a>
+            </div>
+            <button
+              @click="switchTab('overview')"
+              :class="{ active: activeTab === 'overview' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+            >
+              <i class="fa-solid fa-chart-pie w-4 text-center text-xs text-indigo-500"></i>
+              <span class="truncate">Tổng quan & phân tích</span>
+            </button>
+            <button
+              @click="switchTab('report-technical')"
+              :class="{ active: activeTab === 'report-technical' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+              title="Report Technical"
+            >
+              <i class="fa-solid fa-chart-line w-4 text-center text-xs text-emerald-500"></i>
+              <span class="truncate">Báo cáo kỹ thuật</span>
+            </button>
+            <button
+              @click="switchTab('assign-tasks')"
+              :class="{ active: activeTab === 'assign-tasks' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+            >
+              <i class="fa-solid fa-list-check w-4 text-center text-xs text-amber-500"></i>
+              <span class="truncate">Phân công kỹ thuật</span>
+              <span v-if="pendingAssignCount > 0" class="ml-auto px-1.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 rounded-full font-mono">
+                {{ pendingAssignCount }}
+              </span>
+            </button>
+          </div>
+
+          <!-- GROUP 2: DANH MỤC THIẾT BỊ & NHÂN SỰ -->
+          <div class="space-y-1">
+            <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+              Danh Mục Thiết Bị & Nhân Sự
+            </div>
+            <button
+              @click="switchTab('machines')"
+              :class="{ active: activeTab === 'machines' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+            >
+              <i class="fa-solid fa-print w-4 text-center text-xs text-blue-500"></i>
+              <span class="truncate">Máy móc & thiết bị</span>
+            </button>
+            <button
+              @click="switchTab('employees')"
+              :class="{ active: activeTab === 'employees' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+            >
+              <i class="fa-solid fa-users w-4 text-center text-xs text-cyan-500"></i>
+              <span class="truncate">Nhân viên kỹ thuật</span>
+            </button>
+          </div>
+
+          <!-- GROUP 3: QUẢN LÝ USER & PHÂN QUYỀN -->
+          <div class="space-y-1">
+            <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+              Quản Lý User & Phân Quyền
+            </div>
+            <button
+              @click="switchTab('users')"
+              :class="{ active: activeTab === 'users' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+            >
+              <i class="fa-solid fa-user-shield w-4 text-center text-xs text-rose-500"></i>
+              <span class="truncate">Tài khoản & phân quyền</span>
+            </button>
+          </div>
+
+          <!-- GROUP 4: QUẢN LÝ DỮ LIỆU HIỆN CÓ -->
+          <div class="space-y-1">
+            <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
+              Quản Lý Dữ Liệu Hiện Có
+            </div>
+            <button
+              @click="switchTab('existing-data')"
+              :class="{ active: activeTab === 'existing-data' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+            >
+              <i class="fa-solid fa-database w-4 text-center text-xs text-violet-500"></i>
+              <span class="truncate">Quản lý dữ liệu hiện có</span>
             </button>
           </div>
         </div>

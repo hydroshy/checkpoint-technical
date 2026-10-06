@@ -6,7 +6,7 @@ export const CP_TICKET_DETAIL_MODAL_HTML = `    <!-- TICKET DETAIL MODAL -->
             <div class="text-[10px] uppercase font-bold text-slate-400">Chi Tiết Phiếu Yêu Cầu</div>
             <h2 class="text-base font-extrabold font-mono text-sky-600 dark:text-sky-400">{{ selectedTicket.docNo }}</h2>
           </div>
-          <button @click="closeModal('modal-ticket-detail')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeModal('modal-ticket-detail')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
         </div>
 
         <div class="p-6 space-y-5 text-xs">
@@ -84,7 +84,7 @@ export const CP_TICKET_DETAIL_MODAL_HTML = `    <!-- TICKET DETAIL MODAL -->
               <option value="Closed">🟢 Closed</option>
             </select>
           </div>
-          <button @click="closeModal('modal-ticket-detail')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
+          <button type="button" @click="closeModal('modal-ticket-detail')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
         </div>
       </div>
     </div>`;

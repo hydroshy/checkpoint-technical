@@ -7,6 +7,7 @@ const tests = [
   'test/backend-ticket-mgmt.spec.ts',
   'test/report-and-control-panel.e2e.ts',
   'test/modular-backend.spec.ts',
+  'test/frontend-navigation-modals.spec.ts',
 ];
 
 console.log('================================================================');

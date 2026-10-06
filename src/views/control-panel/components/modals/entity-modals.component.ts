@@ -3,7 +3,7 @@ export const CP_ENTITY_MODALS_HTML = `    <!-- ADD MACHINE MODAL -->
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Thêm Máy In Mới</h3>
-          <button @click="closeModal('modal-add-machine')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeModal('modal-add-machine')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
         </div>
         <form @submit.prevent="submitAddMachine" class="p-5 space-y-3.5 text-xs">
           <div class="space-y-1">
@@ -31,7 +31,7 @@ export const CP_ENTITY_MODALS_HTML = `    <!-- ADD MACHINE MODAL -->
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Thêm Nhân Sự</h3>
-          <button @click="closeModal('modal-add-employee')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeModal('modal-add-employee')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
         </div>
         <form @submit.prevent="submitAddEmployee" class="p-5 space-y-3.5 text-xs">
           <div class="space-y-1">
@@ -67,7 +67,7 @@ export const CP_ENTITY_MODALS_HTML = `    <!-- ADD MACHINE MODAL -->
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Thêm Tài Khoản Đăng Nhập</h3>
-          <button @click="closeModal('modal-add-user')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeModal('modal-add-user')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
         </div>
         <form @submit.prevent="submitAddUser" class="p-5 space-y-3.5 text-xs">
           <div class="space-y-1">
@@ -124,7 +124,7 @@ export const CP_ENTITY_MODALS_HTML = `    <!-- ADD MACHINE MODAL -->
       <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
         <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <h3 class="text-sm font-bold">Nạp Danh Sách Nhân Sự Excel</h3>
-          <button @click="closeModal('modal-excel')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeModal('modal-excel')" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
         </div>
         <div class="p-5 space-y-4">
           <p class="text-xs text-slate-500 leading-relaxed">
@@ -140,7 +140,7 @@ export const CP_ENTITY_MODALS_HTML = `    <!-- ADD MACHINE MODAL -->
           </div>
         </div>
         <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-200 dark:border-slate-800 flex justify-end">
-          <button @click="closeModal('modal-excel')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
+          <button type="button" @click="closeModal('modal-excel')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
         </div>
       </div>
     </div>`;

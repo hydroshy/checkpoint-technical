@@ -22,8 +22,8 @@ assert.ok(CONTROL_PANEL_HTML.includes('html.theme-light .tabulator .btn-chain-as
 assert.ok(CONTROL_PANEL_HTML.includes("const activeTab = ref('requests');"), 'Mặc định activeTab là requests');
 console.log('  ✅ [PASS] Chế độ sáng (Light Mode) đã được cấu hình mặc định và đầy đủ style CSS tương phản cao');
 
-// 3. Kiểm tra Nav Bar tinh giản & tiêu đề
-console.log('\n--- 3. Kiểm tra Tinh Giản Nav Bar & Chuẩn Hóa Tiêu Đề ---');
+// 3. Kiểm tra Sidebar đầy đủ các mục menu quản lý & tiêu đề
+console.log('\n--- 3. Kiểm tra Sidebar Đầy Đủ Các Mục Menu Quản Lý & Chuẩn Hóa Tiêu Đề ---');
 assert.ok(CONTROL_PANEL_HTML.includes('<title>Quản Lý Phiếu Kỹ Thuật</title>'), 'HTML title tag phải là Quản Lý Phiếu Kỹ Thuật');
 assert.ok(CONTROL_PANEL_HTML.includes('<h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">Quản Lý Phiếu Kỹ Thuật</h1>'), 'Tiêu đề h1 chính chuẩn');
 assert.ok(!CONTROL_PANEL_HTML.includes('<h1 class="text-xl font-bold tracking-tight">Quản Lý Phiếu Kỹ Thuật (CPSR • CPST • CPSF)</h1>'), 'Không còn ngoặc thừa');
@@ -33,13 +33,15 @@ const asideMatch = CONTROL_PANEL_HTML.match(/<aside[\s\S]*?<\/aside>/);
 assert.ok(asideMatch, 'Phải có thẻ aside');
 const sidebarHtml = asideMatch[0];
 assert.ok(sidebarHtml.includes('Quản lý phiếu kỹ thuật'), 'Sidebar phải hiển thị Quản lý phiếu kỹ thuật');
-assert.ok(!sidebarHtml.includes("@click=\"switchTab('overview')\""), 'Sidebar không còn Overview');
-assert.ok(!sidebarHtml.includes("@click=\"switchTab('assign-tasks')\""), 'Sidebar không còn Assign-tasks');
-assert.ok(!sidebarHtml.includes("@click=\"switchTab('machines')\""), 'Sidebar không còn Machines');
-assert.ok(!sidebarHtml.includes("@click=\"switchTab('employees')\""), 'Sidebar không còn Employees');
-assert.ok(!sidebarHtml.includes("@click=\"switchTab('users')\""), 'Sidebar không còn Users');
-assert.ok(!sidebarHtml.includes("@click=\"switchTab('existing-data')\""), 'Sidebar không còn Existing data');
-console.log('  ✅ [PASS] Nav Bar sidebar đã tinh giản triệt để chỉ còn Quản lý phiếu kỹ thuật, tiêu đề chuẩn hóa');
+assert.ok(sidebarHtml.includes("@click=\"switchTab('requests')\""), 'Sidebar có Requests');
+assert.ok(sidebarHtml.includes("@click=\"switchTab('overview')\""), 'Sidebar có Overview');
+assert.ok(sidebarHtml.includes("@click=\"switchTab('report-technical')\""), 'Sidebar có Report technical');
+assert.ok(sidebarHtml.includes("@click=\"switchTab('assign-tasks')\""), 'Sidebar có Assign-tasks');
+assert.ok(sidebarHtml.includes("@click=\"switchTab('machines')\""), 'Sidebar có Machines');
+assert.ok(sidebarHtml.includes("@click=\"switchTab('employees')\""), 'Sidebar có Employees');
+assert.ok(sidebarHtml.includes("@click=\"switchTab('users')\""), 'Sidebar có Users');
+assert.ok(sidebarHtml.includes("@click=\"switchTab('existing-data')\""), 'Sidebar có Existing data');
+console.log('  ✅ [PASS] Nav Bar sidebar đã khôi phục đầy đủ các mục menu quản lý, tiêu đề chuẩn hóa');
 
 // 4. Kiểm tra khắc phục đơ khi nhấp Chỉnh sửa & các cơ chế reactivity
 console.log('\n--- 4. Kiểm tra Chống Đơ Khi Nhấp Chỉnh Sửa & Reactivity Safety ---');

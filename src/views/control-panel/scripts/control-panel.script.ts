@@ -525,6 +525,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
 
         const openModal = (id) => {
           if (id === 'modal-ticket-detail') showTicketDetailModal.value = true;
+          else if (id === 'modal-chain-detail') showChainModal.value = true;
+          else if (id === 'modal-edit-ticket') showEditModal.value = true;
+          else if (id === 'modal-link-ticket') showLinkModal.value = true;
+          else if (id === 'modal-create-cps') showCreateCpsModal.value = true;
           else if (id === 'modal-add-machine') showAddMachineModal.value = true;
           else if (id === 'modal-add-employee') showAddEmployeeModal.value = true;
           else if (id === 'modal-add-user') showAddUserModal.value = true;
@@ -535,12 +539,24 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
 
         const closeModal = (id) => {
           if (id === 'modal-ticket-detail') showTicketDetailModal.value = false;
+          else if (id === 'modal-chain-detail') showChainModal.value = false;
+          else if (id === 'modal-edit-ticket') showEditModal.value = false;
+          else if (id === 'modal-link-ticket') showLinkModal.value = false;
+          else if (id === 'modal-create-cps') showCreateCpsModal.value = false;
           else if (id === 'modal-add-machine') showAddMachineModal.value = false;
           else if (id === 'modal-add-employee') showAddEmployeeModal.value = false;
           else if (id === 'modal-add-user') showAddUserModal.value = false;
           else if (id === 'modal-excel') showExcelModal.value = false;
           else if (id === 'modal-assign-task') showAssignModal.value = false;
           else document.getElementById(id)?.classList.remove('show');
+        };
+
+        const closeChainModal = () => {
+          showChainModal.value = false;
+        };
+
+        const closeTicketDetailModal = () => {
+          showTicketDetailModal.value = false;
         };
 
         const closeAssignModal = () => {
@@ -1238,6 +1254,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           activeTab.value = tab;
           sidebarOpen.value = false;
           showTicketDetailModal.value = false;
+          showChainModal.value = false;
+          showEditModal.value = false;
+          showLinkModal.value = false;
+          showCreateCpsModal.value = false;
           showAddMachineModal.value = false;
           showAddEmployeeModal.value = false;
           showAddUserModal.value = false;
@@ -1386,6 +1406,37 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                 }
               },
               {
+                title: 'Mã CPSR',
+                field: 'cpsr.docNo',
+                minWidth: 140,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  return '<span class="font-mono font-bold text-slate-800 dark:text-slate-200">' + (r.cpsr?.docNo || r.cpsrDocNo || '') + '</span>';
+                }
+              },
+              {
+                title: 'Mã CPST',
+                field: 'cpst.docNo',
+                minWidth: 130,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  const doc = r.cpst?.docNo || r.cpstDocNo;
+                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">Chưa phản hồi</span>';
+                  return '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + doc + '</span>';
+                }
+              },
+              {
+                title: 'Mã CPSF',
+                field: 'cpsf.docNo',
+                minWidth: 130,
+                formatter: cell => {
+                  const r = cell.getRow().getData();
+                  const doc = r.cpsf?.docNo || r.cpsfDocNo;
+                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">Chưa bàn giao</span>';
+                  return '<span class="font-mono font-bold text-purple-700 dark:text-purple-400">' + doc + '</span>';
+                }
+              },
+              {
                 title: 'Trạng Thái Chuỗi',
                 field: 'status',
                 minWidth: 130,
@@ -1399,15 +1450,6 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                   if (s === 'CLOSED') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">✅ CLOSED</span>';
                   if (s === 'OPEN_TASK') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30">📋 OPEN_TASK</span>';
                   return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-400">' + s + '</span>';
-                }
-              },
-              {
-                title: 'Mã CPSR',
-                field: 'cpsr.docNo',
-                minWidth: 140,
-                formatter: cell => {
-                  const r = cell.getRow().getData();
-                  return '<span class="font-mono font-bold text-slate-800 dark:text-slate-200">' + (r.cpsr?.docNo || r.cpsrDocNo || '') + '</span>';
                 }
               },
               {
@@ -1480,17 +1522,6 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                 }
               },
               {
-                title: 'Mã CPST (Phản Hồi)',
-                field: 'cpst.docNo',
-                minWidth: 130,
-                formatter: cell => {
-                  const r = cell.getRow().getData();
-                  const doc = r.cpst?.docNo || r.cpstDocNo;
-                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">Chưa phản hồi</span>';
-                  return '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + doc + '</span>';
-                }
-              },
-              {
                 title: 'Trạng Thái KT',
                 field: 'cpst.chkStatus',
                 minWidth: 110,
@@ -1502,17 +1533,6 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                   if (s === 'Đã khắc phục') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">Đã khắc phục</span>';
                   if (s === 'Hư hỏng nặng') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20">Hư hỏng nặng</span>';
                   return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">' + s + '</span>';
-                }
-              },
-              {
-                title: 'Mã CPSF (Bàn Giao)',
-                field: 'cpsf.docNo',
-                minWidth: 130,
-                formatter: cell => {
-                  const r = cell.getRow().getData();
-                  const doc = r.cpsf?.docNo || r.cpsfDocNo;
-                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">Chưa bàn giao</span>';
-                  return '<span class="font-mono font-bold text-purple-700 dark:text-purple-400">' + doc + '</span>';
                 }
               },
               {
@@ -1730,14 +1750,16 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
                 { field: 'docNo', type: 'like', value: q },
                 { field: 'cpsr.docNo', type: 'like', value: q },
                 { field: 'cpsrDocNo', type: 'like', value: q },
+                { field: 'cpst.docNo', type: 'like', value: q },
+                { field: 'cpstDocNo', type: 'like', value: q },
+                { field: 'cpsf.docNo', type: 'like', value: q },
+                { field: 'cpsfDocNo', type: 'like', value: q },
                 { field: 'cpsr.reqBy', type: 'like', value: q },
                 { field: 'reqBy', type: 'like', value: q },
                 { field: 'cpsr.machineName', type: 'like', value: q },
                 { field: 'machineName', type: 'like', value: q },
                 { field: 'problem', type: 'like', value: q },
-                { field: 'assignedTo', type: 'like', value: q },
-                { field: 'cpst.docNo', type: 'like', value: q },
-                { field: 'cpsf.docNo', type: 'like', value: q }
+                { field: 'assignedTo', type: 'like', value: q }
               ]);
             } else {
               filters.push([
@@ -1824,8 +1846,10 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
             filename += 'Chain_1-1-1';
             rows = chainList.value.map(r => ({
               'Mã CPS': r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '')),
-              'Trạng Thái Chuỗi': r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN')),
               'Mã CPSR': r.cpsr?.docNo || r.cpsrDocNo || '',
+              'Mã CPST': r.cpst?.docNo || r.cpstDocNo || 'Chưa phản hồi',
+              'Mã CPSF': r.cpsf?.docNo || r.cpsfDocNo || 'Chưa bàn giao',
+              'Trạng Thái Chuỗi': r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN')),
               'Ngày Yêu Cầu': r.cpsr?.reqDate || r.reqDate || '',
               'Giờ Yêu Cầu': r.cpsr?.reqTime || r.reqTime || '',
               'Người Yêu Cầu': r.cpsr?.reqBy || r.reqBy || '',
@@ -1836,10 +1860,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
               'Deadline': r.deadline || '-',
               'Downtime (Phút)': r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : '-'),
               'Tỉ Lệ Phế': r.wastePercent || r.cpsf?.wastePercent || '-',
-              'Mã CPST': r.cpst?.docNo || r.cpstDocNo || 'Chưa phản hồi',
               'KTV Tiếp Nhận': r.cpst?.recvBy || r.assignedTo || '-',
               'Trạng Thái KT': r.cpst?.chkStatus || r.chkStatus || '-',
-              'Mã CPSF': r.cpsf?.docNo || r.cpsfDocNo || 'Chưa bàn giao',
               'Chất Lượng In': r.cpsf?.chkQuality || r.chkQuality || '-',
               'Work Order': r.cpsf?.workOrder || r.workOrder || '-'
             }));
@@ -3138,6 +3160,8 @@ export const CONTROL_PANEL_SCRIPT = `    const { createApp, ref, computed, onMou
           currentSplitCount,
           selectedChain,
           showChainModal,
+          closeChainModal,
+          closeTicketDetailModal,
           switchSplitTab,
           applySplitFilters,
           openChainDetailModal,
