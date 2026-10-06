@@ -2654,6 +2654,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   async addCps(req: CpsRecord): Promise<void> {
+    if (!req.cpsrDocNo && !req.cpsrId) {
+      throw new Error('Ràng buộc nghiệp vụ: Phiếu CPS bắt buộc phải liên kết với phiếu CPSR (cpsrDocNo hoặc cpsrId).');
+    }
     const idx = this.cpsCache.findIndex(r => r.id === req.id || r.docNo === req.docNo);
     if (idx !== -1) {
       this.cpsCache[idx] = req;

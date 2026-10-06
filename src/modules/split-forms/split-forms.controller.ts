@@ -17,7 +17,7 @@ import { SplitFormsService, FormFilterQuery } from './split-forms.service';
 import { CreateCpsrDto, UpdateCpsrDto } from './dto/cpsr.dto';
 import { CreateCpstDto, UpdateCpstDto } from './dto/cpst.dto';
 import { CreateCpsfDto, UpdateCpsfDto } from './dto/cpsf.dto';
-import { AssignCpsDto, UpdateCpsDto } from './dto/cps.dto';
+import { CreateCpsDto, AssignCpsDto, UpdateCpsDto, LinkCpsDto, UnlinkCpsDto } from './dto/cps.dto';
 
 function extractUser(req?: any): any {
   if (!req) return null;
@@ -90,8 +90,15 @@ export class CpsrController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật phiếu CPSR (Control Panel)' })
+  @ApiOperation({ summary: 'Cập nhật phiếu CPSR (Control Panel - PUT)' })
   update(@Param('id') id: string, @Body() dto: UpdateCpsrDto, @Req() req: any) {
+    const user = extractUser(req);
+    return this.service.updateCpsr(idOrDocNoClean(id), dto, user);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Cập nhật một phần phiếu CPSR (Control Panel - PATCH)' })
+  patch(@Param('id') id: string, @Body() dto: UpdateCpsrDto, @Req() req: any) {
     const user = extractUser(req);
     return this.service.updateCpsr(idOrDocNoClean(id), dto, user);
   }
@@ -145,8 +152,15 @@ export class CpstController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật phiếu CPST (Control Panel)' })
+  @ApiOperation({ summary: 'Cập nhật phiếu CPST (Control Panel - PUT)' })
   update(@Param('id') id: string, @Body() dto: UpdateCpstDto, @Req() req: any) {
+    const user = extractUser(req);
+    return this.service.updateCpst(idOrDocNoClean(id), dto, user);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Cập nhật một phần phiếu CPST (Control Panel - PATCH)' })
+  patch(@Param('id') id: string, @Body() dto: UpdateCpstDto, @Req() req: any) {
     const user = extractUser(req);
     return this.service.updateCpst(idOrDocNoClean(id), dto, user);
   }
@@ -194,8 +208,15 @@ export class CpsfController {
   }
 
   @Put(':id')
-  @ApiOperation({ summary: 'Cập nhật phiếu CPSF (Control Panel)' })
+  @ApiOperation({ summary: 'Cập nhật phiếu CPSF (Control Panel - PUT)' })
   update(@Param('id') id: string, @Body() dto: UpdateCpsfDto, @Req() req: any) {
+    const user = extractUser(req);
+    return this.service.updateCpsf(idOrDocNoClean(id), dto, user);
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Cập nhật một phần phiếu CPSF (Control Panel - PATCH)' })
+  patch(@Param('id') id: string, @Body() dto: UpdateCpsfDto, @Req() req: any) {
     const user = extractUser(req);
     return this.service.updateCpsf(idOrDocNoClean(id), dto, user);
   }
@@ -246,11 +267,16 @@ export class CpsController {
     return this.service.findCpsOne(idOrDocNoClean(idOrDocNo));
   }
 
+  @Post()
+  @ApiOperation({ summary: 'Tạo phiếu CPS mới (Ràng buộc nghiệp vụ: Bắt buộc phải có phiếu CPSR)' })
+  create(@Body() dto: CreateCpsDto, @Req() req: any) {
+    const user = extractUser(req);
+    return this.service.createCps(dto, user);
+  }
+
   @Post(':docNo/assign')
-  @Put(':docNo/assign')
-  @Patch(':docNo/assign')
-  @ApiOperation({ summary: 'Phân công nhân viên và hạn chót (deadline) cho phiếu CPS' })
-  assignTask(
+  @ApiOperation({ summary: 'Phân công nhân viên và hạn chót cho phiếu CPS (POST)' })
+  assignPost(
     @Param('docNo') docNo: string,
     @Body() dto: AssignCpsDto,
     @Req() req: any,
@@ -259,16 +285,127 @@ export class CpsController {
     return this.service.assignTask(idOrDocNoClean(docNo), dto, user);
   }
 
+  @Put(':docNo/assign')
+  @ApiOperation({ summary: 'Phân công nhân viên và hạn chót cho phiếu CPS (PUT)' })
+  assignPut(
+    @Param('docNo') docNo: string,
+    @Body() dto: AssignCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.assignTask(idOrDocNoClean(docNo), dto, user);
+  }
+
+  @Patch(':docNo/assign')
+  @ApiOperation({ summary: 'Phân công nhân viên và hạn chót cho phiếu CPS (PATCH)' })
+  assignPatch(
+    @Param('docNo') docNo: string,
+    @Body() dto: AssignCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.assignTask(idOrDocNoClean(docNo), dto, user);
+  }
+
+  @Post('link')
+  @ApiOperation({ summary: 'Ghép nối phiếu CPS với CPST và CPSF (Endpoint chung POST)' })
+  linkGeneral(@Body() dto: LinkCpsDto, @Req() req: any) {
+    const user = extractUser(req);
+    return this.service.linkCps(dto.cpsDocNo || dto.cpsId || '', dto, user);
+  }
+
+  @Post(':idOrDocNo/link')
+  @ApiOperation({ summary: 'Ghép nối phiếu CPS với CPST và CPSF (POST)' })
+  linkPost(
+    @Param('idOrDocNo') idOrDocNo: string,
+    @Body() dto: LinkCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.linkCps(idOrDocNoClean(idOrDocNo), dto, user);
+  }
+
+  @Put(':idOrDocNo/link')
+  @ApiOperation({ summary: 'Ghép nối phiếu CPS với CPST và CPSF (PUT)' })
+  linkPut(
+    @Param('idOrDocNo') idOrDocNo: string,
+    @Body() dto: LinkCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.linkCps(idOrDocNoClean(idOrDocNo), dto, user);
+  }
+
+  @Patch(':idOrDocNo/link')
+  @ApiOperation({ summary: 'Ghép nối phiếu CPS với CPST và CPSF (PATCH)' })
+  linkPatch(
+    @Param('idOrDocNo') idOrDocNo: string,
+    @Body() dto: LinkCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.linkCps(idOrDocNoClean(idOrDocNo), dto, user);
+  }
+
+  @Post(':idOrDocNo/unlink')
+  @ApiOperation({ summary: 'Hủy ghép nối phiếu CPST / CPSF khỏi phiếu CPS (POST)' })
+  unlinkPost(
+    @Param('idOrDocNo') idOrDocNo: string,
+    @Body() dto: UnlinkCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.unlinkCps(idOrDocNoClean(idOrDocNo), dto, user);
+  }
+
+  @Put(':idOrDocNo/unlink')
+  @ApiOperation({ summary: 'Hủy ghép nối phiếu CPST / CPSF khỏi phiếu CPS (PUT)' })
+  unlinkPut(
+    @Param('idOrDocNo') idOrDocNo: string,
+    @Body() dto: UnlinkCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.unlinkCps(idOrDocNoClean(idOrDocNo), dto, user);
+  }
+
+  @Patch(':idOrDocNo/unlink')
+  @ApiOperation({ summary: 'Hủy ghép nối phiếu CPST / CPSF khỏi phiếu CPS (PATCH)' })
+  unlinkPatch(
+    @Param('idOrDocNo') idOrDocNo: string,
+    @Body() dto: UnlinkCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.unlinkCps(idOrDocNoClean(idOrDocNo), dto, user);
+  }
+
   @Put(':docNo')
-  @Patch(':docNo')
-  @ApiOperation({ summary: 'Cập nhật thông tin phiếu CPS' })
-  update(
+  @ApiOperation({ summary: 'Cập nhật thông tin phiếu CPS (PUT)' })
+  updatePut(
     @Param('docNo') docNo: string,
     @Body() dto: UpdateCpsDto,
     @Req() req: any,
   ) {
     const user = extractUser(req);
     return this.service.updateCps(idOrDocNoClean(docNo), dto, user);
+  }
+
+  @Patch(':docNo')
+  @ApiOperation({ summary: 'Cập nhật thông tin phiếu CPS (PATCH)' })
+  updatePatch(
+    @Param('docNo') docNo: string,
+    @Body() dto: UpdateCpsDto,
+    @Req() req: any,
+  ) {
+    const user = extractUser(req);
+    return this.service.updateCps(idOrDocNoClean(docNo), dto, user);
+  }
+
+  @Delete(':idOrDocNo')
+  @ApiOperation({ summary: 'Xóa phiếu CPS (Control Panel)' })
+  remove(@Param('idOrDocNo') idOrDocNo: string) {
+    return this.service.deleteCps(idOrDocNoClean(idOrDocNo));
   }
 }
 

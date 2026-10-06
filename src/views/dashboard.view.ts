@@ -457,7 +457,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
                     <i class="fa-solid fa-chart-pie"></i>
                   </div>
                   <div>
-                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">Report Tuần</h2>
+                    <h2 class="text-lg sm:text-xl font-bold text-slate-900 dark:text-white tracking-tight">Report Technical</h2>
                     <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400">Báo Cáo Kỹ Thuật & Phân Tích KPI</span>
                   </div>
                 </div>
@@ -499,7 +499,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
             <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
             <span class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               <i :class="isRequestActive ? 'fa-solid fa-file-signature text-sky-500' : 'fa-solid fa-chart-pie text-emerald-500'"></i>
-              <span>{{ isRequestActive ? 'Phiếu Nhập Liệu' : 'Report Tuần' }}</span>
+              <span>{{ isRequestActive ? 'Phiếu Nhập Liệu' : 'Report Technical' }}</span>
             </span>
           </div>
 
@@ -526,7 +526,7 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
               </button>
             </template>
 
-            <!-- Report Tuần Tabs -->
+            <!-- Report Technical Tabs -->
             <template v-if="isKpiActive">
               <button
                 type="button"
@@ -595,10 +595,10 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
         <div class="glass-card rounded-2xl p-6 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 bg-gradient-to-r from-sky-500/10 via-transparent to-cyan-500/10 border-sky-500/20">
           <div>
             <div class="flex items-center gap-2">
-              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500 text-white uppercase tracking-wider">Report Tuần</span>
+              <span class="px-2.5 py-1 rounded-full text-xs font-bold bg-sky-500 text-white uppercase tracking-wider">Report Technical</span>
               <span class="text-xs text-slate-400 font-mono">Database Synced: 2 Excel Files</span>
             </div>
-            <h1 class="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">Báo Cáo Kỹ Thuật Hàng Tuần</h1>
+            <h1 class="text-2xl sm:text-3xl font-extrabold mt-1 text-slate-900 dark:text-white">Báo Cáo Kỹ Thuật (Report Technical)</h1>
             <p class="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">
               Giám sát toàn diện 28 phiếu yêu cầu kỹ thuật, 4 sự cố Defect Log, 5 kế hoạch khắc phục Action Plan, 30 người yêu cầu và 121 thiết bị máy móc.
             </p>
