@@ -103,7 +103,7 @@ assert.ok(CONTROL_PANEL_SCRIPT.includes("splitTab.value === 'cpsr'"), 'Có cấu
 assert.ok(CP_EDIT_MODAL_HTML.includes("v-else-if=\"editForm.type === 'cpsr'\""), 'Có modal form chỉnh sửa phiếu CPSR');
 assert.ok(CP_EDIT_MODAL_HTML.includes('v-model="editForm.reqDate"'), 'Modal CPSR có trường Ngày yêu cầu');
 assert.ok(CP_EDIT_MODAL_HTML.includes('v-model="editForm.reqTime"'), 'Modal CPSR có trường Giờ yêu cầu');
-assert.ok(CP_SPLIT_DETAIL_MODAL_HTML.includes("openEditModal('cpsr'"), 'Có nút mở sửa CPSR trực tiếp từ chi tiết chuỗi');
+assert.ok(!CP_SPLIT_DETAIL_MODAL_HTML.includes("openEditModal('cpsr'"), 'Đã loại bỏ nút mở sửa CPSR từ modal xem chi tiết theo yêu cầu');
 console.log('  ✅ [PASS] Hiển thị và chỉnh sửa CPSR trong tab riêng hoàn chỉnh');
 
 // 8. Kiểm tra Tính Downtime Động Theo Thời Gian Thực (Dừng khi CLOSED hoặc OVER_DUE)

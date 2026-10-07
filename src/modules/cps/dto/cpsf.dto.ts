@@ -22,20 +22,35 @@ export class CreateCpsfDto {
   @IsString()
   chkQuality?: string;
 
-  @ApiPropertyOptional({ example: 'WO-20260324-88', description: 'Mã đơn hàng / Work Order' })
+  @ApiPropertyOptional({ example: 'WO-20260324-88', description: 'Mã đơn hàng / Work Order (không bắt buộc)' })
   @IsOptional()
   @IsString()
   workOrder?: string;
 
-  @ApiPropertyOptional({ example: 10000, description: 'Tổng số lượng đơn hàng' })
+  @ApiPropertyOptional({ example: 'WO-20260324-88', description: 'Alias mã đơn hàng / Work Order (không bắt buộc)' })
+  @IsOptional()
+  @IsString()
+  wo?: string;
+
+  @ApiPropertyOptional({ example: 10000, description: 'Tổng số lượng đơn hàng (không bắt buộc)' })
   @IsOptional()
   @IsNumber()
   woTotalQty?: number;
 
-  @ApiPropertyOptional({ example: 25, description: 'Số lượng phế' })
+  @ApiPropertyOptional({ example: 10000, description: 'Alias tổng số lượng đơn hàng (không bắt buộc)' })
+  @IsOptional()
+  @IsNumber()
+  totalQty?: number;
+
+  @ApiPropertyOptional({ example: 25, description: 'Số lượng phế (không bắt buộc)' })
   @IsOptional()
   @IsNumber()
   wasteQty?: number;
+
+  @ApiPropertyOptional({ example: 25, description: 'Alias phế phát sinh / scrap quantity (không bắt buộc)' })
+  @IsOptional()
+  @IsNumber()
+  scrapQty?: number;
 
   @ApiPropertyOptional({ example: 'PCS', description: 'Đơn vị tính phế (PCS / Mét / Tờ in)' })
   @IsOptional()
@@ -66,13 +81,28 @@ export class UpdateCpsfDto {
 
   @ApiPropertyOptional()
   @IsOptional()
+  @IsString()
+  wo?: string;
+
+  @ApiPropertyOptional()
+  @IsOptional()
   @IsNumber()
   woTotalQty?: number;
 
   @ApiPropertyOptional()
   @IsOptional()
   @IsNumber()
+  totalQty?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
   wasteQty?: number;
+
+  @ApiPropertyOptional()
+  @IsOptional()
+  @IsNumber()
+  scrapQty?: number;
 
   @ApiPropertyOptional()
   @IsOptional()

@@ -183,8 +183,8 @@ export class CpsService {
         record.chkStatus = cpst.chkStatus || null;
         if (!record.assignedTo && cpst.recvBy) {
           record.assignedTo = cpst.recvBy;
-          record.status = 'IN_PROGRESS';
         }
+        record.status = 'TO_CONFIRM';
         if (cpst.cpsrDocNo !== cpsr.docNo) {
           await this.dbService.updateCpst(cpst.id, { cpsrDocNo: cpsr.docNo, cpsrId: cpsr.id });
         }
@@ -261,7 +261,9 @@ export class CpsService {
     };
 
     if (existing.status !== 'CLOSED' && !existing.cpsfDocNo) {
-      if (updates.deadline) {
+      if (existing.cpstDocNo) {
+        updates.status = 'TO_CONFIRM';
+      } else if (updates.deadline) {
         const d = new Date(updates.deadline);
         if (!isNaN(d.getTime()) && d.getTime() < Date.now()) {
           updates.status = 'OVER_DUE';
@@ -350,8 +352,8 @@ export class CpsService {
     }
 
     // Tính lại % phế nếu số lượng thay đổi
-    const finalWoQty = updates.woTotalQty !== undefined ? Number(updates.woTotalQty) : (existing.woTotalQty || 0);
-    const finalWasteQty = updates.wasteQty !== undefined ? Number(updates.wasteQty) : (existing.wasteQty || 0);
+    const finalWoQty = updates.woTotalQty !== undefined ? Number(updates.woTotalQty) : (updates.totalQty !== undefined ? Number(updates.totalQty) : (existing.woTotalQty || 0));
+    const finalWasteQty = updates.wasteQty !== undefined ? Number(updates.wasteQty) : (updates.scrapQty !== undefined ? Number(updates.scrapQty) : (existing.wasteQty || 0));
     if (finalWoQty > 0) {
       updates.wastePercent = ((finalWasteQty / finalWoQty) * 100).toFixed(2) + '%';
     }
@@ -366,6 +368,7 @@ export class CpsService {
     const nextStatus = computeCpsStatus({
       status: updates.status || existing.status,
       cpsfDocNo: updates.cpsfDocNo !== undefined ? updates.cpsfDocNo : existing.cpsfDocNo,
+      cpstDocNo: updates.cpstDocNo !== undefined ? updates.cpstDocNo : existing.cpstDocNo,
       assignedTo: updates.assignedTo || existing.assignedTo,
       deadline: updates.deadline !== undefined ? updates.deadline : existing.deadline,
     });
@@ -446,8 +449,8 @@ export class CpsService {
         updates.assignedTo = cpst.recvBy;
         updates.technician = cpst.recvBy;
       }
-      if (existing.status === 'TO_ASSIGN' || existing.status === 'OPEN_TASK') {
-        updates.status = 'IN_PROGRESS';
+      if (existing.status === 'TO_ASSIGN' || existing.status === 'OPEN_TASK' || existing.status === 'IN_PROGRESS') {
+        updates.status = 'TO_CONFIRM';
       }
 
       // Tự động kéo luôn CPSF nếu CPST này đã có nghiệm thu CPSF và chưa có CPSF trên CPS
@@ -558,6 +561,9 @@ export class CpsService {
       updates.cpstDocNo = null;
       updates.downtime = 0;
       updates.chkStatus = null;
+      if (existing.status === 'TO_CONFIRM') {
+        updates.status = existing.assignedTo ? 'IN_PROGRESS' : 'TO_ASSIGN';
+      }
     }
 
     if (dto.unlinkCpsf) {
@@ -565,12 +571,16 @@ export class CpsService {
       updates.cpsfDocNo = null;
       updates.chkQuality = null;
       updates.workOrder = null;
+      updates.wo = null;
       updates.woTotalQty = 0;
+      updates.totalQty = 0;
       updates.wasteQty = 0;
+      updates.scrapQty = 0;
       updates.wastePercent = '0%';
       updates.closedAt = null;
       if (existing.status === 'CLOSED') {
-        updates.status = existing.assignedTo ? 'IN_PROGRESS' : 'TO_ASSIGN';
+        const hasCpst = !dto.unlinkCpst && (existing.cpstDocNo || updates.cpstDocNo);
+        updates.status = hasCpst ? 'TO_CONFIRM' : (existing.assignedTo ? 'IN_PROGRESS' : 'TO_ASSIGN');
       }
       updates.downtime = 0;
     }
@@ -586,6 +596,7 @@ export class CpsService {
     let openTask = 0;
     let toAssign = 0;
     let inProgress = 0;
+    let toConfirm = 0;
     let overdue = 0;
     let closed = 0;
     let totalDowntime = 0;
@@ -595,6 +606,7 @@ export class CpsService {
     for (const item of list) {
       if (item.status === 'CLOSED') closed++;
       else if (item.status === 'OVER_DUE') overdue++;
+      else if (item.status === 'TO_CONFIRM') toConfirm++;
       else if (item.status === 'IN_PROGRESS') inProgress++;
       else if (item.status === 'OPEN_TASK') openTask++;
       else toAssign++;
@@ -611,6 +623,7 @@ export class CpsService {
       openTask,
       toAssign,
       inProgress,
+      toConfirm,
       overdue,
       closed,
       totalDowntime,

@@ -36,6 +36,18 @@ export class CpsfService {
       }
     }
 
+    const workOrder = (dto.workOrder || dto.wo || '').trim() || undefined;
+    const rawWoTotalQty = dto.woTotalQty !== undefined && dto.woTotalQty !== null
+      ? Number(dto.woTotalQty)
+      : (dto.totalQty !== undefined && dto.totalQty !== null ? Number(dto.totalQty) : undefined);
+    const rawWasteQty = dto.wasteQty !== undefined && dto.wasteQty !== null
+      ? Number(dto.wasteQty)
+      : (dto.scrapQty !== undefined && dto.scrapQty !== null ? Number(dto.scrapQty) : undefined);
+
+    const woTotalQty = rawWoTotalQty !== undefined ? rawWoTotalQty : 0;
+    const wasteQty = rawWasteQty !== undefined ? rawWasteQty : 0;
+    const wastePercent = dto.wastePercent || (woTotalQty > 0 ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%' : undefined);
+
     const now = new Date().toISOString();
     const record: CpsfRecord = {
       id: uuidv4(),
@@ -44,11 +56,14 @@ export class CpsfService {
       cpstDocNo: cpst.docNo,
       cpsrDocNo: cpst.cpsrDocNo,
       chkQuality: dto.chkQuality || undefined,
-      workOrder: dto.workOrder || undefined,
-      woTotalQty: dto.woTotalQty !== undefined ? Number(dto.woTotalQty) : 0,
-      wasteQty: dto.wasteQty !== undefined ? Number(dto.wasteQty) : 0,
+      workOrder,
+      wo: workOrder,
+      woTotalQty,
+      totalQty: woTotalQty,
+      wasteQty,
+      scrapQty: wasteQty,
       wasteUnit: dto.wasteUnit || undefined,
-      wastePercent: dto.wastePercent || undefined,
+      wastePercent,
       prodMgr: dto.prodMgr,
       submittedAt: now,
       createdBy: creator?.username || creator?.fullName || 'public',
@@ -64,8 +79,6 @@ export class CpsfService {
       const cpsrDocNo = record.cpsrDocNo || cpst.cpsrDocNo;
       const existingCps = this.dbService.getCpsByCpsrDocNo(cpsrDocNo);
       if (existingCps) {
-        const woTotalQty = record.woTotalQty || 0;
-        const wasteQty = record.wasteQty || 0;
         const calcPercent = woTotalQty > 0
           ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
           : (record.wastePercent || '0%');
@@ -84,8 +97,11 @@ export class CpsfService {
           cpsfDocNo: record.docNo,
           chkQuality: record.chkQuality,
           workOrder: record.workOrder,
+          wo: record.workOrder,
           woTotalQty,
+          totalQty: woTotalQty,
           wasteQty,
+          scrapQty: wasteQty,
           wastePercent: calcPercent,
           wasteUnit: record.wasteUnit,
           downtime,
@@ -165,20 +181,32 @@ export class CpsfService {
     if (!existing) {
       throw new NotFoundException(`Không tìm thấy phiếu CPSF với mã hoặc ID: ${id}`);
     }
-    const updated = await this.dbService.updateCpsf(existing.id, dto);
+    const workOrder = dto.workOrder !== undefined ? dto.workOrder : dto.wo;
+    const rawWoTotalQty = dto.woTotalQty !== undefined ? Number(dto.woTotalQty) : (dto.totalQty !== undefined ? Number(dto.totalQty) : undefined);
+    const rawWasteQty = dto.wasteQty !== undefined ? Number(dto.wasteQty) : (dto.scrapQty !== undefined ? Number(dto.scrapQty) : undefined);
+
+    const updatePayload: Partial<CpsfRecord> = {
+      ...dto,
+      ...(workOrder !== undefined ? { workOrder, wo: workOrder } : {}),
+      ...(rawWoTotalQty !== undefined ? { woTotalQty: rawWoTotalQty, totalQty: rawWoTotalQty } : {}),
+      ...(rawWasteQty !== undefined ? { wasteQty: rawWasteQty, scrapQty: rawWasteQty } : {}),
+    };
+    const updated = await this.dbService.updateCpsf(existing.id, updatePayload);
     const existingCps = this.dbService.getCpsByCpsrDocNo(existing.cpsrDocNo || '');
     if (existingCps) {
-      const woTotalQty = dto.woTotalQty !== undefined ? Number(dto.woTotalQty) : (existingCps.woTotalQty || 0);
-      const wasteQty = dto.wasteQty !== undefined ? Number(dto.wasteQty) : (existingCps.wasteQty || 0);
+      const woTotalQty = rawWoTotalQty !== undefined ? rawWoTotalQty : (existingCps.woTotalQty || 0);
+      const wasteQty = rawWasteQty !== undefined ? rawWasteQty : (existingCps.wasteQty || 0);
       const calcPercent = woTotalQty > 0
         ? ((wasteQty / woTotalQty) * 100).toFixed(2) + '%'
         : (dto.wastePercent || existingCps.wastePercent || '0%');
 
       await this.dbService.updateCps(existingCps.id, {
         ...(dto.chkQuality ? { chkQuality: dto.chkQuality } : {}),
-        ...(dto.workOrder ? { workOrder: dto.workOrder } : {}),
+        ...(workOrder !== undefined ? { workOrder, wo: workOrder } : {}),
         woTotalQty,
+        totalQty: woTotalQty,
         wasteQty,
+        scrapQty: wasteQty,
         wastePercent: calcPercent,
         ...(dto.wasteUnit ? { wasteUnit: dto.wasteUnit } : {}),
       });

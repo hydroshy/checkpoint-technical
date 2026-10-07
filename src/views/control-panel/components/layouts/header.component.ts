@@ -69,7 +69,7 @@ export const CP_HEADER_HTML = `    <!-- TOP APP BAR -->
 
             <!-- Theme Mode Selection -->
             <div class="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giao diện (Theme)</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giao diện</div>
               <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
@@ -98,17 +98,8 @@ export const CP_HEADER_HTML = `    <!-- TOP APP BAR -->
                 href="/dashboard"
                 class="w-full py-2 px-3 rounded-lg text-xs font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition flex items-center justify-between cursor-pointer"
               >
-                <span class="flex items-center gap-2"><i class="fa-solid fa-gauge-high text-sky-500"></i> Quay lại Dashboard</span>
+                <span class="flex items-center gap-2"><i class="fa-solid fa-gauge-high text-sky-500"></i> Dashboard</span>
                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
-              </a>
-              <a
-                v-if="currentUser?.role === 'ADMIN' || currentUser?.username === 'admin'"
-                href="/api/docs"
-                target="_blank"
-                class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
-              >
-                <span class="flex items-center gap-2"><i class="fa-solid fa-book text-sky-500"></i> Swagger API Docs</span>
-                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
               </a>
               <div class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
                 <span class="flex items-center gap-2"><i class="fa-solid fa-sliders"></i> Control Panel</span>

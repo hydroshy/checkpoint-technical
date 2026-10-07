@@ -19,6 +19,8 @@ const tests = [
   'test/dashboard-dmodule-and-control-panel.spec.ts',
   'test/control-panel-independent-and-dashboard-sync.spec.ts',
   'test/dashboard-report-technical-sync.spec.ts',
+  'test/cps-status-and-ui-cleanup.spec.ts',
+  'test/ui-dashboard-login-profile-cpsf.spec.ts',
 ];
 
 console.log('================================================================');

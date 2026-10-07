@@ -8,6 +8,7 @@ export interface ReportStatsResult {
   openTask: number;
   toAssign: number;
   inProgress: number;
+  toConfirm?: number;
   closed: number;
   overDue: number;
   totalStatusCps: number;
@@ -103,6 +104,7 @@ export class AnalyticsReportService {
     let openTask = 0;
     let toAssign = 0;
     let inProgress = 0;
+    let toConfirm = 0;
     let closed = 0;
     let overDue = 0;
     let totalDowntimeMinutes = 0;
@@ -111,6 +113,7 @@ export class AnalyticsReportService {
     for (const item of list) {
       if (item.status === 'CLOSED') closed++;
       else if (item.status === 'OVER_DUE') overDue++;
+      else if (item.status === 'TO_CONFIRM') toConfirm++;
       else if (item.status === 'IN_PROGRESS') inProgress++;
       else if (item.status === 'OPEN_TASK') openTask++;
       else toAssign++;
@@ -122,7 +125,7 @@ export class AnalyticsReportService {
       }
     }
 
-    const totalStatusCps = openTask + toAssign + inProgress + closed + overDue;
+    const totalStatusCps = openTask + toAssign + inProgress + toConfirm + closed + overDue;
     const totalDowntimeHours = Math.round((totalDowntimeMinutes / 60) * 10) / 10;
     const avgDowntimeMinutes =
       dtIncidentsCount > 0 ? Math.round(totalDowntimeMinutes / dtIncidentsCount) : 0;
@@ -134,6 +137,7 @@ export class AnalyticsReportService {
       openTask,
       toAssign,
       inProgress,
+      toConfirm,
       closed,
       overDue,
       totalStatusCps,

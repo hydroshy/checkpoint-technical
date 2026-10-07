@@ -97,14 +97,14 @@ export async function runBackendPerfAndChainTests() {
     });
     assert.strictEqual(cpst.docNo, cpstDoc);
 
-    // Kiểm tra CPS đã tự động cập nhật CPST, downtime, Technician và chuyển sang IN_PROGRESS
+    // Kiểm tra CPS đã tự động cập nhật CPST, downtime, Technician và chuyển sang TO_CONFIRM
     const cpsAfterCpst = dbService.getCpsByCpsrDocNo(cpsr.docNo);
     assert.ok(cpsAfterCpst);
     assert.strictEqual(cpsAfterCpst!.cpstDocNo, cpst.docNo, 'CPS phải liên kết cpstDocNo');
     assert.ok(cpsAfterCpst!.downtime === 40 || cpsAfterCpst!.cpst?.downtime === 40 || (cpsAfterCpst!.downtime !== undefined && cpsAfterCpst!.downtime > 0), 'CPS phải cập nhật downtime từ CPST');
-    assert.strictEqual(cpsAfterCpst!.status, 'IN_PROGRESS', 'CPS chuyển sang IN_PROGRESS');
+    assert.strictEqual(cpsAfterCpst!.status, 'TO_CONFIRM', 'CPS chuyển sang TO_CONFIRM khi hoàn thành CPST');
     assert.strictEqual(cpsAfterCpst!.technician, 'Technician Nguyễn Văn A', 'CPS có technician đồng bộ từ CPST');
-    console.log(`  ✅ [PASS] CPS ${cpsAfterCpst!.docNo} tự động liên kết CPST ${cpst.docNo}, downtime=40m, status=IN_PROGRESS`);
+    console.log(`  ✅ [PASS] CPS ${cpsAfterCpst!.docNo} tự động liên kết CPST ${cpst.docNo}, downtime=40m, status=TO_CONFIRM`);
 
     // 1.3 Tạo CPSF
     const cpsfDoc = (await cpsfService.getNextCpsfDocNo()).docNo;

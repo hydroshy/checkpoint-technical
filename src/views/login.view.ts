@@ -109,15 +109,12 @@ export const LOGIN_HTML = `<!DOCTYPE html>
         
         <!-- Logo & Brand Header -->
         <div class="text-center space-y-2">
-          <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-sky-500/10 border border-sky-500/30 p-2.5 shadow-inner mb-1 overflow-hidden transition-transform hover:scale-105">
-            <img src="/images/logo-login.png?v=3" onerror="this.onerror=null; this.src='/images/logo-navbar.png?v=3'; this.onerror=function(){this.src='/images/favicon.png?v=3';};" class="w-full h-full object-contain rounded-xl" alt="Checkpoint Systems Logo" />
+          <div class="flex items-center justify-center mb-2">
+            <img src="/images/logo-full.png?v=3" onerror="this.onerror=null; this.src='/images/logo-navbar.png?v=3'; this.onerror=function(){this.src='/images/favicon.png?v=3';};" class="h-10 sm:h-12 object-contain" alt="Checkpoint Systems Logo" />
           </div>
-          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight flex items-center justify-center gap-1.5">
-            <span class="text-sky-500">CHECKPOINT</span> Systems
-          </h1>
-          <p class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-black dark:text-white flex items-center justify-center">
             Checkpoint Systems
-          </p>
+          </h1>
         </div>
 
           <!-- Alert Notification -->
@@ -204,49 +201,10 @@ export const LOGIN_HTML = `<!DOCTYPE html>
                 <i class="fa-solid fa-circle-notch fa-spin"></i> Đang xác thực...
               </span>
               <span v-else class="flex items-center gap-2">
-                Đăng Nhập Vào Hệ Thống <i class="fa-solid fa-arrow-right text-xs"></i>
+                Đăng nhập <i class="fa-solid fa-arrow-right text-xs"></i>
               </span>
             </button>
           </form>
-
-          <!-- Account Suggestions / Quick Fill (Gợi ý tài khoản) -->
-          <div class="space-y-2.5 pt-2">
-            <div class="flex items-center justify-between">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-key text-amber-500"></i> Gợi ý tài khoản hệ thống
-              </span>
-              <span class="text-[10px] text-slate-400 font-mono">Pass: Checkpoint@123</span>
-            </div>
-            <div class="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                @click="fillAccount('admin', 'Checkpoint@123')"
-                class="px-2.5 py-2 rounded-xl border border-sky-500/30 bg-sky-500/10 hover:bg-sky-500/20 text-sky-600 dark:text-sky-300 transition text-left cursor-pointer flex flex-col group"
-                title="Bấm để điền tài khoản Quản trị viên"
-              >
-                <span class="text-xs font-bold truncate group-hover:text-sky-500">Admin</span>
-                <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">@admin</span>
-              </button>
-              <button
-                type="button"
-                @click="fillAccount('tech01', 'Checkpoint@123')"
-                class="px-2.5 py-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 transition text-left cursor-pointer flex flex-col group"
-                title="Bấm để điền tài khoản Kỹ thuật viên"
-              >
-                <span class="text-xs font-bold truncate group-hover:text-emerald-500">Kỹ thuật</span>
-                <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">@tech01</span>
-              </button>
-              <button
-                type="button"
-                @click="fillAccount('user01', 'Checkpoint@123')"
-                class="px-2.5 py-2 rounded-xl border border-purple-500/30 bg-purple-500/10 hover:bg-purple-500/20 text-purple-600 dark:text-purple-300 transition text-left cursor-pointer flex flex-col group"
-                title="Bấm để điền tài khoản Nhân viên SX"
-              >
-                <span class="text-xs font-bold truncate group-hover:text-purple-500">Nhân viên</span>
-                <span class="text-[10px] font-mono text-slate-500 dark:text-slate-400">@user01</span>
-              </button>
-            </div>
-          </div>
 
           <!-- System Info Footer -->
           <div class="pt-3 border-t border-slate-200 dark:border-slate-800/80 text-[11px] text-slate-500 dark:text-slate-400 text-center">
@@ -286,11 +244,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
 
         const toggleTheme = () => {
           applyTheme(currentTheme.value === 'dark' ? 'light' : 'dark');
-        };
-
-        const fillAccount = (u, p) => {
-          username.value = u;
-          password.value = p;
         };
 
         const showAlert = (msg, type = 'info') => {
@@ -365,8 +318,7 @@ export const LOGIN_HTML = `<!DOCTYPE html>
           alert,
           currentTheme,
           toggleTheme,
-          handleLogin,
-          fillAccount
+          handleLogin
         };
       }
     }).mount('#app');

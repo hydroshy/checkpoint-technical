@@ -8,9 +8,8 @@ export const DASHBOARD_HEADER_HTML = `    <!-- TOP APP BAR -->
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
-              <span class="text-sm font-extrabold"><span class="text-sky-500">Checkpoint</span> Systems</span>
+              <span class="text-sm font-extrabold text-black dark:text-white">Checkpoint Systems</span>
             </div>
-            <span class="text-[10px] text-slate-500 dark:text-slate-400 font-medium">Dashboard</span>
           </div>
         </a>
       </div>
@@ -50,7 +49,7 @@ export const DASHBOARD_HEADER_HTML = `    <!-- TOP APP BAR -->
 
             <!-- Theme Mode Selection -->
             <div class="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giao diện (Theme)</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giao diện</div>
               <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
@@ -82,15 +81,6 @@ export const DASHBOARD_HEADER_HTML = `    <!-- TOP APP BAR -->
               >
                 <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-sky-500"></i> Control Panel</span>
                 <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
-              </a>
-              <a
-                v-if="isAdmin"
-                href="/api/docs"
-                target="_blank"
-                class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
-              >
-                <span class="flex items-center gap-2"><i class="fa-solid fa-book text-sky-500"></i> Swagger API Docs</span>
-                <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
               </a>
             </div>
 

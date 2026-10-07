@@ -176,7 +176,7 @@ async function runTests() {
     let cpsAfterCpst = dbService.getCpsByCpsrDocNo(cpsrDocNo);
     assert(cpsAfterCpst?.cpstDocNo === cpstDocNo, 'CPS đã liên kết với CPST');
     assert(cpsAfterCpst?.downtime === 45 || cpsAfterCpst?.cpst?.downtime === 45, 'CPS cập nhật downtime = 45 phút');
-    assert(cpsAfterCpst?.status === 'IN_PROGRESS', 'CPS chuyển sang trạng thái IN_PROGRESS');
+    assert(cpsAfterCpst?.status === 'TO_CONFIRM', 'CPS chuyển sang trạng thái TO_CONFIRM sau khi CPST hoàn tất');
 
     // Thử cập nhật CPST qua PATCH
     const resPatchCpst = await fetch(`${baseUrl}/api/cpst/${cpstDocNo}`, {
@@ -249,7 +249,7 @@ async function runTests() {
     assert(resUnlinkCpsf.ok, `Hủy ghép nối CPSF khỏi CPS ${cpsAfterCpsf!.docNo} thành công`);
     let cpsUnlinked = await resUnlinkCpsf.json();
     assert(cpsUnlinked.cpsfDocNo === null, 'cpsfDocNo đã được xóa về null');
-    assert(cpsUnlinked.status === 'IN_PROGRESS', 'Trạng thái CPS mở lại thành IN_PROGRESS');
+    assert(cpsUnlinked.status === 'TO_CONFIRM', 'Trạng thái CPS mở lại thành TO_CONFIRM (vì vẫn còn CPST)');
 
     // 5.2 Test ghép nối lại CPSF qua endpoint /api/cps/:idOrDocNo/link
     const resRelinkCpsf = await fetch(`${baseUrl}/api/cps/${cpsAfterCpsf!.docNo}/link`, {

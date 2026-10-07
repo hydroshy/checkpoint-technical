@@ -84,9 +84,9 @@ export class CpstService {
           downtime,
           chkStatus: record.chkStatus,
           assignedTo,
-          status: existingCps.status === 'CLOSED' ? 'CLOSED' : 'IN_PROGRESS',
+          status: existingCps.status === 'CLOSED' ? 'CLOSED' : 'TO_CONFIRM',
         });
-        this.logger.log(`🔗 CPS ${existingCps.docNo} updated with CPST ${record.docNo} (downtime: ${downtime}m)`);
+        this.logger.log(`🔗 CPS ${existingCps.docNo} updated with CPST ${record.docNo} (downtime: ${downtime}m, status: TO_CONFIRM)`);
       }
     } catch (cpsErr: any) {
       this.logger.error(`Error updating CPS for CPST ${record.docNo}: ${cpsErr.message}`);
@@ -182,6 +182,7 @@ export class CpstService {
         ...(downtime !== undefined ? { downtime } : {}),
         ...(dto.chkStatus ? { chkStatus: dto.chkStatus } : {}),
         ...(dto.recvBy && !existingCps.assignedTo ? { assignedTo: dto.recvBy } : {}),
+        status: existingCps.status === 'CLOSED' ? 'CLOSED' : 'TO_CONFIRM',
       });
     }
     this.logger.log(`✏️ CPST updated: ${existing.docNo} by ${user?.username || 'system'}`);

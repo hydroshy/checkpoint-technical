@@ -51,10 +51,10 @@ assert.ok(
   CONTROL_PANEL_SCRIPT.includes('btn-chain-edit-cpsr'),
   'Cột Thao Tác trên bảng CPS có nút btn-chain-edit-cpsr để sửa CPSR gốc'
 );
-// 3.3 Modal chi tiết 1-1-1 có nút Sửa CPSR ở Bước 1 và Footer
+// 3.3 Modal chi tiết CPS chỉ giữ duy nhất nút Đóng (không có nút Sửa CPSR)
 assert.ok(
-  CP_SPLIT_DETAIL_MODAL_HTML.includes("openEditModal('cpsr', selectedChain.cpsr || selectedChain)"),
-  'Modal chi tiết có nút gọi openEditModal cho CPSR'
+  !CP_SPLIT_DETAIL_MODAL_HTML.includes("openEditModal('cpsr'"),
+  'Modal chi tiết đã loại bỏ nút sửa CPSR theo yêu cầu chuẩn hóa'
 );
 // 3.4 Modal sửa CPS có nút chuyển nhanh sang sửa CPSR
 assert.ok(

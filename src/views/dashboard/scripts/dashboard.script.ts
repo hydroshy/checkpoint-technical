@@ -70,6 +70,9 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
         const cpstList = ref([]);
         const cpsfList = ref([]);
         const showChainModal = ref(false);
+        const lightboxImage = ref(null);
+        const openLightbox = (url) => { lightboxImage.value = url; };
+        const closeLightbox = () => { lightboxImage.value = null; };
         const selectedChain = ref(null);
 
         const initReportDates = () => {
@@ -320,18 +323,32 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           };
         });
 
+        // Gantt Chart Time Markers & 1-Hour Grid Lines on X-Axis
         const ganttTimeTicks = computed(() => {
           const range = ganttTimeRange.value;
           const ticks = [];
-          const count = 5;
           const pad = n => String(n).padStart(2, '0');
+          const oneHourMs = 3600000;
+          const duration = range.durationMs || (24 * oneHourMs);
+          const totalHours = Math.max(1, Math.round(duration / oneHourMs));
 
-          for (let i = 0; i < count; i++) {
-            const p = (i / (count - 1)) * 100;
-            const ms = range.startMs + (range.durationMs * i) / (count - 1);
+          const stepHours = totalHours <= 72 ? 1 : Math.ceil(totalHours / 48);
+          const labelStep = totalHours <= 24 ? 2 : (totalHours <= 48 ? 4 : Math.ceil(totalHours / 8));
+
+          for (let h = 0; h <= totalHours; h += stepHours) {
+            const p = Math.min(100, (h / totalHours) * 100);
+            const ms = range.startMs + (h * oneHourMs);
             const dt = new Date(ms);
-            const label = pad(dt.getDate()) + '/' + pad(dt.getMonth() + 1) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
-            ticks.push({ percent: Math.round(p * 10) / 10, label });
+            const showLabel = (h % labelStep === 0) || (h === totalHours);
+            const label = showLabel
+              ? (totalHours <= 24 ? (pad(dt.getHours()) + ':00') : (pad(dt.getDate()) + '/' + pad(dt.getMonth() + 1) + ' ' + pad(dt.getHours()) + 'h'))
+              : '';
+            ticks.push({
+              percent: Math.round(p * 100) / 100,
+              label,
+              hour: dt.getHours(),
+              isMajor: h % labelStep === 0
+            });
           }
           return ticks;
         });
@@ -480,16 +497,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
               cutout: '72%',
               animation: { duration: 300 },
               plugins: {
-                legend: {
-                  display: true,
-                  position: 'bottom',
-                  labels: {
-                    boxWidth: 8,
-                    padding: 8,
-                    font: { size: 10 },
-                    color: isDark ? '#94a3b8' : '#64748b'
-                  }
-                },
+                legend: { display: false },
                 tooltip: {
                   enabled: !allZeros,
                   callbacks: {
@@ -669,6 +677,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           showChainModal.value = false;
           selectedChain.value = null;
         };
+        const closeSplitDetailModal = closeChainModal;
 
         const openEditModal = (type, item) => {
           if (type === 'cpsr') window.location.href = '/form-request';
@@ -2191,7 +2200,11 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           exportReportTechnicalExcel,
           openChainDetailModal,
           closeChainModal,
+          closeSplitDetailModal,
           showChainModal,
+          lightboxImage,
+          openLightbox,
+          closeLightbox,
           selectedChain,
           openEditModal,
           formatTechnicianName,

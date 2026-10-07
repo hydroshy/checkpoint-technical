@@ -21,14 +21,6 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               <span class="font-bold text-sky-600 dark:text-sky-400 text-sm">1. Phiếu Yêu Cầu Kỹ Thuật (CPSR)</span>
               <div class="flex items-center gap-2">
                 <span class="font-mono font-bold text-xs bg-sky-500/10 text-sky-500 px-2 py-0.5 rounded">{{ (selectedChain.cpsr || selectedChain).docNo }}</span>
-                <button
-                  type="button"
-                  @click="openEditModal('cpsr', selectedChain.cpsr || selectedChain)"
-                  class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer flex items-center gap-1"
-                  title="Chỉnh sửa phiếu CPSR"
-                >
-                  <i class="fa-solid fa-pen-to-square"></i> Sửa CPSR
-                </button>
               </div>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -92,7 +84,7 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               <!-- HÌNH ẢNH KỸ THUẬT VIÊN ĐÃ LƯU (CPST) -->
               <div v-if="(selectedChain.cpst?.photosBefore && selectedChain.cpst.photosBefore.length > 0) || (selectedChain.cpst?.photosAfter && selectedChain.cpst.photosAfter.length > 0) || (selectedChain.photosBefore && selectedChain.photosBefore.length > 0) || (selectedChain.photosAfter && selectedChain.photosAfter.length > 0)" class="pt-3 border-t border-slate-200 dark:border-slate-700/80 space-y-3">
                 <div class="font-bold text-slate-700 dark:text-slate-300 text-xs flex items-center gap-2">
-                  <i class="fa-solid fa-camera text-sky-500"></i> Hình Ảnh Kỹ Thuật Viên Đã Lưu (CPST):
+                  <i class="fa-solid fa-camera text-sky-500"></i> Hình Ảnh
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <!-- Trước sửa chữa -->
@@ -107,19 +99,18 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                       Không có ảnh
                     </div>
                     <div v-else class="grid grid-cols-3 gap-2">
-                      <a
+                      <div
                         v-for="(img, idx) in (selectedChain.cpst?.photosBefore || selectedChain.photosBefore)"
                         :key="'before-'+idx"
-                        :href="img"
-                        target="_blank"
-                        class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group hover:opacity-90 transition relative"
+                        @click="openLightbox(img)"
+                        class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group hover:opacity-90 transition relative cursor-pointer"
                         title="Bấm để xem ảnh phóng to"
                       >
                         <img :src="img" class="w-full h-full object-cover" />
                         <span class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition">
                           <i class="fa-solid fa-magnifying-glass-plus"></i>
                         </span>
-                      </a>
+                      </div>
                     </div>
                   </div>
 
@@ -135,19 +126,18 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                       Không có ảnh
                     </div>
                     <div v-else class="grid grid-cols-3 gap-2">
-                      <a
+                      <div
                         v-for="(img, idx) in (selectedChain.cpst?.photosAfter || selectedChain.photosAfter)"
                         :key="'after-'+idx"
-                        :href="img"
-                        target="_blank"
-                        class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group hover:opacity-90 transition relative"
+                        @click="openLightbox(img)"
+                        class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group hover:opacity-90 transition relative cursor-pointer"
                         title="Bấm để xem ảnh phóng to"
                       >
                         <img :src="img" class="w-full h-full object-cover" />
                         <span class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition">
                           <i class="fa-solid fa-magnifying-glass-plus"></i>
                         </span>
-                      </a>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -204,32 +194,31 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
           </div>
         </div>
 
-        <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <button
-              type="button"
-              @click="openEditModal('cps', selectedChain)"
-              class="px-3.5 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-xs shadow transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="fa-solid fa-pen-to-square"></i> Chỉnh Sửa
-            </button>
-            <button
-              type="button"
-              @click="openEditModal('cpsr', selectedChain.cpsr || selectedChain)"
-              class="px-3.5 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow transition flex items-center gap-1.5 cursor-pointer"
-              title="Chỉnh sửa phiếu CPSR ban đầu"
-            >
-              <i class="fa-solid fa-file-pen"></i> Sửa CPSR
-            </button>
-            <button
-              type="button"
-              @click="openLinkModal(selectedChain)"
-              class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="fa-solid fa-link"></i> Ghép Nối
-            </button>
-          </div>
-          <button type="button" @click="closeChainModal" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
+        <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end">
+          <button type="button" @click="closeChainModal(); (typeof closeSplitDetailModal === 'function' && closeSplitDetailModal())" data-action="closeSplitDetailModal" class="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer transition">Đóng</button>
         </div>
+      </div>
+    </div>
+
+    <!-- LIGHTBOX MODAL PHÓNG TO ẢNH TRONG TRANG -->
+    <div
+      v-if="lightboxImage"
+      id="modal-lightbox"
+      class="fixed inset-0 bg-black/90 z-[70] flex items-center justify-center p-4 backdrop-blur-md cursor-zoom-out"
+      @click="closeLightbox"
+    >
+      <div class="relative max-w-4xl max-h-[90vh] flex flex-col items-center justify-center" @click.stop>
+        <button
+          type="button"
+          @click="closeLightbox"
+          class="absolute -top-10 right-0 text-white hover:text-slate-300 text-2xl font-bold p-1 cursor-pointer transition"
+          title="Đóng (Esc)"
+        >
+          ✕
+        </button>
+        <img
+          :src="lightboxImage"
+          class="max-w-full max-h-[85vh] object-contain rounded-xl shadow-2xl border border-white/10"
+        />
       </div>
     </div>`;

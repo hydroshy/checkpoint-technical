@@ -152,7 +152,7 @@ export class AssignCpsDto {
 }
 
 export class UpdateCpsDto {
-  @ApiPropertyOptional({ example: 'IN_PROGRESS', description: 'Trạng thái CPS (OPEN_TASK | TO_ASSIGN | IN_PROGRESS | OVER_DUE | CLOSED)' })
+  @ApiPropertyOptional({ example: 'IN_PROGRESS', description: 'Trạng thái CPS (OPEN_TASK | TO_ASSIGN | IN_PROGRESS | TO_CONFIRM | OVER_DUE | CLOSED)' })
   @IsOptional()
   @IsString()
   status?: string;
@@ -227,15 +227,30 @@ export class UpdateCpsDto {
   @IsString()
   workOrder?: string;
 
+  @ApiPropertyOptional({ example: 'WO-20261005-99' })
+  @IsOptional()
+  @IsString()
+  wo?: string;
+
   @ApiPropertyOptional({ example: 2000 })
   @IsOptional()
   @IsNumber()
   woTotalQty?: number;
 
+  @ApiPropertyOptional({ example: 2000 })
+  @IsOptional()
+  @IsNumber()
+  totalQty?: number;
+
   @ApiPropertyOptional({ example: 50 })
   @IsOptional()
   @IsNumber()
   wasteQty?: number;
+
+  @ApiPropertyOptional({ example: 50 })
+  @IsOptional()
+  @IsNumber()
+  scrapQty?: number;
 
   @ApiPropertyOptional({ example: '2.50%' })
   @IsOptional()

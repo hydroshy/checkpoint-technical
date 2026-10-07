@@ -291,19 +291,18 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-            Work Order (Lệnh SX) <span class="text-rose-500">*</span>
+            Work Order (Lệnh SX)
           </label>
           <input
             type="text"
             v-model="form.workOrder"
             placeholder="Ví dụ: WO-102934..."
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium font-mono"
-            required
           />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-            Tổng số lượng <span class="text-rose-500">*</span>
+            Tổng số lượng
           </label>
           <input
             type="number"
@@ -311,7 +310,6 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             placeholder="0"
             min="0"
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium font-mono"
-            required
           />
         </div>
         <div>
@@ -570,14 +568,6 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             errorMessage.value = 'Vui lòng đánh giá chất lượng in (Đạt hoặc Chưa đạt).';
             return;
           }
-          if (!form.value.workOrder || !form.value.workOrder.trim()) {
-            errorMessage.value = 'Vui lòng nhập Work Order (Lệnh SX).';
-            return;
-          }
-          if (form.value.woTotalQty === null || form.value.woTotalQty === undefined) {
-            errorMessage.value = 'Vui lòng nhập tổng số lượng sản xuất.';
-            return;
-          }
           if (!form.value.prodMgr) {
             errorMessage.value = 'Vui lòng chọn đại diện sản xuất ký nhận.';
             return;
@@ -595,9 +585,9 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             cpstDocNo: form.value.cpstDocNo,
             cpsrDocNo: selectedCpst.value?.cpsrDocNo || undefined,
             chkQuality: form.value.chkQuality,
-            workOrder: form.value.workOrder.trim(),
-            woTotalQty: Number(form.value.woTotalQty),
-            wasteQty: Number(form.value.wasteQty) || 0,
+            workOrder: form.value.workOrder ? form.value.workOrder.trim() : '',
+            woTotalQty: form.value.woTotalQty != null && form.value.woTotalQty !== '' ? Number(form.value.woTotalQty) : undefined,
+            wasteQty: form.value.wasteQty != null && form.value.wasteQty !== '' ? Number(form.value.wasteQty) : 0,
             wasteUnit: form.value.wasteUnit,
             wastePercent: calculatedWastePercent.value,
             prodMgr: form.value.prodMgr,

@@ -57,8 +57,16 @@ assert.ok(
   'Phải có canvas cho Đồ thị tỷ lệ 4M: chart-report-technical-4m'
 );
 assert.ok(
-  CP_REPORT_TECHNICAL_TAB_HTML.includes('Đồ Thị Tỷ Lệ 4M Đã Giải Quyết'),
-  'Tiêu đề: Đồ Thị Tỷ Lệ 4M Đã Giải Quyết'
+  CP_REPORT_TECHNICAL_TAB_HTML.includes('Tỷ lệ 4M'),
+  'Tiêu đề: Tỷ lệ 4M'
+);
+assert.ok(
+  !CP_REPORT_TECHNICAL_TAB_HTML.includes('Tỷ lệ 4M (Man, Machine, Material, Method) tính client-side'),
+  'Đã bỏ dòng chữ Tỷ lệ 4M tính client-side'
+);
+assert.ok(
+  CP_REPORT_TECHNICAL_TAB_HTML.includes('Số sự cố'),
+  'Chữ Số sự cố và số lượng căn giữa hình tròn'
 );
 assert.ok(
   CONTROL_PANEL_SCRIPT.includes('report4MStats = computed'),
@@ -73,14 +81,18 @@ console.log('  ✅ [PASS] 2 Card KPI và Đồ thị 4M tính client-side hoàn 
 // =========================================================================
 // 4. THIẾT KẾ GANTT CHART DOWNTIME THEO TỪNG MÁY
 // =========================================================================
-console.log('\n--- 4. Kiểm tra Gantt Chart downtime theo từng máy (Trục Y: tên máy, Trục X: thời gian lọc, dải vàng) ---');
+console.log('\n--- 4. Kiểm tra Gantt Chart downtime theo từng máy (Tiến Độ Dừng Máy, lưới 1h) ---');
 assert.ok(
-  CP_REPORT_TECHNICAL_TAB_HTML.includes('Gantt Chart Downtime Theo Từng Máy'),
-  'Hiển thị tiêu đề Gantt Chart Downtime Theo Từng Máy'
+  CP_REPORT_TECHNICAL_TAB_HTML.includes('Tiến Độ Dừng Máy'),
+  'Hiển thị tiêu đề Tiến Độ Dừng Máy'
 );
 assert.ok(
-  CP_REPORT_TECHNICAL_TAB_HTML.includes('Trục Y: Tên Máy'),
-  'Gantt Chart có Trục Y là Tên Máy'
+  !CP_REPORT_TECHNICAL_TAB_HTML.includes('Trục Y: Tên Máy'),
+  'Đã bỏ chú thích Trục Y: Tên Máy'
+);
+assert.ok(
+  !CP_REPORT_TECHNICAL_TAB_HTML.includes('Trục Y là tên máy, Trục X là khoảng thời gian lọc'),
+  'Đã bỏ dòng mô tả trục X/Y thừa'
 );
 assert.ok(
   CP_REPORT_TECHNICAL_TAB_HTML.includes('ganttTimeTicks'),
@@ -132,10 +144,14 @@ for (const col of expectedColumns) {
 // =========================================================================
 // 6. MODAL XEM CHI TIẾT: HIỂN THỊ ĐẦY ĐỦ HÌNH ẢNH KỸ THUẬT VIÊN ĐÃ LƯU KHI CÓ CPST
 // =========================================================================
-console.log('\n--- 6. Kiểm tra Modal Xem Chi Tiết hiển thị đầy đủ hình ảnh CPST ---');
+console.log('\n--- 6. Kiểm tra Modal Xem Chi Tiết hiển thị đầy đủ hình ảnh CPST & Lightbox ---');
 assert.ok(
-  CP_SPLIT_DETAIL_MODAL_HTML.includes('Hình Ảnh Kỹ Thuật Viên Đã Lưu (CPST):'),
-  'Modal chi tiết có phần hiển thị Hình Ảnh Kỹ Thuật Viên Đã Lưu (CPST)'
+  CP_SPLIT_DETAIL_MODAL_HTML.includes('Hình Ảnh'),
+  'Modal chi tiết có phần hiển thị Hình Ảnh'
+);
+assert.ok(
+  !CP_SPLIT_DETAIL_MODAL_HTML.includes('Hình Ảnh Kỹ Thuật Viên Đã Lưu (CPST):'),
+  'Đã rút gọn tiêu đề thành Hình Ảnh'
 );
 assert.ok(
   CP_SPLIT_DETAIL_MODAL_HTML.includes('Trước Sửa Chữa') && CP_SPLIT_DETAIL_MODAL_HTML.includes('photosBefore'),
@@ -146,9 +162,17 @@ assert.ok(
   'Modal hiển thị ảnh sau sửa chữa'
 );
 assert.ok(
+  CP_SPLIT_DETAIL_MODAL_HTML.includes('modal-lightbox'),
+  'Modal chi tiết có Lightbox phóng to ảnh trong trang'
+);
+assert.ok(
+  !CP_SPLIT_DETAIL_MODAL_HTML.includes('openEditModal') && !CP_SPLIT_DETAIL_MODAL_HTML.includes('openLinkModal'),
+  'Modal chi tiết chỉ giữ lại duy nhất nút Đóng, bỏ Sửa CPSR/Chỉnh Sửa/Ghép Nối'
+);
+assert.ok(
   CONTROL_PANEL_SCRIPT.includes('openChainDetailModal'),
   'openChainDetailModal mở modal chi tiết từ nút Xem chi tiết trên bảng'
 );
-console.log('  ✅ [PASS] Modal Xem Chi Tiết hiển thị đầy đủ hình ảnh trước và sau sửa chữa của CPST');
+console.log('  ✅ [PASS] Modal Xem Chi Tiết hiển thị đầy đủ hình ảnh trước và sau sửa chữa của CPST & Lightbox');
 
 console.log('\n🎉 TOÀN BỘ KIỂM THỬ TÁI CẤU TRÚC REPORT TECHNICAL ĐÃ ĐẠT 100% THÀNH CÔNG!');

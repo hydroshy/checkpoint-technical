@@ -115,12 +115,12 @@ console.log('  ✅ [PASS] Biểu đồ 4M và 2 KPI cards tổng quan hoàn ch�
 // =========================================================================
 console.log('\n--- 5. Kiểm tra Gantt Chart downtime theo từng máy ---');
 assert.ok(
-  DASHBOARD_ANALYTICS_CHARTS_HTML.includes('Gantt Chart Downtime Theo Từng Máy'),
-  'Có tiêu đề Gantt Chart Downtime Theo Từng Máy'
+  DASHBOARD_ANALYTICS_CHARTS_HTML.includes('Tiến Độ Dừng Máy'),
+  'Có tiêu đề Tiến Độ Dừng Máy'
 );
 assert.ok(
-  DASHBOARD_ANALYTICS_CHARTS_HTML.includes('Trục Y: Tên Máy'),
-  'Gantt Chart có Trục Y là Tên Máy'
+  !DASHBOARD_ANALYTICS_CHARTS_HTML.includes('Trục Y: Tên Máy'),
+  'Đã bỏ chú thích Trục Y: Tên Máy'
 );
 assert.ok(
   DASHBOARD_ANALYTICS_CHARTS_HTML.includes('ganttTimeTicks'),
@@ -149,10 +149,26 @@ assert.ok(
   'Script có hàm khởi tạo bảng Tabulator cho Report Technical'
 );
 assert.ok(
-  CP_SPLIT_DETAIL_MODAL_HTML.includes('Hình Ảnh Kỹ Thuật Viên Đã Lưu (CPST):') &&
+  DASHBOARD_ANALYTICS_CHARTS_HTML.includes('Tỷ lệ 4M'),
+  'Đổi tên thành Tỷ lệ 4M'
+);
+assert.ok(
+  DASHBOARD_ANALYTICS_CHARTS_HTML.includes('Số sự cố'),
+  'Chữ Số sự cố và số lượng căn giữa hình tròn'
+);
+assert.ok(
+  CP_SPLIT_DETAIL_MODAL_HTML.includes('Hình Ảnh') &&
   CP_SPLIT_DETAIL_MODAL_HTML.includes('photosBefore') &&
   CP_SPLIT_DETAIL_MODAL_HTML.includes('photosAfter'),
   'Modal chi tiết hiển thị đầy đủ hình ảnh trước và sau sửa chữa của CPST'
+);
+assert.ok(
+  CP_SPLIT_DETAIL_MODAL_HTML.includes('modal-lightbox'),
+  'Modal chi tiết tích hợp Lightbox phóng to ảnh'
+);
+assert.ok(
+  !CP_SPLIT_DETAIL_MODAL_HTML.includes('openEditModal') && !CP_SPLIT_DETAIL_MODAL_HTML.includes('openLinkModal'),
+  'Chỉ giữ duy nhất nút Đóng'
 );
 assert.ok(
   DASHBOARD_SCRIPT.includes('openChainDetailModal'),

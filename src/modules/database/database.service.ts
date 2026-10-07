@@ -274,8 +274,11 @@ export interface CpsfRecord {
   cpsrDocNo?: string;
   chkQuality?: string;
   workOrder?: string;
+  wo?: string;
   woTotalQty?: number;
+  totalQty?: number;
   wasteQty?: number;
+  scrapQty?: number;
   wasteUnit?: string;
   wastePercent?: string;
   prodMgr?: string;
@@ -302,16 +305,24 @@ export interface CpsrChainRecord {
   technician?: string | null;
   deadline?: string | null;
   downtime?: number;
+  woTotalQty?: number;
+  totalQty?: number;
+  wasteQty?: number;
+  scrapQty?: number;
   wastePercent?: string;
+  wasteUnit?: string | null;
+  workOrder?: string | null;
+  wo?: string | null;
   chkStatus?: string | null;
   chkQuality?: string | null;
 }
 
-export type CpsStatus = 'OPEN_TASK' | 'TO_ASSIGN' | 'IN_PROGRESS' | 'OVER_DUE' | 'CLOSED';
+export type CpsStatus = 'OPEN_TASK' | 'TO_ASSIGN' | 'IN_PROGRESS' | 'TO_CONFIRM' | 'OVER_DUE' | 'CLOSED';
 
 export function computeCpsStatus(cps: {
   status?: string;
   cpsfDocNo?: string | null;
+  cpstDocNo?: string | null;
   assignedTo?: string | null;
   deadline?: string | Date | null;
 }): CpsStatus {
@@ -320,6 +331,12 @@ export function computeCpsStatus(cps: {
   }
   if (cps.status === 'CLOSED') {
     return 'CLOSED';
+  }
+  if (cps.status === 'TO_CONFIRM') {
+    return 'TO_CONFIRM';
+  }
+  if (cps.cpstDocNo && cps.cpstDocNo.trim() !== '') {
+    return 'TO_CONFIRM';
   }
   if (cps.deadline) {
     const d = new Date(cps.deadline);
@@ -410,6 +427,13 @@ export function computeCpsDowntime(cps: {
     return 0;
   }
 
+  // 1.5. Trạng thái TO_CONFIRM: Kỹ thuật viên đã xử lý xong, dừng tính downtime tại mốc cố định của CPST nếu có
+  if (cps.status === 'TO_CONFIRM') {
+    if (fixedDowntime !== null) {
+      return fixedDowntime;
+    }
+  }
+
   // 2. Trạng thái OVER_DUE: Dừng tính khi phiếu ở trạng thái OVER_DUE (chốt theo deadline)
   if (cps.status === 'OVER_DUE') {
     if (cps.deadline) {
@@ -466,10 +490,13 @@ export interface CpsRecord {
   reqTime?: string;
   downtime?: number;
   woTotalQty?: number;
+  totalQty?: number;
   wasteQty?: number;
+  scrapQty?: number;
   wastePercent?: string;
   wasteUnit?: string | null;
   workOrder?: string | null;
+  wo?: string | null;
   chkStatus?: string | null;
   chkQuality?: string | null;
   notes?: string | null;
@@ -1031,6 +1058,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
             CREATE INDEX IF NOT EXISTS idx_cpsf_doc_no ON cpsf(doc_no);
             CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_doc_no ON cpsf(cpst_doc_no);
             CREATE INDEX IF NOT EXISTS idx_cpsf_submitted_at ON cpsf(submitted_at);
@@ -1101,6 +1131,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(50);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS notes TEXT;
@@ -1454,9 +1487,12 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         cpstDocNo: r.cpst_doc_no,
         cpsrDocNo: r.cpsr_doc_no || undefined,
         chkQuality: r.chk_quality || undefined,
-        workOrder: r.work_order || undefined,
-        woTotalQty: r.wo_total_qty !== null ? Number(r.wo_total_qty) : 0,
-        wasteQty: r.waste_qty !== null ? Number(r.waste_qty) : 0,
+        workOrder: r.work_order || r.wo || undefined,
+        wo: r.work_order || r.wo || undefined,
+        woTotalQty: r.wo_total_qty !== null && r.wo_total_qty !== undefined ? Number(r.wo_total_qty) : (r.total_qty !== null && r.total_qty !== undefined ? Number(r.total_qty) : 0),
+        totalQty: r.wo_total_qty !== null && r.wo_total_qty !== undefined ? Number(r.wo_total_qty) : (r.total_qty !== null && r.total_qty !== undefined ? Number(r.total_qty) : 0),
+        wasteQty: r.waste_qty !== null && r.waste_qty !== undefined ? Number(r.waste_qty) : (r.scrap_qty !== null && r.scrap_qty !== undefined ? Number(r.scrap_qty) : 0),
+        scrapQty: r.waste_qty !== null && r.waste_qty !== undefined ? Number(r.waste_qty) : (r.scrap_qty !== null && r.scrap_qty !== undefined ? Number(r.scrap_qty) : 0),
         wasteUnit: r.waste_unit || undefined,
         wastePercent: r.waste_percent || undefined,
         prodMgr: r.prod_mgr || undefined,
@@ -1497,11 +1533,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         reqDate: r.req_date || undefined,
         reqTime: r.req_time || undefined,
         downtime: r.downtime !== null ? Number(r.downtime) : 0,
-        woTotalQty: r.wo_total_qty !== null ? Number(r.wo_total_qty) : 0,
-        wasteQty: r.waste_qty !== null ? Number(r.waste_qty) : 0,
+        woTotalQty: r.wo_total_qty !== null && r.wo_total_qty !== undefined ? Number(r.wo_total_qty) : (r.total_qty !== null && r.total_qty !== undefined ? Number(r.total_qty) : 0),
+        totalQty: r.wo_total_qty !== null && r.wo_total_qty !== undefined ? Number(r.wo_total_qty) : (r.total_qty !== null && r.total_qty !== undefined ? Number(r.total_qty) : 0),
+        wasteQty: r.waste_qty !== null && r.waste_qty !== undefined ? Number(r.waste_qty) : (r.scrap_qty !== null && r.scrap_qty !== undefined ? Number(r.scrap_qty) : 0),
+        scrapQty: r.waste_qty !== null && r.waste_qty !== undefined ? Number(r.waste_qty) : (r.scrap_qty !== null && r.scrap_qty !== undefined ? Number(r.scrap_qty) : 0),
         wastePercent: r.waste_percent || undefined,
         wasteUnit: r.waste_unit || undefined,
-        workOrder: r.work_order || undefined,
+        workOrder: r.work_order || r.wo || undefined,
+        wo: r.work_order || r.wo || undefined,
         chkStatus: r.chk_status || undefined,
         chkQuality: r.chk_quality || undefined,
         notes: r.notes || undefined,
@@ -2650,8 +2689,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
              updated_at = EXCLUDED.updated_at`,
           [
             req.id, req.docNo, req.cpstId || null, req.cpstDocNo, req.cpsrDocNo || null,
-            req.chkQuality || null, req.workOrder || null, req.woTotalQty || 0,
-            req.wasteQty || 0, req.wasteUnit || null, req.wastePercent || null,
+            req.chkQuality || null, req.workOrder || req.wo || null,
+            req.woTotalQty !== undefined && req.woTotalQty !== null ? req.woTotalQty : (req.totalQty || 0),
+            req.wasteQty !== undefined && req.wasteQty !== null ? req.wasteQty : (req.scrapQty || 0),
+            req.wasteUnit || null, req.wastePercent || null,
             req.prodMgr || null, req.submittedAt, req.createdBy || 'public', req.createdAt, req.updatedAt,
           ]
         );
@@ -2787,6 +2828,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
       const evaluatedStatus = computeCpsStatus({
         status: r.status,
         cpsfDocNo: r.cpsfDocNo,
+        cpstDocNo: r.cpstDocNo,
         assignedTo: r.assignedTo,
         deadline: r.deadline,
       });
@@ -2894,8 +2936,10 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             req.deadline ? new Date(req.deadline).toISOString() : null,
             req.priority || null, req.printTech || null, req.machineName || null, req.problem || null,
             req.reqBy || null, req.reqDate || null, req.reqTime || null,
-            req.downtime || 0, req.woTotalQty || 0, req.wasteQty || 0,
-            req.wastePercent || null, req.wasteUnit || null, req.workOrder || null,
+            req.downtime || 0,
+            req.woTotalQty !== undefined && req.woTotalQty !== null ? req.woTotalQty : (req.totalQty || 0),
+            req.wasteQty !== undefined && req.wasteQty !== null ? req.wasteQty : (req.scrapQty || 0),
+            req.wastePercent || null, req.wasteUnit || null, req.workOrder || req.wo || null,
             req.chkStatus || null, req.chkQuality || null, req.notes || null,
             req.closedAt ? new Date(req.closedAt).toISOString() : null,
             req.createdAt ? new Date(req.createdAt).toISOString() : new Date().toISOString(),
@@ -3186,7 +3230,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           : (cps?.wastePercent || cpsf?.wastePercent || '0%');
         const chkStatus = cps?.chkStatus || cpst?.chkStatus || null;
         const chkQuality = cps?.chkQuality || cpsf?.chkQuality || null;
-        const status = cps?.status || (cpsf ? 'CLOSED' : (cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+        const status = cps?.status || (cpsf ? 'CLOSED' : (cpst ? 'TO_CONFIRM' : 'TO_ASSIGN'));
 
         return {
           id: cps?.id || cpsr.id,
@@ -3214,11 +3258,13 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
 
     return this.enrichedCpsrChainCache.map(item => {
       const cpsfDocNo = item.cpsfDocNo || item.cps?.cpsfDocNo || null;
+      const cpstDocNo = item.cpstDocNo || item.cps?.cpstDocNo || item.cpst?.docNo || null;
       const assignedTo = item.assignedTo || item.cps?.assignedTo || item.cpst?.recvBy || null;
       const deadline = item.deadline || item.cps?.deadline || null;
       const evaluatedStatus = computeCpsStatus({
         status: item.status || item.cps?.status,
         cpsfDocNo,
+        cpstDocNo,
         assignedTo,
         deadline,
       });

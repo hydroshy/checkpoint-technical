@@ -161,6 +161,9 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         const splitFilter = ref({ search: '', status: 'ALL' });
         const selectedChain = ref(null);
         const showChainModal = ref(false);
+        const lightboxImage = ref(null);
+        const openLightbox = (url) => { lightboxImage.value = url; };
+        const closeLightbox = () => { lightboxImage.value = null; };
         let splitTable = null;
 
         // CPS & Assign Task State (Module Phân Công Kỹ Thuật)
@@ -505,19 +508,32 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           };
         });
 
-        // Gantt Chart Time Markers on X-Axis
+        // Gantt Chart Time Markers & 1-Hour Grid Lines on X-Axis
         const ganttTimeTicks = computed(() => {
           const range = ganttTimeRange.value;
           const ticks = [];
-          const count = 5;
           const pad = n => String(n).padStart(2, '0');
+          const oneHourMs = 3600000;
+          const duration = range.durationMs || (24 * oneHourMs);
+          const totalHours = Math.max(1, Math.round(duration / oneHourMs));
 
-          for (let i = 0; i < count; i++) {
-            const p = (i / (count - 1)) * 100;
-            const ms = range.startMs + (range.durationMs * i) / (count - 1);
+          const stepHours = totalHours <= 72 ? 1 : Math.ceil(totalHours / 48);
+          const labelStep = totalHours <= 24 ? 2 : (totalHours <= 48 ? 4 : Math.ceil(totalHours / 8));
+
+          for (let h = 0; h <= totalHours; h += stepHours) {
+            const p = Math.min(100, (h / totalHours) * 100);
+            const ms = range.startMs + (h * oneHourMs);
             const dt = new Date(ms);
-            const label = pad(dt.getDate()) + '/' + pad(dt.getMonth() + 1) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
-            ticks.push({ percent: Math.round(p * 10) / 10, label });
+            const showLabel = (h % labelStep === 0) || (h === totalHours);
+            const label = showLabel
+              ? (totalHours <= 24 ? (pad(dt.getHours()) + ':00') : (pad(dt.getDate()) + '/' + pad(dt.getMonth() + 1) + ' ' + pad(dt.getHours()) + 'h'))
+              : '';
+            ticks.push({
+              percent: Math.round(p * 100) / 100,
+              label,
+              hour: dt.getHours(),
+              isMajor: h % labelStep === 0
+            });
           }
           return ticks;
         });
@@ -759,6 +775,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         const closeChainModal = () => {
           showChainModal.value = false;
         };
+        const closeSplitDetailModal = closeChainModal;
 
         const closeTicketDetailModal = () => {
           showTicketDetailModal.value = false;
@@ -1372,16 +1389,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               cutout: '72%',
               animation: { duration: 300 },
               plugins: {
-                legend: {
-                  display: true,
-                  position: 'bottom',
-                  labels: {
-                    boxWidth: 8,
-                    padding: 8,
-                    font: { size: 10 },
-                    color: isDark ? '#94a3b8' : '#64748b'
-                  }
-                },
+                legend: { display: false },
                 tooltip: {
                   enabled: !allZeros,
                   callbacks: {
@@ -3551,7 +3559,11 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           currentSplitCount,
           selectedChain,
           showChainModal,
+          lightboxImage,
+          openLightbox,
+          closeLightbox,
           closeChainModal,
+          closeSplitDetailModal,
           closeTicketDetailModal,
           switchSplitTab,
           applySplitFilters,

@@ -9,10 +9,8 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 uppercase tracking-wider">
                   <i class="fa-solid fa-chart-pie mr-1"></i> Technical Analytics
                 </span>
-                <span class="text-xs text-slate-500 font-mono">Synced with Overview Hub</span>
               </div>
               <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white mt-1">Report Technical</h1>
-              <p class="text-xs text-slate-600 dark:text-slate-400">Thống kê toàn diện chỉ số phiếu kỹ thuật, thời gian downtime và phân bổ trạng thái CPS theo khoảng thời gian</p>
             </div>
 
             <!-- Time Range & Presets Filter Bar -->
@@ -189,9 +187,6 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                       </div>
                     </div>
                   </div>
-                  <div class="text-center text-[11px] text-slate-500 dark:text-slate-400 mt-2">
-                    Tỷ trọng các trạng thái xử lý kỹ thuật trong kỳ
-                  </div>
                 </div>
               </div>
             </div>
@@ -200,7 +195,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
             <div class="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
               <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                  <i class="fa-solid fa-layer-group text-sky-500"></i> Đồ Thị Tỷ Lệ 4M Đã Giải Quyết
+                  <i class="fa-solid fa-layer-group text-sky-500"></i> Tỷ lệ 4M
                 </h3>
                 <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
                   {{ report4MStats.total }} sự cố
@@ -244,12 +239,15 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                         {{ report4MStats.total }}
                       </div>
                       <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
-                        Sự Cố 4M
+                        Số sự cố
                       </div>
                     </div>
                   </div>
-                  <div class="text-center text-[11px] text-slate-500 dark:text-slate-400 mt-2">
-                    Tỷ lệ 4M (Man, Machine, Material, Method) tính client-side
+                  <div class="flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-[11px] text-slate-600 dark:text-slate-400 mt-2">
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> Man: <b class="font-mono text-slate-800 dark:text-slate-200">{{ report4MStats.man }}</b></span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Machine: <b class="font-mono text-slate-800 dark:text-slate-200">{{ report4MStats.machine }}</b></span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Material: <b class="font-mono text-slate-800 dark:text-slate-200">{{ report4MStats.material }}</b></span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Method: <b class="font-mono text-slate-800 dark:text-slate-200">{{ report4MStats.method }}</b></span>
                   </div>
                 </div>
               </div>
@@ -261,11 +259,8 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                  <i class="fa-solid fa-timeline text-amber-500"></i> Tiến Độ Dừng Máy (Gantt Chart Downtime Theo Từng Máy)
+                  <i class="fa-solid fa-timeline text-amber-500"></i> Tiến Độ Dừng Máy
                 </h3>
-                <p class="text-xs text-slate-500 mt-0.5">
-                  Trục Y là tên máy, Trục X là khoảng thời gian lọc (0h00 {{ reportDateFrom || 'bắt đầu' }} → 23h59 {{ reportDateTo || 'kết thúc' }}), dải màu vàng thể hiện khoảng downtime máy từ CPST/CPSR thực tế
-                </p>
               </div>
               <div class="flex items-center gap-3 text-xs">
                 <div class="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-300">
@@ -289,15 +284,15 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
               <div v-else class="min-w-[760px] space-y-2">
                 <!-- Header / Trục X Time Ticks -->
                 <div class="flex items-center border-b border-slate-200 dark:border-slate-700/60 pb-2 text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                  <div class="w-48 flex-shrink-0 font-bold px-2 text-slate-700 dark:text-slate-300">Trục Y: Tên Máy</div>
+                  <div class="w-48 flex-shrink-0 px-2"></div>
                   <div class="flex-1 relative h-5">
                     <div
                       v-for="(tick, idx) in ganttTimeTicks"
                       :key="idx"
-                      class="absolute top-0 transform -translate-x-1/2 text-center whitespace-nowrap"
+                      class="absolute top-0 transform -translate-x-1/2 text-center whitespace-nowrap pointer-events-none"
                       :style="{ left: tick.percent + '%' }"
                     >
-                      {{ tick.label }}
+                      <span v-if="tick.label">{{ tick.label }}</span>
                     </div>
                   </div>
                 </div>
@@ -322,12 +317,14 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
 
                     <!-- Timeline Track with Yellow Bars -->
                     <div class="flex-1 relative h-7 bg-slate-100 dark:bg-slate-800/60 rounded-md overflow-hidden border border-slate-200 dark:border-slate-700/50">
-                      <!-- Grid lines -->
+                      <!-- Grid lines: chia mỗi 1 tiếng là đường kẻ dọc xuống -->
                       <div
                         v-for="(tick, idx) in ganttTimeTicks"
                         :key="'line-' + idx"
-                        class="absolute top-0 bottom-0 border-l border-slate-200 dark:border-slate-700/30 pointer-events-none"
+                        class="absolute top-0 bottom-0 border-l pointer-events-none"
+                        :class="tick.isMajor ? 'border-slate-300 dark:border-slate-600' : 'border-slate-200/80 dark:border-slate-700/40'"
                         :style="{ left: tick.percent + '%' }"
+                        :title="tick.hour !== undefined ? (tick.hour + ':00') : ''"
                       ></div>
 
                       <!-- Yellow Downtime Bars -->

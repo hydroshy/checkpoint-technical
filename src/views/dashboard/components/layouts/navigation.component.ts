@@ -6,18 +6,9 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
         <div class="glass-card rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-sky-500/10 via-emerald-500/10 to-purple-500/10 border border-slate-200/80 dark:border-slate-800">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <div class="flex items-center gap-2 mb-1.5">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 uppercase tracking-wider">
-                  D-Module • User Portal
-                </span>
-                <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Checkpoint Technical</span>
-              </div>
               <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                 Hệ Thống Dịch Vụ Kỹ Thuật
               </h1>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-                Khởi tạo yêu cầu dịch vụ (CPSR), phản hồi kỹ thuật (CPST), nghiệm thu bàn giao (CPSF) và theo dõi báo cáo hiệu suất kỹ thuật
-              </p>
             </div>
             <div class="flex items-center gap-2 self-stretch sm:self-auto">
               <span class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
