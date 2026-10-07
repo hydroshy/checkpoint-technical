@@ -254,7 +254,6 @@ export const LOGIN_HTML = `<!DOCTYPE html>
           </div>
 
         </div>
-      </div>
     </main>
 
   </div>

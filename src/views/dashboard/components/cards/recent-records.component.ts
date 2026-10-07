@@ -68,7 +68,6 @@ export const DASHBOARD_RECENT_RECORDS_HTML = `        <!-- Recent Records Previe
             </div>
           </div>
         </div>
-      </div>
 
       <!-- =========================================================================
            TAB 2: SHEET 1_TECHNICAL_REQUESTS (28 RECORDS)`;

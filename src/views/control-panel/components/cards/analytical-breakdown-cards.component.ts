@@ -85,5 +85,4 @@ export const CP_ANALYTICAL_BREAKDOWN_CARDS_HTML = `          <!-- Analytical Bre
                 </div>
               </div>
             </div>
-          </div>
-        </div>`;
+          </div>`;

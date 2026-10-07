@@ -102,6 +102,45 @@ assert.ok(
 );
 console.log(`  ✅ [PASS] Lint Check: Không phát hiện chuỗi escape lỗi hay ký tự xuống dòng bất hợp pháp (${totalScriptsChecked} scripts đã kiểm tra)`);
 
+// 1.4 HTML Tag Balance Validator: Kiểm tra cân bằng thẻ mở/đóng div, main, section, form
+console.log('--- 1.4 Kiểm tra tính cân bằng thẻ HTML (HTML Tag Balance Validator) ---');
+function validateHtmlTagBalance(name: string, html: string) {
+  const tagRegex = /<\/?([a-zA-Z0-9\-]+)(?:\s+[^>]*?)?(\/?)>/gs;
+  let match: RegExpExecArray | null;
+  const stack: { tag: string; line: number }[] = [];
+  const errors: string[] = [];
+
+  while ((match = tagRegex.exec(html)) !== null) {
+    const full = match[0];
+    const tag = match[1].toLowerCase();
+    const isSelfClosing = match[2] === '/' || ['img', 'input', 'br', 'hr', 'meta', 'link'].includes(tag);
+    const isClosing = full.startsWith('</');
+    if (isSelfClosing) continue;
+
+    const lineNum = html.substring(0, match.index).split('\n').length;
+    if (!isClosing) {
+      stack.push({ tag, line: lineNum });
+    } else {
+      if (stack.length === 0) {
+        errors.push(`Thẻ đóng thừa </${tag}> tại dòng ${lineNum}`);
+      } else {
+        const top = stack.pop()!;
+        if (top.tag !== tag) {
+          errors.push(`Lệch thẻ tại dòng ${lineNum}: mong đợi </${top.tag}> (mở tại dòng ${top.line}) nhưng gặp </${tag}>`);
+        }
+      }
+    }
+  }
+
+  assert.strictEqual(errors.length, 0, `${name} có lỗi thẻ HTML không khớp: ${errors.join('; ')}`);
+  assert.strictEqual(stack.length, 0, `${name} có thẻ chưa đóng: ${stack.map(s => `<${s.tag}> (dòng ${s.line})`).join(', ')}`);
+  console.log(`  ✅ [PASS] ${name}: 100% cân bằng thẻ HTML (0 thẻ thừa, 0 thẻ lệch, 0 thẻ thiếu)`);
+}
+
+for (const [viewName, htmlContent] of Object.entries(viewTemplates)) {
+  validateHtmlTagBalance(viewName, htmlContent);
+}
+
 // =========================================================================
 // PHẦN 2: KIỂM THỬ TỰ ĐỘNG JSDOM MÔ PHỎNG TẢI TRANG /control-panel
 // =========================================================================
@@ -351,6 +390,42 @@ errWin.dispatchEvent(
   new errWin.Event('unhandledrejection')
 );
 console.log('  ✅ [PASS] Bắt và xử lý an toàn sự kiện unhandledrejection');
+
+// =========================================================================
+// PHẦN 5: KIỂM THỬ MODAL CONTAINMENT TRÊN DASHBOARD VÀ CONTROL-PANEL
+// =========================================================================
+console.log('\n--- 5. Kiểm thử Modal Containment & Phạm vi mount của Vue ---');
+
+// 5.1 Dashboard: Đảm bảo toàn bộ modal nằm trọn trong #app và không rò rỉ ra ngoài
+const dashDom = new JSDOM(DASHBOARD_HTML);
+const dashApp = dashDom.window.document.getElementById('app');
+assert.ok(dashApp, 'Dashboard phải có phần tử #app');
+
+// Kiểm tra phần tử ngoài #app trong <body> không chứa bất kỳ template directive Vue nào
+let dashOutsideAppHtml = '';
+dashDom.window.document.body.childNodes.forEach(node => {
+  if (node !== dashApp && node.nodeName !== 'SCRIPT') {
+    dashOutsideAppHtml += (node as any).outerHTML || '';
+  }
+});
+assert.ok(!dashOutsideAppHtml.includes('modalState.isEdit'), 'Dashboard: Modal máy móc không được rò rỉ ra ngoài #app');
+assert.ok(!dashOutsideAppHtml.includes('Chỉnh Sửa Thiết Bị'), 'Dashboard: Text template không được xuất hiện ngoài #app');
+console.log('  ✅ [PASS] Dashboard: Không có modal nào bị đẩy ra ngoài #app, 0 rò rỉ DOM');
+
+// 5.2 Control-Panel: Đảm bảo toàn bộ modal nằm trọn trong #app
+const cpDom = new JSDOM(CONTROL_PANEL_HTML);
+const cpApp = cpDom.window.document.getElementById('app');
+assert.ok(cpApp, 'Control-Panel phải có phần tử #app');
+
+let cpOutsideAppHtml = '';
+cpDom.window.document.body.childNodes.forEach(node => {
+  if (node !== cpApp && node.nodeName !== 'SCRIPT') {
+    cpOutsideAppHtml += (node as any).outerHTML || '';
+  }
+});
+assert.ok(!cpOutsideAppHtml.includes('showBulkImportModal'), 'Control-Panel: Modal Excel không được rò rỉ ra ngoài #app');
+assert.ok(!cpOutsideAppHtml.includes('Nạp Danh Sách Nhân Sự Excel'), 'Control-Panel: Modal Excel không được xuất hiện ngoài #app');
+console.log('  ✅ [PASS] Control-Panel: Modal Excel và toàn bộ modal nằm trọn vẹn bên trong #app');
 
 console.log('\n================================================================');
 console.log('🎉 TOÀN BỘ CÁC MỤC KIỂM THỬ T2 ĐÃ VƯỢT QUA 100% THÀNH CÔNG!');
