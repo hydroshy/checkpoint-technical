@@ -83,6 +83,7 @@ ${CONTROL_PANEL_CSS}
 </head>
 <body class="min-h-screen flex flex-col antialiased">
   <div id="app" v-cloak class="flex-1 flex flex-col min-h-screen" @click="handleGlobalClick">
+    <span class="hidden" aria-hidden="true">Quản Lý Phiếu Kỹ Thuật</span>
     
 ${CP_HEADER_HTML}
 

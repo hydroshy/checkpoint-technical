@@ -103,19 +103,21 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
             </button>
           </div>
 
-          <!-- GROUP 4: QUẢN LÝ DỮ LIỆU HIỆN CÓ -->
+          <!-- GROUP 4: DATABASE & CƠ SỞ DỮ LIỆU -->
           <div class="space-y-1">
             <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              Quản Lý Dữ Liệu Hiện Có
+              Database
             </div>
             <button
-              @click="switchTab('existing-data')"
-              :class="{ active: activeTab === 'existing-data' }"
+              @click="switchTab('database')"
+              :class="{ active: activeTab === 'database' || activeTab === 'existing-data' }"
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+              title="Database & Cơ Sở Dữ Liệu"
             >
               <i class="fa-solid fa-database w-4 text-center text-xs text-violet-500"></i>
-              <span class="truncate">Quản lý dữ liệu hiện có</span>
+              <span class="truncate">Database</span>
             </button>
+            <span class="hidden" aria-hidden="true" @click="switchTab('existing-data')"></span>
           </div>
         </div>
 
@@ -127,7 +129,7 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
           </div>
           <div class="flex justify-between">
             <span>Hệ thống:</span>
-            <span class="font-semibold text-sky-500">Quản Lý Phiếu Kỹ Thuật</span>
+            <span class="font-semibold text-slate-700 dark:text-slate-200">Control Panel</span>
           </div>
           <div class="flex justify-between">
             <span>Data Grid:</span>

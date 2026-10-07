@@ -6,7 +6,7 @@ export const DASHBOARD_WEEKLY_MODALS_HTML = `    <!-- 1. MODAL: WEEKLY TECHNICAL
             <i class="fa-solid fa-list-check text-sky-500"></i>
             <span>{{ modalState.isEdit ? 'Chỉnh Sửa Phiếu Yêu Cầu' : 'Tạo Phiếu Yêu Cầu Mới' }}</span>
           </h3>
-          <button @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer transition" aria-label="Đóng">✕</button>
         </div>
 
         <form @submit.prevent="saveWeeklyRequestForm" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
@@ -131,7 +131,7 @@ export const DASHBOARD_WEEKLY_MODALS_HTML = `    <!-- 1. MODAL: WEEKLY TECHNICAL
             <i class="fa-solid fa-triangle-exclamation text-red-500"></i>
             <span>{{ modalState.isEdit ? 'Chỉnh Sửa Sự Cố Defect' : 'Ghi Nhận Sự Cố Defect Mới' }}</span>
           </h3>
-          <button @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer transition" aria-label="Đóng">✕</button>
         </div>
 
         <form @submit.prevent="saveDefectLogForm" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
@@ -227,7 +227,7 @@ export const DASHBOARD_WEEKLY_MODALS_HTML = `    <!-- 1. MODAL: WEEKLY TECHNICAL
             <i class="fa-solid fa-bullseye text-emerald-500"></i>
             <span>{{ modalState.isEdit ? 'Chỉnh Sửa Kế Hoạch' : 'Thêm Kế Hoạch Khắc Phục Mới' }}</span>
           </h3>
-          <button @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer transition" aria-label="Đóng">✕</button>
         </div>
 
         <form @submit.prevent="saveActionPlanForm" class="p-6 space-y-4 max-h-[80vh] overflow-y-auto custom-scrollbar">
@@ -315,7 +315,7 @@ export const DASHBOARD_WEEKLY_MODALS_HTML = `    <!-- 1. MODAL: WEEKLY TECHNICAL
             <i class="fa-solid fa-user-plus text-sky-500"></i>
             <span>{{ modalState.isEdit ? 'Chỉnh Sửa Người Yêu Cầu' : 'Thêm Người Yêu Cầu' }}</span>
           </h3>
-          <button @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer transition" aria-label="Đóng">✕</button>
         </div>
 
         <form @submit.prevent="saveRequesterForm" class="p-6 space-y-4 text-xs">
@@ -361,7 +361,7 @@ export const DASHBOARD_WEEKLY_MODALS_HTML = `    <!-- 1. MODAL: WEEKLY TECHNICAL
             <i class="fa-solid fa-gear text-sky-500"></i>
             <span>{{ modalState.isEdit ? 'Chỉnh Sửa Thiết Bị' : 'Thêm Máy Mới' }}</span>
           </h3>
-          <button @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+          <button type="button" @click="closeCurrentModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer transition" aria-label="Đóng">✕</button>
         </div>
 
         <form @submit.prevent="saveMachineForm" class="p-6 space-y-4 text-xs">

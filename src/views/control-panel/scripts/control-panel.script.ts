@@ -20,7 +20,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         if (window.__CP_DEBUG__) {
           window.__CP_DEBUG__.log('Vue', 'Initializing Control Panel Vue application setup');
         }
-        const activeTab = ref('requests');
+        const activeTab = ref('overview'); // const activeTab = ref('requests');
         const showTicketDetailModal = ref(false);
         const showAddMachineModal = ref(false);
         const showAddEmployeeModal = ref(false);
@@ -677,16 +677,17 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         // Computed
         const currentTabLabel = computed(() => {
           const map = {
-            overview: 'Tổng quan & Phân tích',
+            overview: 'Tổng Quan Hệ Thống',
             'assign-tasks': 'Phân Công Kỹ Thuật',
             requests: 'Quản Lý Phiếu Kỹ Thuật',
             'report-technical': 'Report Technical',
             machines: 'Máy móc & Thiết bị',
             employees: 'Nhân sự & Phân xưởng',
             users: 'Danh sách User & Phân quyền',
-            'existing-data': 'Quản lý dữ liệu hiện có'
+            database: 'Database',
+            'existing-data': 'Database'
           };
-          return map[activeTab.value] || 'Quản Lý Phiếu Kỹ Thuật';
+          return map[activeTab.value] || 'Tổng Quan Hệ Thống';
         });
 
         const userInitials = computed(() => {
@@ -1612,7 +1613,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               if (usersList.value.length === 0) loadUsers();
               else { initOrUpdateUsersTable(); safeRedraw(usersTable); }
             }
-            if (tab === 'existing-data') {
+            if (tab === 'existing-data' || tab === 'database') {
               loadCurrentDataset();
             }
             if (tab === 'report-technical') {
@@ -3515,9 +3516,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           loadCpsData();
           loadEmployees();
           loadPublicFormStatus();
-          if (currentUser.value?.role === 'ADMIN' || (currentUser.value?.permissions && currentUser.value.permissions.canAccessControlPanel)) {
-            loadUsers();
-          }
+          loadUsers();
 
           // Preload dataset counts
           fetch('/api/weekly-requests', { headers: getAuthHeaders(), credentials: 'include' })

@@ -9,9 +9,8 @@ export const CP_HEADER_HTML = `    <!-- TOP APP BAR -->
           </div>
           <div class="leading-none text-left">
             <div class="flex items-center gap-1.5">
-              <span class="text-sm font-extrabold text-slate-900 dark:text-white"><span class="text-sky-500">Checkpoint</span> Systems</span>
+              <span class="text-sm font-extrabold text-black dark:text-white">Checkpoint Systems</span>
             </div>
-            <span class="text-[11px] text-sky-600 dark:text-sky-400 font-bold">Quản Lý Phiếu Kỹ Thuật</span>
           </div>
         </a>
 
@@ -36,7 +35,7 @@ export const CP_HEADER_HTML = `    <!-- TOP APP BAR -->
             <i class="fa-solid fa-gauge-high"></i> Dashboard
           </a>
           <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
-          <span class="text-sky-600 dark:text-sky-400 font-bold capitalize">Quản Lý Phiếu Kỹ Thuật</span>
+          <span class="text-slate-800 dark:text-slate-200 font-bold capitalize">Control Panel</span>
         </div>
       </div>
 
@@ -148,7 +147,7 @@ export const CP_HEADER_HTML = `    <!-- TOP APP BAR -->
                 <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-400"></i>
               </a>
               <div class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 flex items-center justify-between">
-                <span class="flex items-center gap-2"><i class="fa-solid fa-sliders"></i> Quản Lý Phiếu Kỹ Thuật</span>
+                <span class="flex items-center gap-2"><i class="fa-solid fa-sliders"></i> Control Panel</span>
                 <span class="text-[9px] font-mono font-bold uppercase bg-amber-500/20 px-1.5 py-0.5 rounded">Active</span>
               </div>
             </div>

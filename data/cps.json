@@ -1,6 +1,6 @@
 [
   {
-    "id": "55398daa-b0dd-45b8-9db0-8905a01dfe2e",
+    "id": "a31fa55c-9325-4d2f-88d0-824448e3d9c1",
     "docNo": "CPS-20261006-005",
     "cpsrId": "3e9f1956-f3fb-41dc-9b3e-43a697598d10",
     "cpsrDocNo": "CPSR-20261006-005",
@@ -31,10 +31,10 @@
     "chkQuality": "Đạt",
     "closedAt": "2026-10-06T14:57:09.959Z",
     "createdAt": "2026-10-06T11:42:53.807Z",
-    "updatedAt": "2026-10-06T14:57:09.964Z"
+    "updatedAt": "2026-10-06T17:39:57.696Z"
   },
   {
-    "id": "b117ffe5-f284-4776-9e59-40ff3c522af3",
+    "id": "c0237af7-1339-46f0-b14b-c9c3e1a876f5",
     "docNo": "CPS-20261006-004",
     "cpsrId": "e98e7fc8-5fd7-4fd9-b68d-2ba715d64a60",
     "cpsrDocNo": "CPSR-20261006-004",
@@ -66,10 +66,10 @@
     "chkQuality": "Đạt",
     "closedAt": "2026-10-06T14:57:23.382Z",
     "createdAt": "2026-10-06T11:40:40.013Z",
-    "updatedAt": "2026-10-06T14:57:23.386Z"
+    "updatedAt": "2026-10-06T17:39:57.701Z"
   },
   {
-    "id": "5d9268f2-4ce7-4c2e-9683-26628e783b68",
+    "id": "9bc24a9f-40c0-46eb-ac1b-39d7113cbd41",
     "docNo": "CPS-20261006-003",
     "cpsrId": "53c75990-7af3-4fb5-a787-b4e9a61b011f",
     "cpsrDocNo": "CPSR-20261006-003",
@@ -77,13 +77,13 @@
     "cpstDocNo": null,
     "cpsfId": null,
     "cpsfDocNo": null,
-    "status": "OVER_DUE",
-    "assignedTo": "Đỗ Đức Nhật",
-    "assignedToId": "VN5944",
-    "assignedToName": "Đỗ Đức Nhật",
-    "assignedBy": "admin",
-    "assignedAt": "2026-10-06T15:01:38.007Z",
-    "deadline": "2026-10-06T15:00:00.000Z",
+    "status": "TO_ASSIGN",
+    "assignedTo": null,
+    "assignedToId": null,
+    "assignedToName": null,
+    "assignedBy": null,
+    "assignedAt": null,
+    "deadline": null,
     "priority": "Hỗ trợ ngay",
     "printTech": "Digital",
     "machineName": "HP 7K chiller 1_Origin",
@@ -91,16 +91,16 @@
     "reqBy": "Lê Minh Hoàng - VN5117",
     "reqDate": "2026-10-06",
     "reqTime": "17:35",
-    "downtime": 265,
+    "downtime": 0,
     "woTotalQty": 0,
     "wasteQty": 0,
     "wastePercent": "0%",
     "closedAt": null,
     "createdAt": "2026-10-06T10:35:32.365Z",
-    "updatedAt": "2026-10-06T15:01:38.007Z"
+    "updatedAt": "2026-10-06T17:39:57.705Z"
   },
   {
-    "id": "34fa52d7-cea9-4943-ad87-699e6755a26a",
+    "id": "55f8b294-45e6-4ae6-a488-cafc73019423",
     "docNo": "CPS-20261006-002",
     "cpsrId": "d76f34f2-39e1-4d13-96ea-0bfde9a0c70d",
     "cpsrDocNo": "CPSR-20261006-002",
@@ -109,11 +109,11 @@
     "cpsfId": null,
     "cpsfDocNo": null,
     "status": "IN_PROGRESS",
-    "assignedTo": "Trần Thị Loan",
-    "assignedToId": "VN5571",
-    "assignedToName": "Trần Thị Loan",
-    "assignedBy": "admin",
-    "assignedAt": "2026-10-06T10:23:07.469Z",
+    "assignedTo": "Lê Minh Hoàng - VN5117",
+    "assignedToId": null,
+    "assignedToName": null,
+    "assignedBy": null,
+    "assignedAt": null,
     "deadline": null,
     "priority": "Hỗ trợ ngay",
     "printTech": "PFL",
@@ -129,10 +129,10 @@
     "chkStatus": "Đã khắc phục",
     "closedAt": null,
     "createdAt": "2026-10-06T10:22:47.037Z",
-    "updatedAt": "2026-10-06T15:12:30.868Z"
+    "updatedAt": "2026-10-06T17:39:57.707Z"
   },
   {
-    "id": "6e5cb127-3137-4e79-addb-2f7803555619",
+    "id": "f36c8efa-d6e5-4089-9b34-38fa5d34c8f2",
     "docNo": "CPS-20261006-001",
     "cpsrId": "14cf7016-0ee7-4668-b682-712fc7cff04b",
     "cpsrDocNo": "CPSR-20261006-001",
@@ -160,6 +160,6 @@
     "wastePercent": "0%",
     "closedAt": null,
     "createdAt": "2026-10-06T10:22:33.025Z",
-    "updatedAt": "2026-10-06T15:53:18.529Z"
+    "updatedAt": "2026-10-06T17:39:57.709Z"
   }
 ]

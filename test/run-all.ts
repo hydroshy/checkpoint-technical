@@ -16,6 +16,7 @@ const tests = [
   'test/dynamic-downtime.spec.ts',
   'test/ui-popup-cleanup.spec.ts',
   'test/report-technical-layout-4m-gantt.spec.ts',
+  'test/dashboard-dmodule-and-control-panel.spec.ts',
 ];
 
 console.log('================================================================');

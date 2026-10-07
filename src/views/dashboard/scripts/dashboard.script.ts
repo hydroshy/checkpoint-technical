@@ -148,19 +148,11 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
         });
 
         const canViewKpi = computed(() => {
-          const u = currentUser.value;
-          if (!u || !u.username) return true;
-          if (u.username === 'admin' || u.role === 'ADMIN') return true;
-          if (u.permissions && u.permissions.canViewKpi !== undefined) {
-            return Boolean(u.permissions.canViewKpi);
-          }
-          if (u.role === 'TECHNICIAN') return true;
-          if (u.role === 'EMPLOYEE') return false;
-          return false;
+          return true; // Dashboard d-module cho phép tất cả người dùng xem Report Technical
         });
 
         const isRequestActive = computed(() => {
-          return activeTab.value === 'v4-form' || activeTab.value === 'v4-history';
+          return false;
         });
 
         const isKpiActive = computed(() => {
@@ -172,21 +164,19 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
         });
 
         const selectMenuCard = (type) => {
-          if (type === 'request') {
-            if (!canCreateRequest.value) {
-              showToast('Tài khoản của bạn không có quyền Tạo phiếu yêu cầu', true);
-              return;
-            }
-            activeTab.value = 'v4-form';
-          } else if (type === 'kpi') {
-            if (!canViewKpi.value) {
-              showToast('Tài khoản của bạn không có quyền Xem Dashboard KPI', true);
-              return;
-            }
+          if (type === 'cpsr' || type === 'form-request') {
+            window.location.href = '/form-request';
+          } else if (type === 'cpst' || type === 'technical-feedback') {
+            window.location.href = '/technical-feedback';
+          } else if (type === 'cpsf' || type === 'confirm-request') {
+            window.location.href = '/confirm-request';
+          } else if (type === 'kpi' || type === 'report-technical') {
             activeTab.value = 'weekly-kpi';
             if (!weeklyRequests.value.length) {
               loadAllWeeklyData();
             }
+          } else if (type === 'request') {
+            window.location.href = '/form-request';
           }
         };
 
@@ -372,12 +362,16 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
 
         // Navigation
         const switchTab = (tab) => {
-          if ((tab === 'v4-form' || tab === 'v4-history') && !canCreateRequest.value) {
-            showToast('Tài khoản của bạn không có quyền Tạo phiếu yêu cầu', true);
+          if (tab === 'cpsr') {
+            window.location.href = '/form-request';
             return;
           }
-          if ((tab === 'weekly-kpi' || tab === 'weekly-requests' || tab === 'defect-logs' || tab === 'action-plans' || tab === 'catalog') && !canViewKpi.value) {
-            showToast('Tài khoản của bạn không có quyền Xem Dashboard KPI', true);
+          if (tab === 'cpst') {
+            window.location.href = '/technical-feedback';
+            return;
+          }
+          if (tab === 'cpsf') {
+            window.location.href = '/confirm-request';
             return;
           }
           activeTab.value = tab;
@@ -1156,11 +1150,6 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
             if (res.ok) {
               currentUser.value = await res.json();
               localStorage.setItem('checkpoint_user', JSON.stringify(currentUser.value));
-              if (isKpiActive.value && !canViewKpi.value && canCreateRequest.value) {
-                activeTab.value = 'v4-form';
-              } else if (isRequestActive.value && !canCreateRequest.value && canViewKpi.value) {
-                activeTab.value = 'weekly-kpi';
-              }
             } else {
               window.location.replace('/login');
             }
@@ -1401,6 +1390,14 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           loadMachinesCatalog();
           loadEmployees();
           loadHistory();
+
+          // Global ESC handler for dismissing any active modal
+          window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+              closeCurrentModal();
+              userMenuOpen.value = false;
+            }
+          });
 
           const savedTheme = localStorage.getItem('checkpoint_theme') || 'light';
           currentTheme.value = savedTheme;
