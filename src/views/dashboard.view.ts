@@ -2,16 +2,14 @@ import { TOAST_CONTAINER_HTML } from './common/layouts/toast.component';
 import { DASHBOARD_CSS } from './dashboard/styles/dashboard.style';
 import { DASHBOARD_HEADER_HTML } from './dashboard/components/layouts/header.component';
 import { DASHBOARD_NAV_HTML } from './dashboard/components/layouts/navigation.component';
-import { DASHBOARD_KPI_CARDS_HTML } from './dashboard/components/cards/kpi-cards.component';
 import { DASHBOARD_ANALYTICS_CHARTS_HTML } from './dashboard/components/charts/analytics-charts.component';
-import { DASHBOARD_RECENT_RECORDS_HTML } from './dashboard/components/cards/recent-records.component';
-import { DASHBOARD_WEEKLY_TABLES_HTML } from './dashboard/components/tables/weekly-tables.component';
 import { DASHBOARD_REQUEST_FORM_HTML } from './dashboard/components/forms/request-form.component';
 import { DASHBOARD_REQUEST_HISTORY_HTML } from './dashboard/components/forms/request-history.component';
 import { DASHBOARD_BOTTOM_BAR_HTML } from './dashboard/components/forms/bottom-action-bar.component';
 import { DASHBOARD_PICKER_MODALS_HTML } from './dashboard/components/modals/picker-modals.component';
 import { DASHBOARD_PDF_TEMPLATE_HTML } from './dashboard/components/modals/pdf-template.component';
 import { DASHBOARD_WEEKLY_MODALS_HTML } from './dashboard/components/modals/weekly-modals.component';
+import { CP_SPLIT_DETAIL_MODAL_HTML } from './control-panel/components/modals/split-detail-modal.component';
 import { DASHBOARD_SCRIPT } from './dashboard/scripts/dashboard.script';
 
 export const DASHBOARD_HTML = `<!DOCTYPE html>
@@ -40,6 +38,10 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
+  <!-- Tabulator Table -->
+  <link rel="stylesheet" href="/vendor/tabulator/tabulator.min.css" />
+  <script src="/vendor/tabulator/tabulator.min.js"></script>
+
   <script>
     (function() {
       try {
@@ -66,45 +68,7 @@ ${DASHBOARD_HEADER_HTML}
 
 ${DASHBOARD_NAV_HTML}
 
-      <!-- TAB 1: WEEKLY KPI -->
-      <div v-show="canViewKpi && activeTab === 'weekly-kpi'" class="space-y-6">
-        <!-- Top Banner -->
-        <div class="glass-card rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-sky-500/10 via-indigo-500/10 to-purple-500/10 border-sky-500/20">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <div class="flex items-center gap-2 mb-1">
-                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/20 text-sky-600 dark:text-sky-400 border border-sky-500/30 uppercase tracking-wider">
-                  Báo cáo tuần
-                </span>
-                <span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Cập nhật tự động</span>
-              </div>
-              <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                Chỉ Số Hiệu Suất Kỹ Thuật (KPI Analytics)
-              </h1>
-              <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">
-                Theo dõi tình trạng xử lý yêu cầu, phân tích lỗi phát sinh và kế hoạch hành động
-              </p>
-            </div>
-            <div class="flex items-center gap-2 self-stretch sm:self-auto">
-              <button
-                @click="loadAllWeeklyData"
-                class="flex-1 sm:flex-none px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-sky-500/25 cursor-pointer"
-              >
-                <i class="fa-solid fa-arrows-rotate" :class="{ 'fa-spin': isRefreshingWeekly }"></i>
-                <span>Làm mới</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-${DASHBOARD_KPI_CARDS_HTML}
-
 ${DASHBOARD_ANALYTICS_CHARTS_HTML}
-
-${DASHBOARD_RECENT_RECORDS_HTML}
-      </div>
-
-${DASHBOARD_WEEKLY_TABLES_HTML}
 
 ${DASHBOARD_REQUEST_FORM_HTML}
 
@@ -121,6 +85,8 @@ ${TOAST_CONTAINER_HTML}
 ${DASHBOARD_PDF_TEMPLATE_HTML}
 
 ${DASHBOARD_WEEKLY_MODALS_HTML}
+
+${CP_SPLIT_DETAIL_MODAL_HTML}
 
   </div>
 

@@ -165,7 +165,7 @@ export async function runBackendPerfAndChainTests() {
       headers,
       body: JSON.stringify({
         technician: 'Technician Hoàng Gia Huy',
-        deadline: '2026-10-07T12:00:00.000Z',
+        deadline: new Date(Date.now() + 86400000).toISOString(),
         priority: 'Hỗ trợ ngay',
         notes: 'Kiểm tra cảm biến và thay thế nếu hỏng',
       }),

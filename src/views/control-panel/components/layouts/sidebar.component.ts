@@ -10,18 +10,18 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
         class="fixed md:static inset-y-0 left-0 z-30 glass-sidebar flex flex-col justify-between transition-all duration-200 ease-in-out md:flex-shrink-0 mt-14 md:mt-0"
       >
         <div class="space-y-4 overflow-y-auto flex-1">
-          <!-- Back to Dashboard Quick Action -->
-          <a
-            href="/dashboard"
-            class="w-full py-2.5 px-3 mb-2 rounded-xl text-xs font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-500/10 hover:bg-sky-100 dark:hover:bg-sky-500/20 border border-sky-200 dark:border-sky-500/20 transition flex items-center justify-between group shadow-xs"
-            title="Quay lại giao diện Dashboard"
-          >
-            <span class="flex items-center gap-2">
-              <i class="fa-solid fa-arrow-left text-sky-500 group-hover:-translate-x-0.5 transition-transform"></i>
-              <span>Quay lại Dashboard</span>
-            </span>
-            <i class="fa-solid fa-gauge-high text-[11px] text-sky-400"></i>
-          </a>
+          <!-- HOME: OVERVIEW CHÍNH -->
+          <div class="space-y-1 mb-2">
+            <button
+              @click="switchTab('overview')"
+              :class="{ active: activeTab === 'overview' }"
+              class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
+              title="Overview"
+            >
+              <i class="fa-solid fa-house w-4 text-center text-xs text-sky-500"></i>
+              <span class="truncate">Overview</span>
+            </button>
+          </div>
 
           <!-- SIDEBAR NAVIGATION MENU: 4 CORE GROUPS WITH FULL MODULES -->
           <!-- GROUP 1: VẬN HÀNH & PHIẾU KỸ THUẬT -->

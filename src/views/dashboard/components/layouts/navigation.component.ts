@@ -131,7 +131,7 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
 
           <!-- THẺ 4: REPORT TECHNICAL -->
           <div
-            @click="selectMenuCard('kpi')"
+            @click="selectMenuCard('report-technical')"
             class="group relative rounded-2xl border border-slate-200 dark:border-slate-800 hover:border-amber-500/60 dark:hover:border-amber-500/60 bg-white dark:bg-slate-900 shadow-sm hover:shadow-xl p-5 sm:p-6 transition-all duration-200 flex flex-col justify-between overflow-hidden cursor-pointer select-none"
           >
             <div class="absolute -right-8 -bottom-8 w-32 h-32 bg-amber-500/10 rounded-full blur-2xl pointer-events-none group-hover:bg-amber-500/20 transition-all"></div>
@@ -151,7 +151,7 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
                 Báo Cáo Kỹ Thuật & Phân Tích KPI
               </div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
-                Theo dõi chỉ số SLA, hiệu suất sửa chữa, tỷ lệ hoàn thành, Defect Logs & Action Plans của hệ thống.
+                Thống kê toàn diện chỉ số phiếu kỹ thuật, thời gian downtime và phân bổ trạng thái CPS theo khoảng thời gian.
               </p>
             </div>
             <div class="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
@@ -187,60 +187,13 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
             </span>
           </div>
 
-          <!-- Sub-tabs navigation buttons for Report Technical -->
-          <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
-            <button
-              type="button"
-              @click="switchTab('weekly-kpi')"
-              :class="activeTab === 'weekly-kpi' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-              class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="fa-solid fa-chart-pie text-[11px]"></i> Tổng Quan KPI
-            </button>
-            <button
-              type="button"
-              @click="switchTab('weekly-requests')"
-              :class="activeTab === 'weekly-requests' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-              class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="fa-solid fa-list-check text-[11px]"></i> Phiếu Yêu Cầu
-              <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 font-mono">{{ weeklyRequests.length }}</span>
-            </button>
-            <button
-              type="button"
-              @click="switchTab('defect-logs')"
-              :class="activeTab === 'defect-logs' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-              class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="fa-solid fa-triangle-exclamation text-amber-500 text-[11px]"></i> Defect Log
-              <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-amber-500/20 text-amber-700 dark:text-amber-300 font-mono">{{ defectLogs.length }}</span>
-            </button>
-            <button
-              type="button"
-              @click="switchTab('action-plans')"
-              :class="activeTab === 'action-plans' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-              class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="fa-solid fa-bullseye text-emerald-500 text-[11px]"></i> Action Plan
-              <span class="px-1.5 py-0.2 rounded-full text-[10px] bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-mono">{{ actionPlans.length }}</span>
-            </button>
-            <button
-              type="button"
-              @click="switchTab('catalog')"
-              :class="activeTab === 'catalog' ? 'bg-emerald-600 text-white font-bold shadow-sm' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
-              class="px-3 py-1.5 rounded-xl text-xs transition flex items-center gap-1.5 cursor-pointer"
-            >
-              <i class="fa-solid fa-users-gear text-[11px]"></i> Người Yêu Cầu & Máy
-            </button>
-
-            <!-- Quay lại Dashboard button -->
-            <button
-              type="button"
-              @click="activeTab = ''"
-              class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition flex items-center gap-1.5 cursor-pointer ml-auto"
-            >
-              <i class="fa-solid fa-arrow-left text-[10px]"></i> Quay lại Dashboard
-            </button>
-          </div>
+          <!-- Quay lại Dashboard button -->
+          <button
+            type="button"
+            @click="activeTab = ''"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition flex items-center gap-1.5 cursor-pointer ml-auto"
+          >
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> Quay lại Dashboard
+          </button>
         </div>
       </section>`;

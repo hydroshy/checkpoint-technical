@@ -29,50 +29,14 @@ export const CP_HEADER_HTML = `    <!-- TOP APP BAR -->
           <i class="fa-solid text-xs" :class="sidebarCollapsed ? 'fa-bars text-sky-500' : 'fa-bars'"></i>
         </button>
 
-        <!-- Breadcrumb Indicator with convenient Back to Dashboard -->
-        <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800 text-xs text-slate-500">
-          <a href="/dashboard" class="flex items-center gap-1 hover:text-sky-600 dark:hover:text-sky-400 transition" title="Quay lại Dashboard">
-            <i class="fa-solid fa-gauge-high"></i> Dashboard
-          </a>
-          <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+        <!-- Independent Control Panel Indicator -->
+        <div class="hidden sm:flex items-center gap-2 pl-3 border-l border-slate-200 dark:border-slate-800 text-xs">
           <span class="text-slate-800 dark:text-slate-200 font-bold capitalize">Control Panel</span>
         </div>
       </div>
 
-      <!-- Right User Menu & Portal Links -->
+      <!-- Right User Menu -->
       <div class="flex items-center gap-2 sm:gap-2.5">
-        <!-- Quick 1-Click Theme Toggle Button -->
-        <button
-          type="button"
-          @click="toggleTheme"
-          class="flex items-center justify-center w-8 h-8 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 hover:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 transition cursor-pointer"
-          :title="currentTheme === 'dark' ? 'Chuyển sang giao diện Sáng' : 'Chuyển sang giao diện Tối'"
-        >
-          <i :class="currentTheme === 'dark' ? 'fa-solid fa-sun text-amber-400' : 'fa-solid fa-moon text-sky-500'" class="text-xs"></i>
-        </button>
-
-        <!-- Swagger Docs Link (Admin Only) -->
-        <a
-          v-if="currentUser?.role === 'ADMIN' || currentUser?.username === 'admin'"
-          href="/api/docs"
-          target="_blank"
-          class="hidden md:flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-sky-500 dark:hover:text-sky-400 border border-slate-200 dark:border-slate-800 transition"
-          title="Tài liệu API Swagger"
-        >
-          <i class="fa-solid fa-book text-sky-500"></i>
-          <span>API Docs</span>
-        </a>
-
-        <!-- Convenient Back to Dashboard Button -->
-        <a
-          href="/dashboard"
-          class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-sky-50 dark:bg-sky-500/15 hover:bg-sky-100 dark:hover:bg-sky-500/25 text-sky-700 dark:text-sky-300 border border-sky-200 dark:border-sky-500/30 transition shadow-sm"
-          title="Quay lại giao diện Dashboard"
-        >
-          <i class="fa-solid fa-gauge-high text-sky-500"></i>
-          <span class="hidden sm:inline">Quay lại Dashboard</span>
-        </a>
-
         <!-- User Menu Dropdown Button -->
         <div class="relative">
           <button

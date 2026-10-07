@@ -3,9 +3,6 @@ import { CONTROL_PANEL_CSS } from './control-panel/styles/control-panel.style';
 import { CP_HEADER_HTML } from './control-panel/components/layouts/header.component';
 import { CP_SIDEBAR_HTML } from './control-panel/components/layouts/sidebar.component';
 import { CP_OVERVIEW_HEADER_HTML } from './control-panel/components/cards/overview-header.component';
-import { CP_PUBLIC_SHARE_CARD_HTML } from './control-panel/components/cards/public-share-card.component';
-import { CP_KPI_CARDS_HTML } from './control-panel/components/cards/kpi-cards.component';
-import { CP_ANALYTICAL_BREAKDOWN_CARDS_HTML } from './control-panel/components/cards/analytical-breakdown-cards.component';
 import { CP_ASSIGN_TASKS_TAB_HTML, CP_ASSIGN_MODAL_HTML } from './control-panel/modules/assign-task-module';
 import { CP_MANAGEMENT_TASKS_TAB_HTML } from './control-panel/modules/management-task-module';
 import { CP_SPLIT_TABLES_HTML } from './control-panel/components/tables/split-tables.component';
@@ -98,9 +95,6 @@ ${CP_SIDEBAR_HTML}
         <!-- VIEW 1: OVERVIEW HUB & ANALYTICS -->
         <div v-show="activeTab === 'overview'" class="space-y-6">
 ${CP_OVERVIEW_HEADER_HTML}
-${CP_PUBLIC_SHARE_CARD_HTML}
-${CP_KPI_CARDS_HTML}
-${CP_ANALYTICAL_BREAKDOWN_CARDS_HTML}
         </div>
 
 ${CP_ASSIGN_TASKS_TAB_HTML}

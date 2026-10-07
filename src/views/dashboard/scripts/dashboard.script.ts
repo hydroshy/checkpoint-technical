@@ -1,4 +1,4 @@
-export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted, nextTick } = Vue;
+export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted, nextTick, toRaw } = Vue;
 
     createApp({
       setup() {
@@ -16,6 +16,755 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           const token = localStorage.getItem('checkpoint_token');
           if (token) headers['Authorization'] = 'Bearer ' + token;
           return headers;
+        };
+
+        const toPlainObject = (obj) => {
+          if (!obj) return null;
+          try {
+            return JSON.parse(JSON.stringify(toRaw ? toRaw(obj) : obj));
+          } catch (_) {
+            return { ...obj };
+          }
+        };
+
+        const safeDestroy = (tbl) => {
+          try {
+            if (tbl && typeof tbl.destroy === 'function') {
+              tbl.destroy();
+            }
+          } catch (_) {}
+          return null;
+        };
+
+        const formatTechnicianName = (val) => {
+          if (!val) return '';
+          let str = String(val).trim();
+          str = str.replace(/^(KTV|ktv|Technician|technician)\s*[-:]?\s*/i, '').trim();
+          if (str.includes(' - ')) {
+            const parts = str.split(' - ');
+            if (parts[0] && parts[0].trim()) {
+              str = parts[0].trim();
+            }
+          }
+          return str;
+        };
+
+        const getPercent = (v, total) => {
+          if (!total || total === 0) return 0;
+          return Math.round((v / total) * 100);
+        };
+
+        // Report Technical State & Computeds
+        const reportDateFrom = ref('');
+        const reportDateTo = ref('');
+        const reportQuickPreset = ref('7d');
+        const reportSearch = ref('');
+        const reportStatusFilter = ref('ALL');
+        let reportChartInstance = null;
+        let report4MChartInstance = null;
+        let reportTableInstance = null;
+
+        const chainList = ref([]);
+        const cpsList = ref([]);
+        const cpsrList = ref([]);
+        const cpstList = ref([]);
+        const cpsfList = ref([]);
+        const showChainModal = ref(false);
+        const selectedChain = ref(null);
+
+        const initReportDates = () => {
+          const today = new Date();
+          const pad = n => String(n).padStart(2, '0');
+          reportDateTo.value = today.getFullYear() + '-' + pad(today.getMonth() + 1) + '-' + pad(today.getDate());
+
+          const from = new Date();
+          from.setDate(from.getDate() - 7);
+          reportDateFrom.value = from.getFullYear() + '-' + pad(from.getMonth() + 1) + '-' + pad(from.getDate());
+          reportQuickPreset.value = '7d';
+        };
+
+        const setReportPreset = (preset) => {
+          reportQuickPreset.value = preset;
+          const today = new Date();
+          const pad = n => String(n).padStart(2, '0');
+          const todayStr = today.getFullYear() + '-' + pad(today.getMonth() + 1) + '-' + pad(today.getDate());
+          reportDateTo.value = todayStr;
+
+          if (preset === 'today') {
+            reportDateFrom.value = todayStr;
+          } else if (preset === '7d') {
+            const from = new Date();
+            from.setDate(from.getDate() - 7);
+            reportDateFrom.value = from.getFullYear() + '-' + pad(from.getMonth() + 1) + '-' + pad(from.getDate());
+          } else if (preset === 'month') {
+            const from = new Date(today.getFullYear(), today.getMonth(), 1);
+            reportDateFrom.value = from.getFullYear() + '-' + pad(from.getMonth() + 1) + '-' + pad(from.getDate());
+          } else if (preset === 'all') {
+            reportDateFrom.value = '';
+            reportDateTo.value = '';
+          }
+          onReportFilterChange();
+        };
+
+        const filteredReportCps = computed(() => {
+          try {
+            let list = Array.isArray(chainList.value) && chainList.value.length > 0
+              ? chainList.value
+              : (Array.isArray(cpsList.value) ? cpsList.value : []);
+
+            if (reportDateFrom.value || reportDateTo.value) {
+              list = list.filter(item => {
+                if (!item) return false;
+                const rawDate = item.reqDate || item.cpsr?.reqDate || item.createdAt || item.updatedAt;
+                if (!rawDate) return true;
+                let dStr = '';
+                if (typeof rawDate === 'string') {
+                  if (rawDate.includes('T')) {
+                    dStr = rawDate.split('T')[0];
+                  } else if (rawDate.includes('/')) {
+                    const parts = rawDate.split('/');
+                    if (parts.length === 3) {
+                      if (parts[0].length === 4) dStr = parts[0] + '-' + parts[1].padStart(2, '0') + '-' + parts[2].padStart(2, '0');
+                      else dStr = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+                    }
+                  } else {
+                    dStr = rawDate.trim();
+                  }
+                }
+                if (!dStr) return true;
+                if (reportDateFrom.value && dStr < reportDateFrom.value) return false;
+                if (reportDateTo.value && dStr > reportDateTo.value) return false;
+                return true;
+              });
+            }
+
+            if (reportStatusFilter.value && reportStatusFilter.value !== 'ALL') {
+              list = list.filter(item => {
+                const s = item.status || (item.cpsf ? 'CLOSED' : (item.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+                return s === reportStatusFilter.value;
+              });
+            }
+
+            const q = String(reportSearch.value || '').trim().toLowerCase();
+            if (q) {
+              list = list.filter(item => {
+                const doc = String(item.docNo || '').toLowerCase();
+                const cpsr = String(item.cpsrDocNo || item.cpsr?.docNo || '').toLowerCase();
+                const mach = String(item.machineName || item.cpsr?.machineName || '').toLowerCase();
+                const prob = String(item.problem || item.cpsr?.problem || '').toLowerCase();
+                const req = String(item.reqBy || item.cpsr?.reqBy || '').toLowerCase();
+                const ass = String(item.assignedTo || item.cpst?.recvBy || '').toLowerCase();
+                return doc.includes(q) || cpsr.includes(q) || mach.includes(q) || prob.includes(q) || req.includes(q) || ass.includes(q);
+              });
+            }
+
+            return list;
+          } catch (e) {
+            console.warn('Error in filteredReportCps:', e);
+            return [];
+          }
+        });
+
+        const reportStats = computed(() => {
+          const list = filteredReportCps.value || [];
+          let openTask = 0;
+          let toAssign = 0;
+          let inProgress = 0;
+          let closed = 0;
+          let overDue = 0;
+          let totalDowntimeMinutes = 0;
+
+          list.forEach(c => {
+            const s = c.status || (c.cpsf ? 'CLOSED' : (c.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+            if (s === 'OPEN_TASK') openTask++;
+            else if (s === 'TO_ASSIGN') toAssign++;
+            else if (s === 'IN_PROGRESS') inProgress++;
+            else if (s === 'CLOSED') closed++;
+            else if (s === 'OVER_DUE') overDue++;
+            else toAssign++;
+
+            const dt = Number(c.downtime != null ? c.downtime : (c.cpst?.downtime != null ? c.cpst.downtime : 0)) || 0;
+            totalDowntimeMinutes += dt;
+          });
+
+          const totalStatusCps = openTask + toAssign + inProgress + closed + overDue;
+          const totalDowntimeHours = Math.round((totalDowntimeMinutes / 60) * 10) / 10;
+
+          return {
+            totalRequests: list.length,
+            totalDowntimeMinutes,
+            totalDowntimeHours,
+            openTask,
+            toAssign,
+            inProgress,
+            closed,
+            overDue,
+            totalStatusCps
+          };
+        });
+
+        const report4MStats = computed(() => {
+          const list = filteredReportCps.value || [];
+          let man = 0;
+          let machine = 0;
+          let material = 0;
+          let method = 0;
+
+          list.forEach(c => {
+            if (!c) return;
+            const rc = String(c.rootCause || c.cpst?.rootCause || c.root_cause || c.cpst?.root_cause || '').trim();
+            if (!rc) return;
+            const lower = rc.toLowerCase();
+            if (lower === 'man' || lower.includes('người') || lower.includes('human') || lower.includes('thao tác') || lower.includes('nhân sự')) {
+              man++;
+            } else if (lower === 'machine' || lower.includes('máy') || lower.includes('thiết bị') || lower.includes('hỏng') || lower.includes('cảm biến') || lower.includes('bụi')) {
+              machine++;
+            } else if (lower === 'material' || lower.includes('vật liệu') || lower.includes('nguyên liệu') || lower.includes('mực') || lower.includes('giấy') || lower.includes('phôi')) {
+              material++;
+            } else if (lower === 'method' || lower.includes('phương pháp') || lower.includes('quy trình') || lower.includes('cài đặt') || lower.includes('setup') || lower.includes('hướng dẫn')) {
+              method++;
+            } else {
+              machine++;
+            }
+          });
+
+          return {
+            man,
+            machine,
+            material,
+            method,
+            total: man + machine + material + method
+          };
+        });
+
+        const parseDateToMs = (dateStr, timeStr) => {
+          if (!dateStr) return null;
+          let iso = String(dateStr).trim();
+          if (iso.includes('/')) {
+            const parts = iso.split('/');
+            if (parts.length === 3) {
+              if (parts[0].length === 4) iso = parts[0] + '-' + parts[1].padStart(2, '0') + '-' + parts[2].padStart(2, '0');
+              else iso = parts[2] + '-' + parts[1].padStart(2, '0') + '-' + parts[0].padStart(2, '0');
+            }
+          }
+          const t = timeStr && String(timeStr).trim() ? String(timeStr).trim() : '00:00';
+          const dt = new Date(iso + 'T' + (t.length === 5 ? t + ':00' : t));
+          if (!isNaN(dt.getTime())) return dt.getTime();
+          return null;
+        };
+
+        const getCpsStartTimestamp = (item) => {
+          if (!item) return null;
+          const reqD = item.cpsr?.reqDate || item.reqDate;
+          const reqT = item.cpsr?.reqTime || item.reqTime;
+          const fromReq = parseDateToMs(reqD, reqT);
+          if (fromReq) return fromReq;
+
+          const rawCreated = item.cpsr?.createdAt || item.createdAt || item.cpsr?.submittedAt;
+          if (rawCreated) {
+            const dt = new Date(rawCreated);
+            if (!isNaN(dt.getTime())) return dt.getTime();
+          }
+          return null;
+        };
+
+        const ganttTimeRange = computed(() => {
+          let startMs = 0;
+          let endMs = 0;
+
+          if (reportDateFrom.value) {
+            const s = new Date(reportDateFrom.value + 'T00:00:00');
+            if (!isNaN(s.getTime())) startMs = s.getTime();
+          }
+          if (reportDateTo.value) {
+            const e = new Date(reportDateTo.value + 'T23:59:59');
+            if (!isNaN(e.getTime())) endMs = e.getTime();
+          }
+
+          const list = filteredReportCps.value || [];
+          if (!startMs || !endMs) {
+            let minT = Infinity;
+            let maxT = -Infinity;
+            list.forEach(c => {
+              const t = getCpsStartTimestamp(c);
+              if (t) {
+                if (t < minT) minT = t;
+                if (t > maxT) maxT = t;
+              }
+            });
+
+            const now = new Date();
+            const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0).getTime();
+            const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59).getTime();
+
+            if (!startMs) startMs = isFinite(minT) ? minT : todayStart;
+            if (!endMs) endMs = isFinite(maxT) ? maxT : todayEnd;
+          }
+
+          if (endMs <= startMs) {
+            endMs = startMs + 24 * 60 * 60 * 1000 - 1000;
+          }
+
+          const pad = n => String(n).padStart(2, '0');
+          const fmt = (ms) => {
+            const dt = new Date(ms);
+            return pad(dt.getDate()) + '/' + pad(dt.getMonth() + 1) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+          };
+
+          return {
+            startMs,
+            endMs,
+            durationMs: Math.max(1000, endMs - startMs),
+            startLabel: fmt(startMs),
+            endLabel: fmt(endMs)
+          };
+        });
+
+        const ganttTimeTicks = computed(() => {
+          const range = ganttTimeRange.value;
+          const ticks = [];
+          const count = 5;
+          const pad = n => String(n).padStart(2, '0');
+
+          for (let i = 0; i < count; i++) {
+            const p = (i / (count - 1)) * 100;
+            const ms = range.startMs + (range.durationMs * i) / (count - 1);
+            const dt = new Date(ms);
+            const label = pad(dt.getDate()) + '/' + pad(dt.getMonth() + 1) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+            ticks.push({ percent: Math.round(p * 10) / 10, label });
+          }
+          return ticks;
+        });
+
+        const ganttMachineRows = computed(() => {
+          const list = filteredReportCps.value || [];
+          const range = ganttTimeRange.value;
+          const machineMap = new Map();
+
+          const pad = n => String(n).padStart(2, '0');
+          const fmtDt = (ms) => {
+            const dt = new Date(ms);
+            return pad(dt.getDate()) + '/' + pad(dt.getMonth() + 1) + ' ' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+          };
+
+          list.forEach(item => {
+            if (!item) return;
+            const mach = String(item.machineName || item.cpsr?.machineName || 'Chưa định danh').trim();
+            if (!machineMap.has(mach)) {
+              machineMap.set(mach, {
+                machineName: mach,
+                totalDowntime: 0,
+                bars: []
+              });
+            }
+            const mData = machineMap.get(mach);
+
+            const startMs = getCpsStartTimestamp(item) || range.startMs;
+            const dtVal = Number(item.downtime != null ? item.downtime : (item.cpst?.downtime != null ? item.cpst.downtime : 0)) || 0;
+            mData.totalDowntime += dtVal;
+
+            const durationMin = dtVal > 0 ? dtVal : 15;
+            const endMs = startMs + durationMin * 60 * 1000;
+
+            const clampedStart = Math.max(range.startMs, startMs);
+            const clampedEnd = Math.min(range.endMs, endMs);
+
+            if (clampedEnd >= clampedStart) {
+              const left = Math.max(0, Math.min(100, ((clampedStart - range.startMs) / range.durationMs) * 100));
+              const width = Math.max(1.2, Math.min(100 - left, ((clampedEnd - clampedStart) / range.durationMs) * 100));
+
+              const doc = item.docNo || (item.cpsr?.docNo ? item.cpsr.docNo.replace('CPSR-', 'CPS-') : (item.cpsrDocNo ? item.cpsrDocNo.replace('CPSR-', 'CPS-') : 'CPS'));
+              const prob = item.problem || item.cpsr?.problem || 'Không có mô tả';
+              const tech = formatTechnicianName(item.assignedToName || item.assignedTo || item.cpst?.recvBy || '') || 'Chưa giao';
+              const tooltip = '[' + doc + '] ' + mach + '\\n' + 'Downtime: ' + (dtVal > 0 ? dtVal + 'p' : 'Đang xử lý') + '\\n' + 'Từ: ' + fmtDt(startMs) + ' → Đến: ' + fmtDt(endMs) + '\\n' + 'Sự cố: ' + prob + '\\n' + 'Technician: ' + tech;
+
+              mData.bars.push({
+                left: Math.round(left * 10) / 10,
+                width: Math.round(width * 10) / 10,
+                downtime: dtVal,
+                tooltip,
+                item
+              });
+            }
+          });
+
+          return Array.from(machineMap.values());
+        });
+
+        const onReportFilterChange = () => {
+          nextTick(() => {
+            renderReportChart();
+            renderReport4MChart();
+            initOrUpdateReportTable();
+          });
+        };
+
+        const renderReportChart = () => {
+          const canvas = document.getElementById('chart-report-technical-donut');
+          if (!canvas || typeof Chart === 'undefined') return;
+
+          if (reportChartInstance) {
+            reportChartInstance.destroy();
+            reportChartInstance = null;
+          }
+
+          const stats = reportStats.value;
+          const isDark = currentTheme.value === 'dark';
+          const dataVals = [stats.openTask, stats.toAssign, stats.inProgress, stats.closed, stats.overDue];
+          const allZeros = dataVals.every(v => v === 0);
+
+          reportChartInstance = new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+              labels: ['OPEN_TASK', 'TO_ASSIGN', 'IN_PROGRESS', 'CLOSED', 'OVER_DUE'],
+              datasets: [{
+                data: allZeros ? [1] : dataVals,
+                backgroundColor: allZeros ? ['#94a3b8'] : ['#64748b', '#f59e0b', '#0284c7', '#10b981', '#ef4444'],
+                borderWidth: 2,
+                borderColor: isDark ? '#0f172a' : '#ffffff',
+                hoverOffset: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '72%',
+              animation: { duration: 300 },
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  enabled: !allZeros,
+                  callbacks: {
+                    label: function(ctx) {
+                      const val = ctx.raw || 0;
+                      const total = stats.totalStatusCps || 1;
+                      const pct = Math.round((val / total) * 100);
+                      return " " + ctx.label + ": " + val + " phiếu (" + pct + "%)";
+                    }
+                  }
+                }
+              }
+            }
+          });
+        };
+
+        const renderReport4MChart = () => {
+          const canvas = document.getElementById('chart-report-technical-4m');
+          if (!canvas || typeof Chart === 'undefined') return;
+
+          if (report4MChartInstance) {
+            report4MChartInstance.destroy();
+            report4MChartInstance = null;
+          }
+
+          const stats = report4MStats.value;
+          const isDark = currentTheme.value === 'dark';
+          const dataVals = [stats.man, stats.machine, stats.material, stats.method];
+          const allZeros = dataVals.every(v => v === 0);
+
+          report4MChartInstance = new Chart(canvas, {
+            type: 'doughnut',
+            data: {
+              labels: ['Man (Con người)', 'Machine (Máy móc)', 'Material (Vật tư)', 'Method (Phương pháp)'],
+              datasets: [{
+                data: allZeros ? [1] : dataVals,
+                backgroundColor: allZeros ? ['#94a3b8'] : ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6'],
+                borderWidth: 2,
+                borderColor: isDark ? '#0f172a' : '#ffffff',
+                hoverOffset: 4
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: '72%',
+              animation: { duration: 300 },
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom',
+                  labels: {
+                    boxWidth: 8,
+                    padding: 8,
+                    font: { size: 10 },
+                    color: isDark ? '#94a3b8' : '#64748b'
+                  }
+                },
+                tooltip: {
+                  enabled: !allZeros,
+                  callbacks: {
+                    label: function(ctx) {
+                      const val = ctx.raw || 0;
+                      const total = stats.total || 1;
+                      const pct = Math.round((val / total) * 100);
+                      return " " + ctx.label + ": " + val + " (" + pct + "%)";
+                    }
+                  }
+                }
+              }
+            }
+          });
+        };
+
+        const initOrUpdateReportTable = () => {
+          const el = document.getElementById('tabulator-report-technical');
+          if (!el || typeof Tabulator === 'undefined') return;
+
+          const data = filteredReportCps.value || [];
+          const columns = [
+            {
+              title: 'Mã CPS',
+              field: 'docNo',
+              minWidth: 140,
+              formatter: cell => {
+                const r = cell.getRow().getData();
+                const code = r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '-'));
+                return '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + code + '</span>';
+              }
+            },
+            {
+              title: 'Ngày khởi tạo',
+              minWidth: 130,
+              formatter: cell => {
+                const r = cell.getRow().getData();
+                const d = r.cpsr?.reqDate || r.reqDate || (r.createdAt ? r.createdAt.slice(0, 10) : '-');
+                const t = r.cpsr?.reqTime || r.reqTime || '';
+                return '<div class="text-xs font-medium text-slate-800 dark:text-slate-200">' + d + (t ? ' <span class="text-[10px] text-slate-400 font-mono">' + t + '</span>' : '') + '</div>';
+              }
+            },
+            {
+              title: 'Người yêu cầu',
+              minWidth: 140,
+              formatter: cell => {
+                const r = cell.getRow().getData();
+                const req = r.cpsr?.reqBy || r.reqBy || '-';
+                return '<div class="text-xs font-semibold text-slate-800 dark:text-slate-200">' + req + '</div>';
+              }
+            },
+            {
+              title: 'Máy',
+              minWidth: 150,
+              formatter: cell => {
+                const r = cell.getRow().getData();
+                const mach = r.cpsr?.machineName || r.machineName || '-';
+                const tech = r.cpsr?.printTech || r.printTech || '';
+                return '<div><span class="font-semibold text-slate-800 dark:text-slate-200 text-xs">' + mach + '</span>' + (tech ? '<span class="block text-[10px] text-slate-400 font-mono">' + tech + '</span>' : '') + '</div>';
+              }
+            },
+            {
+              title: 'Sự cố',
+              minWidth: 180,
+              formatter: cell => {
+                const r = cell.getRow().getData();
+                const p = r.cpsr?.problem || r.problem || '-';
+                return '<span class="truncate block max-w-xs text-xs text-slate-700 dark:text-slate-300" title="' + p + '">' + p + '</span>';
+              }
+            },
+            {
+              title: 'Technician',
+              minWidth: 140,
+              formatter: cell => {
+                const r = cell.getRow().getData();
+                const ass = r.assignedTo || r.cpst?.recvBy;
+                const techName = formatTechnicianName(r.assignedToName || ass);
+                if (!techName) return '<span class="text-amber-600 dark:text-amber-400 italic text-[11px]">Chưa giao</span>';
+                return '<div class="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1"><i class="fa-solid fa-user-check text-[10px] text-emerald-600 dark:text-emerald-400"></i> ' + techName + '</div>';
+              }
+            },
+            {
+              title: 'Trạng thái',
+              field: 'status',
+              minWidth: 130,
+              hozAlign: 'center',
+              formatter: cell => {
+                const r = cell.getRow().getData();
+                const s = r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+                if (s === 'TO_ASSIGN') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/30">⏳ TO_ASSIGN</span>';
+                if (s === 'IN_PROGRESS') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-500/10 text-sky-700 dark:text-sky-400 border border-sky-500/30">⚡ IN_PROGRESS</span>';
+                if (s === 'OVER_DUE') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/30">⚠️ OVER_DUE</span>';
+                if (s === 'CLOSED') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30">✅ CLOSED</span>';
+                return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 dark:bg-slate-500/15 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-500/30">📋 ' + s + '</span>';
+              }
+            },
+            {
+              title: 'Downtime',
+              minWidth: 90,
+              hozAlign: 'center',
+              formatter: cell => {
+                const r = cell.getRow().getData();
+                const dt = r.downtime != null ? r.downtime : r.cpst?.downtime;
+                if (dt == null || dt === '') return '<span class="text-slate-400">-</span>';
+                return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + 'p</span>';
+              }
+            },
+            {
+              title: 'Xem chi tiết',
+              hozAlign: 'center',
+              minWidth: 120,
+              headerSort: false,
+              formatter: () => '<button class="btn-report-view px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold cursor-pointer transition flex items-center gap-1 mx-auto"><i class="fa-solid fa-eye"></i> Xem chi tiết</button>',
+              cellClick: (e, cell) => {
+                const r = cell.getRow().getData();
+                if (e.target.closest('.btn-report-view')) {
+                  openChainDetailModal(r);
+                }
+              }
+            }
+          ];
+
+          if (reportTableInstance) {
+            safeDestroy(reportTableInstance);
+            reportTableInstance = null;
+          }
+
+          try {
+            reportTableInstance = new Tabulator(el, {
+              data: toPlainObject(data),
+              columns: columns,
+              layout: 'fitColumns',
+              responsiveLayout: false,
+              pagination: 'local',
+              paginationSize: 15,
+              paginationSizeSelector: [10, 15, 25, 50],
+              height: 'auto',
+              placeholder: '<div class="p-8 text-center text-slate-400 text-xs">Không tìm thấy phiếu kỹ thuật nào trong khoảng thời gian đã chọn</div>'
+            });
+          } catch (err) {
+            console.warn('Error init report table:', err);
+          }
+        };
+
+        const openChainDetailModal = async (data) => {
+          if (!data) return;
+          if (data.cpsr && (data.cpst !== undefined || data.cpsf !== undefined)) {
+            selectedChain.value = data;
+          } else {
+            const doc = data.docNo || data.cpsrDocNo || data.cpsr?.docNo;
+            const found = (chainList.value || []).find(c => c.cpsr?.docNo === doc || c.cpsrDocNo === doc || c.docNo === doc || c.cpst?.docNo === doc || c.cpsf?.docNo === doc);
+            if (found) {
+              selectedChain.value = found;
+            } else {
+              const currentCpsrList = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
+              const cpsrItem = data.cpsr || currentCpsrList.find(r => r && (r.docNo === doc || r.id === doc)) || data;
+              selectedChain.value = { cpsr: cpsrItem, cpst: data.cpst || null, cpsf: data.cpsf || null };
+            }
+          }
+
+          const cpstDoc = selectedChain.value?.cpst?.docNo || selectedChain.value?.cpstDocNo || data.cpstDocNo || data.cpst?.docNo;
+          if (cpstDoc) {
+            const allCpst = Array.isArray(cpstList.value) ? cpstList.value : (Array.isArray(cpstList.value?.data) ? cpstList.value.data : []);
+            const foundT = allCpst.find(t => t && (t.docNo === cpstDoc || t.id === cpstDoc || t.cpsrDocNo === selectedChain.value?.cpsr?.docNo));
+            if (foundT) {
+              selectedChain.value = {
+                ...selectedChain.value,
+                cpst: { ...foundT, ...(selectedChain.value.cpst || {}) }
+              };
+            }
+          }
+
+          showChainModal.value = true;
+        };
+
+        const closeChainModal = () => {
+          showChainModal.value = false;
+          selectedChain.value = null;
+        };
+
+        const openEditModal = (type, item) => {
+          if (type === 'cpsr') window.location.href = '/form-request';
+          else if (type === 'cpst') window.location.href = '/technical-feedback';
+          else if (type === 'cpsf') window.location.href = '/confirm-request';
+        };
+
+        const exportReportTechnicalExcel = () => {
+          const rows = filteredReportCps.value.map(r => ({
+            'Mã CPS': r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '')),
+            'Ngày Khởi Tạo': r.cpsr?.reqDate || r.reqDate || '',
+            'Người Yêu Cầu': r.cpsr?.reqBy || r.reqBy || '',
+            'Máy': r.cpsr?.machineName || r.machineName || '',
+            'Công Nghệ': r.cpsr?.printTech || r.printTech || '',
+            'Sự Cố': r.cpsr?.problem || r.problem || '',
+            'Technician': formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || ''),
+            'Trạng Thái': r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN')),
+            'Downtime (Phút)': r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : ''),
+            'Mã CPSR': r.cpsr?.docNo || r.cpsrDocNo || '',
+            'Mã CPST': r.cpst?.docNo || r.cpstDocNo || '',
+            'Mã CPSF': r.cpsf?.docNo || r.cpsfDocNo || '',
+            'Nguyên Nhân Gốc': r.rootCause || r.cpst?.rootCause || ''
+          }));
+
+          if (typeof XLSX === 'undefined') {
+            showToast('Thư viện XLSX chưa tải xong', true);
+            return;
+          }
+
+          const ws = XLSX.utils.json_to_sheet(rows);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, 'Du_Lieu_Phieu_Yeu_Cau');
+          const from = reportDateFrom.value || 'All';
+          const to = reportDateTo.value || 'All';
+          XLSX.writeFile(wb, "Du_Lieu_Phieu_Yeu_Cau_" + from + "_den_" + to + ".xlsx");
+          showToast('Đã xuất file Excel dữ liệu phiếu yêu cầu!');
+        };
+
+        const loadChainData = async () => {
+          try {
+            let res = await fetch('/api/cps', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              const data = await res.json();
+              if (Array.isArray(data)) {
+                chainList.value = data;
+                cpsList.value = data;
+                return;
+              } else if (Array.isArray(data?.data)) {
+                chainList.value = data.data;
+                cpsList.value = data.data;
+                return;
+              }
+            }
+            res = await fetch('/api/cpsr-chain', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              const data = await res.json();
+              chainList.value = Array.isArray(data) ? data : (Array.isArray(data?.data) ? data.data : []);
+            }
+          } catch(e) { console.warn('Could not load chain data', e); }
+        };
+
+        const loadCpsrData = async () => {
+          try {
+            const res = await fetch('/api/cpsr', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              const resJson = await res.json();
+              cpsrList.value = Array.isArray(resJson) ? resJson : (Array.isArray(resJson?.data) ? resJson.data : []);
+            }
+          } catch(e) { console.warn('Could not load cpsr data', e); }
+        };
+
+        const loadCpstData = async () => {
+          try {
+            const res = await fetch('/api/cpst', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              const resJson = await res.json();
+              cpstList.value = Array.isArray(resJson) ? resJson : (Array.isArray(resJson?.data) ? resJson.data : []);
+            }
+          } catch(e) { console.warn('Could not load cpst data', e); }
+        };
+
+        const loadCpsfData = async () => {
+          try {
+            const res = await fetch('/api/cpsf', { headers: getAuthHeaders(), credentials: 'include' });
+            if (res.ok) {
+              const resJson = await res.json();
+              cpsfList.value = Array.isArray(resJson) ? resJson : (Array.isArray(resJson?.data) ? resJson.data : []);
+            }
+          } catch(e) { console.warn('Could not load cpsf data', e); }
+        };
+
+        const loadAllSplitData = async () => {
+          await Promise.all([loadChainData(), loadCpsrData(), loadCpstData(), loadCpsfData()]);
+          if (activeTab.value === 'report-technical') {
+            onReportFilterChange();
+          }
         };
         const savingServer = ref(false);
         const exportingPDF = ref(false);
@@ -156,7 +905,8 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
         });
 
         const isKpiActive = computed(() => {
-          return activeTab.value === 'weekly-kpi' ||
+          return activeTab.value === 'report-technical' ||
+                 activeTab.value === 'weekly-kpi' ||
                  activeTab.value === 'weekly-requests' ||
                  activeTab.value === 'defect-logs' ||
                  activeTab.value === 'action-plans' ||
@@ -171,10 +921,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           } else if (type === 'cpsf' || type === 'confirm-request') {
             window.location.href = '/confirm-request';
           } else if (type === 'kpi' || type === 'report-technical') {
-            activeTab.value = 'weekly-kpi';
-            if (!weeklyRequests.value.length) {
-              loadAllWeeklyData();
-            }
+            switchTab('report-technical');
           } else if (type === 'request') {
             window.location.href = '/form-request';
           }
@@ -379,8 +1126,18 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           showPersonModal.value = false;
           showExcelModal.value = false;
           modalState.value = { type: null, isEdit: false, item: {} };
-          if (tab === 'weekly-kpi') {
-            nextTick(() => renderCharts());
+          if (tab === 'weekly-kpi' || tab === 'report-technical') {
+            activeTab.value = 'report-technical';
+            if (!reportDateFrom.value && !reportDateTo.value) {
+              initReportDates();
+            }
+            loadAllSplitData().then(() => {
+              nextTick(() => {
+                renderReportChart();
+                renderReport4MChart();
+                initOrUpdateReportTable();
+              });
+            });
           }
           if (tab === 'v4-history') {
             loadHistory();
@@ -1385,7 +2142,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           initForm();
           loadSession();
           if (isKpiActive.value && canViewKpi.value) {
-            loadAllWeeklyData();
+            switchTab('report-technical');
           }
           loadMachinesCatalog();
           loadEmployees();
@@ -1395,6 +2152,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
               closeCurrentModal();
+              closeChainModal();
               userMenuOpen.value = false;
             }
           });
@@ -1418,6 +2176,25 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           isKpiActive,
           canCreateRequest,
           canViewKpi,
+          reportDateFrom,
+          reportDateTo,
+          reportQuickPreset,
+          setReportPreset,
+          reportSearch,
+          reportStatusFilter,
+          reportStats,
+          getPercent,
+          report4MStats,
+          ganttTimeTicks,
+          ganttMachineRows,
+          onReportFilterChange,
+          exportReportTechnicalExcel,
+          openChainDetailModal,
+          closeChainModal,
+          showChainModal,
+          selectedChain,
+          openEditModal,
+          formatTechnicianName,
           isAdmin,
           isAdminOrTech,
           canAccessControlPanel,

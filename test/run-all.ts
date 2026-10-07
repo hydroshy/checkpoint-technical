@@ -17,6 +17,8 @@ const tests = [
   'test/ui-popup-cleanup.spec.ts',
   'test/report-technical-layout-4m-gantt.spec.ts',
   'test/dashboard-dmodule-and-control-panel.spec.ts',
+  'test/control-panel-independent-and-dashboard-sync.spec.ts',
+  'test/dashboard-report-technical-sync.spec.ts',
 ];
 
 console.log('================================================================');

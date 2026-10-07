@@ -23,6 +23,7 @@ console.log('\n--- 1. Kiểm tra Đầy Đủ Các Mục Menu Quản Lý Trên S
 
 // Kiểm tra 4 nhóm quản trị và các mục menu chính (Report Technical lên đầu, bỏ Overview)
 const expectedTabs = [
+  { tab: 'overview', label: 'Overview' },
   { tab: 'report-technical', label: 'Report Technical' },
   { tab: 'requests', label: 'Quản lý phiếu kỹ thuật' },
   { tab: 'assign-tasks', label: 'Phân công kỹ thuật' },
@@ -40,15 +41,14 @@ for (const item of expectedTabs) {
   console.log(`  ✅ [PASS] Sidebar chứa mục: [${item.tab}] - ${item.label}`);
 }
 
-// Kiểm tra lược bỏ Tổng quan & phân tích khỏi sidebar
-assert.ok(!CP_SIDEBAR_HTML.includes("switchTab('overview')"), 'Sidebar đã lược bỏ mục Tổng quan & phân tích');
-console.log('  ✅ [PASS] Sidebar đã loại bỏ hoàn toàn mục Tổng quan & phân tích');
-
-// Kiểm tra vị trí: Report Technical đứng trước Quản lý phiếu kỹ thuật
+// Kiểm tra Overview làm Home chính ở đầu sidebar
+assert.ok(CP_SIDEBAR_HTML.includes("switchTab('overview')"), 'Sidebar phải có mục Overview làm Home chính');
+const overviewIdx = CP_SIDEBAR_HTML.indexOf("switchTab('overview')");
 const reportTechIdx = CP_SIDEBAR_HTML.indexOf("switchTab('report-technical')");
 const requestsIdx = CP_SIDEBAR_HTML.indexOf("switchTab('requests')");
-assert.ok(reportTechIdx < requestsIdx, 'Report Technical phải nằm ở vị trí đầu tiên trong sidebar');
-console.log('  ✅ [PASS] Report Technical nằm ở vị trí đầu tiên trong sidebar trái');
+assert.ok(overviewIdx < reportTechIdx, 'Overview phải nằm ở vị trí đầu tiên làm Home chính trong sidebar');
+assert.ok(reportTechIdx < requestsIdx, 'Report Technical phải nằm trước Quản lý phiếu kỹ thuật');
+console.log('  ✅ [PASS] Overview làm Home chính ở đầu sidebar trái');
 
 // Kiểm tra 3 link mở form tạo nhanh phiếu
 assert.ok(CP_SIDEBAR_HTML.includes('href="/form-request"'), 'Sidebar có liên kết mở form CPSR');

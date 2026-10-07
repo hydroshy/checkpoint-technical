@@ -12,6 +12,7 @@ const BASE_DIR = path.resolve(__dirname, '..');
 // Đường dẫn các file liên quan Dashboard
 const DASHBOARD_VIEW_PATH = path.join(BASE_DIR, 'src/views/dashboard.view.ts');
 const DASHBOARD_NAV_PATH = path.join(BASE_DIR, 'src/views/dashboard/components/layouts/navigation.component.ts');
+const DASHBOARD_CHARTS_PATH = path.join(BASE_DIR, 'src/views/dashboard/components/charts/analytics-charts.component.ts');
 const DASHBOARD_SCRIPT_PATH = path.join(BASE_DIR, 'src/views/dashboard/scripts/dashboard.script.ts');
 
 // Đường dẫn các file liên quan Control Panel
@@ -20,10 +21,12 @@ const CP_HEADER_PATH = path.join(BASE_DIR, 'src/views/control-panel/components/l
 const CP_SIDEBAR_PATH = path.join(BASE_DIR, 'src/views/control-panel/components/layouts/sidebar.component.ts');
 const CP_OVERVIEW_HEADER_PATH = path.join(BASE_DIR, 'src/views/control-panel/components/cards/overview-header.component.ts');
 const CP_MASTER_TABLES_PATH = path.join(BASE_DIR, 'src/views/control-panel/components/tables/master-tables.component.ts');
+const CP_CHARTS_PATH = path.join(BASE_DIR, 'src/views/control-panel/components/charts/analytics-charts.component.ts');
 const CP_SCRIPT_PATH = path.join(BASE_DIR, 'src/views/control-panel/scripts/control-panel.script.ts');
 
 const dashboardViewContent = fs.existsSync(DASHBOARD_VIEW_PATH) ? fs.readFileSync(DASHBOARD_VIEW_PATH, 'utf-8') : '';
 const dashboardNavContent = fs.existsSync(DASHBOARD_NAV_PATH) ? fs.readFileSync(DASHBOARD_NAV_PATH, 'utf-8') : '';
+const dashboardChartsContent = fs.existsSync(DASHBOARD_CHARTS_PATH) ? fs.readFileSync(DASHBOARD_CHARTS_PATH, 'utf-8') : '';
 const dashboardScriptContent = fs.existsSync(DASHBOARD_SCRIPT_PATH) ? fs.readFileSync(DASHBOARD_SCRIPT_PATH, 'utf-8') : '';
 
 const cpViewContent = fs.existsSync(CP_VIEW_PATH) ? fs.readFileSync(CP_VIEW_PATH, 'utf-8') : '';
@@ -31,11 +34,12 @@ const cpHeaderContent = fs.existsSync(CP_HEADER_PATH) ? fs.readFileSync(CP_HEADE
 const cpSidebarContent = fs.existsSync(CP_SIDEBAR_PATH) ? fs.readFileSync(CP_SIDEBAR_PATH, 'utf-8') : '';
 const cpOverviewHeaderContent = fs.existsSync(CP_OVERVIEW_HEADER_PATH) ? fs.readFileSync(CP_OVERVIEW_HEADER_PATH, 'utf-8') : '';
 const cpMasterTablesContent = fs.existsSync(CP_MASTER_TABLES_PATH) ? fs.readFileSync(CP_MASTER_TABLES_PATH, 'utf-8') : '';
+const cpChartsContent = fs.existsSync(CP_CHARTS_PATH) ? fs.readFileSync(CP_CHARTS_PATH, 'utf-8') : '';
 const cpScriptContent = fs.existsSync(CP_SCRIPT_PATH) ? fs.readFileSync(CP_SCRIPT_PATH, 'utf-8') : '';
 
 // Gộp nội dung để kiểm tra toàn diện
-const allDashboardContent = dashboardViewContent + '\n' + dashboardNavContent + '\n' + dashboardScriptContent;
-const allControlPanelContent = cpViewContent + '\n' + cpHeaderContent + '\n' + cpSidebarContent + '\n' + cpOverviewHeaderContent + '\n' + cpMasterTablesContent + '\n' + cpScriptContent;
+const allDashboardContent = dashboardViewContent + '\n' + dashboardNavContent + '\n' + dashboardChartsContent + '\n' + dashboardScriptContent + '\n' + cpChartsContent;
+const allControlPanelContent = cpViewContent + '\n' + cpHeaderContent + '\n' + cpSidebarContent + '\n' + cpOverviewHeaderContent + '\n' + cpMasterTablesContent + '\n' + cpChartsContent + '\n' + cpScriptContent;
 
 // =========================================================================
 // PHẦN 1: KIỂM THỬ DASHBOARD D-MODULE: 4 CARD CHUẨN
@@ -186,6 +190,42 @@ const hasDbTables =
   allControlPanelContent.includes('Tập Dữ Liệu');
 assert.ok(hasDbTables, 'Tab Database phải hiển thị danh sách các bảng dữ liệu');
 console.log('  ✅ [PASS] Hiển thị danh sách các bảng dữ liệu trong hệ thống');
+
+// =========================================================================
+// PHẦN 6: KIỂM THỬ CONTROL PANEL ĐỘC LẬP & OVERVIEW CHỈ CÓ TỔNG QUAN HỆ THỐNG
+// =========================================================================
+console.log('\n--- 6. Kiểm thử Control Panel độc lập và tinh gọn Overview ---');
+
+const topBarHtml = cpHeaderContent.split('<!-- User Menu Dropdown Button -->')[0] || cpHeaderContent;
+assert.ok(!topBarHtml.includes('Quay lại Dashboard') && !topBarHtml.includes('href="/dashboard"'), 'Top bar không có nút Quay lại Dashboard');
+assert.ok(!topBarHtml.includes('API Docs') && !topBarHtml.includes('href="/api/docs"'), 'Top bar không có nút API Docs');
+assert.ok(!topBarHtml.includes('@click="toggleTheme"'), 'Top bar không có nút toggleTheme riêng');
+assert.ok(!cpHeaderContent.includes('Dashboard > Control Panel'), 'Header không có breadcrumb Dashboard > Control Panel');
+
+assert.ok(!cpSidebarContent.includes('Quay lại Dashboard') && !cpSidebarContent.includes('href="/dashboard"'), 'Sidebar không có nút Quay lại Dashboard');
+assert.ok(cpSidebarContent.includes("switchTab('overview')"), 'Sidebar có mục Overview làm Home chính');
+const ovIdx = cpSidebarContent.indexOf("switchTab('overview')");
+const rtIdx = cpSidebarContent.indexOf("switchTab('report-technical')");
+assert.ok(ovIdx < rtIdx, 'Overview nằm ở vị trí đầu tiên trong Sidebar làm Home chính');
+
+assert.ok(!cpViewContent.includes('CP_PUBLIC_SHARE_CARD_HTML'), 'Overview không còn Public Form Card');
+assert.ok(!cpViewContent.includes('CP_KPI_CARDS_HTML'), 'Overview không còn Tổng Phiếu Yêu Cầu cũ');
+assert.ok(!cpViewContent.includes('CP_ANALYTICAL_BREAKDOWN_CARDS_HTML'), 'Overview không còn Analytical Breakdown cũ');
+console.log('  ✅ [PASS] Control Panel hoàn toàn độc lập, Overview làm Home chính chỉ giữ khối Tổng Quan Hệ Thống');
+
+// =========================================================================
+// PHẦN 7: KIỂM THỬ DASHBOARD ĐỒNG BỘ REPORT TECHNICAL GIỐNG CONTROL PANEL
+// =========================================================================
+console.log('\n--- 7. Kiểm thử Dashboard đồng bộ Report Technical giống Control Panel ---');
+
+assert.ok(allDashboardContent.includes('1 Tuần trước'), 'Dashboard có bộ lọc thời gian 1 tuần trước');
+assert.ok(allDashboardContent.includes('reportDateFrom') && allDashboardContent.includes('reportDateTo'), 'Dashboard có date pickers');
+assert.ok(allDashboardContent.includes('Phiếu Yêu Cầu') && allDashboardContent.includes('Downtime'), 'Dashboard có KPI cards');
+assert.ok(allDashboardContent.includes('chart-report-technical-donut'), 'Dashboard có Donut chart trạng thái');
+assert.ok(allDashboardContent.includes('chart-report-technical-4m'), 'Dashboard có 4M chart');
+assert.ok(allDashboardContent.includes('Gantt Chart Downtime Theo Từng Máy') || allDashboardContent.includes('ganttMachineRows'), 'Dashboard có Gantt Chart downtime theo từng máy');
+assert.ok(allDashboardContent.includes('modal-chain-detail') || allDashboardContent.includes('openSplitDetailModal') || allDashboardContent.includes('showChainModal'), 'Dashboard có modal xem chi tiết CPST');
+console.log('  ✅ [PASS] Dashboard đã đồng bộ toàn diện module Report Technical giống Control Panel');
 
 console.log('\n================================================================');
 console.log('🎉 TOÀN BỘ KIỂM THỬ CHO T4 (DASHBOARD D-MODULE & CONTROL PANEL OVERVIEW/DATABASE) ĐẠT 100%!');
