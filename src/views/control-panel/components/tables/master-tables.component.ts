@@ -94,14 +94,14 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
         <div v-show="activeTab === 'users'" class="space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 class="text-xl font-bold tracking-tight">Quản Lý User & Phân Quyền</h1>
-              <p class="text-xs text-slate-500">Phân quyền tài khoản trực tiếp qua bảng Tabulator (ADMIN, TECHNICIAN, EMPLOYEE)</p>
+              <h1 class="text-xl font-bold tracking-tight">{{ t('Users & Access Control', 'Quản Lý User & Phân Quyền') }}</h1>
+              <p class="text-xs text-slate-500">{{ t('Manage account permissions directly in Tabulator (ADMIN, TECHNICIAN, EMPLOYEE)', 'Phân quyền tài khoản trực tiếp qua bảng Tabulator (ADMIN, TECHNICIAN, EMPLOYEE)') }}</p>
             </div>
             <button
               @click="openAddUserModal"
               class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-500/25 cursor-pointer"
             >
-              <i class="fa-solid fa-user-plus"></i> Thêm Tài Khoản
+              <i class="fa-solid fa-user-plus"></i> {{ t('Add User', 'Thêm Tài Khoản') }}
             </button>
           </div>
 
@@ -111,14 +111,14 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
               type="text"
               v-model="userSearch"
               @input="applyUserFilters"
-              placeholder="🔍 Tìm kiếm tài khoản theo username, họ tên hoặc email..."
+              :placeholder="t('Search user by username, full name or email...', '🔍 Tìm kiếm tài khoản theo username, họ tên hoặc email...')"
               class="input-box px-3.5 py-2 rounded-xl text-xs outline-none flex-1"
             />
             <select v-model="userRoleFilter" @change="applyUserFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none sm:w-60 cursor-pointer">
-              <option value="ALL">— Tất cả vai trò —</option>
-              <option value="ADMIN">ADMIN (Quản trị viên)</option>
-              <option value="TECHNICIAN">TECHNICIAN (Kỹ thuật viên)</option>
-              <option value="EMPLOYEE">EMPLOYEE (Nhân viên)</option>
+              <option value="ALL">— {{ t('All Roles', 'Tất cả vai trò') }} —</option>
+              <option value="ADMIN">ADMIN ({{ t('Administrator', 'Quản trị viên') }})</option>
+              <option value="TECHNICIAN">TECHNICIAN ({{ t('Technician', 'Kỹ thuật viên') }})</option>
+              <option value="EMPLOYEE">EMPLOYEE ({{ t('Employee', 'Nhân viên') }})</option>
             </select>
           </div>
 

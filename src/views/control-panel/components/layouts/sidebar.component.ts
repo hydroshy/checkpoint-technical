@@ -16,10 +16,10 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               @click="switchTab('overview')"
               :class="{ active: activeTab === 'overview' }"
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
-              title="Overview"
+              :title="t('Overview', 'Tổng quan')"
             >
               <i class="fa-solid fa-house w-4 text-center text-xs text-sky-500"></i>
-              <span class="truncate">Overview</span>
+              <span class="truncate">{{ t('Overview', 'Tổng quan') }}</span>
             </button>
           </div>
 
@@ -27,16 +27,16 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
           <!-- GROUP 1: VẬN HÀNH & PHIẾU KỸ THUẬT -->
           <div class="space-y-1">
             <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              Vận Hành & Phiếu
+              {{ t('Operations & Tickets', 'Vận Hành & Phiếu') }}
             </div>
             <button
               @click="switchTab('report-technical')"
               :class="{ active: activeTab === 'report-technical' }"
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
-              title="Report Technical"
+              :title="t('Report Technical', 'Báo cáo kỹ thuật')"
             >
               <i class="fa-solid fa-chart-line w-4 text-center text-xs text-emerald-500"></i>
-              <span class="truncate">Report Technical</span>
+              <span class="truncate">{{ t('Report Technical', 'Báo cáo kỹ thuật') }}</span>
             </button>
             <button
               @click="switchTab('requests')"
@@ -44,7 +44,7 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-table-list w-4 text-center text-xs text-sky-500"></i>
-              <span class="truncate">Quản lý phiếu kỹ thuật</span>
+              <span class="truncate">{{ t('Ticket Management', 'Quản lý phiếu kỹ thuật') }}</span>
             </button>
             <!-- Ẩn liên kết phụ trên Sidebar - chỉ để 1 mục duy nhất dẫn đến module -->
             <span class="hidden" aria-hidden="true">
@@ -58,7 +58,7 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-list-check w-4 text-center text-xs text-amber-500"></i>
-              <span class="truncate">Phân công kỹ thuật</span>
+              <span class="truncate">{{ t('Task Assignment', 'Phân công kỹ thuật') }}</span>
               <span v-if="pendingAssignCount > 0" class="ml-auto px-1.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 rounded-full font-mono">
                 {{ pendingAssignCount }}
               </span>
@@ -68,7 +68,7 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
           <!-- GROUP 2: DANH MỤC THIẾT BỊ & NHÂN SỰ -->
           <div class="space-y-1">
             <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              Danh Mục Thiết Bị & Nhân Sự
+              {{ t('Equipment & Personnel', 'Danh Mục Thiết Bị & Nhân Sự') }}
             </div>
             <button
               @click="switchTab('machines')"
@@ -76,7 +76,7 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-print w-4 text-center text-xs text-blue-500"></i>
-              <span class="truncate">Máy móc & thiết bị</span>
+              <span class="truncate">{{ t('Machines & Equipment', 'Máy móc & thiết bị') }}</span>
             </button>
             <button
               @click="switchTab('employees')"
@@ -84,14 +84,14 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-users w-4 text-center text-xs text-cyan-500"></i>
-              <span class="truncate">Nhân viên kỹ thuật</span>
+              <span class="truncate">{{ t('Technical Staff', 'Nhân viên kỹ thuật') }}</span>
             </button>
           </div>
 
           <!-- GROUP 3: QUẢN LÝ USER & PHÂN QUYỀN -->
           <div class="space-y-1">
             <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              Quản Lý User & Phân Quyền
+              {{ t('User Accounts & RBAC', 'Quản Lý User & Phân Quyền') }}
             </div>
             <button
               @click="switchTab('users')"
@@ -99,7 +99,7 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-user-shield w-4 text-center text-xs text-rose-500"></i>
-              <span class="truncate">Tài khoản & phân quyền</span>
+              <span class="truncate">{{ t('Accounts & Permissions', 'Tài khoản & phân quyền') }}</span>
             </button>
           </div>
 
@@ -112,10 +112,10 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               @click="switchTab('database')"
               :class="{ active: activeTab === 'database' || activeTab === 'existing-data' }"
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
-              title="Database & Cơ Sở Dữ Liệu"
+              :title="t('Database & Tables', 'Database & Cơ Sở Dữ Liệu')"
             >
               <i class="fa-solid fa-database w-4 text-center text-xs text-violet-500"></i>
-              <span class="truncate">Database</span>
+              <span class="truncate">{{ t('Database', 'Cơ sở dữ liệu') }}</span>
             </button>
             <span class="hidden" aria-hidden="true" @click="switchTab('existing-data')"></span>
           </div>

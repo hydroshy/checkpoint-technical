@@ -14,7 +14,14 @@ export function extractUser(req?: any): any {
       if (parts.length === 2 && parts[0].toLowerCase() === 'bearer') token = parts[1];
       else if (parts.length === 1 && !parts[0].includes(' ')) token = parts[0];
     }
-    if (!token) token = req.headers['x-access-token'] as string;
+    if (!token) token = (req.headers['x-access-token'] || req.headers['checkpoint-token']) as string;
+    if (!token && req.headers['cookie']) {
+      const match = req.headers['cookie'].match(/(?:access_token|checkpoint_token)=([^;]+)/);
+      if (match) token = decodeURIComponent(match[1]);
+    }
+  }
+  if (!token && req.query) {
+    token = (req.query.token || req.query.access_token) as string;
   }
   if (token) {
     try {

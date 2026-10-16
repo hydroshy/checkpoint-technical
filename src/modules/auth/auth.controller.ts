@@ -3,6 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorators/current-user.decorator';
 
@@ -58,5 +59,16 @@ export class AuthController {
   @ApiOperation({ summary: 'Get current user session profile' })
   async getProfile(@CurrentUser() user: any) {
     return user;
+  }
+
+  @Post('change-password')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'User self change personal password' })
+  async changePassword(
+    @CurrentUser() user: any,
+    @Body() body: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(user.id || user.sub, body);
   }
 }

@@ -143,4 +143,39 @@ export const CP_ENTITY_MODALS_HTML = `    <!-- ADD MACHINE MODAL -->
           <button type="button" @click="closeModal('modal-excel')" class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer">Đóng</button>
         </div>
       </div>
+    </div>
+
+    <!-- ADMIN RESET USER PASSWORD MODAL -->
+    <div id="modal-reset-user-password" v-if="showResetPasswordModal" class="modal-overlay fixed inset-0 bg-slate-950/70 z-[60] flex items-center justify-center p-4 backdrop-blur-sm" @click="closeResetPasswordModal">
+      <div class="modal-content bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden border border-slate-200 dark:border-slate-800" @click.stop>
+        <div class="bg-slate-50 dark:bg-slate-800/80 px-5 py-3.5 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+          <div class="flex items-center gap-2">
+            <i class="fa-solid fa-key text-amber-500"></i>
+            <h3 class="text-sm font-bold">{{ t('Reset User Password', 'Đặt Lại Mật Khẩu User') }}</h3>
+          </div>
+          <button type="button" @click="closeResetPasswordModal" class="text-slate-400 hover:text-slate-600 text-lg cursor-pointer">✕</button>
+        </div>
+        <form @submit.prevent="submitResetUserPassword" class="p-5 space-y-3.5 text-xs">
+          <div v-if="resetPasswordTarget" class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs">
+            <div class="font-bold text-slate-800 dark:text-slate-200">{{ resetPasswordTarget.fullName || resetPasswordTarget.username }}</div>
+            <div class="font-mono text-slate-400 text-[11px]">@{{ resetPasswordTarget.username }} · {{ resetPasswordTarget.role }}</div>
+          </div>
+          <div v-if="resetPasswordError" class="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400 text-xs flex items-center gap-2">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>{{ resetPasswordError }}</span>
+          </div>
+          <div class="space-y-1">
+            <label class="font-bold text-slate-600 dark:text-slate-400 block">{{ t('New Password', 'Mật khẩu mới') }}</label>
+            <input type="password" v-model="resetPasswordForm.newPassword" required minlength="6" placeholder="Checkpoint@123" class="input-box w-full px-3 py-2 rounded-xl" />
+            <p class="text-[10px] text-slate-400">{{ t('Default password: Checkpoint@123', 'Mặc định gợi ý: Checkpoint@123 (tối thiểu 6 ký tự)') }}</p>
+          </div>
+          <div class="pt-2 flex gap-3">
+            <button type="button" @click="closeResetPasswordModal" class="flex-1 py-2 rounded-xl border border-slate-200 dark:border-slate-700 font-bold cursor-pointer">{{ t('Cancel', 'Hủy') }}</button>
+            <button type="submit" :disabled="resetPasswordLoading" class="flex-1 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 disabled:opacity-50 text-white font-bold shadow-md shadow-amber-500/30 flex items-center justify-center gap-2 cursor-pointer">
+              <i v-if="resetPasswordLoading" class="fa-solid fa-spinner fa-spin"></i>
+              <span>{{ t('Reset Password', 'Đặt Lại') }}</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>`;

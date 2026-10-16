@@ -1,21 +1,5 @@
 [
   {
-    "id": "user-admin-1",
-    "username": "admin",
-    "email": "admin@checkpointsystems.com",
-    "passwordHash": "$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW",
-    "fullName": "Super Administrator",
-    "role": "ADMIN",
-    "isActive": true,
-    "permissions": {
-      "canCreateRequest": true,
-      "canViewKpi": true,
-      "canAccessControlPanel": true
-    },
-    "createdAt": "2026-10-03T08:28:04.802Z",
-    "updatedAt": "2026-10-03T08:28:04.802Z"
-  },
-  {
     "id": "user-tech-1",
     "username": "tech01",
     "email": "tech01@checkpointsystems.com",
@@ -29,13 +13,13 @@
       "canAccessControlPanel": false
     },
     "createdAt": "2026-10-03T08:28:04.802Z",
-    "updatedAt": "2026-10-03T08:28:04.802Z"
+    "updatedAt": "2026-10-15T17:09:27.606Z"
   },
   {
     "id": "user-emp-1",
     "username": "user01",
     "email": "user01@checkpointsystems.com",
-    "passwordHash": "$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW",
+    "passwordHash": "$2a$10$E9jR8ilmrYqq0QG0u7OFkOXZs/DfXVYUmgSj/YyeEWlfZCZVXkeTK",
     "fullName": "Nguyễn Văn A (SX)",
     "role": "EMPLOYEE",
     "isActive": true,
@@ -45,6 +29,198 @@
       "canAccessControlPanel": false
     },
     "createdAt": "2026-10-03T08:28:04.802Z",
-    "updatedAt": "2026-10-03T08:28:04.802Z"
+    "updatedAt": "2026-10-15T17:09:27.376Z"
+  },
+  {
+    "id": "user-admin-1",
+    "username": "admin",
+    "email": "admin@checkpointsystems.com",
+    "passwordHash": "$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW",
+    "fullName": "Super Administrator",
+    "role": "ADMIN",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": true,
+      "canAccessControlPanel": true
+    },
+    "createdAt": "2026-10-03T08:28:04.802Z",
+    "updatedAt": "2026-10-15T17:09:26.125Z"
+  },
+  {
+    "id": "7d7c70f1-3ab9-4fc7-80e5-2c4031ffc2e7",
+    "username": "cptech",
+    "email": "cptech@checkpoint.com",
+    "passwordHash": "$2a$10$rOL.s12yXt7lc4A7mrNHpevRsiI89BwFLydwFrt8on6WpXskbmxXu",
+    "fullName": "cptech",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": true,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-04T10:25:01.497Z",
+    "updatedAt": "2026-10-07T14:10:59.312Z"
+  },
+  {
+    "id": "698ee101-0678-467a-ba84-6eb157c0f748",
+    "username": "longthai",
+    "email": "Long.Thai@checkpt.com",
+    "passwordHash": "$2a$10$a4aXnDe4Za1jxvylPzsgG.vYs53K0D5UFpdx9kpsWOAmvaHzuYT5G",
+    "fullName": "John",
+    "role": "ADMIN",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": true,
+      "canAccessControlPanel": true
+    },
+    "createdAt": "2026-10-08T01:03:09.535Z",
+    "updatedAt": "2026-10-15T17:09:26.125Z"
+  },
+  {
+    "id": "5bc78fd2-9a2a-4915-bc52-e46a4dfed3c7",
+    "username": "vuphung",
+    "email": "vu.phung@checkpt.com",
+    "passwordHash": "$2a$10$WzRPdrWvL2UiAiRXP5nxq.VnJ50VjAXy/20J8/EgQqCLA4Lfh6i8a",
+    "fullName": "Vũ Phùng",
+    "role": "TECHNICIAN",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": true,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-08T01:08:29.828Z",
+    "updatedAt": "2026-10-08T01:08:29.828Z"
+  },
+  {
+    "id": "95e903d9-1653-4f64-8741-362f41d89145",
+    "username": "RFID",
+    "email": "VNRFID@checkpt.com",
+    "passwordHash": "$2a$10$A1a8ayp8/GC3ZElqyj3w/O2P/dKg0BlzNUNwU9ct0pGB0u6zTx3eK",
+    "fullName": "RFID",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-10T07:09:55.862Z",
+    "updatedAt": "2026-10-10T07:09:55.862Z"
+  },
+  {
+    "id": "5d0f67b8-7ebd-405f-a962-57479f0560d5",
+    "username": "PFL",
+    "email": "Truong.Luc@checkpt.com",
+    "passwordHash": "$2a$10$FJPaSJF9ox6/x9V13owfkOxW02UhkXRdP4dBU5uXV020xCOhhot0y",
+    "fullName": "PFL",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-10T07:13:12.801Z",
+    "updatedAt": "2026-10-10T07:13:12.801Z"
+  },
+  {
+    "id": "5a32acff-04d4-4bfa-b9e8-cad78ec1e07d",
+    "username": "Woven",
+    "email": "vnwoven@checkpt.com",
+    "passwordHash": "$2a$10$nnn18zwDgxBzyyuHXp1zce/k2297OkIboVEn/d8rBWUDwKNExRuaK",
+    "fullName": "Woven",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-10T07:14:15.741Z",
+    "updatedAt": "2026-10-10T07:14:15.741Z"
+  },
+  {
+    "id": "2af3b030-dc0f-4b7b-9b8d-c2ce4affff19",
+    "username": "Offset",
+    "email": "Vn.Offset@checkpt.com",
+    "passwordHash": "$2a$10$JNBn7RbMbyo0S4Ubr6XNd.HyhGi65PrvztwNMINVruisBssHlTkMu",
+    "fullName": "Offset",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-10T07:15:16.735Z",
+    "updatedAt": "2026-10-10T07:15:16.735Z"
+  },
+  {
+    "id": "017f0004-0ffd-41d3-8f4e-e080ef9b06b9",
+    "username": "Digital",
+    "email": "VNDigital@checkpt.com",
+    "passwordHash": "$2a$10$qkgu/ss6.BniEEXz4NYWKujNDWaOGxoAYST9XDlzzo29.pnnRKUE6",
+    "fullName": "Digital",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-10T07:15:43.081Z",
+    "updatedAt": "2026-10-10T07:15:43.081Z"
+  },
+  {
+    "id": "0d09b4c6-29c9-4e73-a98e-770989db43c8",
+    "username": "HTL",
+    "email": "vnhtl@checkpt.com",
+    "passwordHash": "$2a$10$.LZ26w2NymjtlrQqkErWJO6/6Mjs3rIcK8OJe1hRPF/e/E1HZ25Wm",
+    "fullName": "HTL",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-10T07:16:22.182Z",
+    "updatedAt": "2026-10-10T07:16:22.182Z"
+  },
+  {
+    "id": "a6fb0bed-2108-4b8b-ab4a-5545e2b9a204",
+    "username": "Diecut",
+    "email": "vn.diecut@checkpt.com",
+    "passwordHash": "$2a$10$2I6kTGiwoqA4pPOi7kYWuOXKGKvQ0TMYEuRVtrJV2hi22sRz3KkCS",
+    "fullName": "DieCut",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-10T07:22:20.177Z",
+    "updatedAt": "2026-10-10T07:22:20.177Z"
+  },
+  {
+    "id": "ff71b5b5-a293-4a40-a54a-a11ad4ae14cc",
+    "username": "S&P",
+    "email": "VNSNP@checkpt.com",
+    "passwordHash": "$2a$10$xyIVRZGS0dn9/Y.BZVmb/O7.jfU.M0aPf14A6mPRIz28uTD.aMW76",
+    "fullName": "S&P",
+    "role": "EMPLOYEE",
+    "isActive": true,
+    "permissions": {
+      "canCreateRequest": true,
+      "canViewKpi": false,
+      "canAccessControlPanel": false
+    },
+    "createdAt": "2026-10-10T07:23:07.856Z",
+    "updatedAt": "2026-10-10T07:23:07.856Z"
   }
 ]

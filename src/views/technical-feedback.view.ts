@@ -335,7 +335,8 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             <option value="Machine">Machine (Máy móc / Thiết bị)</option>
             <option value="Material">Material (Nguyên vật liệu)</option>
             <option value="Method">Method (Phương pháp / Quy trình)</option>
-            <option v-if="form.rootCause && !['Man', 'Machine', 'Material', 'Method'].includes(form.rootCause)" :value="form.rootCause">{{ form.rootCause }}</option>
+            <option value="System / Process">System / Process (Hệ thống / Quy trình)</option>
+            <option v-if="form.rootCause && !['Man', 'Machine', 'Material', 'Method', 'System / Process'].includes(form.rootCause)" :value="form.rootCause">{{ form.rootCause }}</option>
           </select>
         </div>
         <div>

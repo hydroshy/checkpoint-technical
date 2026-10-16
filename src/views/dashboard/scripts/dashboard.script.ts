@@ -11,6 +11,90 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           if (cachedUser) currentUser.value = JSON.parse(cachedUser);
         } catch(e) {}
 
+        const currentLang = ref(localStorage.getItem('checkpoint_lang') || 'en');
+        const setLanguage = (lang) => {
+          currentLang.value = lang;
+          localStorage.setItem('checkpoint_lang', lang);
+          document.documentElement.setAttribute('lang', lang);
+          renderReportChart();
+          renderReport4MChart();
+        };
+        const t = (en, vi) => {
+          if (vi !== undefined) {
+            return currentLang.value === 'vi' ? vi : en;
+          }
+          if (window.__I18N_DICT__ && window.__I18N_DICT__[en]) {
+            return window.__I18N_DICT__[en][currentLang.value] || window.__I18N_DICT__[en]['en'] || en;
+          }
+          return en;
+        };
+
+        // User Settings & Password Modal State
+        const showSettingsModal = ref(false);
+        const settingsForm = ref({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        const settingsError = ref('');
+        const settingsLoading = ref(false);
+
+        const openSettingsModal = () => {
+          settingsForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' };
+          settingsError.value = '';
+          showSettingsModal.value = true;
+          userMenuOpen.value = false;
+        };
+
+        const closeSettingsModal = () => {
+          showSettingsModal.value = false;
+          settingsError.value = '';
+        };
+
+        const submitChangePassword = async () => {
+          settingsError.value = '';
+          if (!settingsForm.value.oldPassword) {
+            settingsError.value = t('Please enter current password.', 'Vui lòng nhập mật khẩu hiện tại.');
+            return;
+          }
+          if (!settingsForm.value.newPassword || settingsForm.value.newPassword.length < 6) {
+            settingsError.value = t('New password must be at least 6 characters.', 'Mật khẩu mới phải có ít nhất 6 ký tự.');
+            return;
+          }
+          if (settingsForm.value.newPassword !== settingsForm.value.confirmPassword) {
+            settingsError.value = t('Passwords do not match.', 'Mật khẩu xác nhận không khớp.');
+            return;
+          }
+          settingsLoading.value = true;
+          try {
+            const payload = {
+              oldPassword: settingsForm.value.oldPassword,
+              newPassword: settingsForm.value.newPassword
+            };
+            let res = await fetch('/auth/change-password', {
+              method: 'POST',
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+              credentials: 'include',
+              body: JSON.stringify(payload)
+            });
+            if (!res.ok && res.status === 404) {
+              res = await fetch('/api/users/change-password', {
+                method: 'POST',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
+                body: JSON.stringify(payload)
+              });
+            }
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+              showToast(t('Password changed successfully!', 'Đổi mật khẩu thành công!'));
+              closeSettingsModal();
+            } else {
+              settingsError.value = data.message || t('Failed to change password.', 'Đổi mật khẩu thất bại.');
+            }
+          } catch (err) {
+            settingsError.value = err.message || t('Error updating password.', 'Có lỗi khi cập nhật mật khẩu.');
+          } finally {
+            settingsLoading.value = false;
+          }
+        };
+
         const getAuthHeaders = (extra = {}) => {
           const headers = { ...extra };
           const token = localStorage.getItem('checkpoint_token');
@@ -212,6 +296,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           let machine = 0;
           let material = 0;
           let method = 0;
+          let systemProcess = 0;
 
           list.forEach(c => {
             if (!c) return;
@@ -220,11 +305,13 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
             const lower = rc.toLowerCase();
             if (lower === 'man' || lower.includes('người') || lower.includes('human') || lower.includes('thao tác') || lower.includes('nhân sự')) {
               man++;
+            } else if (lower.includes('system') || lower.includes('process') || lower.includes('hệ thống') || lower.includes('quy trình')) {
+              systemProcess++;
             } else if (lower === 'machine' || lower.includes('máy') || lower.includes('thiết bị') || lower.includes('hỏng') || lower.includes('cảm biến') || lower.includes('bụi')) {
               machine++;
             } else if (lower === 'material' || lower.includes('vật liệu') || lower.includes('nguyên liệu') || lower.includes('mực') || lower.includes('giấy') || lower.includes('phôi')) {
               material++;
-            } else if (lower === 'method' || lower.includes('phương pháp') || lower.includes('quy trình') || lower.includes('cài đặt') || lower.includes('setup') || lower.includes('hướng dẫn')) {
+            } else if (lower === 'method' || lower.includes('phương pháp') || lower.includes('cài đặt') || lower.includes('setup') || lower.includes('hướng dẫn')) {
               method++;
             } else {
               machine++;
@@ -236,7 +323,8 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
             machine,
             material,
             method,
-            total: man + machine + material + method
+            systemProcess,
+            total: man + machine + material + method + systemProcess
           };
         });
 
@@ -476,16 +564,22 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
 
           const stats = report4MStats.value;
           const isDark = currentTheme.value === 'dark';
-          const dataVals = [stats.man, stats.machine, stats.material, stats.method];
+          const dataVals = [stats.man, stats.machine, stats.material, stats.method, stats.systemProcess];
           const allZeros = dataVals.every(v => v === 0);
 
           report4MChartInstance = new Chart(canvas, {
             type: 'doughnut',
             data: {
-              labels: ['Man (Con người)', 'Machine (Máy móc)', 'Material (Vật tư)', 'Method (Phương pháp)'],
+              labels: [
+                currentLang.value === 'vi' ? 'Man (Con người)' : 'Man (Human)',
+                currentLang.value === 'vi' ? 'Machine (Máy móc)' : 'Machine (Equipment)',
+                currentLang.value === 'vi' ? 'Material (Vật tư)' : 'Material',
+                currentLang.value === 'vi' ? 'Method (Phương pháp)' : 'Method (Process)',
+                currentLang.value === 'vi' ? 'System / Process (Hệ thống / Quy trình)' : 'System / Process'
+              ],
               datasets: [{
                 data: allZeros ? [1] : dataVals,
-                backgroundColor: allZeros ? ['#94a3b8'] : ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6'],
+                backgroundColor: allZeros ? ['#94a3b8'] : ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#14b8a6'],
                 borderWidth: 2,
                 borderColor: isDark ? '#0f172a' : '#ffffff',
                 hoverOffset: 4
@@ -884,6 +978,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
         const canAccessControlPanel = computed(() => {
           const u = currentUser.value;
           if (!u || !u.username) return false;
+          if (u.role === 'EMPLOYEE') return false;
           if (u.username === 'admin' || u.role === 'ADMIN' || u.role === 'SUPER_ADMIN') return true;
           let perms = u.permissions;
           if (typeof perms === 'string') {
@@ -2338,7 +2433,17 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           triggerRestore,
           processRestoreFile,
           formatDisplayDate,
-          formatShortDate
+          formatShortDate,
+          currentLang,
+          setLanguage,
+          t,
+          showSettingsModal,
+          settingsForm,
+          settingsError,
+          settingsLoading,
+          openSettingsModal,
+          closeSettingsModal,
+          submitChangePassword
         };
       }
     }).mount('#app');`;

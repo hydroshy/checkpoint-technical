@@ -173,7 +173,8 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
                 <option value="Machine">Machine (Máy móc / Thiết bị)</option>
                 <option value="Material">Material (Nguyên vật liệu)</option>
                 <option value="Method">Method (Phương pháp / Quy trình)</option>
-                <option v-if="editForm.rootCause && !['Man', 'Machine', 'Material', 'Method'].includes(editForm.rootCause)" :value="editForm.rootCause">{{ editForm.rootCause }}</option>
+                <option value="System / Process">System / Process (Hệ thống / Quy trình)</option>
+                <option v-if="editForm.rootCause && !['Man', 'Machine', 'Material', 'Method', 'System / Process'].includes(editForm.rootCause)" :value="editForm.rootCause">{{ editForm.rootCause }}</option>
               </select>
             </div>
 

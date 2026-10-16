@@ -1200,6 +1200,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
         updatedAt: r.updated_at ? new Date(r.updated_at).toISOString() : new Date().toISOString(),
       }));
+
+      // Ensure essential default users from users.json (admin, tech01, user01) exist in PG
+      const defaultUsersFromJson = this.readJson<UserRecord[]>('users.json', []);
+      for (const defU of defaultUsersFromJson) {
+        if (!this.usersCache.some(u => u.username.toLowerCase() === defU.username.toLowerCase())) {
+          this.addUser(defU);
+        }
+      }
     } catch (err: any) {
       this.logger.warn(`Could not load users from PG (${err.message}). Using local JSON fallback.`);
       this.usersCache = this.readJson<UserRecord[]>('users.json', []).map(u => ({

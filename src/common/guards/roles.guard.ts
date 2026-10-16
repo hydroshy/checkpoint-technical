@@ -19,8 +19,18 @@ export class RolesGuard implements CanActivate {
       throw new ForbiddenException('User not authenticated');
     }
     const userRole = user.role || user.userType;
-    if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN' || user.permissions?.canAccessControlPanel) {
-      return true; // Admins and users with canAccessControlPanel have access to everything
+    if (userRole === 'EMPLOYEE') {
+      const hasRole = requiredRoles.includes(userRole);
+      if (!hasRole) {
+        throw new ForbiddenException(`Role '${userRole}' is not allowed to access this resource.`);
+      }
+      return true;
+    }
+    if (userRole === 'ADMIN' || userRole === 'SUPER_ADMIN') {
+      return true; // Admins have access to everything
+    }
+    if (userRole === 'TECHNICIAN' && user.permissions?.canAccessControlPanel) {
+      return true;
     }
     const hasRole = requiredRoles.includes(userRole);
     if (!hasRole) {

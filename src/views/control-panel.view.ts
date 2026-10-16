@@ -1,4 +1,6 @@
 import { TOAST_CONTAINER_HTML } from './common/layouts/toast.component';
+import { SETTINGS_MODAL_HTML } from './common/modals/settings-modal.component';
+import { I18N_CLIENT_SCRIPT } from './common/i18n';
 import { CONTROL_PANEL_CSS } from './control-panel/styles/control-panel.style';
 import { CP_HEADER_HTML } from './control-panel/components/layouts/header.component';
 import { CP_SIDEBAR_HTML } from './control-panel/components/layouts/sidebar.component';
@@ -31,9 +33,27 @@ export const CONTROL_PANEL_HTML = `<!DOCTYPE html>
   <link rel="shortcut icon" href="/images/favicon.ico?v=3" />
   <link rel="apple-touch-icon" href="/images/favicon.png?v=3" />
   
+  <!-- Early RBAC Guard: Block EMPLOYEE from Control Panel -->
+  <script>
+    (function() {
+      try {
+        var cached = localStorage.getItem('checkpoint_user');
+        if (cached) {
+          var u = JSON.parse(cached);
+          if (u && (u.role === 'EMPLOYEE' || (u.permissions && !u.permissions.canAccessControlPanel && u.role !== 'ADMIN' && u.username !== 'admin'))) {
+            window.location.replace('/dashboard');
+          }
+        }
+      } catch(e) {}
+    })();
+  </script>
+
   <!-- Global Error Boundary & Debug Handler (Chống trắng màn hình & Debug Mount) -->
   <script>
 ${CP_ERROR_AND_DEBUG_HEAD_SCRIPT}
+  </script>
+  <script>
+${I18N_CLIENT_SCRIPT}
   </script>
 
   <script>
@@ -121,6 +141,8 @@ ${CP_LINK_MODAL_HTML}
 ${CP_CREATE_CPS_MODAL_HTML}
 
 ${CP_ENTITY_MODALS_HTML}
+
+${SETTINGS_MODAL_HTML}
 
 ${TOAST_CONTAINER_HTML}
 

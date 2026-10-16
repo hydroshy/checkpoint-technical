@@ -1,4 +1,6 @@
 import { TOAST_CONTAINER_HTML } from './common/layouts/toast.component';
+import { SETTINGS_MODAL_HTML } from './common/modals/settings-modal.component';
+import { I18N_CLIENT_SCRIPT } from './common/i18n';
 import { DASHBOARD_CSS } from './dashboard/styles/dashboard.style';
 import { DASHBOARD_HEADER_HTML } from './dashboard/components/layouts/header.component';
 import { DASHBOARD_NAV_HTML } from './dashboard/components/layouts/navigation.component';
@@ -53,6 +55,9 @@ export const DASHBOARD_HTML = `<!DOCTYPE html>
       }
     })();
   </script>
+  <script>
+${I18N_CLIENT_SCRIPT}
+  </script>
 
   <style>
 ${DASHBOARD_CSS}
@@ -87,6 +92,8 @@ ${DASHBOARD_PDF_TEMPLATE_HTML}
 ${DASHBOARD_WEEKLY_MODALS_HTML}
 
 ${CP_SPLIT_DETAIL_MODAL_HTML}
+
+${SETTINGS_MODAL_HTML}
 
   </div>
 

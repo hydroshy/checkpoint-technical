@@ -79,7 +79,7 @@ const cpHeaderPath = path.resolve(__dirname, '../src/views/control-panel/compone
 const cpHeaderContent = fs.readFileSync(cpHeaderPath, 'utf-8');
 
 assert.ok(
-  cpHeaderContent.includes('Giao diện</div>'),
+  cpHeaderContent.includes('Giao diện</div>') || cpHeaderContent.includes("t('Theme', 'Giao diện')"),
   'Control Panel: "Giao diện (Theme)" đổi thành "Giao diện"'
 );
 assert.ok(
@@ -87,7 +87,7 @@ assert.ok(
   'Control Panel: Không còn text "(Theme)"'
 );
 assert.ok(
-  dashboardHeaderContent.includes('Giao diện</div>'),
+  dashboardHeaderContent.includes('Giao diện</div>') || dashboardHeaderContent.includes("t('Theme', 'Giao diện')"),
   'Dashboard: "Giao diện (Theme)" đổi thành "Giao diện"'
 );
 assert.ok(
@@ -96,7 +96,8 @@ assert.ok(
 );
 
 assert.ok(
-  cpHeaderContent.includes('<i class="fa-solid fa-gauge-high text-sky-500"></i> Dashboard</span>'),
+  cpHeaderContent.includes('<i class="fa-solid fa-gauge-high text-sky-500"></i> Dashboard</span>') ||
+  cpHeaderContent.includes("<i class=\"fa-solid fa-gauge-high text-sky-500\"></i> {{ t('Dashboard'"),
   'Control Panel: Nút "Quay lại Dashboard" đã đổi thành "Dashboard"'
 );
 assert.ok(

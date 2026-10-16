@@ -18,31 +18,31 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
           <!-- BƯỚC 1: CPSR -->
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
-              <span class="font-bold text-sky-600 dark:text-sky-400 text-sm">1. Phiếu Yêu Cầu Kỹ Thuật (CPSR)</span>
+              <span class="font-bold text-sky-600 dark:text-sky-400 text-sm">1. {{ t('Technical Request Form (CPSR)', 'Phiếu Yêu Cầu Kỹ Thuật (CPSR)') }}</span>
               <div class="flex items-center gap-2">
                 <span class="font-mono font-bold text-xs bg-sky-500/10 text-sky-500 px-2 py-0.5 rounded">{{ (selectedChain.cpsr || selectedChain).docNo }}</span>
               </div>
             </div>
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
-                <span class="text-slate-400 block text-[10px] font-bold">NGÀY & GIỜ</span>
+                <span class="text-slate-400 block text-[10px] font-bold">{{ t('DATE & TIME', 'NGÀY & GIỜ') }}</span>
                 <span class="font-medium">{{ (selectedChain.cpsr || selectedChain).reqDate }} {{ (selectedChain.cpsr || selectedChain).reqTime }}</span>
               </div>
               <div>
-                <span class="text-slate-400 block text-[10px] font-bold">NGƯỜI YÊU CẦU</span>
+                <span class="text-slate-400 block text-[10px] font-bold">{{ t('REQUESTER', 'NGƯỜI YÊU CẦU') }}</span>
                 <span class="font-medium text-slate-800 dark:text-slate-100">{{ (selectedChain.cpsr || selectedChain).reqBy }}</span>
               </div>
               <div>
-                <span class="text-slate-400 block text-[10px] font-bold">THIẾT BỊ / MÁY</span>
+                <span class="text-slate-400 block text-[10px] font-bold">{{ t('MACHINE / EQUIPMENT', 'THIẾT BỊ / MÁY') }}</span>
                 <span class="font-medium">{{ (selectedChain.cpsr || selectedChain).printTech }} - {{ (selectedChain.cpsr || selectedChain).machineName }}</span>
               </div>
               <div>
-                <span class="text-slate-400 block text-[10px] font-bold">ƯU TIÊN</span>
+                <span class="text-slate-400 block text-[10px] font-bold">{{ t('PRIORITY', 'ƯU TIÊN') }}</span>
                 <span class="font-bold" :class="(selectedChain.cpsr || selectedChain).priority === 'Hỗ trợ ngay' ? 'text-rose-500' : 'text-amber-500'">{{ (selectedChain.cpsr || selectedChain).priority || 'N/A' }}</span>
               </div>
             </div>
             <div>
-              <span class="text-slate-400 block text-[10px] font-bold">MÔ TẢ SỰ CỐ:</span>
+              <span class="text-slate-400 block text-[10px] font-bold">{{ t('PROBLEM DESCRIPTION:', 'MÔ TẢ SỰ CỐ:') }}</span>
               <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-mono text-[11px] leading-relaxed">{{ (selectedChain.cpsr || selectedChain).problem }}</p>
             </div>
           </div>
@@ -50,9 +50,9 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
           <!-- BƯỚC 2: CPST -->
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
-              <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm">2. Phản Hồi Kỹ Thuật (CPST)</span>
+              <span class="font-bold text-emerald-600 dark:text-emerald-400 text-sm">2. {{ t('Technical Feedback (CPST)', 'Phản Hồi Kỹ Thuật (CPST)') }}</span>
               <span v-if="selectedChain.cpst" class="font-mono font-bold text-xs bg-emerald-500/10 text-emerald-500 px-2 py-0.5 rounded">{{ selectedChain.cpst.docNo }}</span>
-              <span v-else class="text-xs text-slate-400">Chưa tạo phản hồi</span>
+              <span v-else class="text-xs text-slate-400">{{ t('Not created yet', 'Chưa tạo phản hồi') }}</span>
             </div>
 
             <div v-if="selectedChain.cpst" class="space-y-3">
@@ -158,15 +158,15 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
           <!-- BƯỚC 3: CPSF -->
           <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-3">
             <div class="flex items-center justify-between pb-2 border-b border-slate-200 dark:border-slate-700">
-              <span class="font-bold text-purple-600 dark:text-purple-400 text-sm">3. Nghiệm Thu & Bàn Giao (CPSF)</span>
+              <span class="font-bold text-purple-600 dark:text-purple-400 text-sm">3. {{ t('Acceptance & Handover (CPSF)', 'Nghiệm Thu & Bàn Giao (CPSF)') }}</span>
               <span v-if="selectedChain.cpsf" class="font-mono font-bold text-xs bg-purple-500/10 text-purple-500 px-2 py-0.5 rounded">{{ selectedChain.cpsf.docNo }}</span>
-              <span v-else class="text-xs text-slate-400">Chưa bàn giao</span>
+              <span v-else class="text-xs text-slate-400">{{ t('Not handed over yet', 'Chưa bàn giao') }}</span>
             </div>
 
             <div v-if="selectedChain.cpsf" class="space-y-3">
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">CHẤT LƯỢNG IN</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('PRINT QUALITY', 'CHẤT LƯỢNG IN') }}</span>
                   <span class="font-bold text-xs" :class="selectedChain.cpsf.chkQuality === 'Đạt' ? 'text-emerald-500' : 'text-rose-500'">{{ selectedChain.cpsf.chkQuality }}</span>
                 </div>
                 <div>
@@ -174,28 +174,28 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                   <span class="font-mono font-medium">{{ selectedChain.cpsf.workOrder || '-' }}</span>
                 </div>
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">TỔNG SL / PHẾ</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('TOTAL / SCRAP', 'TỔNG SL / PHẾ') }}</span>
                   <span class="font-mono font-medium">{{ selectedChain.cpsf.woTotalQty }} / {{ selectedChain.cpsf.wasteQty }} ({{ selectedChain.cpsf.wastePercent || '0%' }})</span>
                 </div>
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">ĐẠI DIỆN SX KÝ NHẬN</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('PROD REP SIGNATURE', 'ĐẠI DIỆN SX KÝ NHẬN') }}</span>
                   <span class="font-medium text-slate-800 dark:text-slate-100">{{ selectedChain.cpsf.prodMgr }}</span>
                 </div>
               </div>
             </div>
 
             <div v-else-if="selectedChain.cpst" class="flex flex-col sm:flex-row items-center justify-between p-3 rounded-lg bg-purple-500/10 border border-purple-500/20 gap-3">
-              <span class="text-purple-400 font-medium">Kỹ thuật đã phản hồi. Chờ sản xuất nghiệm thu bàn giao.</span>
+              <span class="text-purple-400 font-medium">{{ t('Technical responded. Awaiting production acceptance handover.', 'Kỹ thuật đã phản hồi. Chờ sản xuất nghiệm thu bàn giao.') }}</span>
               <a :href="'/confirm-request?cpst=' + encodeURIComponent(selectedChain.cpst.docNo)" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs shadow transition">
-                + Xác Nhận Bàn Giao CPSF Ngay →
+                + {{ t('Confirm CPSF Handover Now', 'Xác Nhận Bàn Giao CPSF Ngay') }} →
               </a>
             </div>
-            <div v-else class="text-slate-400 italic">Cần hoàn thành bước 2 (CPST) trước khi bàn giao.</div>
+            <div v-else class="text-slate-400 italic">{{ t('Must complete step 2 (CPST) prior to handover.', 'Cần hoàn thành bước 2 (CPST) trước khi bàn giao.') }}</div>
           </div>
         </div>
 
         <div class="p-4 bg-slate-50 dark:bg-slate-800/80 border-t border-slate-100 dark:border-slate-800 flex items-center justify-end">
-          <button type="button" @click="closeChainModal(); (typeof closeSplitDetailModal === 'function' && closeSplitDetailModal())" data-action="closeSplitDetailModal" class="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer transition">Đóng</button>
+          <button type="button" @click="closeChainModal(); (typeof closeSplitDetailModal === 'function' && closeSplitDetailModal())" data-action="closeSplitDetailModal" class="px-5 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 dark:bg-slate-700 dark:hover:bg-slate-600 text-xs font-bold text-slate-700 dark:text-slate-200 cursor-pointer transition">{{ t('Close', 'Đóng') }}</button>
         </div>
       </div>
     </div>

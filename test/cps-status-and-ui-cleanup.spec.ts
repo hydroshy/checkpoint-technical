@@ -135,7 +135,7 @@ async function runTests() {
   // Lightbox ảnh và chỉ nút Đóng
   assert.ok(splitModalContent.includes('openLightbox') || splitModalContent.includes('lightboxImage'), 'Popup chi tiết CPS có hỗ trợ Lightbox xem ảnh');
   assert.ok(splitModalContent.includes('closeChainModal'), 'Popup chi tiết CPS có nút đóng modal closeChainModal');
-  assert.ok(splitModalContent.includes('>Đóng</button>'), 'Popup chi tiết CPS có nút Đóng');
+  assert.ok(splitModalContent.includes('>Đóng</button>') || splitModalContent.includes("t('Close', 'Đóng')"), 'Popup chi tiết CPS có nút Đóng');
   console.log('  ✅ [PASS] Popup chi tiết CPS hỗ trợ phóng to ảnh bằng Lightbox tại chỗ và chỉ có nút Đóng');
 
   // -------------------------------------------------------------

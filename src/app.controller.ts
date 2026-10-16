@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Req, Res } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, Optional } from '@nestjs/common';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Request, Response } from 'express';
 import * as path from 'path';
@@ -9,9 +9,12 @@ import { CONTROL_PANEL_HTML } from './views/control-panel.view';
 import { FORM_REQUEST_HTML } from './views/form-request.view';
 import { TECHNICAL_FEEDBACK_HTML } from './views/technical-feedback.view';
 import { CONFIRM_REQUEST_HTML } from './views/confirm-request.view';
+import { extractUser } from './common/utils/request-user.util';
+import { DatabaseService } from './modules/database/database.service';
 
 @Controller()
 export class AppController {
+  constructor(@Optional() private readonly dbService?: DatabaseService) {}
   @Get('favicon.ico')
   @ApiExcludeEndpoint()
   getFavicon(@Res() res: Response) {
@@ -116,6 +119,20 @@ export class AppController {
     if (queryToken && queryToken.length > 20) {
       res.cookie('access_token', queryToken, { path: '/', sameSite: 'lax', httpOnly: false });
       res.cookie('checkpoint_token', queryToken, { path: '/', sameSite: 'lax', httpOnly: false });
+    }
+    const user = extractUser(req);
+    if (user) {
+      const role = user.role || user.userType;
+      if (role === 'EMPLOYEE') {
+        return res.redirect('/dashboard?error=access_denied');
+      }
+      if (role !== 'ADMIN' && role !== 'SUPER_ADMIN') {
+        const dbUser = this.dbService?.getUserById(user.sub || user.id);
+        const canAccess = dbUser?.permissions?.canAccessControlPanel ?? user.permissions?.canAccessControlPanel;
+        if (!canAccess) {
+          return res.redirect('/dashboard?error=access_denied');
+        }
+      }
     }
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(CONTROL_PANEL_HTML);

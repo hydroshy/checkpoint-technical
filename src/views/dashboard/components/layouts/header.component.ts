@@ -47,9 +47,34 @@ export const DASHBOARD_HEADER_HTML = `    <!-- TOP APP BAR -->
               </div>
             </div>
 
+            <!-- Language Mode Selection (EN / VI) -->
+            <div class="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ t('Language', 'Ngôn ngữ') }}</div>
+              <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
+                <button
+                  type="button"
+                  @click="setLanguage('en')"
+                  class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition cursor-pointer select-none"
+                  :class="currentLang === 'en' ? 'bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 font-bold shadow-sm border border-slate-200 dark:border-slate-700' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'"
+                >
+                  <span class="text-[11px] font-mono font-bold">EN</span>
+                  <span>English</span>
+                </button>
+                <button
+                  type="button"
+                  @click="setLanguage('vi')"
+                  class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-lg text-xs font-semibold transition cursor-pointer select-none"
+                  :class="currentLang === 'vi' ? 'bg-white dark:bg-slate-800 text-sky-600 dark:text-sky-400 font-bold shadow-sm border border-slate-200 dark:border-slate-700' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'"
+                >
+                  <span class="text-[11px] font-mono font-bold">VI</span>
+                  <span>Tiếng Việt</span>
+                </button>
+              </div>
+            </div>
+
             <!-- Theme Mode Selection -->
             <div class="space-y-1.5 pb-3 border-b border-slate-100 dark:border-slate-800">
-              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Giao diện</div>
+              <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">{{ t('Theme', 'Giao diện') }}</div>
               <div class="grid grid-cols-2 gap-1.5 p-1 rounded-xl bg-slate-100 dark:bg-slate-950 border border-slate-200 dark:border-slate-800">
                 <button
                   type="button"
@@ -58,7 +83,7 @@ export const DASHBOARD_HEADER_HTML = `    <!-- TOP APP BAR -->
                   :class="currentTheme === 'light' ? 'bg-white text-slate-900 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'"
                 >
                   <i class="fa-solid fa-sun text-amber-500 text-[11px]"></i>
-                  <span>Sáng</span>
+                  <span>{{ t('Light', 'Sáng') }}</span>
                 </button>
                 <button
                   type="button"
@@ -67,19 +92,27 @@ export const DASHBOARD_HEADER_HTML = `    <!-- TOP APP BAR -->
                   :class="currentTheme === 'dark' ? 'bg-slate-800 text-white shadow-sm border border-slate-700' : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200'"
                 >
                   <i class="fa-solid fa-moon text-sky-400 text-[11px]"></i>
-                  <span>Tối</span>
+                  <span>{{ t('Dark', 'Tối') }}</span>
                 </button>
               </div>
             </div>
 
             <!-- Portal Links -->
             <div class="space-y-1 text-xs pb-3 border-b border-slate-100 dark:border-slate-800">
+              <button
+                type="button"
+                @click="openSettingsModal"
+                class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
+              >
+                <span class="flex items-center gap-2"><i class="fa-solid fa-gear text-slate-500"></i> {{ t('Settings & Password', 'Cài đặt & Mật khẩu') }}</span>
+                <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
+              </button>
               <a
                 v-if="canAccessControlPanel"
                 href="/control-panel"
                 class="w-full py-2 px-3 rounded-lg text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition flex items-center justify-between cursor-pointer"
               >
-                <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-sky-500"></i> Control Panel</span>
+                <span class="flex items-center gap-2"><i class="fa-solid fa-sliders text-sky-500"></i> {{ t('Control Panel', 'Quản trị hệ thống') }}</span>
                 <i class="fa-solid fa-arrow-right text-[10px] text-slate-400"></i>
               </a>
             </div>
@@ -89,7 +122,7 @@ export const DASHBOARD_HEADER_HTML = `    <!-- TOP APP BAR -->
               @click="handleLogout"
               class="w-full py-2 px-3 rounded-lg text-xs font-bold text-red-500 hover:bg-red-500/10 border border-red-500/20 transition flex items-center justify-center gap-2 cursor-pointer"
             >
-              <i class="fa-solid fa-right-from-bracket"></i> Đăng Xuất
+              <i class="fa-solid fa-right-from-bracket"></i> {{ t('Sign Out', 'Đăng Xuất') }}
             </button>
           </div>
         </div>

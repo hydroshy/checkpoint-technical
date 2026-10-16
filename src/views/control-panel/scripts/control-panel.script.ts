@@ -49,6 +49,165 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             }
           }
         } catch(e) {}
+        if (currentUser.value && currentUser.value.role === 'EMPLOYEE') {
+          window.location.href = '/dashboard?error=access_denied';
+          return;
+        }
+
+        const currentLang = ref(localStorage.getItem('checkpoint_lang') || 'en');
+        const setLanguage = (lang) => {
+          currentLang.value = lang;
+          localStorage.setItem('checkpoint_lang', lang);
+          document.documentElement.setAttribute('lang', lang);
+          if (activeTab.value === 'report-technical') {
+            nextTick(() => {
+              renderReportChart();
+              renderReport4MChart();
+            });
+          }
+          safeRedraw(usersTable);
+          safeRedraw(machinesTable);
+          safeRedraw(empTable);
+          safeRedraw(splitTable);
+        };
+        const t = (en, vi) => {
+          if (vi !== undefined) {
+            return currentLang.value === 'vi' ? vi : en;
+          }
+          if (window.__I18N_DICT__ && window.__I18N_DICT__[en]) {
+            return window.__I18N_DICT__[en][currentLang.value] || window.__I18N_DICT__[en]['en'] || en;
+          }
+          return en;
+        };
+
+        // User Settings & Password Modal State
+        const showSettingsModal = ref(false);
+        const settingsForm = ref({ oldPassword: '', newPassword: '', confirmPassword: '' });
+        const settingsError = ref('');
+        const settingsLoading = ref(false);
+
+        const openSettingsModal = () => {
+          settingsForm.value = { oldPassword: '', newPassword: '', confirmPassword: '' };
+          settingsError.value = '';
+          showSettingsModal.value = true;
+          userMenuOpen.value = false;
+        };
+
+        const closeSettingsModal = () => {
+          showSettingsModal.value = false;
+          settingsError.value = '';
+        };
+
+        const submitChangePassword = async () => {
+          settingsError.value = '';
+          if (!settingsForm.value.oldPassword) {
+            settingsError.value = t('Please enter current password.', 'Vui lòng nhập mật khẩu hiện tại.');
+            return;
+          }
+          if (!settingsForm.value.newPassword || settingsForm.value.newPassword.length < 6) {
+            settingsError.value = t('New password must be at least 6 characters.', 'Mật khẩu mới phải có ít nhất 6 ký tự.');
+            return;
+          }
+          if (settingsForm.value.newPassword !== settingsForm.value.confirmPassword) {
+            settingsError.value = t('Passwords do not match.', 'Mật khẩu xác nhận không khớp.');
+            return;
+          }
+          settingsLoading.value = true;
+          try {
+            const payload = {
+              oldPassword: settingsForm.value.oldPassword,
+              newPassword: settingsForm.value.newPassword
+            };
+            let res = await fetch('/auth/change-password', {
+              method: 'POST',
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+              credentials: 'include',
+              body: JSON.stringify(payload)
+            });
+            if (!res.ok && res.status === 404) {
+              res = await fetch('/api/users/change-password', {
+                method: 'POST',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
+                body: JSON.stringify(payload)
+              });
+            }
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+              showToast(t('Password changed successfully!', 'Đổi mật khẩu thành công!'));
+              closeSettingsModal();
+            } else {
+              settingsError.value = data.message || t('Failed to change password.', 'Đổi mật khẩu thất bại.');
+            }
+          } catch (err) {
+            settingsError.value = err.message || t('Error updating password.', 'Có lỗi khi cập nhật mật khẩu.');
+          } finally {
+            settingsLoading.value = false;
+          }
+        };
+
+        // Admin Reset User Password State
+        const showResetPasswordModal = ref(false);
+        const resetPasswordTarget = ref(null);
+        const resetPasswordForm = ref({ newPassword: 'Checkpoint@123' });
+        const resetPasswordError = ref('');
+        const resetPasswordLoading = ref(false);
+
+        const openResetPasswordModal = (user) => {
+          resetPasswordTarget.value = user;
+          resetPasswordForm.value = { newPassword: 'Checkpoint@123' };
+          resetPasswordError.value = '';
+          showResetPasswordModal.value = true;
+        };
+
+        const closeResetPasswordModal = () => {
+          showResetPasswordModal.value = false;
+          resetPasswordTarget.value = null;
+          resetPasswordError.value = '';
+        };
+
+        const submitResetUserPassword = async () => {
+          if (!resetPasswordTarget.value) return;
+          if (!resetPasswordForm.value.newPassword || resetPasswordForm.value.newPassword.length < 6) {
+            resetPasswordError.value = t('Password must be at least 6 characters.', 'Mật khẩu phải từ 6 ký tự trở lên.');
+            return;
+          }
+          resetPasswordLoading.value = true;
+          resetPasswordError.value = '';
+          try {
+            const u = resetPasswordTarget.value;
+            const payload = {
+              newPassword: resetPasswordForm.value.newPassword,
+              password: resetPasswordForm.value.newPassword
+            };
+            let res = await fetch('/api/users/' + u.id + '/reset-password', {
+              method: 'POST',
+              headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+              credentials: 'include',
+              body: JSON.stringify(payload)
+            });
+            if (!res.ok && (res.status === 404 || res.status === 405)) {
+              res = await fetch('/api/users/' + u.id, {
+                method: 'PUT',
+                headers: getAuthHeaders({ 'Content-Type': 'application/json' }),
+                credentials: 'include',
+                body: JSON.stringify(payload)
+              });
+            }
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+              showToast(t('Password reset successfully for @' + u.username, 'Đặt lại mật khẩu thành công cho @' + u.username));
+              closeResetPasswordModal();
+              loadUsers();
+            } else {
+              resetPasswordError.value = data.message || t('Failed to reset password.', 'Đặt lại mật khẩu thất bại.');
+            }
+          } catch (err) {
+            resetPasswordError.value = err.message || t('Error resetting password.', 'Lỗi đặt lại mật khẩu.');
+          } finally {
+            resetPasswordLoading.value = false;
+          }
+        };
 
         const getAuthHeaders = (extra = {}) => {
           const headers = { ...extra };
@@ -388,13 +547,14 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           };
         });
 
-        // 4M Ratio Computed Client-side (Man, Machine, Material, Method đã giải quyết)
+        // 4M Ratio Computed Client-side (Man, Machine, Material, Method, System / Process)
         const report4MStats = computed(() => {
           const list = filteredReportCps.value || [];
           let man = 0;
           let machine = 0;
           let material = 0;
           let method = 0;
+          let systemProcess = 0;
 
           list.forEach(c => {
             if (!c) return;
@@ -403,11 +563,13 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             const lower = rc.toLowerCase();
             if (lower === 'man' || lower.includes('người') || lower.includes('human') || lower.includes('thao tác') || lower.includes('nhân sự')) {
               man++;
+            } else if (lower.includes('system') || lower.includes('process') || lower.includes('hệ thống') || lower.includes('quy trình')) {
+              systemProcess++;
             } else if (lower === 'machine' || lower.includes('máy') || lower.includes('thiết bị') || lower.includes('hỏng') || lower.includes('cảm biến') || lower.includes('bụi')) {
               machine++;
             } else if (lower === 'material' || lower.includes('vật liệu') || lower.includes('nguyên liệu') || lower.includes('mực') || lower.includes('giấy') || lower.includes('phôi')) {
               material++;
-            } else if (lower === 'method' || lower.includes('phương pháp') || lower.includes('quy trình') || lower.includes('cài đặt') || lower.includes('setup') || lower.includes('hướng dẫn')) {
+            } else if (lower === 'method' || lower.includes('phương pháp') || lower.includes('cài đặt') || lower.includes('setup') || lower.includes('hướng dẫn')) {
               method++;
             } else {
               machine++;
@@ -419,7 +581,8 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             machine,
             material,
             method,
-            total: man + machine + material + method
+            systemProcess,
+            total: man + machine + material + method + systemProcess
           };
         });
 
@@ -788,7 +951,15 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         const triggerUpload = (id) => document.getElementById(id)?.click();
 
         const get4MLabel = (k) => {
-          const map = { MAN: 'Con người (MAN)', MACHINE: 'Máy móc (MACHINE)', MATERIAL: 'Vật tư (MATERIAL)', METHOD: 'Phương pháp (METHOD)' };
+          const map = {
+            MAN: 'Con người (MAN)',
+            MACHINE: 'Máy móc (MACHINE)',
+            MATERIAL: 'Vật tư (MATERIAL)',
+            METHOD: 'Phương pháp (METHOD)',
+            'SYSTEM / PROCESS': 'Hệ thống / Quy trình (System / Process)',
+            SYSTEM: 'Hệ thống (SYSTEM)',
+            PROCESS: 'Quy trình (PROCESS)'
+          };
           return map[k] || k;
         };
 
@@ -1368,16 +1539,22 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
 
           const stats = report4MStats.value;
           const isDark = currentTheme.value === 'dark';
-          const dataVals = [stats.man, stats.machine, stats.material, stats.method];
+          const dataVals = [stats.man, stats.machine, stats.material, stats.method, stats.systemProcess];
           const allZeros = dataVals.every(v => v === 0);
 
           report4MChartInstance = new Chart(canvas, {
             type: 'doughnut',
             data: {
-              labels: ['Man (Con người)', 'Machine (Máy móc)', 'Material (Vật tư)', 'Method (Phương pháp)'],
+              labels: [
+                currentLang.value === 'vi' ? 'Man (Con người)' : 'Man (Human)',
+                currentLang.value === 'vi' ? 'Machine (Máy móc)' : 'Machine (Equipment)',
+                currentLang.value === 'vi' ? 'Material (Vật tư)' : 'Material',
+                currentLang.value === 'vi' ? 'Method (Phương pháp)' : 'Method (Process)',
+                currentLang.value === 'vi' ? 'System / Process (Hệ thống / Quy trình)' : 'System / Process'
+              ],
               datasets: [{
                 data: allZeros ? [1] : dataVals,
-                backgroundColor: allZeros ? ['#94a3b8'] : ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6'],
+                backgroundColor: allZeros ? ['#94a3b8'] : ['#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#14b8a6'],
                 borderWidth: 2,
                 borderColor: isDark ? '#0f172a' : '#ffffff',
                 hoverOffset: 4
@@ -2663,14 +2840,14 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 placeholder: '<span>Không có dữ liệu tài khoản</span>',
                 columns: [
                 {
-                  title: 'Tên Đăng Nhập',
+                  title: t('Username', 'Tên Đăng Nhập'),
                   field: 'username',
                   sorter: 'string',
                   minWidth: 130,
                   formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">@' + (cell.getValue() || '') + '</span>'
                 },
                 {
-                  title: 'Họ và Tên',
+                  title: t('Full Name', 'Họ và Tên'),
                   field: 'fullName',
                   sorter: 'string',
                   minWidth: 150,
@@ -2684,7 +2861,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   formatter: cell => '<span class="font-mono text-slate-400 text-xs">' + (cell.getValue() || '—') + '</span>'
                 },
                 {
-                  title: 'Vai Trò',
+                  title: t('Role', 'Vai Trò'),
                   field: 'role',
                   sorter: 'string',
                   minWidth: 110,
@@ -2697,7 +2874,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   }
                 },
                 {
-                  title: 'Phân Quyền Chi Tiết (Tạo phiếu / Xem KPI / Admin)',
+                  title: t('Permissions (Create / KPI / Admin)', 'Phân Quyền Chi Tiết (Tạo phiếu / Xem KPI / Admin)'),
                   minWidth: 320,
                   headerSort: false,
                   formatter: cell => {
@@ -2709,11 +2886,11 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                     return '<div class="flex items-center gap-3 text-[11px]">' +
                       '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
                         '<input type="checkbox" data-perm="canCreateRequest" ' + (canReq ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-sky-600 h-3.5 w-3.5 cursor-pointer" />' +
-                        '<span class="text-slate-700 dark:text-slate-300">Tạo phiếu</span>' +
+                        '<span class="text-slate-700 dark:text-slate-300">' + (currentLang.value === 'vi' ? 'Tạo phiếu' : 'Create req') + '</span>' +
                       '</label>' +
                       '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
                         '<input type="checkbox" data-perm="canViewKpi" ' + (canKpi ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-emerald-600 h-3.5 w-3.5 cursor-pointer" />' +
-                        '<span class="text-slate-700 dark:text-slate-300">Xem KPI</span>' +
+                        '<span class="text-slate-700 dark:text-slate-300">' + (currentLang.value === 'vi' ? 'Xem KPI' : 'View KPI') + '</span>' +
                       '</label>' +
                       '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
                         '<input type="checkbox" data-perm="canAccessControlPanel" ' + (canCp ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-amber-600 h-3.5 w-3.5 cursor-pointer" />' +
@@ -2730,29 +2907,38 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   }
                 },
                 {
-                  title: 'Trạng Thái',
+                  title: t('Status', 'Trạng Thái'),
                   field: 'isActive',
                   hozAlign: 'center',
                   minWidth: 100,
                   formatter: cell => {
                     const active = cell.getValue();
+                    const activeText = active ? (currentLang.value === 'vi' ? 'Kích hoạt' : 'Active') : (currentLang.value === 'vi' ? 'Tạm khóa' : 'Locked');
                     return '<span class="inline-flex items-center gap-1.5 text-[11px] font-bold ' + (active ? 'text-emerald-500' : 'text-red-500') + '">' +
                       '<span class="w-2 h-2 rounded-full ' + (active ? 'bg-emerald-500' : 'bg-red-500') + '"></span>' +
-                      (active ? 'Kích hoạt' : 'Tạm khóa') +
+                      activeText +
                     '</span>';
                   }
                 },
                 {
-                  title: 'Thao Tác',
+                  title: t('Actions', 'Thao Tác'),
                   hozAlign: 'right',
-                  minWidth: 80,
+                  minWidth: 100,
                   headerSort: false,
                   formatter: cell => {
                     const u = cell.getRow().getData();
                     if (u.username === 'admin') return '';
-                    return '<button class="btn-user-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="Xóa tài khoản"><i class="fa-solid fa-trash-can"></i></button>';
+                    return '<div class="flex items-center justify-end gap-1.5">' +
+                      '<button class="btn-user-reset-pwd p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 transition cursor-pointer" title="' + (currentLang.value === 'vi' ? 'Đặt lại mật khẩu' : 'Reset Password') + '"><i class="fa-solid fa-key text-xs"></i></button>' +
+                      '<button class="btn-user-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + (currentLang.value === 'vi' ? 'Xóa tài khoản' : 'Delete user') + '"><i class="fa-solid fa-trash-can text-xs"></i></button>' +
+                    '</div>';
                   },
                   cellClick: (e, cell) => {
+                    const resetBtn = e.target.closest('.btn-user-reset-pwd');
+                    if (resetBtn) {
+                      openResetPasswordModal(cell.getRow().getData());
+                      return;
+                    }
                     const target = e.target.closest('.btn-user-delete');
                     if (!target) return;
                     deleteUser(cell.getRow().getData());
@@ -3476,7 +3662,15 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           try {
             const res = await fetch('/auth/session', { headers: getAuthHeaders(), credentials: 'include' });
             if (res.ok) {
-              const sessionUser = await res.json();
+              const rawData = await res.json();
+              const sessionUser = (rawData && rawData.user) ? rawData.user : rawData;
+              if (sessionUser && (sessionUser.role === 'EMPLOYEE' || (!sessionUser.permissions?.canAccessControlPanel && sessionUser.role !== 'ADMIN' && sessionUser.username !== 'admin'))) {
+                console.warn('Control Panel restricted for EMPLOYEE. Redirecting to /dashboard...');
+                try {
+                  window.location.replace('/dashboard');
+                } catch(_) {}
+                return;
+              }
               if (sessionUser && typeof sessionUser === 'object') {
                 currentUser.value = { ...currentUser.value, ...sessionUser };
               }
@@ -3704,7 +3898,25 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           publicFormUrl,
           loadPublicFormStatus,
           togglePublicForm,
-          copyPublicFormLink
+          copyPublicFormLink,
+          currentLang,
+          setLanguage,
+          t,
+          showSettingsModal,
+          settingsForm,
+          settingsError,
+          settingsLoading,
+          openSettingsModal,
+          closeSettingsModal,
+          submitChangePassword,
+          showResetPasswordModal,
+          resetPasswordTarget,
+          resetPasswordForm,
+          resetPasswordError,
+          resetPasswordLoading,
+          openResetPasswordModal,
+          closeResetPasswordModal,
+          submitResetUserPassword
         };
       }
     });

@@ -1,4 +1,4 @@
-import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { v4 as uuidv4 } from 'uuid';
 import * as bcrypt from 'bcryptjs';
 import {
@@ -8,7 +8,7 @@ import {
   getDefaultPermissions,
   normalizePermissions,
 } from '../database/database.service';
-import { CreateUserDto, UpdateUserDto, UpdateUserPermissionsDto } from './dto/user.dto';
+import { CreateUserDto, UpdateUserDto, UpdateUserPermissionsDto, ChangePasswordDto } from './dto/user.dto';
 
 @Injectable()
 export class UsersService {
@@ -65,8 +65,12 @@ export class UsersService {
     if (body.email !== undefined) updates.email = body.email;
     if (body.role !== undefined) updates.role = body.role;
     if (body.isActive !== undefined) updates.isActive = body.isActive;
-    if (body.password) {
-      updates.passwordHash = await bcrypt.hash(body.password, 10);
+    const rawPassword = body.password || body.newPassword;
+    if (rawPassword) {
+      if (typeof rawPassword !== 'string' || rawPassword.trim().length < 6) {
+        throw new BadRequestException('Mật khẩu mới phải có ít nhất 6 ký tự.');
+      }
+      updates.passwordHash = await bcrypt.hash(rawPassword.trim(), 10);
     }
     if (body.permissions !== undefined) {
       const current = this.dbService.getUserById(id);
@@ -83,6 +87,48 @@ export class UsersService {
     }
     const { passwordHash: _, ...result } = updated;
     return result;
+  }
+
+  async changePassword(userId: string, body: ChangePasswordDto) {
+    if (!userId) {
+      throw new UnauthorizedException('Xác thực không hợp lệ. Vui lòng đăng nhập lại.');
+    }
+    const user = this.dbService.getUserById(userId);
+    if (!user) {
+      throw new NotFoundException('Không tìm thấy tài khoản người dùng.');
+    }
+    if (!user.isActive) {
+      throw new UnauthorizedException('Tài khoản đã bị tạm khóa.');
+    }
+
+    const { oldPassword, newPassword } = body;
+    if (!newPassword || typeof newPassword !== 'string' || newPassword.trim().length < 6) {
+      throw new BadRequestException('Mật khẩu mới phải có ít nhất 6 ký tự.');
+    }
+
+    let isOldValid = false;
+    if (user.passwordHash) {
+      if (user.passwordHash.startsWith('$2a$') || user.passwordHash.startsWith('$2b$')) {
+        isOldValid = await bcrypt.compare(oldPassword, user.passwordHash);
+      } else {
+        isOldValid = oldPassword === user.passwordHash;
+      }
+    }
+    if (!isOldValid && user.passwordHash === 'Checkpoint@123' && oldPassword === 'Checkpoint@123') {
+      isOldValid = true;
+    }
+
+    if (!isOldValid) {
+      throw new BadRequestException('Mật khẩu cũ không chính xác.');
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword.trim(), 10);
+    this.dbService.updateUser(userId, { passwordHash });
+
+    return {
+      success: true,
+      message: 'Đổi mật khẩu thành công.',
+    };
   }
 
   async updatePermissions(id: string, body: UpdateUserPermissionsDto) {

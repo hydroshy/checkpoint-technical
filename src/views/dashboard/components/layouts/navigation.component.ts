@@ -7,13 +7,13 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
               <h1 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">
-                Hệ Thống Dịch Vụ Kỹ Thuật
+                {{ t('Technical Services Portal', 'Hệ Thống Dịch Vụ Kỹ Thuật') }}
               </h1>
             </div>
             <div class="flex items-center gap-2 self-stretch sm:self-auto">
               <span class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700/80 text-xs font-bold text-slate-600 dark:text-slate-300 flex items-center gap-2">
                 <i class="fa-solid fa-user-check text-sky-500"></i>
-                <span>{{ currentUser.fullName || currentUser.username || 'Nhân viên' }}</span>
+                <span>{{ currentUser.fullName || currentUser.username || (currentLang === 'vi' ? 'Nhân viên' : 'Staff') }}</span>
               </span>
             </div>
           </div>
@@ -37,18 +37,18 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
                 </span>
               </div>
               <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
-                Tạo Form CPSR
+                {{ t('Create CPSR Form', 'Tạo Form CPSR') }}
               </h2>
               <div class="text-xs font-semibold text-sky-600 dark:text-sky-400 mt-0.5">
-                Phiếu Yêu Cầu Kỹ Thuật
+                {{ t('Technical Request Form', 'Phiếu Yêu Cầu Kỹ Thuật') }}
               </div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
-                Khởi tạo yêu cầu sửa chữa, báo hỏng máy in, ghi nhận sự cố ban đầu và thời gian phát sinh sự cố.
+                {{ t('Initiate repair request, report equipment breakdown, log initial defect and occurrence time.', 'Khởi tạo yêu cầu sửa chữa, báo hỏng máy in, ghi nhận sự cố ban đầu và thời gian phát sinh sự cố.') }}
               </p>
             </div>
             <div class="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
               <span class="font-bold text-sky-600 dark:text-sky-400 flex items-center gap-1.5 group-hover:underline">
-                Mở form-request <i class="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                {{ t('Open form-request', 'Mở form-request') }} <i class="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
               </span>
               <span class="font-mono text-[10px] text-slate-400">/form-request</span>
             </div>
@@ -70,18 +70,18 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
                 </span>
               </div>
               <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                Tạo Form CPST
+                {{ t('Create CPST Form', 'Tạo Form CPST') }}
               </h2>
               <div class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                Phản Hồi & Xử Lý Kỹ Thuật
+                {{ t('Technical Feedback & Resolution', 'Phản Hồi & Xử Lý Kỹ Thuật') }}
               </div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
-                Tiếp nhận phiếu, phân loại nguyên nhân theo 4M, cập nhật tiến độ xử lý và downtime kỹ thuật.
+                {{ t('Acknowledge ticket, classify 4M root cause, update progress and technical downtime.', 'Tiếp nhận phiếu, phân loại nguyên nhân theo 4M, cập nhật tiến độ xử lý và downtime kỹ thuật.') }}
               </p>
             </div>
             <div class="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
               <span class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5 group-hover:underline">
-                Mở technical-feedback <i class="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                {{ t('Open technical-feedback', 'Mở technical-feedback') }} <i class="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
               </span>
               <span class="font-mono text-[10px] text-slate-400">/technical-feedback</span>
             </div>
@@ -103,18 +103,18 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
                 </span>
               </div>
               <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
-                Tạo Form CPSF
+                {{ t('Create CPSF Form', 'Tạo Form CPSF') }}
               </h2>
               <div class="text-xs font-semibold text-purple-600 dark:text-purple-400 mt-0.5">
-                Xác Nhận & Nghiệm Thu Bàn Giao
+                {{ t('Acceptance & Handover Confirmation', 'Xác Nhận & Nghiệm Thu Bàn Giao') }}
               </div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
-                Kiểm tra chất lượng hoàn tất, tính tỷ lệ phế liệu, xác nhận nghiệm thu và hoàn tất bàn giao.
+                {{ t('Verify completion quality, compute scrap rate, confirm acceptance and close handover.', 'Kiểm tra chất lượng hoàn tất, tính tỷ lệ phế liệu, xác nhận nghiệm thu và hoàn tất bàn giao.') }}
               </p>
             </div>
             <div class="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
               <span class="font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1.5 group-hover:underline">
-                Mở confirm-request <i class="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                {{ t('Open confirm-request', 'Mở confirm-request') }} <i class="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
               </span>
               <span class="font-mono text-[10px] text-slate-400">/confirm-request</span>
             </div>
@@ -136,18 +136,18 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
                 </span>
               </div>
               <h2 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white tracking-tight group-hover:text-amber-600 dark:group-hover:text-amber-400 transition-colors">
-                Report Technical
+                {{ t('Technical Reports', 'Báo Cáo Kỹ Thuật') }}
               </h2>
               <div class="text-xs font-semibold text-amber-600 dark:text-amber-400 mt-0.5">
-                Báo Cáo Kỹ Thuật & Phân Tích KPI
+                {{ t('Analytics & KPI Performance', 'Báo Cáo Kỹ Thuật & Phân Tích KPI') }}
               </div>
               <p class="text-xs text-slate-500 dark:text-slate-400 mt-2.5 leading-relaxed">
-                Thống kê toàn diện chỉ số phiếu kỹ thuật, thời gian downtime và phân bổ trạng thái CPS theo khoảng thời gian.
+                {{ t('Comprehensive metrics for tickets, downtime duration and CPS status distribution.', 'Thống kê toàn diện chỉ số phiếu kỹ thuật, thời gian downtime và phân bổ trạng thái CPS theo khoảng thời gian.') }}
               </p>
             </div>
             <div class="mt-5 pt-3.5 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
               <span class="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1.5 group-hover:underline">
-                Xem Report Technical <i class="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
+                {{ t('View Technical Report', 'Xem Report Technical') }} <i class="fa-solid fa-arrow-right text-[10px] transition-transform group-hover:translate-x-1"></i>
               </span>
               <span class="font-mono text-[10px] text-slate-400">D-Module KPI</span>
             </div>
@@ -166,7 +166,7 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
               @click="activeTab = ''"
               type="button"
               class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl font-bold text-slate-500 hover:text-sky-600 dark:text-slate-400 dark:hover:text-sky-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
-              title="Quay lại Dashboard"
+              :title="t('Back to Dashboard', 'Quay lại Dashboard')"
             >
               <i class="fa-solid fa-house text-xs"></i>
               <span>Dashboard</span>
@@ -174,7 +174,7 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
             <i class="fa-solid fa-chevron-right text-[10px] text-slate-400"></i>
             <span class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
               <i class="fa-solid fa-chart-pie text-emerald-500"></i>
-              <span>Report Technical</span>
+              <span>{{ t('Report Technical', 'Báo Cáo Kỹ Thuật') }}</span>
             </span>
           </div>
 
@@ -184,7 +184,7 @@ export const DASHBOARD_NAV_HTML = `      <!-- ==================================
             @click="activeTab = ''"
             class="px-3 py-1.5 rounded-xl text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-sky-600 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition flex items-center gap-1.5 cursor-pointer ml-auto"
           >
-            <i class="fa-solid fa-arrow-left text-[10px]"></i> Quay lại Dashboard
+            <i class="fa-solid fa-arrow-left text-[10px]"></i> {{ t('Back to Dashboard', 'Quay lại Dashboard') }}
           </button>
         </div>
       </section>`;

@@ -248,6 +248,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                     <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> Machine: <b class="font-mono text-slate-800 dark:text-slate-200">{{ report4MStats.machine }}</b></span>
                     <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Material: <b class="font-mono text-slate-800 dark:text-slate-200">{{ report4MStats.material }}</b></span>
                     <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> Method: <b class="font-mono text-slate-800 dark:text-slate-200">{{ report4MStats.method }}</b></span>
+                    <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-teal-500"></span> System/Process: <b class="font-mono text-slate-800 dark:text-slate-200">{{ report4MStats.systemProcess || 0 }}</b></span>
                   </div>
                 </div>
               </div>

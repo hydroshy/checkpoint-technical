@@ -21,6 +21,8 @@ const tests = [
   'test/dashboard-report-technical-sync.spec.ts',
   'test/cps-status-and-ui-cleanup.spec.ts',
   'test/ui-dashboard-login-profile-cpsf.spec.ts',
+  'test/frontend-i18n-rbac-cpst.spec.ts',
+  'test/qa-system-verification-i18n-rbac-cpst.spec.ts',
 ];
 
 console.log('================================================================');

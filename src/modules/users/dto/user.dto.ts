@@ -78,6 +78,11 @@ export class UpdateUserDto {
   @IsString()
   password?: string;
 
+  @ApiPropertyOptional({ example: 'NewPassword@123', description: 'Mật khẩu mới (Reset password)' })
+  @IsOptional()
+  @IsString()
+  newPassword?: string;
+
   @ApiPropertyOptional({ type: UserPermissionsDto, description: 'Cập nhật phân quyền' })
   @IsOptional()
   @ValidateNested()
@@ -107,3 +112,28 @@ export class UpdateUserPermissionsDto {
   @Type(() => UserPermissionsDto)
   permissions?: UserPermissionsDto;
 }
+
+export class ResetPasswordDto {
+  @ApiPropertyOptional({ example: 'NewPassword@123', description: 'Mật khẩu mới' })
+  @IsOptional()
+  @IsString()
+  newPassword?: string;
+
+  @ApiPropertyOptional({ example: 'NewPassword@123', description: 'Mật khẩu mới' })
+  @IsOptional()
+  @IsString()
+  password?: string;
+}
+
+export class ChangePasswordDto {
+  @ApiProperty({ example: 'Checkpoint@123', description: 'Mật khẩu cũ' })
+  @IsNotEmpty({ message: 'Mật khẩu cũ không được để trống' })
+  @IsString()
+  oldPassword!: string;
+
+  @ApiProperty({ example: 'NewPassword@123', description: 'Mật khẩu mới' })
+  @IsNotEmpty({ message: 'Mật khẩu mới không được để trống' })
+  @IsString()
+  newPassword!: string;
+}
+
