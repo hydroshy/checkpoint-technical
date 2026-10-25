@@ -4,14 +4,14 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
         <div v-show="activeTab === 'machines'" class="space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 class="text-xl font-bold tracking-tight">Danh Mục Công Nghệ In & Máy Móc</h1>
-              <p class="text-xs text-slate-500">Quản lý danh mục các loại máy in theo từng công nghệ với Tabulator.js</p>
+              <h1 class="text-xl font-bold tracking-tight">{{ t('Printing Technologies & Machines Catalog', 'Danh Mục Công Nghệ In & Máy Móc') }}</h1>
+              <p class="text-xs text-slate-500">{{ t('Manage machine list by technology with Tabulator.js', 'Quản lý danh mục các loại máy in theo từng công nghệ với Tabulator.js') }}</p>
             </div>
             <button
               @click="openAddMachineModal"
               class="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-500/25 cursor-pointer"
             >
-              <i class="fa-solid fa-plus"></i> Thêm Máy Mới
+              <i class="fa-solid fa-plus"></i> {{ t('Add New Machine', 'Thêm Máy Mới') }}
             </button>
           </div>
 
@@ -21,11 +21,11 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
               type="text"
               v-model="machineSearch"
               @input="applyMachineFilters"
-              placeholder="🔍 Tìm kiếm máy theo tên, mã máy hoặc công nghệ..."
+              :placeholder="t('Search machine by name, code or technology...', '🔍 Tìm kiếm máy theo tên, mã máy hoặc công nghệ...')"
               class="input-box px-3.5 py-2 rounded-xl text-xs outline-none flex-1"
             />
             <select v-model="machineTechFilter" @change="applyMachineFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none sm:w-60 cursor-pointer">
-              <option value="ALL">— Tất cả công nghệ —</option>
+              <option value="ALL">— {{ t('All Technologies', 'Tất cả công nghệ') }} —</option>
               <option v-for="(machines, tech) in machineCatalog" :key="tech" :value="tech">{{ tech }}</option>
             </select>
           </div>
@@ -42,27 +42,27 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
         <div v-show="activeTab === 'employees'" class="space-y-6">
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h1 class="text-xl font-bold tracking-tight">Danh Sách Nhân Sự & Phân Xưởng</h1>
-              <p class="text-xs text-slate-500">Quản lý nhân sự toàn nhà máy hiển thị qua bảng dữ liệu Tabulator</p>
+              <h1 class="text-xl font-bold tracking-tight">{{ t('Personnel & Workshops List', 'Danh Sách Nhân Sự & Phân Xưởng') }}</h1>
+              <p class="text-xs text-slate-500">{{ t('Factory-wide personnel management displayed via Tabulator data table', 'Quản lý nhân sự toàn nhà máy hiển thị qua bảng dữ liệu Tabulator') }}</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button
                 @click="openAddEmployeeModal"
                 class="px-3.5 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-sky-500/25 cursor-pointer"
               >
-                <i class="fa-solid fa-user-plus"></i> Thêm Nhân Viên
+                <i class="fa-solid fa-user-plus"></i> {{ t('Add Employee', 'Thêm Nhân Viên') }}
               </button>
               <button
                 @click="openExcelUploader"
                 class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/25 cursor-pointer"
               >
-                <i class="fa-solid fa-file-excel"></i> Nạp Excel
+                <i class="fa-solid fa-file-excel"></i> {{ t('Import Excel', 'Nạp Excel') }}
               </button>
               <button
                 @click="exportEmployeesExcel"
                 class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
               >
-                <i class="fa-solid fa-download"></i> Xuất Excel
+                <i class="fa-solid fa-download"></i> {{ t('Export Excel', 'Xuất Excel') }}
               </button>
             </div>
           </div>
@@ -73,11 +73,11 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
               type="text"
               v-model="empSearch"
               @input="applyEmpFilters"
-              placeholder="🔍 Tìm kiếm nhân viên theo tên hoặc mã NV..."
+              :placeholder="t('Search employee by name or code...', '🔍 Tìm kiếm nhân viên theo tên hoặc mã NV...')"
               class="input-box px-3.5 py-2 rounded-xl text-xs outline-none flex-1"
             />
             <select v-model="empDeptFilter" @change="applyEmpFilters" class="input-box px-3.5 py-2 rounded-xl text-xs outline-none sm:w-60 cursor-pointer">
-              <option value="ALL">— Tất cả bộ phận —</option>
+              <option value="ALL">— {{ t('All Departments', 'Tất cả bộ phận') }} —</option>
               <option v-for="d in distinctDepts" :key="d" :value="d">{{ d }}</option>
             </select>
           </div>
@@ -135,22 +135,22 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
               <h1 class="text-xl font-bold tracking-tight text-slate-900 dark:text-white flex items-center gap-2.5">
-                <i class="fa-solid fa-database text-violet-500"></i> Database
+                <i class="fa-solid fa-database text-violet-500"></i> {{ t('Database', 'Cơ Sở Dữ Liệu') }}
               </h1>
-              <p class="text-xs text-slate-500">Theo dõi trạng thái Database Health của cơ sở dữ liệu đang kết nối và danh sách các bảng dữ liệu trong hệ thống</p>
+              <p class="text-xs text-slate-500">{{ t('Monitor Database Health status and tables in the system', 'Theo dõi trạng thái Database Health của cơ sở dữ liệu đang kết nối và danh sách các bảng dữ liệu trong hệ thống') }}</p>
             </div>
             <div class="flex flex-wrap items-center gap-2">
               <button
                 @click="loadCurrentDataset"
                 class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer"
               >
-                <i class="fa-solid fa-arrows-rotate"></i> Tải lại
+                <i class="fa-solid fa-arrows-rotate"></i> {{ t('Reload', 'Tải lại') }}
               </button>
               <button
                 @click="exportCurrentDatasetExcel"
                 class="px-3.5 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-emerald-500/25 cursor-pointer"
               >
-                <i class="fa-solid fa-file-excel"></i> Xuất Excel Tập Này
+                <i class="fa-solid fa-file-excel"></i> {{ t('Export This Dataset', 'Xuất Excel Tập Này') }}
               </button>
             </div>
           </div>
@@ -167,40 +167,40 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
                 <i class="fa-solid fa-circle-check text-base"></i> Healthy (Connected)
               </div>
               <div class="text-[11px] text-emerald-700 dark:text-emerald-300 font-semibold">
-                Trạng Thái Kết Nối: Đang hoạt động bình thường
+                {{ t('Connection Status: Operating normally', 'Trạng Thái Kết Nối: Đang hoạt động bình thường') }}
               </div>
             </div>
 
             <!-- Health Card 2: Database Engine -->
             <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-2">
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Cơ Sở Dữ Liệu (Engine)</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{{ t('Database (Engine)', 'Cơ Sở Dữ Liệu (Engine)') }}</div>
               <div class="text-xl sm:text-2xl font-extrabold font-mono text-slate-800 dark:text-slate-200">
                 SQLite 3 (WAL)
               </div>
               <div class="text-[11px] text-slate-500">
-                Lưu trữ cục bộ an toàn, độ trễ &lt; 1ms
+                {{ t('Safe local storage, latency < 1ms', 'Lưu trữ cục bộ an toàn, độ trễ < 1ms') }}
               </div>
             </div>
 
             <!-- Health Card 3: Total Tables -->
             <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-2">
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Danh Sách Bảng (Tables)</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{{ t('Tables List', 'Danh Sách Bảng (Tables)') }}</div>
               <div class="text-xl sm:text-2xl font-extrabold font-mono text-violet-600 dark:text-violet-400">
-                8 Bảng Dữ Liệu
+                8 {{ t('Data Tables', 'Bảng Dữ Liệu') }}
               </div>
               <div class="text-[11px] text-slate-500">
-                4 bảng vận hành + 4 bảng danh mục
+                {{ t('4 operational tables + 4 catalog tables', '4 bảng vận hành + 4 bảng danh mục') }}
               </div>
             </div>
 
             <!-- Health Card 4: Tổng Bản Ghi -->
             <div class="glass-card rounded-2xl p-4 sm:p-5 space-y-2">
-              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Tổng Bản Ghi (Records)</div>
+              <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">{{ t('Total Records', 'Tổng Bản Ghi (Records)') }}</div>
               <div class="text-xl sm:text-2xl font-extrabold font-mono text-sky-600 dark:text-sky-400">
                 {{ weeklyRequestsList.length + defectLogsList.length + actionPlansList.length + requestersList.length + machinesFlatList.length + employeesList.length + usersList.length }}
               </div>
               <div class="text-[11px] text-slate-500">
-                Đồng bộ tự động theo thời gian thực
+                {{ t('Real-time automatic sync', 'Đồng bộ tự động theo thời gian thực') }}
               </div>
             </div>
           </div>
@@ -209,9 +209,9 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
           <div class="glass-card rounded-2xl p-4 space-y-3">
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b border-slate-100 dark:border-slate-800">
               <div class="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center gap-2">
-                <i class="fa-solid fa-table-cells text-sky-500"></i> Danh Sách Bảng Dữ Liệu Đang Kết Nối
+                <i class="fa-solid fa-table-cells text-sky-500"></i> {{ t('Connected Data Tables List', 'Danh Sách Bảng Dữ Liệu Đang Kết Nối') }}
               </div>
-              <span class="text-[11px] text-slate-400 font-mono">Chọn bảng để tra cứu dữ liệu chi tiết</span>
+              <span class="text-[11px] text-slate-400 font-mono">{{ t('Select table to view detailed data', 'Chọn bảng để tra cứu dữ liệu chi tiết') }}</span>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -224,8 +224,8 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
                   <span class="text-[10px] font-bold text-slate-400 font-mono uppercase">table: weekly_requests</span>
                   <i class="fa-solid fa-list-check text-xs text-sky-500"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">Phiếu Yêu Cầu Tuần</div>
-                <div class="text-xs font-mono font-extrabold text-sky-600 dark:text-sky-400 mt-0.5">{{ weeklyRequestsList.length }} bản ghi</div>
+                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ t('Weekly Requests', 'Phiếu Yêu Cầu Tuần') }}</div>
+                <div class="text-xs font-mono font-extrabold text-sky-600 dark:text-sky-400 mt-0.5">{{ weeklyRequestsList.length }} {{ t('records', 'bản ghi') }}</div>
               </div>
 
               <div
@@ -237,8 +237,8 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
                   <span class="text-[10px] font-bold text-slate-400 font-mono uppercase">table: defect_logs</span>
                   <i class="fa-solid fa-triangle-exclamation text-xs text-amber-500"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">Defect Logs Kỹ Thuật</div>
-                <div class="text-xs font-mono font-extrabold text-amber-500 mt-0.5">{{ defectLogsList.length }} bản ghi</div>
+                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ t('Defect Logs', 'Defect Logs Kỹ Thuật') }}</div>
+                <div class="text-xs font-mono font-extrabold text-amber-500 mt-0.5">{{ defectLogsList.length }} {{ t('records', 'bản ghi') }}</div>
               </div>
 
               <div
@@ -250,8 +250,8 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
                   <span class="text-[10px] font-bold text-slate-400 font-mono uppercase">table: action_plans</span>
                   <i class="fa-solid fa-bullseye text-xs text-emerald-500"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">Action Plan Hành Động</div>
-                <div class="text-xs font-mono font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">{{ actionPlansList.length }} bản ghi</div>
+                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ t('Action Plans', 'Action Plan Hành Động') }}</div>
+                <div class="text-xs font-mono font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">{{ actionPlansList.length }} {{ t('records', 'bản ghi') }}</div>
               </div>
 
               <div
@@ -263,8 +263,8 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
                   <span class="text-[10px] font-bold text-slate-400 font-mono uppercase">table: requesters</span>
                   <i class="fa-solid fa-users-gear text-xs text-indigo-500"></i>
                 </div>
-                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">Người Yêu Cầu</div>
-                <div class="text-xs font-mono font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">{{ requestersList.length }} bản ghi</div>
+                <div class="text-sm font-bold text-slate-800 dark:text-slate-200 mt-1">{{ t('Requesters', 'Người Yêu Cầu') }}</div>
+                <div class="text-xs font-mono font-extrabold text-indigo-600 dark:text-indigo-400 mt-0.5">{{ requestersList.length }} {{ t('records', 'bản ghi') }}</div>
               </div>
             </div>
           </div>
@@ -274,14 +274,14 @@ export const CP_MASTER_TABLES_HTML = `        <!-- =============================
             <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
               <div class="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-2">
                 <i class="fa-solid fa-table text-violet-500"></i>
-                <span>Dữ Liệu Bảng: <span class="font-mono text-sky-600 dark:text-sky-400 uppercase font-bold">{{ activeDataset }}</span></span>
+                <span>{{ t('Table Data:', 'Dữ Liệu Bảng:') }} <span class="font-mono text-sky-600 dark:text-sky-400 uppercase font-bold">{{ activeDataset }}</span></span>
               </div>
               <div class="w-full sm:w-80">
                 <input
                   type="text"
                   v-model="datasetSearch"
                   @input="applyDatasetFilter"
-                  placeholder="🔍 Tìm nhanh trong tập dữ liệu này..."
+                  :placeholder="t('Quick search in this dataset...', '🔍 Tìm nhanh trong tập dữ liệu này...')"
                   class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"
                 />
               </div>

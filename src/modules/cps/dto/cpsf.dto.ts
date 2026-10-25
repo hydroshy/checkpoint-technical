@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsNotEmpty, IsOptional, IsString, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsNumber, IsIn } from 'class-validator';
 
 export class CreateCpsfDto {
   @ApiPropertyOptional({ example: 'CPSF-20260324-001', description: 'Mã phiếu CPSF (nếu để trống hệ thống tự sinh)' })
@@ -17,10 +17,20 @@ export class CreateCpsfDto {
   @IsString()
   cpsrDocNo?: string;
 
-  @ApiPropertyOptional({ example: 'Đạt', description: 'Chất lượng in (Đạt / Chưa đạt)' })
+  @ApiPropertyOptional({
+    example: 'Đạt',
+    enum: ['Đạt', 'Chưa đạt', 'Chạy tạm, tiếp tục theo dõi'],
+    description: 'Chất lượng in (Đạt / Chưa đạt / Chạy tạm, tiếp tục theo dõi)',
+  })
   @IsOptional()
   @IsString()
+  @IsIn(['Đạt', 'Chưa đạt', 'Chạy tạm, tiếp tục theo dõi'])
   chkQuality?: string;
+
+  @ApiPropertyOptional({ example: 'Máy chạy ổn định, tiếp tục theo dõi nhiệt độ sấy', description: 'Ghi chú bàn giao / ý kiến đánh giá' })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 
   @ApiPropertyOptional({ example: 'WO-20260324-88', description: 'Mã đơn hàng / Work Order (không bắt buộc)' })
   @IsOptional()
@@ -69,10 +79,20 @@ export class CreateCpsfDto {
 }
 
 export class UpdateCpsfDto {
-  @ApiPropertyOptional()
+  @ApiPropertyOptional({
+    example: 'Đạt',
+    enum: ['Đạt', 'Chưa đạt', 'Chạy tạm, tiếp tục theo dõi'],
+    description: 'Chất lượng in (Đạt / Chưa đạt / Chạy tạm, tiếp tục theo dõi)',
+  })
   @IsOptional()
   @IsString()
+  @IsIn(['Đạt', 'Chưa đạt', 'Chạy tạm, tiếp tục theo dõi'])
   chkQuality?: string;
+
+  @ApiPropertyOptional({ example: 'Máy chạy ổn định, tiếp tục theo dõi nhiệt độ sấy', description: 'Ghi chú bàn giao / ý kiến đánh giá' })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 
   @ApiPropertyOptional()
   @IsOptional()

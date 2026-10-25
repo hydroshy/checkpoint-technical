@@ -13,13 +13,13 @@
       "canAccessControlPanel": false
     },
     "createdAt": "2026-10-03T08:28:04.802Z",
-    "updatedAt": "2026-10-15T17:09:27.606Z"
+    "updatedAt": "2026-10-25T13:08:32.066Z"
   },
   {
     "id": "user-emp-1",
     "username": "user01",
     "email": "user01@checkpointsystems.com",
-    "passwordHash": "$2a$10$E9jR8ilmrYqq0QG0u7OFkOXZs/DfXVYUmgSj/YyeEWlfZCZVXkeTK",
+    "passwordHash": "$2a$10$FMQ9l0taewZWnd6TP.PsTO7pFx.d32b5hIAD/G2shfcJCNxjrN0.a",
     "fullName": "Nguyễn Văn A (SX)",
     "role": "EMPLOYEE",
     "isActive": true,
@@ -29,7 +29,7 @@
       "canAccessControlPanel": false
     },
     "createdAt": "2026-10-03T08:28:04.802Z",
-    "updatedAt": "2026-10-15T17:09:27.376Z"
+    "updatedAt": "2026-10-25T13:08:31.836Z"
   },
   {
     "id": "user-admin-1",
@@ -45,7 +45,7 @@
       "canAccessControlPanel": true
     },
     "createdAt": "2026-10-03T08:28:04.802Z",
-    "updatedAt": "2026-10-15T17:09:26.125Z"
+    "updatedAt": "2026-10-25T13:08:30.571Z"
   },
   {
     "id": "7d7c70f1-3ab9-4fc7-80e5-2c4031ffc2e7",
@@ -77,7 +77,7 @@
       "canAccessControlPanel": true
     },
     "createdAt": "2026-10-08T01:03:09.535Z",
-    "updatedAt": "2026-10-15T17:09:26.125Z"
+    "updatedAt": "2026-10-25T13:08:30.571Z"
   },
   {
     "id": "5bc78fd2-9a2a-4915-bc52-e46a4dfed3c7",

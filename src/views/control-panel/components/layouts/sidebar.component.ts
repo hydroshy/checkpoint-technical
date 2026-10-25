@@ -44,7 +44,7 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-table-list w-4 text-center text-xs text-sky-500"></i>
-              <span class="truncate">{{ t('Ticket Management', 'Quản lý phiếu kỹ thuật') }}</span>
+              <span class="truncate">{{ t('Requests Management', 'Quản lý phiếu kỹ thuật') }}</span>
             </button>
             <!-- Ẩn liên kết phụ trên Sidebar - chỉ để 1 mục duy nhất dẫn đến module -->
             <span class="hidden" aria-hidden="true">
@@ -58,7 +58,7 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-list-check w-4 text-center text-xs text-amber-500"></i>
-              <span class="truncate">{{ t('Task Assignment', 'Phân công kỹ thuật') }}</span>
+              <span class="truncate">{{ t('Assign Tasks', 'Phân công kỹ thuật') }}</span>
               <span v-if="pendingAssignCount > 0" class="ml-auto px-1.5 py-0.5 text-[10px] font-bold bg-amber-500/20 text-amber-400 rounded-full font-mono">
                 {{ pendingAssignCount }}
               </span>
@@ -84,14 +84,14 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-users w-4 text-center text-xs text-cyan-500"></i>
-              <span class="truncate">{{ t('Technical Staff', 'Nhân viên kỹ thuật') }}</span>
+              <span class="truncate">{{ t('Technicians', 'Nhân viên kỹ thuật') }}</span>
             </button>
           </div>
 
           <!-- GROUP 3: QUẢN LÝ USER & PHÂN QUYỀN -->
           <div class="space-y-1">
             <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              {{ t('User Accounts & RBAC', 'Quản Lý User & Phân Quyền') }}
+              {{ t('Users & Permissions', 'Tài Khoản & Phân Quyền') }}
             </div>
             <button
               @click="switchTab('users')"
@@ -99,14 +99,14 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
               class="nav-item w-full py-2 px-3 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition text-left cursor-pointer"
             >
               <i class="fa-solid fa-user-shield w-4 text-center text-xs text-rose-500"></i>
-              <span class="truncate">{{ t('Accounts & Permissions', 'Tài khoản & phân quyền') }}</span>
+              <span class="truncate">{{ t('Users & Permissions', 'Tài khoản & phân quyền') }}</span>
             </button>
           </div>
 
           <!-- GROUP 4: DATABASE & CƠ SỞ DỮ LIỆU -->
           <div class="space-y-1">
             <div class="px-2 pb-1 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">
-              Database
+              {{ t('Database', 'Cơ Sở Dữ Liệu') }}
             </div>
             <button
               @click="switchTab('database')"
@@ -124,11 +124,11 @@ export const CP_SIDEBAR_HTML = `      <!-- MOBILE BACKDROP -->
         <!-- Sidebar Footer -->
         <div class="pt-3 border-t border-slate-200 dark:border-slate-800 text-[11px] text-slate-400 space-y-1">
           <div class="flex justify-between">
-            <span>Dự án:</span>
+            <span>{{ t('Project:', 'Dự án:') }}</span>
             <span class="font-bold text-slate-700 dark:text-slate-200">Checkpoint Systems</span>
           </div>
           <div class="flex justify-between">
-            <span>Hệ thống:</span>
+            <span>{{ t('System:', 'Hệ thống:') }}</span>
             <span class="font-semibold text-slate-700 dark:text-slate-200">Control Panel</span>
           </div>
           <div class="flex justify-between">

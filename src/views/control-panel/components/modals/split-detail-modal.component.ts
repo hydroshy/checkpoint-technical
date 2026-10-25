@@ -58,25 +58,25 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
             <div v-if="selectedChain.cpst" class="space-y-3">
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">TECHNICIAN TIẾP NHẬN</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('TECHNICIAN RECEIVED', 'TECHNICIAN TIẾP NHẬN') }}</span>
                   <span class="font-medium text-slate-800 dark:text-slate-100">{{ formatTechnicianName(selectedChain.cpst.recvBy) }}</span>
                 </div>
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">TRẠNG THÁI KT</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('TECH STATUS', 'TRẠNG THÁI KT') }}</span>
                   <span class="font-bold text-emerald-500">{{ selectedChain.cpst.chkStatus }}</span>
                 </div>
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">THỜI GIAN GỬI</span>
-                  <span class="font-medium">{{ selectedChain.cpst.submittedAt ? new Date(selectedChain.cpst.submittedAt).toLocaleString('vi-VN') : '-' }}</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('SUBMITTED TIME', 'THỜI GIAN GỬI') }}</span>
+                  <span class="font-medium">{{ selectedChain.cpst.submittedAt ? new Date(selectedChain.cpst.submittedAt).toLocaleString(currentLang === 'vi' ? 'vi-VN' : 'en-US') : '-' }}</span>
                 </div>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">NGUYÊN NHÂN GỐC:</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('ROOT CAUSE:', 'NGUYÊN NHÂN GỐC:') }}</span>
                   <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">{{ selectedChain.cpst.rootCause || 'N/A' }}</p>
                 </div>
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">HÀNH ĐỘNG KHẮC PHỤC:</span>
+                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('ACTION TAKEN:', 'HÀNH ĐỘNG KHẮC PHỤC:') }}</span>
                   <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">{{ selectedChain.cpst.actionTaken || 'N/A' }}</p>
                 </div>
               </div>
@@ -84,19 +84,19 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               <!-- HÌNH ẢNH KỸ THUẬT VIÊN ĐÃ LƯU (CPST) -->
               <div v-if="(selectedChain.cpst?.photosBefore && selectedChain.cpst.photosBefore.length > 0) || (selectedChain.cpst?.photosAfter && selectedChain.cpst.photosAfter.length > 0) || (selectedChain.photosBefore && selectedChain.photosBefore.length > 0) || (selectedChain.photosAfter && selectedChain.photosAfter.length > 0)" class="pt-3 border-t border-slate-200 dark:border-slate-700/80 space-y-3">
                 <div class="font-bold text-slate-700 dark:text-slate-300 text-xs flex items-center gap-2">
-                  <i class="fa-solid fa-camera text-sky-500"></i> Hình Ảnh
+                  <i class="fa-solid fa-camera text-sky-500"></i> {{ t('Photos', 'Hình Ảnh') }}
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <!-- Trước sửa chữa -->
                   <div class="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
-                      <span>📸 Trước Sửa Chữa</span>
+                      <span>📸 {{ t('Before Repair', 'Trước Sửa Chữa') }}</span>
                       <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                        {{ ((selectedChain.cpst?.photosBefore || selectedChain.photosBefore) || []).length }} ảnh
+                        {{ ((selectedChain.cpst?.photosBefore || selectedChain.photosBefore) || []).length }} {{ t('photos', 'ảnh') }}
                       </span>
                     </div>
                     <div v-if="((selectedChain.cpst?.photosBefore || selectedChain.photosBefore) || []).length === 0" class="text-xs text-slate-400 italic py-3 text-center">
-                      Không có ảnh
+                      {{ t('No photos', 'Không có ảnh') }}
                     </div>
                     <div v-else class="grid grid-cols-3 gap-2">
                       <div
@@ -104,7 +104,7 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                         :key="'before-'+idx"
                         @click="openLightbox(img)"
                         class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group hover:opacity-90 transition relative cursor-pointer"
-                        title="Bấm để xem ảnh phóng to"
+                        :title="t('Click to enlarge photo', 'Bấm để xem ảnh phóng to')"
                       >
                         <img :src="img" class="w-full h-full object-cover" />
                         <span class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition">
@@ -117,13 +117,13 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                   <!-- Sau sửa chữa -->
                   <div class="p-3 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
                     <div class="text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 flex items-center justify-between">
-                      <span>✨ Sau Sửa Chữa</span>
+                      <span>✨ {{ t('After Repair', 'Sau Sửa Chữa') }}</span>
                       <span class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                        {{ ((selectedChain.cpst?.photosAfter || selectedChain.photosAfter) || []).length }} ảnh
+                        {{ ((selectedChain.cpst?.photosAfter || selectedChain.photosAfter) || []).length }} {{ t('photos', 'ảnh') }}
                       </span>
                     </div>
                     <div v-if="((selectedChain.cpst?.photosAfter || selectedChain.photosAfter) || []).length === 0" class="text-xs text-slate-400 italic py-3 text-center">
-                      Không có ảnh
+                      {{ t('No photos', 'Không có ảnh') }}
                     </div>
                     <div v-else class="grid grid-cols-3 gap-2">
                       <div
@@ -131,7 +131,7 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                         :key="'after-'+idx"
                         @click="openLightbox(img)"
                         class="block aspect-square rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700 group hover:opacity-90 transition relative cursor-pointer"
-                        title="Bấm để xem ảnh phóng to"
+                        :title="t('Click to enlarge photo', 'Bấm để xem ảnh phóng to')"
                       >
                         <img :src="img" class="w-full h-full object-cover" />
                         <span class="absolute inset-0 bg-black/25 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white text-xs transition">
@@ -143,14 +143,14 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                 </div>
               </div>
               <div v-else class="text-[11px] text-slate-400 italic pt-1">
-                <i class="fa-solid fa-camera text-slate-400 mr-1"></i> Kỹ thuật viên chưa đính kèm hình ảnh cho phiếu CPST này
+                <i class="fa-solid fa-camera text-slate-400 mr-1"></i> {{ t('Technician has not attached photos for this CPST ticket', 'Kỹ thuật viên chưa đính kèm hình ảnh cho phiếu CPST này') }}
               </div>
             </div>
 
             <div v-else class="flex flex-col sm:flex-row items-center justify-between p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 gap-3">
-              <span class="text-amber-500 font-medium">Yêu cầu này đang chờ kỹ thuật phản hồi.</span>
+              <span class="text-amber-500 font-medium">{{ t('This request is pending technical feedback.', 'Yêu cầu này đang chờ kỹ thuật phản hồi.') }}</span>
               <a :href="'/technical-feedback?cpsr=' + encodeURIComponent((selectedChain.cpsr || selectedChain).docNo)" target="_blank" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow transition">
-                + Tạo Phản Hồi CPST Ngay →
+                + {{ t('Create CPST Feedback Now', 'Tạo Phản Hồi CPST Ngay') }} →
               </a>
             </div>
           </div>
@@ -167,7 +167,10 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <span class="text-slate-400 block text-[10px] font-bold">{{ t('PRINT QUALITY', 'CHẤT LƯỢNG IN') }}</span>
-                  <span class="font-bold text-xs" :class="selectedChain.cpsf.chkQuality === 'Đạt' ? 'text-emerald-500' : 'text-rose-500'">{{ selectedChain.cpsf.chkQuality }}</span>
+                  <span v-if="selectedChain.cpsf.chkQuality === 'Chạy tạm, tiếp tục theo dõi'" class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-xs bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    🟡 {{ t('Conditional Run / Monitor', 'Chạy tạm, tiếp tục theo dõi') }}
+                  </span>
+                  <span v-else class="font-bold text-xs" :class="selectedChain.cpsf.chkQuality === 'Đạt' ? 'text-emerald-500' : 'text-rose-500'">{{ selectedChain.cpsf.chkQuality }}</span>
                 </div>
                 <div>
                   <span class="text-slate-400 block text-[10px] font-bold">WORK ORDER</span>
@@ -181,6 +184,10 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                   <span class="text-slate-400 block text-[10px] font-bold">{{ t('PROD REP SIGNATURE', 'ĐẠI DIỆN SX KÝ NHẬN') }}</span>
                   <span class="font-medium text-slate-800 dark:text-slate-100">{{ selectedChain.cpsf.prodMgr }}</span>
                 </div>
+              </div>
+              <div v-if="selectedChain.cpsf.notes" class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/60 text-xs">
+                <span class="text-slate-400 block text-[10px] font-bold uppercase tracking-wider mb-0.5">{{ t('Notes / Remarks', 'Ghi chú / Ghi nhận') }}</span>
+                <p class="text-slate-700 dark:text-slate-200 whitespace-pre-wrap">{{ selectedChain.cpsf.notes }}</p>
               </div>
             </div>
 

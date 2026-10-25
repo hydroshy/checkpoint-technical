@@ -24,7 +24,7 @@ export const CP_HEADER_HTML = `    <!-- TOP APP BAR -->
           type="button"
           @click="sidebarCollapsed = !sidebarCollapsed"
           class="hidden md:flex items-center justify-center p-1.5 rounded-lg text-slate-500 hover:text-slate-800 dark:hover:text-white border border-slate-200 dark:border-slate-800 transition cursor-pointer"
-          :title="sidebarCollapsed ? 'Mở rộng menu' : 'Thu gọn menu'"
+          :title="sidebarCollapsed ? t('Expand menu', 'Mở rộng menu') : t('Collapse menu', 'Thu gọn menu')"
         >
           <i class="fa-solid text-xs" :class="sidebarCollapsed ? 'fa-bars text-sky-500' : 'fa-bars'"></i>
         </button>
@@ -46,7 +46,7 @@ export const CP_HEADER_HTML = `    <!-- TOP APP BAR -->
             <div class="w-6 h-6 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center justify-center font-bold text-xs">
               {{ userInitials }}
             </div>
-            <span class="text-xs font-bold hidden sm:inline">{{ currentUser.fullName || currentUser.username || 'Quản trị' }}</span>
+            <span class="text-xs font-bold hidden sm:inline">{{ currentUser.fullName || currentUser.username || t('Admin', 'Quản trị') }}</span>
             <i :class="userMenuOpen ? 'rotate-180' : ''" class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform"></i>
           </button>
 

@@ -8,7 +8,7 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
           <div>
             <h2 class="text-base font-extrabold font-mono text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <i class="fa-solid fa-link text-purple-500"></i>
-              <span>Ghép Nối Phiếu: {{ linkForm.cpsDocNo }}</span>
+              <span>{{ t('Link Ticket:', 'Ghép Nối Phiếu:') }} {{ linkForm.cpsDocNo }}</span>
             </h2>
           </div>
           <button @click="closeLinkModal" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 text-lg cursor-pointer">✕</button>
@@ -17,7 +17,7 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
         <div class="p-6 space-y-4 text-xs">
           <!-- CPS Selector Dropdown (Allows changing or selecting CPS) -->
           <div class="space-y-1">
-            <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Chọn Phiếu CPS Cần Ghép Nối</label>
+            <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ t('Select CPS Ticket to Link', 'Chọn Phiếu CPS Cần Ghép Nối') }}</label>
             <select v-model="linkForm.cpsDocNo" @change="onSelectLinkCps(linkForm.cpsDocNo)" class="input-box w-full px-3 py-2 rounded-xl text-xs font-mono font-bold outline-none cursor-pointer">
               <option v-for="c in chainList" :key="c.docNo || c.id" :value="c.docNo">
                 {{ c.docNo }} • {{ c.cpsrDocNo || c.cpsr?.docNo || '-' }} ({{ c.machineName || c.cpsr?.machineName || '-' }})
@@ -28,15 +28,15 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
           <!-- Information Summary Card -->
           <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
             <div class="flex items-center justify-between text-[11px]">
-              <span class="text-slate-500">Mã CPSR Gốc:</span>
+              <span class="text-slate-500">{{ t('Original CPSR Code:', 'Mã CPSR Gốc:') }}</span>
               <span class="font-mono font-bold text-sky-600 dark:text-sky-400">{{ linkForm.cpsrDocNo || '-' }}</span>
             </div>
             <div class="flex items-center justify-between text-[11px]">
-              <span class="text-slate-500">Thiết bị:</span>
+              <span class="text-slate-500">{{ t('Equipment:', 'Thiết bị:') }}</span>
               <span class="font-medium text-slate-700 dark:text-slate-200">{{ linkForm.machineName || '-' }}</span>
             </div>
             <div class="flex items-center justify-between text-[11px]">
-              <span class="text-slate-500">Sự cố:</span>
+              <span class="text-slate-500">{{ t('Issue:', 'Sự cố:') }}</span>
               <span class="truncate max-w-[220px] text-slate-600 dark:text-slate-300 font-mono">{{ linkForm.problem || '-' }}</span>
             </div>
           </div>
@@ -45,29 +45,29 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
           <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-2">
             <div class="flex items-center justify-between">
               <span class="font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-screwdriver-wrench"></i> 2. Phản Hồi Kỹ Thuật (CPST)
+                <i class="fa-solid fa-screwdriver-wrench"></i> 2. {{ t('Technical Feedback (CPST)', 'Phản Hồi Kỹ Thuật (CPST)') }}
               </span>
               <span v-if="linkForm.currentCpst" class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                Đã nối: {{ linkForm.currentCpst }}
+                {{ t('Linked:', 'Đã nối:') }} {{ linkForm.currentCpst }}
               </span>
-              <span v-else class="text-[10px] text-amber-500 italic">Chưa ghép nối</span>
+              <span v-else class="text-[10px] text-amber-500 italic">{{ t('Not linked', 'Chưa ghép nối') }}</span>
             </div>
 
             <div v-if="linkForm.currentCpst" class="flex items-center justify-between pt-1">
-              <span class="text-slate-500">Gỡ ghép nối CPST hiện tại:</span>
+              <span class="text-slate-500">{{ t('Unlink current CPST:', 'Gỡ ghép nối CPST hiện tại:') }}</span>
               <button
                 type="button"
                 @click="unlinkItem('cpst')"
                 class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 font-bold transition cursor-pointer"
               >
-                <i class="fa-solid fa-unlink"></i> Hủy ghép CPST
+                <i class="fa-solid fa-unlink"></i> {{ t('Unlink CPST', 'Hủy ghép CPST') }}
               </button>
             </div>
 
             <div v-else class="space-y-1">
-              <label class="block text-slate-600 dark:text-slate-400">Chọn phiếu CPST để ghép nối:</label>
+              <label class="block text-slate-600 dark:text-slate-400">{{ t('Select CPST ticket to link:', 'Chọn phiếu CPST để ghép nối:') }}</label>
               <select v-model="linkForm.selectedCpst" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                <option value="">-- Chọn phiếu CPST khả dụng --</option>
+                <option value="">-- {{ t('Select available CPST ticket', 'Chọn phiếu CPST khả dụng') }} --</option>
                 <option v-for="t in cpstList" :key="t.docNo || t.id" :value="t.docNo">
                   {{ t.docNo }} (Technician: {{ formatTechnicianName(t.recvBy) || 'N/A' }} • {{ t.chkStatus || 'N/A' }})
                 </option>
@@ -79,29 +79,29 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
           <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-700/80 space-y-2">
             <div class="flex items-center justify-between">
               <span class="font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-                <i class="fa-solid fa-circle-check"></i> 3. Nghiệm Thu & Bàn Giao (CPSF)
+                <i class="fa-solid fa-circle-check"></i> 3. {{ t('Acceptance & Handover (CPSF)', 'Nghiệm Thu & Bàn Giao (CPSF)') }}
               </span>
               <span v-if="linkForm.currentCpsf" class="px-2 py-0.5 rounded font-mono text-[10px] font-bold bg-purple-500/10 text-purple-600 border border-purple-500/20">
-                Đã nối: {{ linkForm.currentCpsf }}
+                {{ t('Linked:', 'Đã nối:') }} {{ linkForm.currentCpsf }}
               </span>
-              <span v-else class="text-[10px] text-amber-500 italic">Chưa ghép nối</span>
+              <span v-else class="text-[10px] text-amber-500 italic">{{ t('Not linked', 'Chưa ghép nối') }}</span>
             </div>
 
             <div v-if="linkForm.currentCpsf" class="flex items-center justify-between pt-1">
-              <span class="text-slate-500">Gỡ ghép nối CPSF hiện tại:</span>
+              <span class="text-slate-500">{{ t('Unlink current CPSF:', 'Gỡ ghép nối CPSF hiện tại:') }}</span>
               <button
                 type="button"
                 @click="unlinkItem('cpsf')"
                 class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 dark:bg-rose-500/10 dark:hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 border border-rose-300 dark:border-rose-500/30 font-bold transition cursor-pointer"
               >
-                <i class="fa-solid fa-unlink"></i> Hủy ghép CPSF
+                <i class="fa-solid fa-unlink"></i> {{ t('Unlink CPSF', 'Hủy ghép CPSF') }}
               </button>
             </div>
 
             <div v-else class="space-y-1">
-              <label class="block text-slate-600 dark:text-slate-400">Chọn phiếu CPSF để ghép nối:</label>
+              <label class="block text-slate-600 dark:text-slate-400">{{ t('Select CPSF ticket to link:', 'Chọn phiếu CPSF để ghép nối:') }}</label>
               <select v-model="linkForm.selectedCpsf" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                <option value="">-- Chọn phiếu CPSF khả dụng --</option>
+                <option value="">-- {{ t('Select available CPSF ticket', 'Chọn phiếu CPSF khả dụng') }} --</option>
                 <option v-for="f in cpsfList" :key="f.docNo || f.id" :value="f.docNo">
                   {{ f.docNo }} (WO: {{ f.workOrder || 'N/A' }} • CL: {{ f.chkQuality || 'N/A' }})
                 </option>
@@ -112,7 +112,7 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
           <!-- Buttons -->
           <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
             <button type="button" @click="closeLinkModal" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-              Đóng
+              {{ t('Close', 'Đóng') }}
             </button>
             <button
               type="button"
@@ -122,7 +122,7 @@ export const CP_LINK_MODAL_HTML = `    <!-- ====================================
             >
               <i v-if="isLinking" class="fa-solid fa-spinner fa-spin"></i>
               <i v-else class="fa-solid fa-link"></i>
-              <span>Lưu Ghép Nối</span>
+              <span>{{ t('Save Link', 'Lưu Ghép Nối') }}</span>
             </button>
           </div>
         </div>

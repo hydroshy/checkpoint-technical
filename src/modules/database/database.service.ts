@@ -273,6 +273,7 @@ export interface CpsfRecord {
   cpstDocNo: string;
   cpsrDocNo?: string;
   chkQuality?: string;
+  notes?: string;
   workOrder?: string;
   wo?: string;
   woTotalQty?: number;
@@ -315,6 +316,7 @@ export interface CpsrChainRecord {
   wo?: string | null;
   chkStatus?: string | null;
   chkQuality?: string | null;
+  notes?: string | null;
 }
 
 export type CpsStatus = 'OPEN_TASK' | 'TO_ASSIGN' | 'IN_PROGRESS' | 'TO_CONFIRM' | 'OVER_DUE' | 'CLOSED';
@@ -1046,13 +1048,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               cpst_id VARCHAR(255) REFERENCES cpst(id) ON DELETE CASCADE,
               cpst_doc_no VARCHAR(255) UNIQUE REFERENCES cpst(doc_no) ON DELETE CASCADE,
               cpsr_doc_no VARCHAR(255),
-              chk_quality VARCHAR(50),
+              chk_quality VARCHAR(100),
               work_order VARCHAR(255),
               wo_total_qty NUMERIC DEFAULT 0,
               waste_qty NUMERIC DEFAULT 0,
               waste_unit VARCHAR(50),
               waste_percent VARCHAR(50),
               prod_mgr VARCHAR(255),
+              notes TEXT,
               submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               created_by VARCHAR(255) DEFAULT 'public',
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
@@ -1061,6 +1064,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
             ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
             ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS notes TEXT;
+            ALTER TABLE cpsf ALTER COLUMN chk_quality TYPE VARCHAR(100);
+            ALTER TABLE cps ALTER COLUMN chk_quality TYPE VARCHAR(100);
             CREATE INDEX IF NOT EXISTS idx_cpsf_doc_no ON cpsf(doc_no);
             CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_doc_no ON cpsf(cpst_doc_no);
             CREATE INDEX IF NOT EXISTS idx_cpsf_submitted_at ON cpsf(submitted_at);
@@ -1504,6 +1510,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         wasteUnit: r.waste_unit || undefined,
         wastePercent: r.waste_percent || undefined,
         prodMgr: r.prod_mgr || undefined,
+        notes: r.notes || undefined,
         submittedAt: r.submitted_at ? new Date(r.submitted_at).toISOString() : new Date().toISOString(),
         createdBy: r.created_by || 'public',
         createdAt: r.created_at ? new Date(r.created_at).toISOString() : new Date().toISOString(),
@@ -2678,8 +2685,8 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           `INSERT INTO cpsf (
              id, doc_no, cpst_id, cpst_doc_no, cpsr_doc_no, chk_quality,
              work_order, wo_total_qty, waste_qty, waste_unit, waste_percent,
-             prod_mgr, submitted_at, created_by, created_at, updated_at
-           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)
+             prod_mgr, notes, submitted_at, created_by, created_at, updated_at
+           ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)
            ON CONFLICT (id) DO UPDATE SET
              doc_no = EXCLUDED.doc_no,
              cpst_id = EXCLUDED.cpst_id,
@@ -2692,6 +2699,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
              waste_unit = EXCLUDED.waste_unit,
              waste_percent = EXCLUDED.waste_percent,
              prod_mgr = EXCLUDED.prod_mgr,
+             notes = EXCLUDED.notes,
              submitted_at = EXCLUDED.submitted_at,
              created_by = EXCLUDED.created_by,
              updated_at = EXCLUDED.updated_at`,
@@ -2701,7 +2709,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             req.woTotalQty !== undefined && req.woTotalQty !== null ? req.woTotalQty : (req.totalQty || 0),
             req.wasteQty !== undefined && req.wasteQty !== null ? req.wasteQty : (req.scrapQty || 0),
             req.wasteUnit || null, req.wastePercent || null,
-            req.prodMgr || null, req.submittedAt, req.createdBy || 'public', req.createdAt, req.updatedAt,
+            req.prodMgr || null, req.notes || null, req.submittedAt, req.createdBy || 'public', req.createdAt, req.updatedAt,
           ]
         );
       } catch (err: any) {
@@ -2801,6 +2809,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
         const workOrder = r.workOrder || cpsf?.workOrder || null;
         const chkStatus = r.chkStatus || cpst?.chkStatus || null;
         const chkQuality = r.chkQuality || cpsf?.chkQuality || null;
+        const notes = r.notes || cpsf?.notes || null;
 
         const assignedTo = r.assignedTo || cpst?.recvBy || null;
         const assignedToName = r.assignedToName || assignedTo;
@@ -2821,6 +2830,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           workOrder,
           chkStatus,
           chkQuality,
+          notes,
           assignedTo,
           assignedToName,
           technician,
@@ -3059,6 +3069,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           workOrder: cpsf?.workOrder || null,
           chkStatus: cpst?.chkStatus || null,
           chkQuality: cpsf?.chkQuality || null,
+          notes: cpsf?.notes || null,
           closedAt: cpsf ? (cpsf.submittedAt || now) : null,
           createdAt: cpsr.createdAt || now,
           updatedAt: now,
@@ -3089,6 +3100,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           existing.wasteUnit = cpsf.wasteUnit || null;
           existing.workOrder = cpsf.workOrder || null;
           existing.chkQuality = cpsf.chkQuality || null;
+          if (cpsf.notes && !existing.notes) existing.notes = cpsf.notes;
           existing.closedAt = cpsf.submittedAt || new Date().toISOString();
           needUpdate = true;
         }
@@ -3238,6 +3250,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           : (cps?.wastePercent || cpsf?.wastePercent || '0%');
         const chkStatus = cps?.chkStatus || cpst?.chkStatus || null;
         const chkQuality = cps?.chkQuality || cpsf?.chkQuality || null;
+        const notes = cps?.notes || cpsf?.notes || null;
         const status = cps?.status || (cpsf ? 'CLOSED' : (cpst ? 'TO_CONFIRM' : 'TO_ASSIGN'));
 
         return {
@@ -3256,6 +3269,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
           wastePercent,
           chkStatus,
           chkQuality,
+          notes,
           cpsr,
           cpst,
           cpsf,

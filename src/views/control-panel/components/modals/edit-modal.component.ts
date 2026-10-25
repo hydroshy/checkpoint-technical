@@ -6,7 +6,7 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
         <!-- Modal Header -->
         <div class="sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-6 py-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center z-10">
           <div>
-            <div class="text-[10px] uppercase font-bold text-sky-500">Chỉnh Sửa Dữ Liệu Phiếu</div>
+            <div class="text-[10px] uppercase font-bold text-sky-500">{{ t('Edit Ticket Data', 'Chỉnh Sửa Dữ Liệu Phiếu') }}</div>
             <h2 class="text-base font-extrabold font-mono text-slate-800 dark:text-slate-100 flex items-center gap-2">
               <i class="fa-solid fa-pen-to-square text-sky-500"></i>
               <span>{{ editForm.docNo }}</span>
@@ -25,57 +25,57 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <div class="flex items-center justify-between mb-1">
-                  <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">Mã CPSR Gốc (Liên kết)</label>
+                  <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">{{ t('Original CPSR Code (Linked)', 'Mã CPSR Gốc (Liên kết)') }}</label>
                   <button
                     type="button"
                     v-if="editForm.cpsrDocNo"
                     @click="openEditModal('cpsr', { docNo: editForm.cpsrDocNo })"
                     class="text-sky-600 hover:text-sky-500 dark:text-sky-400 dark:hover:text-sky-300 text-[11px] font-bold cursor-pointer inline-flex items-center gap-1"
-                    title="Chuyển sang sửa thông tin phiếu CPSR này"
+                    :title="t('Switch to edit this CPSR ticket info', 'Chuyển sang sửa thông tin phiếu CPSR này')"
                   >
-                    <i class="fa-solid fa-pen-to-square"></i> Sửa CPSR này
+                    <i class="fa-solid fa-pen-to-square"></i> {{ t('Edit this CPSR', 'Sửa CPSR này') }}
                   </button>
                 </div>
                 <input type="text" :value="editForm.cpsrDocNo" disabled class="input-box w-full px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800/80 text-slate-500 cursor-not-allowed" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Trạng thái phiếu</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Ticket Status', 'Trạng thái phiếu') }}</label>
                 <select v-model="editForm.status" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                  <option value="TO_ASSIGN">⏳ Chờ phân công (TO_ASSIGN)</option>
-                  <option value="IN_PROGRESS">⚡ Đang xử lý (IN_PROGRESS)</option>
-                  <option value="OVER_DUE">⚠️ Quá hạn (OVER_DUE)</option>
-                  <option value="CLOSED">✅ Đã đóng (CLOSED)</option>
-                  <option value="OPEN_TASK">📋 Mở (OPEN_TASK)</option>
+                  <option value="TO_ASSIGN">⏳ {{ t('Pending Assignment (TO_ASSIGN)', 'Chờ phân công (TO_ASSIGN)') }}</option>
+                  <option value="IN_PROGRESS">⚡ {{ t('In Progress (IN_PROGRESS)', 'Đang xử lý (IN_PROGRESS)') }}</option>
+                  <option value="OVER_DUE">⚠️ {{ t('Overdue (OVER_DUE)', 'Quá hạn (OVER_DUE)') }}</option>
+                  <option value="CLOSED">✅ {{ t('Closed (CLOSED)', 'Đã đóng (CLOSED)') }}</option>
+                  <option value="OPEN_TASK">📋 {{ t('Open (OPEN_TASK)', 'Mở (OPEN_TASK)') }}</option>
                 </select>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Technician Phụ Trách</label>
-                <input type="text" v-model="editForm.assignedTo" list="list-ktv-edit" placeholder="Chọn hoặc nhập tên Technician" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Assigned Technician', 'Technician Phụ Trách') }}</label>
+                <input type="text" v-model="editForm.assignedTo" list="list-ktv-edit" :placeholder="t('Select or enter Technician name', 'Chọn hoặc nhập tên Technician')" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
                 <datalist id="list-ktv-edit">
                   <option v-for="e in employeesList" :key="e.id || e.mnv" :value="e.name + (e.mnv ? ' - ' + e.mnv : '')"></option>
                 </datalist>
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mức Ưu Tiên</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Priority Level', 'Mức Ưu Tiên') }}</label>
                 <select v-model="editForm.priority" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                  <option value="Hỗ trợ ngay">🔴 Hỗ trợ ngay</option>
-                  <option value="Chạy tạm">🟡 Chạy tạm</option>
-                  <option value="Khác">📌 Khác</option>
+                  <option value="Hỗ trợ ngay">🔴 {{ t('Urgent support', 'Hỗ trợ ngay') }}</option>
+                  <option value="Chạy tạm">🟡 {{ t('Temporary run', 'Chạy tạm') }}</option>
+                  <option value="Khác">📌 {{ t('Other', 'Khác') }}</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hạn chót hoàn thành (Deadline)</label>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Deadline', 'Hạn chót hoàn thành (Deadline)') }}</label>
               <input type="datetime-local" v-model="editForm.deadline" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Ghi chú phân công / Xử lý</label>
-              <textarea v-model="editForm.notes" rows="3" placeholder="Nhập ghi chú kỹ thuật..." class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"></textarea>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Assignment / Handling Notes', 'Ghi chú phân công / Xử lý') }}</label>
+              <textarea v-model="editForm.notes" rows="3" :placeholder="t('Enter technical notes...', 'Nhập ghi chú kỹ thuật...')" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"></textarea>
             </div>
           </template>
 
@@ -83,25 +83,25 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
           <template v-else-if="editForm.type === 'cpsr'">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Ngày Yêu Cầu</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Request Date', 'Ngày Yêu Cầu') }}</label>
                 <input type="date" v-model="editForm.reqDate" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Giờ Yêu Cầu</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Request Time', 'Giờ Yêu Cầu') }}</label>
                 <input type="time" v-model="editForm.reqTime" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Người Yêu Cầu</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Requester', 'Người Yêu Cầu') }}</label>
                 <input type="text" v-model="editForm.reqBy" list="list-requesters-edit" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
                 <datalist id="list-requesters-edit">
                   <option v-for="r in requestersList" :key="r.id" :value="r.mnv + ' - ' + r.fullName"></option>
                 </datalist>
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Tên Máy / Thiết Bị</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Machine / Equipment Name', 'Tên Máy / Thiết Bị') }}</label>
                 <input type="text" v-model="editForm.machineName" list="list-machines-edit" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
                 <datalist id="list-machines-edit">
                   <option v-for="m in machinesFlatList" :key="m.name" :value="m.name">{{ m.tech }}</option>
@@ -111,28 +111,28 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Công Nghệ In</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Print Technology', 'Công Nghệ In') }}</label>
                 <select v-model="editForm.printTech" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
                   <option v-for="(machines, tech) in machineCatalog" :key="tech" :value="tech">{{ tech }}</option>
                 </select>
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mức Ưu Tiên</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Priority Level', 'Mức Ưu Tiên') }}</label>
                 <select v-model="editForm.priority" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                  <option value="Hỗ trợ ngay">🔴 Hỗ trợ ngay</option>
-                  <option value="Chạy tạm">🟡 Chạy tạm</option>
-                  <option value="Khác">📌 Khác</option>
+                  <option value="Hỗ trợ ngay">🔴 {{ t('Urgent support', 'Hỗ trợ ngay') }}</option>
+                  <option value="Chạy tạm">🟡 {{ t('Temporary run', 'Chạy tạm') }}</option>
+                  <option value="Khác">📌 {{ t('Other', 'Khác') }}</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Trạng thái sự cố / máy</label>
-              <input type="text" v-model="editForm.machineStatus" placeholder="VD: Hàng SX lần đầu, Hàng SX nhiều lần..." class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Machine / Incident Status', 'Trạng thái sự cố / máy') }}</label>
+              <input type="text" v-model="editForm.machineStatus" :placeholder="t('e.g. First production, Repeated production...', 'VD: Hàng SX lần đầu, Hàng SX nhiều lần...')" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mô Tả Sự Cố</label>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Problem Description', 'Mô Tả Sự Cố') }}</label>
               <textarea v-model="editForm.problem" rows="3" required class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"></textarea>
             </div>
           </template>
@@ -141,34 +141,34 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
           <template v-else-if="editForm.type === 'cpst'">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Technician Tiếp Nhận</label>
-                <input type="text" v-model="editForm.recvBy" list="list-ktv-edit" placeholder="Chọn hoặc nhập tên Technician tiếp nhận" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Receiving Technician', 'Technician Tiếp Nhận') }}</label>
+                <input type="text" v-model="editForm.recvBy" list="list-ktv-edit" :placeholder="t('Select or enter receiving Technician name', 'Chọn hoặc nhập tên Technician tiếp nhận')" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Trạng Thái Kỹ Thuật</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Technical Status', 'Trạng Thái Kỹ Thuật') }}</label>
                 <select v-model="editForm.chkStatus" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                  <option value="Đã khắc phục">🟢 Đã khắc phục</option>
-                  <option value="Theo dõi thêm">🟡 Theo dõi thêm</option>
-                  <option value="Hư hỏng nặng">🔴 Hư hỏng nặng</option>
+                  <option value="Đã khắc phục">🟢 {{ t('Resolved', 'Đã khắc phục') }}</option>
+                  <option value="Theo dõi thêm">🟡 {{ t('Further monitoring', 'Theo dõi thêm') }}</option>
+                  <option value="Hư hỏng nặng">🔴 {{ t('Severe damage', 'Hư hỏng nặng') }}</option>
                 </select>
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Downtime (Phút)</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Downtime (Minutes)', 'Downtime (Phút)') }}</label>
                 <input type="number" v-model.number="editForm.downtime" min="0" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Mã CPSR Liên Kết</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Linked CPSR Code', 'Mã CPSR Liên Kết') }}</label>
                 <input type="text" :value="editForm.cpsrDocNo" disabled class="input-box w-full px-3.5 py-2 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800/80 text-slate-500 cursor-not-allowed" />
               </div>
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Nguyên Nhân Gốc (Root Cause - 4M)</label>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Root Cause (4M)', 'Nguyên Nhân Gốc (Root Cause - 4M)') }}</label>
               <select v-model="editForm.rootCause" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                <option value="" disabled>-- Chọn nguyên nhân gốc rễ (4M) --</option>
+                <option value="" disabled>-- {{ t('Select root cause (4M)', 'Chọn nguyên nhân gốc rễ (4M)') }} --</option>
                 <option value="Man">Man (Con người)</option>
                 <option value="Machine">Machine (Máy móc / Thiết bị)</option>
                 <option value="Material">Material (Nguyên vật liệu)</option>
@@ -179,7 +179,7 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Hành Động Khắc Phục (Action Taken)</label>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Action Taken', 'Hành Động Khắc Phục (Action Taken)') }}</label>
               <textarea v-model="editForm.actionTaken" rows="2" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"></textarea>
             </div>
           </template>
@@ -188,52 +188,58 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
           <template v-else-if="editForm.type === 'cpsf'">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Chất Lượng In</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Print Quality', 'Chất Lượng In') }}</label>
                 <select v-model="editForm.chkQuality" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                  <option value="Đạt">🟢 Đạt</option>
-                  <option value="Chưa đạt">🔴 Chưa đạt</option>
+                  <option value="Đạt">🟢 {{ t('Pass', 'Đạt') }}</option>
+                  <option value="Chạy tạm, tiếp tục theo dõi">🟡 {{ t('Conditional Run / Monitor', 'Chạy tạm, tiếp tục theo dõi') }}</option>
+                  <option value="Chưa đạt">🔴 {{ t('Fail', 'Chưa đạt') }}</option>
                 </select>
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Work Order (Mã WO)</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Work Order ({{ t('WO Code', 'Mã WO') }})</label>
                 <input type="text" v-model="editForm.workOrder" placeholder="VD: WO-20261006-01" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
               </div>
             </div>
 
             <div class="grid grid-cols-3 gap-3">
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Tổng SL</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Total Qty', 'Tổng SL') }}</label>
                 <input type="number" v-model.number="editForm.woTotalQty" min="0" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">SL Phế</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Scrap Qty', 'SL Phế') }}</label>
                 <input type="number" v-model.number="editForm.wasteQty" min="0" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
               </div>
               <div>
-                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Đơn Vị</label>
+                <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Unit', 'Đơn Vị') }}</label>
                 <select v-model="editForm.wasteUnit" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
                   <option value="PCS">PCS</option>
-                  <option value="Mét">Mét</option>
-                  <option value="Tờ in">Tờ in</option>
+                  <option value="Mét">{{ t('Meter', 'Mét') }}</option>
+                  <option value="Tờ in">{{ t('Sheet', 'Tờ in') }}</option>
                 </select>
               </div>
             </div>
 
             <div>
-              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Đại Diện SX Nghiệm Thu</label>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Production Acceptance Rep', 'Đại Diện SX Nghiệm Thu') }}</label>
               <input type="text" v-model="editForm.prodMgr" list="list-requesters-edit" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none" />
+            </div>
+
+            <div>
+              <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Notes / Remarks', 'Ghi Chú / Ghi Nhận') }}</label>
+              <textarea v-model="editForm.notes" rows="2" placeholder="VD: Theo dõi chất lượng in sau xử lý..." class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"></textarea>
             </div>
           </template>
 
           <!-- Buttons -->
           <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-200 dark:border-slate-800">
             <button type="button" @click="closeEditModal" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer">
-              Hủy Bỏ
+              {{ t('Cancel', 'Hủy Bỏ') }}
             </button>
             <button type="submit" :disabled="isSavingEdit" class="px-5 py-2 bg-sky-600 hover:bg-sky-500 disabled:opacity-50 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-lg shadow-sky-600/30 cursor-pointer">
               <i v-if="isSavingEdit" class="fa-solid fa-spinner fa-spin"></i>
               <i v-else class="fa-solid fa-check"></i>
-              <span>Lưu Thay Đổi</span>
+              <span>{{ t('Save Changes', 'Lưu Thay Đổi') }}</span>
             </button>
           </div>
         </form>

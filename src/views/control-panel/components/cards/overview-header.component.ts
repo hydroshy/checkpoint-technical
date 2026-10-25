@@ -41,7 +41,7 @@ export const CP_OVERVIEW_HEADER_HTML = `          <!-- HEADER TỔNG QUAN HỆ T
                     {{ usersList.length || 0 }} <span class="text-xs font-semibold text-slate-500">{{ t('accounts', 'tài khoản') }}</span>
                   </div>
                   <div class="text-[11px] text-slate-500">
-                    {{ usersList.filter(u => u.role === 'ADMIN').length }} Admin · {{ usersList.filter(u => u.role === 'TECHNICIAN').length }} KTV · {{ usersList.filter(u => u.role === 'EMPLOYEE').length }} NV
+                    {{ usersList.filter(u => u.role === 'ADMIN').length }} Admin · {{ usersList.filter(u => u.role === 'TECHNICIAN').length }} {{ t('Tech', 'KTV') }} · {{ usersList.filter(u => u.role === 'EMPLOYEE').length }} {{ t('Staff', 'NV') }}
                   </div>
                 </div>
                 <div class="w-11 h-11 rounded-xl bg-sky-500/10 text-sky-500 flex items-center justify-center text-lg">
@@ -94,7 +94,7 @@ export const CP_OVERVIEW_HEADER_HTML = `          <!-- HEADER TỔNG QUAN HỆ T
                 </div>
                 <div class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 flex items-center gap-2">
                   <i class="fa-solid fa-circle text-[7px] text-emerald-500"></i>
-                  <div class="truncate text-[11px] font-semibold text-slate-700 dark:text-slate-200">Phiếu Kỹ Thuật (CPSR)</div>
+                  <div class="truncate text-[11px] font-semibold text-slate-700 dark:text-slate-200">{{ t('Technical Requests (CPSR)', 'Phiếu Kỹ Thuật (CPSR)') }}</div>
                 </div>
                 <div class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 flex items-center gap-2">
                   <i class="fa-solid fa-circle text-[7px] text-emerald-500"></i>

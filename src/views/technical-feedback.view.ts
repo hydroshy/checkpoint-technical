@@ -22,101 +22,96 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background-color: #f8fafc;
+      background-color: #f1f5f9;
       color: #0f172a;
     }
-    [v-cloak] { display: none !important; }
-    .font-brand { font-family: 'Host Grotesk', sans-serif; }
-    .font-mono { font-family: 'Azeret Mono', monospace; }
-
+    .font-brand {
+      font-family: 'Host Grotesk', sans-serif;
+    }
+    .font-mono {
+      font-family: 'Azeret Mono', monospace;
+    }
     .card-panel {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-    }
-    .input-field {
-      background-color: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: #0f172a;
-    }
-    .input-field:focus {
-      border-color: #0284c7;
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
     }
     .readonly-box {
-      background-color: #f8fafc;
-      border: 1px solid #e2e8f0;
-      color: #334155;
-    }
-
-    /* Big Toggle Buttons */
-    .btn-toggle {
-      min-height: 52px;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 12px;
-      padding: 12px 18px;
-      cursor: pointer;
-      transition: all 0.15s ease-in-out;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      border: 2px solid #e2e8f0;
-      background: #ffffff;
-      color: #475569;
-      user-select: none;
-    }
-    .btn-toggle:hover {
-      border-color: #94a3b8;
-      color: #0f172a;
       background: #f8fafc;
+      border: 1px solid #e2e8f0;
     }
-    .btn-toggle.active-success {
-      background-color: #059669 !important;
-      border-color: #059669 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+    .input-field {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      color: #0f172a;
+      transition: all 0.2s ease;
     }
-    .btn-toggle.active-warning {
-      background-color: #d97706 !important;
-      border-color: #d97706 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(217, 119, 6, 0.35);
+    .input-field:focus {
+      background: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      outline: none;
     }
-    .btn-toggle.active-danger {
-      background-color: #dc2626 !important;
-      border-color: #dc2626 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
-    }
-
-    /* Drag and Drop Box */
     .upload-zone {
       border: 2px dashed #cbd5e1;
-      background-color: #f8fafc;
-      border-radius: 14px;
-      padding: 16px;
+      border-radius: 0.875rem;
+      background: #f8fafc;
+      padding: 1.25rem;
       text-align: center;
-      cursor: pointer;
       transition: all 0.2s ease;
+      cursor: pointer;
     }
     .upload-zone:hover, .upload-zone.dragover {
       border-color: #0284c7;
-      background-color: #f0f9ff;
+      background: #f0f9ff;
     }
-
-    /* Big Submit Button */
-    .btn-submit {
-      min-height: 56px;
-      font-size: 17px;
+    .btn-toggle {
+      width: 100%;
+      padding: 1rem;
+      border-radius: 0.875rem;
+      border: 2px solid #e2e8f0;
+      background: #ffffff;
+      color: #475569;
       font-weight: 700;
-      border-radius: 14px;
+      font-size: 0.95rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
       cursor: pointer;
-      transition: all 0.15s ease-in-out;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    .btn-toggle:hover {
+      border-color: #cbd5e1;
+      background: #f8fafc;
+    }
+    .btn-toggle.active-success {
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #047857;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+    .btn-toggle.active-warning {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      color: #b45309;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
+    }
+    .btn-toggle.active-danger {
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #b91c1c;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
+    }
+    .btn-submit {
       background: #0284c7;
       color: #ffffff;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 1.125rem 2rem;
+      border-radius: 0.875rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
       border: none;
       box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
     }
@@ -134,9 +129,29 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
   <div id="app" v-cloak class="max-w-4xl mx-auto space-y-6">
 
     <!-- Top Navigation Header -->
-    <header class="card-panel rounded-2xl p-4 flex items-center shadow-sm">
+    <header class="card-panel rounded-2xl p-4 flex items-center justify-between shadow-sm">
       <div class="flex items-center">
         <img src="/images/logo-full.png" alt="Checkpoint Systems" class="h-8 sm:h-9 object-contain" />
+      </div>
+
+      <!-- Language Toggle EN / VI -->
+      <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
+        <button
+          type="button"
+          @click="setLanguage('en')"
+          class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer"
+          :class="currentLang === 'en' ? 'bg-white text-sky-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-800'"
+        >
+          <span>EN</span>
+        </button>
+        <button
+          type="button"
+          @click="setLanguage('vi')"
+          class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer"
+          :class="currentLang === 'vi' ? 'bg-white text-sky-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-800'"
+        >
+          <span>VI</span>
+        </button>
       </div>
     </header>
 
@@ -145,8 +160,8 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 border border-slate-200 shadow-2xl">
         <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-3xl font-bold">?</div>
         <div>
-          <h2 class="font-brand font-bold text-xl text-slate-900">Xác Nhận Gửi Phản Hồi</h2>
-          <p class="text-sm text-slate-600 mt-2 font-medium">Bạn có muốn gửi hay không?</p>
+          <h2 class="font-brand font-bold text-xl text-slate-900">{{ t('Confirm Submit Feedback', 'Xác Nhận Gửi Phản Hồi') }}</h2>
+          <p class="text-sm text-slate-600 mt-2 font-medium">{{ t('Do you want to submit this feedback?', 'Bạn có muốn gửi hay không?') }}</p>
         </div>
         <div class="grid grid-cols-2 gap-3 pt-2">
           <button
@@ -154,7 +169,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             @click="showConfirmModal = false"
             class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
           >
-            Hủy / Cancel
+            {{ t('Cancel', 'Hủy') }}
           </button>
           <button
             type="button"
@@ -173,24 +188,24 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-lg w-full text-center space-y-5 border-2 border-emerald-500 shadow-2xl">
         <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl font-bold">✓</div>
         <div>
-          <h2 class="font-brand font-bold text-2xl text-slate-900">Lưu Phản Hồi Thành Công!</h2>
-          <p class="text-sm text-slate-600 mt-1">Phiếu CPST đã được ghi nhận vào hệ thống.</p>
+          <h2 class="font-brand font-bold text-2xl text-slate-900">{{ t('Feedback Saved Successfully!', 'Lưu Phản Hồi Thành Công!') }}</h2>
+          <p class="text-sm text-slate-600 mt-1">{{ t('CPST ticket has been recorded into the system.', 'Phiếu CPST đã được ghi nhận vào hệ thống.') }}</p>
         </div>
         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-2">
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Số phiếu phản hồi:</span>
+            <span class="text-xs text-slate-500">{{ t('Feedback Ticket No:', 'Số phiếu phản hồi:') }}</span>
             <span class="font-mono text-base font-bold text-sky-600">{{ submittedDocNo }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Liên kết yêu cầu:</span>
+            <span class="text-xs text-slate-500">{{ t('Linked Request:', 'Liên kết yêu cầu:') }}</span>
             <span class="font-mono text-xs font-semibold text-emerald-600">{{ form.cpsrDocNo }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Người tiếp nhận KT:</span>
+            <span class="text-xs text-slate-500">{{ t('Technician In-charge:', 'Người tiếp nhận KT:') }}</span>
             <span class="text-xs text-slate-700 font-medium">{{ form.recvBy }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Trạng thái:</span>
+            <span class="text-xs text-slate-500">{{ t('Status:', 'Trạng thái:') }}</span>
             <span class="text-xs font-bold" :class="form.chkStatus === 'Đã khắc phục' ? 'text-emerald-600' : (form.chkStatus === 'Hư hỏng nặng' ? 'text-rose-600' : 'text-amber-600')">{{ form.chkStatus }}</span>
           </div>
         </div>
@@ -200,7 +215,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             @click="resetForm"
             class="w-full py-3.5 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition text-center shadow-md"
           >
-            Hoàn thành
+            {{ t('Done', 'Hoàn thành') }}
           </button>
         </div>
       </div>
@@ -218,12 +233,12 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <!-- Header & Next Code Badge -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
         <div>
-          <h1 class="font-brand font-bold text-2xl text-slate-900">PHIẾU PHẢN HỒI KỸ THUẬT (CPST)</h1>
-          <p class="text-xs text-slate-500 mt-1">Dành cho Technician tiếp nhận, xử lý và phản hồi sự cố</p>
+          <h1 class="font-brand font-bold text-2xl text-slate-900">{{ t('TECHNICAL FEEDBACK FORM (CPST)', 'PHIẾU PHẢN HỒI KỸ THUẬT (CPST)') }}</h1>
+          <p class="text-xs text-slate-500 mt-1">{{ t('For technicians receiving, resolving, and feeding back technical issues', 'Dành cho Technician tiếp nhận, xử lý và phản hồi sự cố') }}</p>
         </div>
         <div class="flex items-center gap-2 bg-sky-50 px-4 py-2.5 rounded-xl border border-sky-200">
-          <span class="text-xs text-slate-600 uppercase tracking-wider font-semibold">Số phiếu:</span>
-          <span class="font-mono text-base font-bold text-sky-700">{{ docNo || 'Đang tải...' }}</span>
+          <span class="text-xs text-slate-600 uppercase tracking-wider font-semibold">{{ t('Ticket No:', 'Số phiếu:') }}</span>
+          <span class="font-mono text-base font-bold text-sky-700">{{ docNo || t('Loading...', 'Đang tải...') }}</span>
         </div>
       </div>
 
@@ -231,7 +246,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
         <div>
           <label class="block text-xs font-bold text-sky-700 uppercase tracking-wider mb-2">
-            Chọn mã phiếu yêu cầu CPSR cần liên kết <span class="text-rose-500">*</span>
+            {{ t('Select linked CPSR ticket code', 'Chọn mã phiếu yêu cầu CPSR cần liên kết') }} <span class="text-rose-500">*</span>
           </label>
           <select
             v-model="form.cpsrDocNo"
@@ -239,35 +254,35 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono font-semibold cursor-pointer text-slate-800"
             required
           >
-            <option value="" disabled>-- Chọn mã phiếu CPSR đang chờ phản hồi --</option>
+            <option value="" disabled>-- {{ t('Select pending CPSR ticket', 'Chọn mã phiếu CPSR đang chờ phản hồi') }} --</option>
             <option v-for="c in availableCpsrs" :key="c.docNo" :value="c.docNo">
               {{ c.docNo }} — {{ c.machineName }} ({{ c.reqBy }})
             </option>
-            <option v-if="customCpsrMode" :value="form.cpsrDocNo">{{ form.cpsrDocNo }} (Từ liên kết URL)</option>
+            <option v-if="customCpsrMode" :value="form.cpsrDocNo">{{ form.cpsrDocNo }} ({{ t('From URL link', 'Từ liên kết URL') }})</option>
           </select>
         </div>
 
         <!-- Readonly Auto-filled Info from CPSR -->
         <div v-if="selectedCpsr" class="readonly-box p-4 rounded-xl space-y-3 text-xs">
           <div class="font-semibold text-slate-600 uppercase tracking-wider text-[11px] pb-1 border-b border-slate-200">
-            Thông tin tự động nạp từ phiếu yêu cầu {{ selectedCpsr.docNo }} (Read-only)
+            {{ t('Auto-loaded details from technical request', 'Thông tin tự động nạp từ phiếu yêu cầu') }} {{ selectedCpsr.docNo }} (Read-only)
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <span class="text-slate-500 block">Người yêu cầu:</span>
+              <span class="text-slate-500 block">{{ t('Requester:', 'Người yêu cầu:') }}</span>
               <span class="font-medium text-slate-900">{{ selectedCpsr.reqBy }}</span>
             </div>
             <div>
-              <span class="text-slate-500 block">Thiết bị / Máy in:</span>
+              <span class="text-slate-500 block">{{ t('Equipment / Machine:', 'Thiết bị / Máy in:') }}</span>
               <span class="font-medium text-slate-900">{{ selectedCpsr.printTech }} - {{ selectedCpsr.machineName }}</span>
             </div>
             <div>
-              <span class="text-slate-500 block">Thời gian yêu cầu:</span>
+              <span class="text-slate-500 block">{{ t('Request Time:', 'Thời gian yêu cầu:') }}</span>
               <span class="font-medium text-slate-900">{{ selectedCpsr.reqDate }} {{ selectedCpsr.reqTime }}</span>
             </div>
           </div>
           <div>
-            <span class="text-slate-500 block">Mô tả sự cố:</span>
+            <span class="text-slate-500 block">{{ t('Problem Description:', 'Mô tả sự cố:') }}</span>
             <p class="text-slate-800 mt-0.5 bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-[11px]">{{ selectedCpsr.problem }}</p>
           </div>
         </div>
@@ -283,7 +298,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             type="text"
             v-model="recvSearch"
             @focus="showRecvDropdown = true"
-            placeholder="Nhập tên hoặc mã Technician tiếp nhận..."
+            :placeholder="t('Enter name or employee code of technician...', 'Nhập tên hoặc mã Technician tiếp nhận...')"
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium pr-10"
           />
           <button
@@ -308,7 +323,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             class="p-3 hover:bg-slate-50 cursor-pointer transition flex flex-col gap-0.5"
           >
             <div class="text-sm font-bold text-slate-900">{{ emp.name }}</div>
-            <div class="text-xs font-mono font-semibold text-sky-600">Mã NV: {{ emp.mnv }}</div>
+            <div class="text-xs font-mono font-semibold text-sky-600">{{ t('Emp Code:', 'Mã NV:') }} {{ emp.mnv }}</div>
             <div class="text-xs text-slate-500">{{ emp.dept || 'Kỹ thuật' }} • {{ emp.role || 'Kỹ thuật viên' }}</div>
           </div>
         </div>
@@ -323,7 +338,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <div class="space-y-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-            Nguyên nhân gốc rễ (Root Cause - 4M) <span class="text-rose-500">*</span>
+            {{ t('Root Cause (4M / System & Process)', 'Nguyên nhân gốc rễ (Root Cause - 4M)') }} <span class="text-rose-500">*</span>
           </label>
           <select
             v-model="form.rootCause"
@@ -341,12 +356,12 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-            Hành động khắc phục (Action Taken) <span class="text-rose-500">*</span>
+            {{ t('Action Taken', 'Hành động khắc phục (Action Taken)') }} <span class="text-rose-500">*</span>
           </label>
           <textarea
             v-model="form.actionTaken"
             rows="3"
-            placeholder="Các bước kỹ thuật đã thực hiện để xử lý và phục hồi thiết bị..."
+            :placeholder="t('Technical steps performed to fix and restore equipment...', 'Các bước kỹ thuật đã thực hiện để xử lý và phục hồi thiết bị...')"
             class="input-field w-full p-4 rounded-xl text-sm font-medium resize-y"
             required
           ></textarea>
@@ -356,15 +371,15 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <!-- Field Group 4: Two Columns for Photos (Trạng thái lỗi & Đã khắc phục) -->
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
-          Hình ảnh xác minh (2 Cột: Trạng thái lỗi & Đã khắc phục)
+          {{ t('Verification Photos (2 Columns: Defect State & Resolved State)', 'Hình ảnh xác minh (2 Cột: Trạng thái lỗi & Đã khắc phục)') }}
         </label>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
           <!-- Column 1: Photos Before (Trạng thái lỗi) -->
           <div class="card-panel rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-rose-600 uppercase tracking-wide">Cột 1: Trạng thái lỗi</span>
-              <span class="text-[11px] text-slate-500 font-mono">{{ form.photosBefore.length }} ảnh</span>
+              <span class="text-xs font-bold text-rose-600 uppercase tracking-wide">{{ t('Column 1: Defect State', 'Cột 1: Trạng thái lỗi') }}</span>
+              <span class="text-[11px] text-slate-500 font-mono">{{ form.photosBefore.length }} {{ t('photos', 'ảnh') }}</span>
             </div>
             
             <div
@@ -376,7 +391,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             >
               <input type="file" ref="fileBefore" multiple accept="image/*" class="hidden" @change="handleFileSelect($event, 'photosBefore')" />
               <div class="text-2xl mb-1">📷</div>
-              <div class="text-xs font-semibold text-slate-700">Kéo thả ảnh hoặc bấm để chọn</div>
+              <div class="text-xs font-semibold text-slate-700">{{ t('Drag and drop photos or click to browse', 'Kéo thả ảnh hoặc bấm để chọn') }}</div>
               <div class="text-[10px] text-slate-500 mt-0.5">PNG, JPG, WEBP</div>
             </div>
 
@@ -396,8 +411,8 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           <!-- Column 2: Photos After (Đã khắc phục) -->
           <div class="card-panel rounded-xl p-4 space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-emerald-600 uppercase tracking-wide">Cột 2: Đã khắc phục</span>
-              <span class="text-[11px] text-slate-500 font-mono">{{ form.photosAfter.length }} ảnh</span>
+              <span class="text-xs font-bold text-emerald-600 uppercase tracking-wide">{{ t('Column 2: Resolved State', 'Cột 2: Đã khắc phục') }}</span>
+              <span class="text-[11px] text-slate-500 font-mono">{{ form.photosAfter.length }} {{ t('photos', 'ảnh') }}</span>
             </div>
 
             <div
@@ -409,7 +424,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             >
               <input type="file" ref="fileAfter" multiple accept="image/*" class="hidden" @change="handleFileSelect($event, 'photosAfter')" />
               <div class="text-2xl mb-1">📷</div>
-              <div class="text-xs font-semibold text-slate-700">Kéo thả ảnh hoặc bấm để chọn</div>
+              <div class="text-xs font-semibold text-slate-700">{{ t('Drag and drop photos or click to browse', 'Kéo thả ảnh hoặc bấm để chọn') }}</div>
               <div class="text-[10px] text-slate-500 mt-0.5">PNG, JPG, WEBP</div>
             </div>
 
@@ -432,7 +447,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <!-- Field Group 5: Status (3 BIG BUTTONS) -->
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
-          Trạng thái xử lý sự cố <span class="text-rose-500">*</span>
+          {{ t('Issue Resolution Status', 'Trạng thái xử lý sự cố') }} <span class="text-rose-500">*</span>
         </label>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
@@ -441,7 +456,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             class="btn-toggle"
             :class="{ 'active-success': form.chkStatus === 'Đã khắc phục' }"
           >
-            Đã khắc phục
+            {{ t('Resolved', 'Đã khắc phục') }}
           </button>
           <button
             type="button"
@@ -449,7 +464,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             class="btn-toggle"
             :class="{ 'active-warning': form.chkStatus === 'Theo dõi thêm' }"
           >
-            Theo dõi thêm
+            {{ t('Monitoring', 'Theo dõi thêm') }}
           </button>
           <button
             type="button"
@@ -457,7 +472,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             class="btn-toggle"
             :class="{ 'active-danger': form.chkStatus === 'Hư hỏng nặng' }"
           >
-            Hư hỏng nặng
+            {{ t('Severe Defect', 'Hư hỏng nặng') }}
           </button>
         </div>
       </div>
@@ -470,8 +485,8 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           :disabled="isSubmitting"
           class="btn-submit w-full"
         >
-          <span v-if="!isSubmitting">SUBMIT PHẢN HỒI KỸ THUẬT (CPST)</span>
-          <span v-else>Đang lưu phản hồi...</span>
+          <span v-if="!isSubmitting">{{ t('SUBMIT TECHNICAL FEEDBACK (CPST)', 'SUBMIT PHẢN HỒI KỸ THUẬT (CPST)') }}</span>
+          <span v-else>{{ t('Saving feedback...', 'Đang lưu phản hồi...') }}</span>
         </button>
       </div>
 
@@ -484,6 +499,14 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
 
     createApp({
       setup() {
+        const currentLang = ref(localStorage.getItem('checkpoint_lang') || 'en');
+        const setLanguage = (lang) => {
+          currentLang.value = lang;
+          localStorage.setItem('checkpoint_lang', lang);
+          document.documentElement.setAttribute('lang', lang);
+        };
+        const t = (en, vi) => currentLang.value === 'vi' ? vi : en;
+
         const docNo = ref('');
         const isSubmitting = ref(false);
         const showConfirmModal = ref(false);
@@ -611,7 +634,6 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           return new Promise((resolve) => {
             if (!file.type || !file.type.startsWith('image/')) {
               resolve(null);
-              return;
             }
             const reader = new FileReader();
             reader.onload = (e) => {
@@ -679,19 +701,19 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
         function submitForm() {
           errorMessage.value = '';
           if (!form.value.cpsrDocNo) {
-            errorMessage.value = 'Vui lòng chọn mã phiếu CPSR cần liên kết.';
+            errorMessage.value = t('Please select linked CPSR ticket code.', 'Vui lòng chọn mã phiếu CPSR cần liên kết.');
             return;
           }
           if (!form.value.recvBy) {
-            errorMessage.value = 'Vui lòng chọn Technician tiếp nhận.';
+            errorMessage.value = t('Please select technician in charge.', 'Vui lòng chọn Technician tiếp nhận.');
             return;
           }
           if (!form.value.rootCause || !form.value.rootCause.trim()) {
-            errorMessage.value = 'Vui lòng chọn nguyên nhân gốc rễ (4M).';
+            errorMessage.value = t('Please select root cause (4M).', 'Vui lòng chọn nguyên nhân gốc rễ (4M).');
             return;
           }
           if (!form.value.actionTaken || !form.value.actionTaken.trim()) {
-            errorMessage.value = 'Vui lòng nhập hành động khắc phục.';
+            errorMessage.value = t('Please enter action taken.', 'Vui lòng nhập hành động khắc phục.');
             return;
           }
 
@@ -730,7 +752,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             submittedDocNo.value = result.docNo || docNo.value;
             successModal.value = true;
           } catch (err) {
-            errorMessage.value = 'Gửi phản hồi thất bại: ' + err.message;
+            errorMessage.value = (currentLang.value === 'vi' ? 'Gửi phản hồi thất bại: ' : 'Failed to submit feedback: ') + err.message;
           } finally {
             isSubmitting.value = false;
           }
@@ -761,6 +783,9 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
         });
 
         return {
+          currentLang,
+          setLanguage,
+          t,
           docNo,
           form,
           isSubmitting,

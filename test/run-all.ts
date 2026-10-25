@@ -23,6 +23,9 @@ const tests = [
   'test/ui-dashboard-login-profile-cpsf.spec.ts',
   'test/frontend-i18n-rbac-cpst.spec.ts',
   'test/qa-system-verification-i18n-rbac-cpst.spec.ts',
+  'test/full-system-i18n-verification.spec.ts',
+  'test/frontend-cpsf-quality-notes.spec.ts',
+  'test/qa-cpsf-quality-and-notes-verification.spec.ts',
 ];
 
 console.log('================================================================');

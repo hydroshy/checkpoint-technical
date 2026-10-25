@@ -3,27 +3,27 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
         <div class="glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">1. Phiếu Yêu Cầu Kỹ Thuật</h2>
+              <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ t('1. Technical Requests', '1. Phiếu Yêu Cầu Kỹ Thuật') }}</h2>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">
-                {{ filteredWeeklyRequests.length }} / {{ weeklyRequests.length }} phiếu
+                {{ filteredWeeklyRequests.length }} / {{ weeklyRequests.length }} {{ t('tickets', 'phiếu') }}
               </span>
             </div>
-            <p class="text-xs text-slate-500 mt-1">Dữ liệu từ Sheet <strong>1_Technical_Requests</strong> trong Weekly Technical Database.</p>
+            <p class="text-xs text-slate-500 mt-1">{{ t('Data from Sheet', 'Dữ liệu từ Sheet') }} <strong>1_Technical_Requests</strong> {{ t('in Weekly Technical Database.', 'trong Weekly Technical Database.') }}</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
             <button
               @click="exportWeeklyRequestsExcel"
               class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-emerald-500/20 cursor-pointer"
-              title="Tải về file Excel .xlsx"
+              :title="t('Download Excel file .xlsx', 'Tải về file Excel .xlsx')"
             >
-              <i class="fa-solid fa-file-excel"></i> <span>Xuất Excel</span>
+              <i class="fa-solid fa-file-excel"></i> <span>{{ t('Export Excel', 'Xuất Excel') }}</span>
             </button>
             <button
               @click="openWeeklyRequestModal()"
               class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-sky-500/20 cursor-pointer"
             >
-              <i class="fa-solid fa-plus"></i> <span>Tạo Phiếu Mới</span>
+              <i class="fa-solid fa-plus"></i> <span>{{ t('+ Create New Ticket', '+ Tạo Phiếu Mới') }}</span>
             </button>
           </div>
         </div>
@@ -31,22 +31,22 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
         <!-- Filter Bar -->
         <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Tìm kiếm</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Search', 'Tìm kiếm') }}</label>
             <div class="relative">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
               <input
                 v-model="reqFilter.search"
                 type="text"
-                placeholder="Tìm mã NV, tên, thiết bị..."
+                :placeholder="t('Search employee ID, name, equipment...', 'Tìm mã NV, tên, thiết bị...')"
                 class="input-box w-full pl-9 pr-3 py-2 rounded-xl text-xs outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Mức độ nghiêm trọng</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Severity Level', 'Mức độ nghiêm trọng') }}</label>
             <select v-model="reqFilter.severity" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-              <option value="ALL">Tất cả mức độ</option>
+              <option value="ALL">{{ t('All severities', 'Tất cả mức độ') }}</option>
               <option value="Critical">Critical</option>
               <option value="High">High</option>
               <option value="Medium">Medium</option>
@@ -55,9 +55,9 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Trạng thái phiếu</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Ticket Status', 'Trạng thái phiếu') }}</label>
             <select v-model="reqFilter.status" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-              <option value="ALL">Tất cả trạng thái</option>
+              <option value="ALL">{{ t('All statuses', 'Tất cả trạng thái') }}</option>
               <option value="Open">Open</option>
               <option value="In Progress">In Progress</option>
               <option value="Overdue">Overdue</option>
@@ -66,9 +66,9 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Thiết bị / Máy</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Equipment / Machine', 'Thiết bị / Máy') }}</label>
             <select v-model="reqFilter.equipment" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-              <option value="ALL">Tất cả thiết bị</option>
+              <option value="ALL">{{ t('All equipments', 'Tất cả thiết bị') }}</option>
               <option v-for="m in uniqueReqEquipments" :key="m" :value="m">{{ m }}</option>
             </select>
           </div>
@@ -80,23 +80,23 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
             <table class="w-full text-xs data-table">
               <thead>
                 <tr class="text-left">
-                  <th class="py-3 px-3.5 whitespace-nowrap">Mã Phiếu / Người Yêu Cầu</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Ngày</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Loại Yêu Cầu</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Thiết Bị (Equipment)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Mức Độ</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Trạng Thái</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-center">SLA Mục Tiêu (h)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-center">Thực Tế (h)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-center">Đạt SLA</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Người Báo</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Người Xử Lý</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-right">Thao Tác</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Ticket ID / Requester', 'Mã Phiếu / Người Yêu Cầu') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Date', 'Ngày') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Request Type', 'Loại Yêu Cầu') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Equipment', 'Thiết Bị (Equipment)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Severity', 'Mức Độ') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Status', 'Trạng Thái') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-center">{{ t('SLA Target (h)', 'SLA Mục Tiêu (h)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-center">{{ t('Actual (h)', 'Thực Tế (h)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-center">{{ t('Met SLA', 'Đạt SLA') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Reporter', 'Người Báo') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Resolver', 'Người Xử Lý') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-right">{{ t('Actions', 'Thao Tác') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="filteredWeeklyRequests.length === 0">
-                  <td colspan="12" class="text-center py-8 text-slate-400">Không tìm thấy phiếu yêu cầu kỹ thuật phù hợp.</td>
+                  <td colspan="12" class="text-center py-8 text-slate-400">{{ t('No matching technical requests found.', 'Không tìm thấy phiếu yêu cầu kỹ thuật phù hợp.') }}</td>
                 </tr>
                 <tr v-for="req in filteredWeeklyRequests" :key="req.id">
                   <td class="py-3 px-3.5 font-bold text-slate-900 dark:text-white whitespace-nowrap">
@@ -131,14 +131,14 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
                       <button
                         @click="openWeeklyRequestModal(req)"
                         class="p-1.5 rounded-lg text-sky-500 hover:bg-sky-500/10 transition"
-                        title="Chỉnh sửa phiếu"
+                        :title="t('Edit ticket', 'Chỉnh sửa phiếu')"
                       >
                         <i class="fa-solid fa-pen-to-square"></i>
                       </button>
                       <button
                         @click="deleteWeeklyRequest(req.id)"
                         class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 transition"
-                        title="Xóa phiếu"
+                        :title="t('Delete ticket', 'Xóa phiếu')"
                       >
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
@@ -159,12 +159,12 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
         <div class="glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">2. Nhật Ký Sự Cố (Defect Log)</h2>
+              <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ t('2. Defect Incident Logs', '2. Nhật Ký Sự Cố (Defect Log)') }}</h2>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20">
-                {{ filteredDefectLogs.length }} / {{ defectLogs.length }} lỗi
+                {{ filteredDefectLogs.length }} / {{ defectLogs.length }} {{ t('incidents', 'lỗi') }}
               </span>
             </div>
-            <p class="text-xs text-slate-500 mt-1">Dữ liệu từ Sheet <strong>2_Defect_Log</strong>: Ghi nhận nguyên nhân, thời gian dừng máy và báo cáo 8D.</p>
+            <p class="text-xs text-slate-500 mt-1">{{ t('Data from Sheet', 'Dữ liệu từ Sheet') }} <strong>2_Defect_Log</strong>: {{ t('Record root cause, downtime minutes and 8D reports.', 'Ghi nhận nguyên nhân, thời gian dừng máy và báo cáo 8D.') }}</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
@@ -172,13 +172,13 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               @click="exportDefectLogsExcel"
               class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-emerald-500/20 cursor-pointer"
             >
-              <i class="fa-solid fa-file-excel"></i> <span>Xuất Excel</span>
+              <i class="fa-solid fa-file-excel"></i> <span>{{ t('Export Excel', 'Xuất Excel') }}</span>
             </button>
             <button
               @click="openDefectModal()"
               class="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-red-500/20 cursor-pointer"
             >
-              <i class="fa-solid fa-plus"></i> <span>Ghi Nhận Lỗi Defect</span>
+              <i class="fa-solid fa-plus"></i> <span>{{ t('+ Log Defect Incident', '+ Ghi Nhận Lỗi Defect') }}</span>
             </button>
           </div>
         </div>
@@ -186,22 +186,22 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
         <!-- Filter Bar -->
         <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Tìm kiếm sự cố</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Search defect incident', 'Tìm kiếm sự cố') }}</label>
             <div class="relative">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
               <input
                 v-model="defectFilter.search"
                 type="text"
-                placeholder="Tìm nội dung sự cố, sản phẩm..."
+                :placeholder="t('Search defect description, product...', 'Tìm nội dung sự cố, sản phẩm...')"
                 class="input-box w-full pl-9 pr-3 py-2 rounded-xl text-xs outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Xưởng / Facility</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Facility / Workshop', 'Xưởng / Facility') }}</label>
             <select v-model="defectFilter.facility" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-              <option value="ALL">Tất cả xưởng</option>
+              <option value="ALL">{{ t('All workshops', 'Tất cả xưởng') }}</option>
               <option value="RFID">RFID</option>
               <option value="WOVEN">WOVEN</option>
               <option value="LASER">LASER</option>
@@ -211,9 +211,9 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Nguyên nhân gốc</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Root Cause', 'Nguyên nhân gốc') }}</label>
             <select v-model="defectFilter.rootCause" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-              <option value="ALL">Tất cả nguyên nhân</option>
+              <option value="ALL">{{ t('All causes', 'Tất cả nguyên nhân') }}</option>
               <option value="Machine">Machine</option>
               <option value="System">System</option>
               <option value="Method">Method</option>
@@ -229,22 +229,22 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
             <table class="w-full text-xs data-table">
               <thead>
                 <tr class="text-left">
-                  <th class="py-3 px-3.5 whitespace-nowrap">Mã Defect</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Ngày</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Xưởng (Facility)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Nguồn Gốc (Source)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Nguyên Nhân Gốc</th>
-                  <th class="py-3 px-3.5">Chi Tiết Sự Cố (Specific Issue)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Sản Phẩm Ảnh Hưởng</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-center">Dừng Máy (phút)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-center">Tái Diễn?</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-center">Cần Báo Cáo 8D?</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-right">Thao Tác</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Defect ID', 'Mã Defect') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Date', 'Ngày') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Facility', 'Xưởng (Facility)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Source', 'Nguồn Gốc (Source)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Root Cause', 'Nguyên Nhân Gốc') }}</th>
+                  <th class="py-3 px-3.5">{{ t('Specific Issue', 'Chi Tiết Sự Cố (Specific Issue)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Affected Product', 'Sản Phẩm Ảnh Hưởng') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-center">{{ t('Downtime (min)', 'Dừng Máy (phút)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-center">{{ t('Recurring?', 'Tái Diễn?') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-center">{{ t('8D Report?', 'Cần Báo Cáo 8D?') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-right">{{ t('Actions', 'Thao Tác') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="filteredDefectLogs.length === 0">
-                  <td colspan="11" class="text-center py-8 text-slate-400">Không tìm thấy sự cố defect nào phù hợp.</td>
+                  <td colspan="11" class="text-center py-8 text-slate-400">{{ t('No defect incidents found.', 'Không tìm thấy sự cố defect nào phù hợp.') }}</td>
                 </tr>
                 <tr v-for="d in filteredDefectLogs" :key="d.id">
                   <td class="py-3 px-3.5 font-mono font-bold text-red-500 whitespace-nowrap">#{{ d.defectId }}</td>
@@ -274,14 +274,14 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
                       <button
                         @click="openDefectModal(d)"
                         class="p-1.5 rounded-lg text-sky-500 hover:bg-sky-500/10 transition"
-                        title="Chỉnh sửa sự cố"
+                        :title="t('Edit defect', 'Chỉnh sửa sự cố')"
                       >
                         <i class="fa-solid fa-pen-to-square"></i>
                       </button>
                       <button
                         @click="deleteDefectLog(d.id)"
                         class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 transition"
-                        title="Xóa sự cố"
+                        :title="t('Delete defect', 'Xóa sự cố')"
                       >
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
@@ -302,12 +302,12 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
         <div class="glass-card rounded-2xl p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
             <div class="flex items-center gap-2">
-              <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">3. Kế Hoạch Hành Động (Action Plan)</h2>
+              <h2 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900 dark:text-white">{{ t('3. Action Plans', '3. Kế Hoạch Hành Động (Action Plan)') }}</h2>
               <span class="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                {{ filteredActionPlans.length }} / {{ actionPlans.length }} kế hoạch
+                {{ filteredActionPlans.length }} / {{ actionPlans.length }} {{ t('plans', 'kế hoạch') }}
               </span>
             </div>
-            <p class="text-xs text-slate-500 mt-1">Dữ liệu từ Sheet <strong>3_Action_Plan</strong>: Biện pháp khắc phục dài hạn, người phụ trách và tiến độ hoàn thành.</p>
+            <p class="text-xs text-slate-500 mt-1">{{ t('Data from Sheet', 'Dữ liệu từ Sheet') }} <strong>3_Action_Plan</strong>: {{ t('Long-term corrective actions, PIC and completion progress.', 'Biện pháp khắc phục dài hạn, người phụ trách và tiến độ hoàn thành.') }}</p>
           </div>
 
           <div class="flex flex-wrap items-center gap-2">
@@ -315,13 +315,13 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               @click="exportActionPlansExcel"
               class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-emerald-500/20 cursor-pointer"
             >
-              <i class="fa-solid fa-file-excel"></i> <span>Xuất Excel</span>
+              <i class="fa-solid fa-file-excel"></i> <span>{{ t('Export Excel', 'Xuất Excel') }}</span>
             </button>
             <button
               @click="openActionPlanModal()"
               class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 shadow-md shadow-emerald-500/20 cursor-pointer"
             >
-              <i class="fa-solid fa-plus"></i> <span>Thêm Kế Hoạch Mới</span>
+              <i class="fa-solid fa-plus"></i> <span>{{ t('+ Add New Action Plan', '+ Thêm Kế Hoạch Mới') }}</span>
             </button>
           </div>
         </div>
@@ -329,32 +329,32 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
         <!-- Filter Bar -->
         <div class="glass-card rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Tìm kiếm kế hoạch</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Search action plan', 'Tìm kiếm kế hoạch') }}</label>
             <div class="relative">
               <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400"></i>
               <input
                 v-model="actionFilter.search"
                 type="text"
-                placeholder="Tìm mã, mô tả, PIC..."
+                :placeholder="t('Search ID, description, PIC...', 'Tìm mã, mô tả, PIC...')"
                 class="input-box w-full pl-9 pr-3 py-2 rounded-xl text-xs outline-none"
               />
             </div>
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Trạng thái (Status)</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Status', 'Trạng thái (Status)') }}</label>
             <select v-model="actionFilter.status" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-              <option value="ALL">Tất cả trạng thái</option>
-              <option value="In Progress">In Progress (Đang thực hiện)</option>
-              <option value="Completed">Completed (Hoàn thành)</option>
-              <option value="Pending">Pending (Chờ duyệt)</option>
+              <option value="ALL">{{ t('All statuses', 'Tất cả trạng thái') }}</option>
+              <option value="In Progress">In Progress ({{ t('In Progress', 'Đang thực hiện') }})</option>
+              <option value="Completed">Completed ({{ t('Completed', 'Hoàn thành') }})</option>
+              <option value="Pending">Pending ({{ t('Pending', 'Chờ duyệt') }})</option>
             </select>
           </div>
 
           <div>
-            <label class="block font-semibold text-slate-400 mb-1">Người phụ trách (PIC)</label>
+            <label class="block font-semibold text-slate-400 mb-1">{{ t('Person In Charge (PIC)', 'Người phụ trách (PIC)') }}</label>
             <select v-model="actionFilter.pic" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-              <option value="ALL">Tất cả PIC</option>
+              <option value="ALL">{{ t('All PICs', 'Tất cả PIC') }}</option>
               <option value="Steve">Steve</option>
               <option value="Wayne">Wayne</option>
             </select>
@@ -367,22 +367,22 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
             <table class="w-full text-xs data-table">
               <thead>
                 <tr class="text-left">
-                  <th class="py-3 px-3.5 whitespace-nowrap">Mã Kế Hoạch (Action ID)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Ngày Tạo</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Xưởng</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Action ID', 'Mã Kế Hoạch (Action ID)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Date Created', 'Ngày Tạo') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Workshop', 'Xưởng') }}</th>
                   <th class="py-3 px-3.5 whitespace-nowrap">Defect ID</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Loại Khắc Phục (Fix Type)</th>
-                  <th class="py-3 px-3.5">Mô Tả Hành Động</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Phụ Trách (PIC)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Hạn Chót (Deadline)</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Trạng Thái</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap">Nguồn Lực Cần</th>
-                  <th class="py-3 px-3.5 whitespace-nowrap text-right">Thao Tác</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Fix Type', 'Loại Khắc Phục (Fix Type)') }}</th>
+                  <th class="py-3 px-3.5">{{ t('Action Description', 'Mô Tả Hành Động') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('PIC', 'Phụ Trách (PIC)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Deadline', 'Hạn Chót (Deadline)') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Status', 'Trạng Thái') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Resource Needed', 'Nguồn Lực Cần') }}</th>
+                  <th class="py-3 px-3.5 whitespace-nowrap text-right">{{ t('Actions', 'Thao Tác') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="filteredActionPlans.length === 0">
-                  <td colspan="11" class="text-center py-8 text-slate-400">Không tìm thấy kế hoạch hành động nào.</td>
+                  <td colspan="11" class="text-center py-8 text-slate-400">{{ t('No action plans found.', 'Không tìm thấy kế hoạch hành động nào.') }}</td>
                 </tr>
                 <tr v-for="act in filteredActionPlans" :key="act.id">
                   <td class="py-3 px-3.5 font-bold font-mono text-emerald-600 dark:text-emerald-400 whitespace-nowrap">
@@ -410,14 +410,14 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
                       <button
                         @click="openActionPlanModal(act)"
                         class="p-1.5 rounded-lg text-sky-500 hover:bg-sky-500/10 transition"
-                        title="Chỉnh sửa kế hoạch"
+                        :title="t('Edit plan', 'Chỉnh sửa kế hoạch')"
                       >
                         <i class="fa-solid fa-pen-to-square"></i>
                       </button>
                       <button
                         @click="deleteActionPlan(act.id)"
                         class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 transition"
-                        title="Xóa kế hoạch"
+                        :title="t('Delete plan', 'Xóa kế hoạch')"
                       >
                         <i class="fa-solid fa-trash-can"></i>
                       </button>
@@ -443,7 +443,7 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               class="px-4 py-2 rounded-lg text-xs transition flex items-center gap-2 cursor-pointer"
             >
               <i class="fa-solid fa-users"></i>
-              <span>Người Yêu Cầu ({{ requestersList.length }})</span>
+              <span>{{ t('Requesters', 'Người Yêu Cầu') }} ({{ requestersList.length }})</span>
             </button>
             <button
               @click="catalogSubTab = 'machines'"
@@ -451,7 +451,7 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               class="px-4 py-2 rounded-lg text-xs transition flex items-center gap-2 cursor-pointer"
             >
               <i class="fa-solid fa-gears"></i>
-              <span>Danh Mục Máy Móc ({{ rawMachinesList.length }})</span>
+              <span>{{ t('Machine Catalog', 'Danh Mục Máy Móc') }} ({{ rawMachinesList.length }})</span>
             </button>
           </div>
 
@@ -461,14 +461,14 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               @click="exportRequestersExcel"
               class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer"
             >
-              <i class="fa-solid fa-file-excel"></i> Xuất Excel
+              <i class="fa-solid fa-file-excel"></i> {{ t('Export Excel', 'Xuất Excel') }}
             </button>
             <button
               v-if="catalogSubTab === 'requesters'"
               @click="openRequesterModal()"
               class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer"
             >
-              <i class="fa-solid fa-plus"></i> Thêm Người Yêu Cầu
+              <i class="fa-solid fa-plus"></i> {{ t('+ Add Personnel', '+ Thêm Người Yêu Cầu') }}
             </button>
 
             <button
@@ -476,14 +476,14 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               @click="exportMachinesExcel"
               class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer"
             >
-              <i class="fa-solid fa-file-excel"></i> Xuất Excel
+              <i class="fa-solid fa-file-excel"></i> {{ t('Export Excel', 'Xuất Excel') }}
             </button>
             <button
               v-if="catalogSubTab === 'machines'"
               @click="openMachineModal()"
               class="px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-white text-xs font-bold transition flex items-center gap-2 cursor-pointer"
             >
-              <i class="fa-solid fa-plus"></i> Thêm Máy Mới
+              <i class="fa-solid fa-plus"></i> {{ t('+ Add Machine', '+ Thêm Máy Mới') }}
             </button>
           </div>
         </div>
@@ -496,13 +496,13 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               <input
                 v-model="requesterFilter.search"
                 type="text"
-                placeholder="Tìm mã NV (MNV), họ tên, chức vụ..."
+                :placeholder="t('Search employee code, full name, position...', 'Tìm mã NV (MNV), họ tên, chức vụ...')"
                 class="input-box w-full pl-9 pr-3 py-2 rounded-xl text-xs outline-none"
               />
             </div>
             <div class="sm:w-64">
               <select v-model="requesterFilter.department" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-                <option value="ALL">Tất cả bộ phận</option>
+                <option value="ALL">{{ t('All departments', 'Tất cả bộ phận') }}</option>
                 <option v-for="d in uniqueDepartments" :key="d" :value="d">{{ d }}</option>
               </select>
             </div>
@@ -513,13 +513,13 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               <table class="w-full text-xs data-table">
                 <thead>
                   <tr class="text-left">
-                    <th class="py-3 px-3.5 w-16 text-center">STT</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap">Mã Nhân Viên (MNV)</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap">Họ và Tên</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap">Bộ Phận</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap">Khu Vực</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap">Chức Vụ</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap text-right">Thao Tác</th>
+                    <th class="py-3 px-3.5 w-16 text-center">{{ t('No.', 'STT') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Employee Code', 'Mã Nhân Viên (MNV)') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Full Name', 'Họ và Tên') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Department', 'Bộ Phận') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Area / Line', 'Khu Vực') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Position / Role', 'Chức Vụ') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap text-right">{{ t('Actions', 'Thao Tác') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -535,14 +535,14 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
                         <button
                           @click="openRequesterModal(r)"
                           class="p-1.5 rounded-lg text-sky-500 hover:bg-sky-500/10 transition"
-                          title="Sửa"
+                          :title="t('Edit', 'Sửa')"
                         >
                           <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         <button
                           @click="deleteRequester(r.id)"
                           class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 transition"
-                          title="Xóa"
+                          :title="t('Delete', 'Xóa')"
                         >
                           <i class="fa-solid fa-trash-can"></i>
                         </button>
@@ -563,13 +563,13 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               <input
                 v-model="machineFilter.search"
                 type="text"
-                placeholder="Tìm tên máy, khu vực công nghệ..."
+                :placeholder="t('Search machine name, technology...', 'Tìm tên máy, khu vực công nghệ...')"
                 class="input-box w-full pl-9 pr-3 py-2 rounded-xl text-xs outline-none"
               />
             </div>
             <div class="sm:w-64">
               <select v-model="machineFilter.tech" class="input-box w-full px-3 py-2 rounded-xl text-xs outline-none">
-                <option value="ALL">Tất cả khu vực ({{ uniqueMachineTechs.length }})</option>
+                <option value="ALL">{{ t('All technologies', 'Tất cả khu vực') }} ({{ uniqueMachineTechs.length }})</option>
                 <option v-for="t in uniqueMachineTechs" :key="t" :value="t">{{ t }}</option>
               </select>
             </div>
@@ -580,10 +580,10 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
               <table class="w-full text-xs data-table">
                 <thead>
                   <tr class="text-left">
-                    <th class="py-3 px-3.5 w-16 text-center">STT</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap">Khu Vực / Công Nghệ</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap">Tên Máy</th>
-                    <th class="py-3 px-3.5 whitespace-nowrap text-right">Thao Tác</th>
+                    <th class="py-3 px-3.5 w-16 text-center">{{ t('No.', 'STT') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Technology / Area', 'Khu Vực / Công Nghệ') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap">{{ t('Machine Name', 'Tên Máy') }}</th>
+                    <th class="py-3 px-3.5 whitespace-nowrap text-right">{{ t('Actions', 'Thao Tác') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -600,14 +600,14 @@ export const DASHBOARD_WEEKLY_TABLES_HTML = `      <div v-show="canViewKpi && ac
                         <button
                           @click="openMachineModal(m)"
                           class="p-1.5 rounded-lg text-sky-500 hover:bg-sky-500/10 transition"
-                          title="Sửa"
+                          :title="t('Edit', 'Sửa')"
                         >
                           <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         <button
                           @click="deleteMachine(m.id)"
                           class="p-1.5 rounded-lg text-red-500 hover:bg-red-500/10 transition"
-                          title="Xóa"
+                          :title="t('Delete', 'Xóa')"
                         >
                           <i class="fa-solid fa-trash-can"></i>
                         </button>

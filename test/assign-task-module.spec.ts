@@ -48,7 +48,8 @@ assert.strictEqual(
   'Giao diện KHÔNG được chứa chữ "(Assign Task)"'
 );
 assert.ok(
-  CP_ASSIGN_TASKS_TAB_HTML.includes('<span>Phân Công Kỹ Thuật</span>'),
+  CP_ASSIGN_TASKS_TAB_HTML.includes('<span>Phân Công Kỹ Thuật</span>') ||
+  CP_ASSIGN_TASKS_TAB_HTML.includes("t('Task Assignment', 'Phân Công Kỹ Thuật')"),
   'Giao diện hiển thị tiêu đề gọn gàng: "Phân Công Kỹ Thuật"'
 );
 

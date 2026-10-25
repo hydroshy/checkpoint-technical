@@ -56,6 +56,7 @@ export class CpsfService {
       cpstDocNo: cpst.docNo,
       cpsrDocNo: cpst.cpsrDocNo,
       chkQuality: dto.chkQuality || undefined,
+      notes: dto.notes !== undefined ? (dto.notes.trim() || undefined) : undefined,
       workOrder,
       wo: workOrder,
       woTotalQty,
@@ -96,6 +97,7 @@ export class CpsfService {
           cpsfId: record.id,
           cpsfDocNo: record.docNo,
           chkQuality: record.chkQuality,
+          notes: record.notes !== undefined ? record.notes : existingCps.notes,
           workOrder: record.workOrder,
           wo: record.workOrder,
           woTotalQty,
@@ -127,6 +129,7 @@ export class CpsfService {
         (r.cpstDocNo && r.cpstDocNo.toLowerCase().includes(q)) ||
         (r.cpsrDocNo && r.cpsrDocNo.toLowerCase().includes(q)) ||
         (r.workOrder && r.workOrder.toLowerCase().includes(q)) ||
+        (r.notes && r.notes.toLowerCase().includes(q)) ||
         (r.prodMgr && r.prodMgr.toLowerCase().includes(q))
       );
     }
@@ -187,6 +190,7 @@ export class CpsfService {
 
     const updatePayload: Partial<CpsfRecord> = {
       ...dto,
+      ...(dto.notes !== undefined ? { notes: dto.notes.trim() } : {}),
       ...(workOrder !== undefined ? { workOrder, wo: workOrder } : {}),
       ...(rawWoTotalQty !== undefined ? { woTotalQty: rawWoTotalQty, totalQty: rawWoTotalQty } : {}),
       ...(rawWasteQty !== undefined ? { wasteQty: rawWasteQty, scrapQty: rawWasteQty } : {}),
@@ -201,7 +205,8 @@ export class CpsfService {
         : (dto.wastePercent || existingCps.wastePercent || '0%');
 
       await this.dbService.updateCps(existingCps.id, {
-        ...(dto.chkQuality ? { chkQuality: dto.chkQuality } : {}),
+        ...(dto.chkQuality !== undefined ? { chkQuality: dto.chkQuality } : {}),
+        ...(dto.notes !== undefined ? { notes: dto.notes.trim() } : {}),
         ...(workOrder !== undefined ? { workOrder, wo: workOrder } : {}),
         woTotalQty,
         totalQty: woTotalQty,

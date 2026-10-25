@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
@@ -30,6 +30,12 @@ async function runTests() {
 
   app.use(json({ limit: '50mb' }));
   app.use(urlencoded({ extended: true, limit: '50mb' }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: false,
+      transform: true,
+    }),
+  );
 
   const testPort = 3399;
   await app.listen(testPort);
@@ -197,6 +203,18 @@ async function runTests() {
     // =========================================================================
     console.log('\n--- 4. Kiểm thử CPSF: Tạo, cập nhật (PUT/PATCH), tính % phế & CLOSED CPS ---');
 
+    // 4.0 Kiểm tra validation chkQuality không hợp lệ bị từ chối với status 400
+    const resInvalidQuality = await fetch(`${baseUrl}/api/cpsf`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        cpstDocNo,
+        chkQuality: 'Không hợp lệ',
+        prodMgr: 'Quản Đốc Lê Văn C',
+      }),
+    });
+    assert(resInvalidQuality.status === 400, 'Tạo CPSF với chkQuality không hợp lệ bị từ chối 400');
+
     const nextCpsfCode = await splitService.getNextCpsfDocNo();
     const cpsfDocNo = nextCpsfCode.docNo;
     const resCreateCpsf = await fetch(`${baseUrl}/api/cpsf`, {
@@ -205,7 +223,8 @@ async function runTests() {
       body: JSON.stringify({
         docNo: cpsfDocNo,
         cpstDocNo,
-        chkQuality: 'Đạt',
+        chkQuality: 'Chạy tạm, tiếp tục theo dõi',
+        notes: 'Theo dõi tiếp nhiệt độ sấy',
         workOrder: 'WO-20261006-01',
         woTotalQty: 5000,
         wasteQty: 100,
@@ -215,25 +234,45 @@ async function runTests() {
     });
     assert(resCreateCpsf.ok, `Tạo phiếu CPSF ${cpsfDocNo} thành công`);
 
-    // Kiểm tra CPS được cập nhật thành CLOSED
+    const cpsfRecord = dbService.getCpsfByIdOrDocNo(cpsfDocNo);
+    assert(cpsfRecord?.chkQuality === 'Chạy tạm, tiếp tục theo dõi', 'CPSF lưu đúng chkQuality: Chạy tạm, tiếp tục theo dõi');
+    assert(cpsfRecord?.notes === 'Theo dõi tiếp nhiệt độ sấy', 'CPSF lưu đúng trường notes');
+
+    // Kiểm tra CPS được cập nhật thành CLOSED và đồng bộ chkQuality + notes
     let cpsAfterCpsf = dbService.getCpsByCpsrDocNo(cpsrDocNo);
     assert(cpsAfterCpsf?.cpsfDocNo === cpsfDocNo, 'CPS đã liên kết với CPSF');
     assert(cpsAfterCpsf?.status === 'CLOSED', 'CPS chuyển sang trạng thái CLOSED');
+    assert(cpsAfterCpsf?.chkQuality === 'Chạy tạm, tiếp tục theo dõi', 'CPS đồng bộ chkQuality: Chạy tạm, tiếp tục theo dõi');
+    assert(cpsAfterCpsf?.notes === 'Theo dõi tiếp nhiệt độ sấy', 'CPS đồng bộ trường notes từ CPSF');
     assert(cpsAfterCpsf?.wastePercent === '2.00%', 'CPS tính đúng tỷ lệ phế: 2.00% (100 / 5000)');
     assert(!!cpsAfterCpsf?.closedAt, 'CPS có thời điểm closedAt');
 
-    // Cập nhật CPSF qua PATCH (thay đổi số lượng phế)
+    // Cập nhật CPSF qua PATCH (thay đổi số lượng phế, chkQuality thành 'Đạt', cập nhật notes)
     const resPatchCpsf = await fetch(`${baseUrl}/api/cpsf/${cpsfDocNo}`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         wasteQty: 250,
+        chkQuality: 'Đạt',
+        notes: 'Đã chạy ổn định, nghiệm thu đạt',
       }),
     });
     assert(resPatchCpsf.ok, `PATCH cập nhật CPSF ${cpsfDocNo} thành công`);
     cpsAfterCpsf = dbService.getCpsByCpsrDocNo(cpsrDocNo);
     assert(cpsAfterCpsf?.wasteQty === 250, 'CPS đã cập nhật số lượng phế = 250');
     assert(cpsAfterCpsf?.wastePercent === '5.00%', 'CPS tính lại đúng tỷ lệ phế: 5.00% (250 / 5000)');
+    assert(cpsAfterCpsf?.chkQuality === 'Đạt', 'CPS đã cập nhật chkQuality mới = Đạt');
+    assert(cpsAfterCpsf?.notes === 'Đã chạy ổn định, nghiệm thu đạt', 'CPS đã cập nhật notes mới');
+
+    // Kiểm tra PATCH với chkQuality không hợp lệ bị từ chối 400
+    const resPatchInvalid = await fetch(`${baseUrl}/api/cpsf/${cpsfDocNo}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chkQuality: 'Sai_Gia_Tri',
+      }),
+    });
+    assert(resPatchInvalid.status === 400, 'PATCH CPSF với chkQuality sai bị từ chối 400');
 
     // =========================================================================
     // SECTION 5: GHÉP NỐI & HỦY GHÉP NỐI (LINK & UNLINK API)

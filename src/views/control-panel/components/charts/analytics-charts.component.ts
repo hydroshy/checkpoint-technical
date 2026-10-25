@@ -23,7 +23,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer"
                   :class="reportQuickPreset === '7d' ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
                 >
-                  1 Tuần trước
+                  {{ t('1 Week Ago', '1 Tuần trước') }}
                 </button>
                 <button
                   type="button"
@@ -31,7 +31,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer"
                   :class="reportQuickPreset === 'today' ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
                 >
-                  Hôm nay
+                  {{ t('Today', 'Hôm nay') }}
                 </button>
                 <button
                   type="button"
@@ -39,7 +39,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer"
                   :class="reportQuickPreset === 'month' ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
                 >
-                  Tháng này
+                  {{ t('This Month', 'Tháng này') }}
                 </button>
                 <button
                   type="button"
@@ -47,7 +47,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   class="px-2.5 py-1 rounded-lg text-xs font-semibold transition cursor-pointer"
                   :class="reportQuickPreset === 'all' ? 'bg-sky-600 text-white font-bold shadow-xs' : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white'"
                 >
-                  Tất cả
+                  {{ t('All', 'Tất cả') }}
                 </button>
               </div>
 
@@ -58,7 +58,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   v-model="reportDateFrom"
                   @change="onReportFilterChange"
                   class="input-box px-2.5 py-1 rounded-xl font-mono text-xs outline-none"
-                  title="Từ ngày"
+                  :title="t('From date', 'Từ ngày')"
                 />
                 <span class="text-slate-400">→</span>
                 <input
@@ -66,7 +66,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   v-model="reportDateTo"
                   @change="onReportFilterChange"
                   class="input-box px-2.5 py-1 rounded-xl font-mono text-xs outline-none"
-                  title="Đến ngày"
+                  :title="t('To date', 'Đến ngày')"
                 />
               </div>
 
@@ -75,9 +75,9 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                 type="button"
                 @click="exportReportTechnicalExcel"
                 class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-sm cursor-pointer ml-auto"
-                title="Xuất bảng báo cáo này ra Excel"
+                :title="t('Export this report to Excel', 'Xuất bảng báo cáo này ra Excel')"
               >
-                <i class="fa-solid fa-file-excel"></i> Xuất Excel
+                <i class="fa-solid fa-file-excel"></i> {{ t('Export Excel', 'Xuất Excel') }}
               </button>
             </div>
           </div>
@@ -88,10 +88,10 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
             <div class="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
               <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                  <i class="fa-solid fa-chart-pie text-emerald-500"></i> Phân Bổ Tỷ Lệ Trạng Thái Phiếu
+                  <i class="fa-solid fa-chart-pie text-emerald-500"></i> {{ t('Ticket Status Distribution', 'Phân Bổ Tỷ Lệ Trạng Thái Phiếu') }}
                 </h3>
                 <span class="text-xs font-mono font-bold text-sky-600 dark:text-sky-400">
-                  {{ reportStats.totalStatusCps }} phiếu
+                  {{ reportStats.totalStatusCps }} {{ t('tickets', 'phiếu') }}
                 </span>
               </div>
 
@@ -104,7 +104,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                       <span class="w-3 h-3 rounded-full bg-slate-500"></span>
                       <div>
                         <div class="font-bold text-xs text-slate-700 dark:text-slate-300">OPEN_TASK</div>
-                        <div class="text-[9px] text-slate-400">Phiếu mới tiếp nhận</div>
+                        <div class="text-[9px] text-slate-400">{{ t('Newly received ticket', 'Phiếu mới tiếp nhận') }}</div>
                       </div>
                     </div>
                     <div class="text-right">
@@ -119,7 +119,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                       <span class="w-3 h-3 rounded-full bg-amber-500"></span>
                       <div>
                         <div class="font-bold text-xs text-amber-700 dark:text-amber-400">TO_ASSIGN</div>
-                        <div class="text-[9px] text-slate-400">Chờ giao kỹ thuật</div>
+                        <div class="text-[9px] text-slate-400">{{ t('Pending tech assignment', 'Chờ giao kỹ thuật') }}</div>
                       </div>
                     </div>
                     <div class="text-right">
@@ -134,7 +134,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                       <span class="w-3 h-3 rounded-full bg-sky-500"></span>
                       <div>
                         <div class="font-bold text-xs text-sky-700 dark:text-sky-400">IN_PROGRESS</div>
-                        <div class="text-[9px] text-slate-400">Đang xử lý sửa chữa</div>
+                        <div class="text-[9px] text-slate-400">{{ t('Repair in progress', 'Đang xử lý sửa chữa') }}</div>
                       </div>
                     </div>
                     <div class="text-right">
@@ -149,7 +149,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                       <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
                       <div>
                         <div class="font-bold text-xs text-emerald-700 dark:text-emerald-400">CLOSED</div>
-                        <div class="text-[9px] text-slate-400">Đã nghiệm thu đóng</div>
+                        <div class="text-[9px] text-slate-400">{{ t('Closed & accepted', 'Đã nghiệm thu đóng') }}</div>
                       </div>
                     </div>
                     <div class="text-right">
@@ -164,7 +164,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                       <span class="w-3 h-3 rounded-full bg-rose-500"></span>
                       <div>
                         <div class="font-bold text-xs text-rose-700 dark:text-rose-400">OVER_DUE</div>
-                        <div class="text-[9px] text-slate-400">Quá hạn xử lý</div>
+                        <div class="text-[9px] text-slate-400">{{ t('Overdue', 'Quá hạn xử lý') }}</div>
                       </div>
                     </div>
                     <div class="text-right">
@@ -183,7 +183,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                         {{ reportStats.totalStatusCps }}
                       </div>
                       <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
-                        Tổng Trạng Thái CPS
+                        {{ t('Total CPS Status', 'Tổng Trạng Thái CPS') }}
                       </div>
                     </div>
                   </div>
@@ -195,10 +195,10 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
             <div class="glass-card rounded-2xl p-5 flex flex-col justify-between space-y-4">
               <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                  <i class="fa-solid fa-layer-group text-sky-500"></i> Tỷ lệ 4M
+                  <i class="fa-solid fa-layer-group text-sky-500"></i> {{ t('4M Ratio', 'Tỷ lệ 4M') }}
                 </h3>
                 <span class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">
-                  {{ report4MStats.total }} sự cố
+                  {{ report4MStats.total }} {{ t('incidents', 'sự cố') }}
                 </span>
               </div>
 
@@ -208,25 +208,25 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   <!-- Card Phiếu Yêu Cầu -->
                   <div class="p-4 rounded-xl bg-sky-50/50 dark:bg-sky-500/5 border border-sky-200 dark:border-sky-500/20 flex flex-col justify-between flex-1">
                     <div class="flex items-center justify-between text-slate-400">
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400">Phiếu Yêu Cầu</span>
+                      <span class="text-[10px] font-bold uppercase tracking-wider text-sky-700 dark:text-sky-400">{{ t('Requests', 'Phiếu Yêu Cầu') }}</span>
                       <i class="fa-solid fa-file-invoice text-sky-500 text-lg"></i>
                     </div>
                     <div class="text-3xl font-extrabold font-mono text-sky-600 dark:text-sky-400 my-1">
                       {{ reportStats.totalRequests }}
                     </div>
-                    <div class="text-[10px] text-slate-500">Tổng phiếu kỹ thuật trong kỳ</div>
+                    <div class="text-[10px] text-slate-500">{{ t('Total tickets in period', 'Tổng phiếu kỹ thuật trong kỳ') }}</div>
                   </div>
 
                   <!-- Card Tổng Downtime -->
                   <div class="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-500/5 border border-amber-200 dark:border-amber-500/20 flex flex-col justify-between flex-1">
                     <div class="flex items-center justify-between text-slate-400">
-                      <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">Tổng Downtime</span>
+                      <span class="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">{{ t('Total Downtime', 'Tổng Downtime') }}</span>
                       <i class="fa-solid fa-clock-rotate-left text-amber-500 text-lg"></i>
                     </div>
                     <div class="text-3xl font-extrabold font-mono text-amber-600 dark:text-amber-400 my-1">
                       {{ reportStats.totalDowntimeMinutes }}<span class="text-xs font-normal ml-0.5">m</span>
                     </div>
-                    <div class="text-[10px] text-slate-500 truncate">~ {{ reportStats.totalDowntimeHours }} giờ dừng máy</div>
+                    <div class="text-[10px] text-slate-500 truncate">~ {{ reportStats.totalDowntimeHours }} {{ t('hours downtime', 'giờ dừng máy') }}</div>
                   </div>
                 </div>
 
@@ -239,7 +239,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                         {{ report4MStats.total }}
                       </div>
                       <div class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">
-                        Số sự cố
+                        {{ t('Incidents count', 'Số sự cố') }}
                       </div>
                     </div>
                   </div>
@@ -260,17 +260,17 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                  <i class="fa-solid fa-timeline text-amber-500"></i> Tiến Độ Dừng Máy
+                  <i class="fa-solid fa-timeline text-amber-500"></i> {{ t('Machine Downtime Schedule', 'Tiến Độ Dừng Máy') }}
                 </h3>
               </div>
               <div class="flex items-center gap-3 text-xs">
                 <div class="flex items-center gap-1.5 font-medium text-slate-600 dark:text-slate-300">
                   <span class="w-3.5 h-3.5 rounded bg-amber-400 border border-amber-500 shadow-xs"></span>
-                  <span>Downtime máy</span>
+                  <span>{{ t('Machine downtime', 'Downtime máy') }}</span>
                 </div>
                 <span class="text-slate-400">|</span>
                 <span class="font-mono text-xs font-bold text-amber-600 dark:text-amber-400">
-                  {{ ganttMachineRows.length }} máy ghi nhận
+                  {{ ganttMachineRows.length }} {{ t('machines recorded', 'máy ghi nhận') }}
                 </span>
               </div>
             </div>
@@ -279,7 +279,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
             <div class="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/60 p-3">
               <div v-if="ganttMachineRows.length === 0" class="py-12 text-center text-slate-400 text-xs">
                 <i class="fa-solid fa-circle-check text-emerald-500 text-2xl mb-2 block"></i>
-                Không có sự cố dừng máy (downtime) nào trong khoảng thời gian đã chọn
+                {{ t('No machine downtime recorded in selected period', 'Không có sự cố dừng máy (downtime) nào trong khoảng thời gian đã chọn') }}
               </div>
 
               <div v-else class="min-w-[760px] space-y-2">
@@ -353,9 +353,9 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
             <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
               <div>
                 <h3 class="text-sm font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100">
-                  <i class="fa-solid fa-table text-sky-500"></i> Dữ Liệu Phiếu Yêu Cầu
+                  <i class="fa-solid fa-table text-sky-500"></i> {{ t('Request Tickets Data', 'Dữ Liệu Phiếu Yêu Cầu') }}
                 </h3>
-                <p class="text-xs text-slate-500 mt-0.5">Danh sách các phiếu lọc theo mốc thời gian từ {{ reportDateFrom || '...' }} đến {{ reportDateTo || '...' }}</p>
+                <p class="text-xs text-slate-500 mt-0.5">{{ t('Tickets filtered from', 'Danh sách các phiếu lọc theo mốc thời gian từ') }} {{ reportDateFrom || '...' }} {{ t('to', 'đến') }} {{ reportDateTo || '...' }}</p>
               </div>
 
               <!-- Quick Search & Status Filter inside Tabulator -->
@@ -364,7 +364,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   type="text"
                   v-model="reportSearch"
                   @input="onReportFilterChange"
-                  placeholder="🔍 Tìm mã phiếu, người YC, Technician, thiết bị..."
+                  :placeholder="t('Search ticket code, requester, Technician, machine...', '🔍 Tìm mã phiếu, người YC, Technician, thiết bị...')"
                   class="input-box px-3.5 py-1.5 rounded-xl text-xs outline-none w-full sm:w-64"
                 />
                 <select
@@ -372,7 +372,7 @@ export const CP_REPORT_TECHNICAL_TAB_HTML = `        <!-- ======================
                   @change="onReportFilterChange"
                   class="input-box px-3 py-1.5 rounded-xl text-xs outline-none cursor-pointer"
                 >
-                  <option value="ALL">-- Tất cả trạng thái --</option>
+                  <option value="ALL">-- {{ t('All Statuses', 'Tất cả trạng thái') }} --</option>
                   <option value="OPEN_TASK">OPEN_TASK</option>
                   <option value="TO_ASSIGN">TO_ASSIGN</option>
                   <option value="IN_PROGRESS">IN_PROGRESS</option>

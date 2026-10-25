@@ -22,86 +22,89 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       margin: 0;
       padding: 0;
       min-height: 100vh;
-      background-color: #f8fafc;
+      background-color: #f1f5f9;
       color: #0f172a;
     }
-    [v-cloak] { display: none !important; }
-    .font-brand { font-family: 'Host Grotesk', sans-serif; }
-    .font-mono { font-family: 'Azeret Mono', monospace; }
-
+    .font-brand {
+      font-family: 'Host Grotesk', sans-serif;
+    }
+    .font-mono {
+      font-family: 'Azeret Mono', monospace;
+    }
     .card-panel {
       background: #ffffff;
       border: 1px solid #e2e8f0;
-      box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
-    }
-    .input-field {
-      background-color: #ffffff;
-      border: 1px solid #cbd5e1;
-      color: #0f172a;
-    }
-    .input-field:focus {
-      border-color: #0284c7;
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
     }
     .readonly-box {
-      background-color: #f8fafc;
+      background: #f8fafc;
       border: 1px solid #e2e8f0;
-      color: #334155;
     }
-
-    /* Big Toggle Buttons */
+    .input-field {
+      background: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      color: #0f172a;
+      transition: all 0.2s ease;
+    }
+    .input-field:focus {
+      background: #ffffff;
+      border-color: #0284c7;
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+      outline: none;
+    }
     .btn-toggle {
-      min-height: 52px;
-      font-size: 15px;
-      font-weight: 600;
-      border-radius: 12px;
-      padding: 12px 18px;
-      cursor: pointer;
-      transition: all 0.15s ease-in-out;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
+      width: 100%;
+      padding: 1rem;
+      border-radius: 0.875rem;
       border: 2px solid #e2e8f0;
       background: #ffffff;
       color: #475569;
-      user-select: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
     }
     .btn-toggle:hover {
-      border-color: #94a3b8;
-      color: #0f172a;
+      border-color: #cbd5e1;
       background: #f8fafc;
     }
+    .btn-toggle.active-primary {
+      border-color: #0284c7;
+      background: #f0f9ff;
+      color: #0369a1;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+    }
     .btn-toggle.active-success {
-      background-color: #059669 !important;
-      border-color: #059669 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(5, 150, 105, 0.35);
+      border-color: #10b981;
+      background: #ecfdf5;
+      color: #047857;
+      box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+    }
+    .btn-toggle.active-warning {
+      border-color: #f59e0b;
+      background: #fffbeb;
+      color: #b45309;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.15);
     }
     .btn-toggle.active-danger {
-      background-color: #dc2626 !important;
-      border-color: #dc2626 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(220, 38, 38, 0.35);
+      border-color: #ef4444;
+      background: #fef2f2;
+      color: #b91c1c;
+      box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
     }
-    .btn-toggle.active-primary {
-      background-color: #0284c7 !important;
-      border-color: #0284c7 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(2, 132, 199, 0.35);
-    }
-
-    /* Big Submit Button */
     .btn-submit {
-      min-height: 56px;
-      font-size: 17px;
-      font-weight: 700;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: all 0.15s ease-in-out;
       background: #0284c7;
       color: #ffffff;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 1.125rem 2rem;
+      border-radius: 0.875rem;
+      transition: all 0.2s ease;
+      cursor: pointer;
       border: none;
       box-shadow: 0 4px 16px rgba(2, 132, 199, 0.35);
     }
@@ -119,19 +122,67 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
   <div id="app" v-cloak class="max-w-4xl mx-auto space-y-6">
 
     <!-- Top Navigation Header -->
-    <header class="card-panel rounded-2xl p-4 flex items-center shadow-sm">
+    <header class="card-panel rounded-2xl p-4 flex items-center justify-between shadow-sm">
       <div class="flex items-center">
         <img src="/images/logo-full.png" alt="Checkpoint Systems" class="h-8 sm:h-9 object-contain" />
       </div>
+
+      <!-- Language Toggle EN / VI -->
+      <div class="flex items-center gap-1.5 p-1 rounded-xl bg-slate-100 border border-slate-200">
+        <button
+          type="button"
+          @click="setLanguage('en')"
+          class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer"
+          :class="currentLang === 'en' ? 'bg-white text-sky-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-800'"
+        >
+          <span>EN</span>
+        </button>
+        <button
+          type="button"
+          @click="setLanguage('vi')"
+          class="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer"
+          :class="currentLang === 'vi' ? 'bg-white text-sky-600 shadow-sm border border-slate-200' : 'text-slate-500 hover:text-slate-800'"
+        >
+          <span>VI</span>
+        </button>
+      </div>
     </header>
 
-    <!-- Confirm Submit Modal Notification -->
+    <!-- Confirm Submit Modal Notification (Preview Modal) -->
     <div v-if="showConfirmModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-      <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-md w-full text-center space-y-5 border border-slate-200 shadow-2xl">
+      <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-lg w-full text-center space-y-5 border border-slate-200 shadow-2xl">
         <div class="w-16 h-16 mx-auto rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-3xl font-bold">?</div>
         <div>
-          <h2 class="font-brand font-bold text-xl text-slate-900">Xác Nhận Gửi Bàn Giao</h2>
-          <p class="text-sm text-slate-600 mt-2 font-medium">Bạn có muốn gửi hay không?</p>
+          <h2 class="font-brand font-bold text-xl text-slate-900">{{ t('Confirm Handover Submission', 'Xác Nhận Gửi Bàn Giao') }}</h2>
+          <p class="text-sm text-slate-600 mt-1 font-medium">{{ t('Please review the information before submitting:', 'Vui lòng kiểm tra lại thông tin trước khi gửi:') }}</p>
+        </div>
+        <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-2 text-xs">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">{{ t('Tech Feedback Doc No:', 'Mã phản hồi KT:') }}</span>
+            <span class="font-mono font-bold text-sky-600">{{ form.cpstDocNo }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">{{ t('Print Quality:', 'Chất lượng in:') }}</span>
+            <span class="font-bold text-xs" :class="form.chkQuality === 'Đạt' ? 'text-emerald-600' : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? 'text-amber-600' : 'text-rose-600')">
+              {{ form.chkQuality === 'Đạt' ? ('🟢 ' + t('Pass', 'Đạt')) : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? ('🟡 ' + t('Conditional Run / Monitor', 'Chạy tạm, tiếp tục theo dõi')) : ('🔴 ' + t('Fail', 'Chưa đạt'))) }}
+            </span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">Work Order:</span>
+            <span class="text-slate-800 font-mono font-medium">{{ form.workOrder || 'N/A' }}</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">{{ t('Total / Scrap Qty:', 'Tổng SL / Phế:') }}</span>
+            <span class="text-slate-800 font-mono font-medium">{{ form.woTotalQty || 0 }} / {{ form.wasteQty || 0 }} {{ form.wasteUnit }} ({{ calculatedWastePercent }})</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-500">{{ t('Production Representative:', 'Đại diện sản xuất:') }}</span>
+            <span class="text-slate-800 font-medium">{{ form.prodMgr }}</span>
+          </div>
+          <div v-if="form.notes" class="pt-2 border-t border-slate-200">
+            <span class="text-slate-500 block mb-0.5 font-semibold">{{ t('Notes / Remarks:', 'Ghi chú / Ghi nhận:') }}</span>
+            <p class="text-slate-800 bg-white p-2.5 rounded-lg border border-slate-200 whitespace-pre-wrap">{{ form.notes }}</p>
+          </div>
         </div>
         <div class="grid grid-cols-2 gap-3 pt-2">
           <button
@@ -139,7 +190,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             @click="showConfirmModal = false"
             class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
           >
-            Hủy / Cancel
+            {{ t('Cancel', 'Hủy / Cancel') }}
           </button>
           <button
             type="button"
@@ -147,7 +198,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             :disabled="isSubmitting"
             class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-sky-600 hover:bg-sky-500 text-white transition shadow-md"
           >
-            OK
+            {{ t('Confirm & Submit', 'Xác Nhận & Gửi') }}
           </button>
         </div>
       </div>
@@ -158,29 +209,35 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       <div class="card-panel rounded-2xl p-6 sm:p-8 max-w-lg w-full text-center space-y-5 border-2 border-emerald-500 shadow-2xl">
         <div class="w-16 h-16 mx-auto rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center text-3xl font-bold">✓</div>
         <div>
-          <h2 class="font-brand font-bold text-2xl text-slate-900">Bàn Giao Hoàn Tất!</h2>
-          <p class="text-sm text-slate-600 mt-1">Đã hoàn thành toàn bộ quy trình 3 bước (CPSR → CPST → CPSF).</p>
+          <h2 class="font-brand font-bold text-2xl text-slate-900">{{ t('Handover Acceptance Completed!', 'Bàn Giao Hoàn Tất!') }}</h2>
+          <p class="text-sm text-slate-600 mt-1">{{ t('All 3 steps in process completed (CPSR → CPST → CPSF).', 'Đã hoàn thành toàn bộ quy trình 3 bước (CPSR → CPST → CPSF).') }}</p>
         </div>
         <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-left space-y-2">
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Số phiếu xác nhận:</span>
+            <span class="text-xs text-slate-500">{{ t('Confirmation Doc No:', 'Số phiếu xác nhận:') }}</span>
             <span class="font-mono text-base font-bold text-sky-600">{{ submittedDocNo }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Mã phản hồi KT:</span>
+            <span class="text-xs text-slate-500">{{ t('Tech Feedback Doc No:', 'Mã phản hồi KT:') }}</span>
             <span class="font-mono text-xs font-semibold text-emerald-600">{{ form.cpstDocNo }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Chất lượng in:</span>
-            <span class="text-xs font-bold" :class="form.chkQuality === 'Đạt' ? 'text-emerald-600' : 'text-rose-600'">{{ form.chkQuality }}</span>
+            <span class="text-xs text-slate-500">{{ t('Print Quality:', 'Chất lượng in:') }}</span>
+            <span class="text-xs font-bold" :class="form.chkQuality === 'Đạt' ? 'text-emerald-600' : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? 'text-amber-600' : 'text-rose-600')">
+              {{ form.chkQuality === 'Đạt' ? ('🟢 ' + t('Pass', 'Đạt')) : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? ('🟡 ' + t('Conditional Run / Monitor', 'Chạy tạm, tiếp tục theo dõi')) : ('🔴 ' + t('Fail', 'Chưa đạt'))) }}
+            </span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-xs text-slate-500">Work Order:</span>
             <span class="text-xs text-slate-700 font-mono">{{ form.workOrder || 'N/A' }}</span>
           </div>
           <div class="flex justify-between items-center">
-            <span class="text-xs text-slate-500">Tỷ lệ phế:</span>
+            <span class="text-xs text-slate-500">{{ t('Scrap Rate:', 'Tỷ lệ phế:') }}</span>
             <span class="text-xs font-mono font-bold text-amber-600">{{ calculatedWastePercent }}</span>
+          </div>
+          <div v-if="form.notes" class="pt-2 border-t border-slate-200 text-left">
+            <span class="text-[11px] text-slate-500 block font-semibold">{{ t('Notes / Remarks:', 'Ghi chú / Ghi nhận:') }}</span>
+            <p class="text-xs text-slate-700 whitespace-pre-wrap mt-0.5">{{ form.notes }}</p>
           </div>
         </div>
         <div class="pt-2">
@@ -189,7 +246,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             @click="resetForm"
             class="w-full py-3.5 px-4 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition text-center shadow-md"
           >
-            Hoàn thành
+            {{ t('Done', 'Hoàn thành') }}
           </button>
         </div>
       </div>
@@ -207,12 +264,12 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       <!-- Header & Next Code Badge -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-200">
         <div>
-          <h1 class="font-brand font-bold text-2xl text-slate-900">PHIẾU XÁC NHẬN BÀN GIAO (CPSF)</h1>
-          <p class="text-xs text-slate-500 mt-1">Dành cho đại diện sản xuất nghiệm thu chất lượng sau xử lý</p>
+          <h1 class="font-brand font-bold text-2xl text-slate-900">{{ t('HANDOVER ACCEPTANCE FORM (CPSF)', 'PHIẾU XÁC NHẬN BÀN GIAO (CPSF)') }}</h1>
+          <p class="text-xs text-slate-500 mt-1">{{ t('For production representative confirming quality acceptance and handover', 'Dành cho đại diện sản xuất nghiệm thu chất lượng sau xử lý') }}</p>
         </div>
         <div class="flex items-center gap-2 bg-sky-50 px-4 py-2.5 rounded-xl border border-sky-200">
-          <span class="text-xs text-slate-600 uppercase tracking-wider font-semibold">Số phiếu:</span>
-          <span class="font-mono text-base font-bold text-sky-700">{{ docNo || 'Đang tải...' }}</span>
+          <span class="text-xs text-slate-600 uppercase tracking-wider font-semibold">{{ t('Ticket No:', 'Số phiếu:') }}</span>
+          <span class="font-mono text-base font-bold text-sky-700">{{ docNo || t('Loading...', 'Đang tải...') }}</span>
         </div>
       </div>
 
@@ -220,7 +277,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-4">
         <div>
           <label class="block text-xs font-bold text-sky-700 uppercase tracking-wider mb-2">
-            Chọn mã phản hồi kỹ thuật CPST cần nghiệm thu <span class="text-rose-500">*</span>
+            {{ t('Select CPST technical feedback code for handover acceptance', 'Chọn mã phản hồi kỹ thuật CPST cần nghiệm thu') }} <span class="text-rose-500">*</span>
           </label>
           <select
             v-model="form.cpstDocNo"
@@ -228,61 +285,72 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-mono font-semibold cursor-pointer text-slate-800"
             required
           >
-            <option value="" disabled>-- Chọn mã phiếu CPST đã xử lý --</option>
+            <option value="" disabled>-- {{ t('Select resolved CPST ticket', 'Chọn mã phiếu CPST đã xử lý') }} --</option>
             <option v-for="c in availableCpsts" :key="c.docNo" :value="c.docNo">
               {{ c.docNo }} — ({{ c.recvBy }}) [{{ c.chkStatus }}]
             </option>
-            <option v-if="customCpstMode" :value="form.cpstDocNo">{{ form.cpstDocNo }} (Từ liên kết URL)</option>
+            <option v-if="customCpstMode" :value="form.cpstDocNo">{{ form.cpstDocNo }} ({{ t('From URL link', 'Từ liên kết URL') }})</option>
           </select>
         </div>
 
         <!-- Readonly Auto-filled Info from CPST -->
         <div v-if="selectedCpst" class="readonly-box p-4 rounded-xl space-y-3 text-xs">
           <div class="font-semibold text-slate-600 uppercase tracking-wider text-[11px] pb-1 border-b border-slate-200">
-            Thông tin tự động nạp từ phản hồi {{ selectedCpst.docNo }} (Read-only)
+            {{ t('Auto-loaded details from feedback', 'Thông tin tự động nạp từ phản hồi') }} {{ selectedCpst.docNo }} (Read-only)
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div>
-              <span class="text-slate-500 block">Technician tiếp nhận:</span>
+              <span class="text-slate-500 block">{{ t('Technician In-charge:', 'Technician tiếp nhận:') }}</span>
               <span class="font-medium text-slate-900">{{ selectedCpst.recvBy }}</span>
             </div>
             <div>
-              <span class="text-slate-500 block">Mã yêu cầu CPSR gốc:</span>
+              <span class="text-slate-500 block">{{ t('Original CPSR Request Code:', 'Mã yêu cầu CPSR gốc:') }}</span>
               <span class="font-mono font-medium text-sky-600">{{ selectedCpst.cpsrDocNo }}</span>
             </div>
             <div>
-              <span class="text-slate-500 block">Trạng thái kỹ thuật:</span>
+              <span class="text-slate-500 block">{{ t('Technical Status:', 'Trạng thái kỹ thuật:') }}</span>
               <span class="font-bold text-emerald-600">{{ selectedCpst.chkStatus }}</span>
             </div>
           </div>
           <div v-if="selectedCpst.actionTaken">
-            <span class="text-slate-500 block">Hành động khắc phục:</span>
+            <span class="text-slate-500 block">{{ t('Action Taken:', 'Hành động khắc phục:') }}</span>
             <p class="text-slate-800 mt-0.5 bg-white p-2.5 rounded-lg border border-slate-200 font-mono text-[11px]">{{ selectedCpst.actionTaken }}</p>
           </div>
         </div>
       </div>
 
-      <!-- Field Group 2: Print Quality (2 BIG BUTTONS) -->
+      <!-- Field Group 2: Print Quality (3 BIG BUTTONS) -->
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
-          Đánh giá chất lượng in <span class="text-rose-500">*</span>
+          {{ t('Print Quality Evaluation', 'Đánh giá chất lượng in') }} <span class="text-rose-500">*</span>
         </label>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
             type="button"
             @click="form.chkQuality = 'Đạt'"
-            class="btn-toggle"
+            class="btn-toggle flex items-center justify-center gap-2"
             :class="{ 'active-success': form.chkQuality === 'Đạt' }"
           >
-            ĐẠT
+            <span class="text-base">🟢</span>
+            <span>{{ t('PASS / ĐẠT', 'ĐẠT') }}</span>
+          </button>
+          <button
+            type="button"
+            @click="form.chkQuality = 'Chạy tạm, tiếp tục theo dõi'"
+            class="btn-toggle flex items-center justify-center gap-2 text-center"
+            :class="{ 'active-warning': form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' }"
+          >
+            <span class="text-base">🟡</span>
+            <span>{{ t('CONDITIONAL RUN / MONITOR', 'CHẠY TẠM, THEO DÕI') }}</span>
           </button>
           <button
             type="button"
             @click="form.chkQuality = 'Chưa đạt'"
-            class="btn-toggle"
+            class="btn-toggle flex items-center justify-center gap-2"
             :class="{ 'active-danger': form.chkQuality === 'Chưa đạt' }"
           >
-            CHƯA ĐẠT
+            <span class="text-base">🔴</span>
+            <span>{{ t('FAIL / CHƯA ĐẠT', 'CHƯA ĐẠT') }}</span>
           </button>
         </div>
       </div>
@@ -291,18 +359,18 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-            Work Order (Lệnh SX)
+            {{ t('Work Order (WO)', 'Work Order (Lệnh SX)') }}
           </label>
           <input
             type="text"
             v-model="form.workOrder"
-            placeholder="Ví dụ: WO-102934..."
+            :placeholder="t('e.g. WO-102934...', 'Ví dụ: WO-102934...')"
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium font-mono"
           />
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-            Tổng số lượng
+            {{ t('Total Quantity', 'Tổng số lượng') }}
           </label>
           <input
             type="number"
@@ -314,7 +382,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
         </div>
         <div>
           <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex justify-between">
-            <span>Phế phát sinh</span>
+            <span>{{ t('Scrap / Waste Qty', 'Phế phát sinh') }}</span>
             <span class="text-amber-600 font-mono font-bold">{{ calculatedWastePercent }}</span>
           </label>
           <input
@@ -330,7 +398,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
       <!-- Field Group 4: Unit (3 BIG BUTTONS) -->
       <div>
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2.5">
-          Đơn vị tính <span class="text-rose-500">*</span>
+          {{ t('Unit of Measure', 'Đơn vị tính') }} <span class="text-rose-500">*</span>
         </label>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button
@@ -347,7 +415,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             class="btn-toggle"
             :class="{ 'active-primary': form.wasteUnit === 'Mét' }"
           >
-            Mét
+            {{ t('Meters', 'Mét') }}
           </button>
           <button
             type="button"
@@ -355,22 +423,35 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             class="btn-toggle"
             :class="{ 'active-primary': form.wasteUnit === 'Tờ in' }"
           >
-            Tờ in
+            {{ t('Sheets', 'Tờ in') }}
           </button>
         </div>
+      </div>
+
+      <!-- Field Group: Notes / Remarks -->
+      <div>
+        <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+          {{ t('Notes / Remarks', 'Ghi chú / Ghi nhận') }}
+        </label>
+        <textarea
+          v-model="form.notes"
+          rows="3"
+          :placeholder="t('Enter notes, conditional monitoring conditions, or remarks...', 'Nhập ghi chú, điều kiện theo dõi chạy tạm hoặc lưu ý...')"
+          class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium"
+        ></textarea>
       </div>
 
       <!-- Field Group 5: Production Manager Signature / Droplist (3-line search) -->
       <div class="relative">
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-          Đại diện sản xuất ký nhận <span class="text-rose-500">*</span>
+          {{ t('Production Representative Signature', 'Đại diện sản xuất ký nhận') }} <span class="text-rose-500">*</span>
         </label>
         <div class="relative">
           <input
             type="text"
             v-model="mgrSearch"
             @focus="showMgrDropdown = true"
-            placeholder="Nhập tên hoặc mã đại diện sản xuất..."
+            :placeholder="t('Enter name or employee code of production representative...', 'Nhập tên hoặc mã đại diện sản xuất...')"
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium pr-10"
           />
           <button
@@ -395,13 +476,13 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             class="p-3 hover:bg-slate-50 cursor-pointer transition flex flex-col gap-0.5"
           >
             <div class="text-sm font-bold text-slate-900">{{ emp.name }}</div>
-            <div class="text-xs font-mono font-semibold text-sky-600">Mã NV: {{ emp.mnv }}</div>
+            <div class="text-xs font-mono font-semibold text-sky-600">{{ t('Emp Code:', 'Mã NV:') }} {{ emp.mnv }}</div>
             <div class="text-xs text-slate-500">{{ emp.dept || 'Sản xuất' }} • {{ emp.role || 'Quản lý SX' }}</div>
           </div>
         </div>
 
         <div v-if="form.prodMgr" class="mt-2 text-xs text-emerald-600 flex items-center gap-1 font-medium">
-          <span>✓ Đại diện SX ký nhận:</span>
+          <span>✓ {{ t('Production Rep:', 'Đại diện SX ký nhận:') }}</span>
           <span class="text-slate-800 font-semibold">{{ form.prodMgr }}</span>
         </div>
       </div>
@@ -414,8 +495,8 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           :disabled="isSubmitting"
           class="btn-submit w-full"
         >
-          <span v-if="!isSubmitting">SUBMIT XÁC NHẬN BÀN GIAO (CPSF)</span>
-          <span v-else>Đang lưu xác nhận bàn giao...</span>
+          <span v-if="!isSubmitting">{{ t('SUBMIT HANDOVER ACCEPTANCE (CPSF)', 'SUBMIT XÁC NHẬN BÀN GIAO (CPSF)') }}</span>
+          <span v-else>{{ t('Saving handover acceptance...', 'Đang lưu xác nhận bàn giao...') }}</span>
         </button>
       </div>
 
@@ -428,6 +509,14 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
 
     createApp({
       setup() {
+        const currentLang = ref(localStorage.getItem('checkpoint_lang') || 'en');
+        const setLanguage = (lang) => {
+          currentLang.value = lang;
+          localStorage.setItem('checkpoint_lang', lang);
+          document.documentElement.setAttribute('lang', lang);
+        };
+        const t = (en, vi) => currentLang.value === 'vi' ? vi : en;
+
         const docNo = ref('');
         const isSubmitting = ref(false);
         const showConfirmModal = ref(false);
@@ -450,6 +539,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           woTotalQty: null,
           wasteQty: null,
           wasteUnit: 'PCS',
+          notes: '',
           prodMgr: ''
         });
 
@@ -561,15 +651,15 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
         function submitForm() {
           errorMessage.value = '';
           if (!form.value.cpstDocNo) {
-            errorMessage.value = 'Vui lòng chọn mã phản hồi CPST cần nghiệm thu.';
+            errorMessage.value = t('Please select CPST feedback code for acceptance.', 'Vui lòng chọn mã phản hồi CPST cần nghiệm thu.');
             return;
           }
           if (!form.value.chkQuality) {
-            errorMessage.value = 'Vui lòng đánh giá chất lượng in (Đạt hoặc Chưa đạt).';
+            errorMessage.value = t('Please evaluate print quality.', 'Vui lòng đánh giá chất lượng in.');
             return;
           }
           if (!form.value.prodMgr) {
-            errorMessage.value = 'Vui lòng chọn đại diện sản xuất ký nhận.';
+            errorMessage.value = t('Please select production representative signature.', 'Vui lòng chọn đại diện sản xuất ký nhận.');
             return;
           }
 
@@ -590,6 +680,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             wasteQty: form.value.wasteQty != null && form.value.wasteQty !== '' ? Number(form.value.wasteQty) : 0,
             wasteUnit: form.value.wasteUnit,
             wastePercent: calculatedWastePercent.value,
+            notes: form.value.notes ? form.value.notes.trim() : '',
             prodMgr: form.value.prodMgr,
             submittedAt: new Date().toISOString()
           };
@@ -610,7 +701,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             submittedDocNo.value = result.docNo || docNo.value;
             successModal.value = true;
           } catch (err) {
-            errorMessage.value = 'Gửi xác nhận thất bại: ' + err.message;
+            errorMessage.value = (currentLang.value === 'vi' ? 'Gửi xác nhận thất bại: ' : 'Failed to submit handover: ') + err.message;
           } finally {
             isSubmitting.value = false;
           }
@@ -620,6 +711,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           form.value.workOrder = '';
           form.value.woTotalQty = null;
           form.value.wasteQty = null;
+          form.value.notes = '';
           selectedCpst.value = null;
           form.value.cpstDocNo = '';
           successModal.value = false;
@@ -640,6 +732,9 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
         });
 
         return {
+          currentLang,
+          setLanguage,
+          t,
           docNo,
           form,
           isSubmitting,

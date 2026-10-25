@@ -16,7 +16,7 @@ export const CP_ASSIGN_MODAL_HTML = `    <!-- ==================================
         <div class="px-6 py-4 bg-slate-50 dark:bg-slate-800/80 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
           <div>
             <div class="text-[10px] uppercase font-bold text-amber-500 flex items-center gap-1.5">
-              <i class="fa-solid fa-clipboard-user"></i> Module Phân Công Kỹ Thuật
+              <i class="fa-solid fa-clipboard-user"></i> {{ t('Assign Task Module', 'Module Phân Công Kỹ Thuật') }}
             </div>
             <h2 class="text-base font-extrabold font-mono text-slate-800 dark:text-slate-100 flex items-center gap-2 mt-0.5">
               <span>{{ selectedCpsForAssign.docNo || ('CPS-' + (selectedCpsForAssign.cpsrDocNo ? selectedCpsForAssign.cpsrDocNo.replace('CPSR-', '') : (selectedCpsForAssign.cpsr?.docNo ? selectedCpsForAssign.cpsr.docNo.replace('CPSR-', '') : ''))) }}</span>
@@ -33,17 +33,17 @@ export const CP_ASSIGN_MODAL_HTML = `    <!-- ==================================
           <!-- Summary card -->
           <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/80 space-y-2">
             <div class="grid grid-cols-2 gap-2 text-slate-600 dark:text-slate-300">
-              <div><span class="text-slate-400 block text-[10px] font-bold">THIẾT BỊ / MÁY:</span> <span class="font-bold text-slate-800 dark:text-slate-100">{{ selectedCpsForAssign.machineName || selectedCpsForAssign.cpsr?.machineName || '-' }}</span></div>
-              <div><span class="text-slate-400 block text-[10px] font-bold">CÔNG NGHỆ:</span> <span class="font-mono">{{ selectedCpsForAssign.printTech || selectedCpsForAssign.cpsr?.printTech || '-' }}</span></div>
+              <div><span class="text-slate-400 block text-[10px] font-bold">{{ t('EQUIPMENT / MACHINE:', 'THIẾT BỊ / MÁY:') }}</span> <span class="font-bold text-slate-800 dark:text-slate-100">{{ selectedCpsForAssign.machineName || selectedCpsForAssign.cpsr?.machineName || '-' }}</span></div>
+              <div><span class="text-slate-400 block text-[10px] font-bold">{{ t('TECHNOLOGY:', 'CÔNG NGHỆ:') }}</span> <span class="font-mono">{{ selectedCpsForAssign.printTech || selectedCpsForAssign.cpsr?.printTech || '-' }}</span></div>
               <div class="col-span-2">
-                <span class="text-slate-400 block text-[10px] font-bold">MÔ TẢ SỰ CỐ:</span>
+                <span class="text-slate-400 block text-[10px] font-bold">{{ t('PROBLEM DESCRIPTION:', 'MÔ TẢ SỰ CỐ:') }}</span>
                 <p class="mt-0.5 p-2 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 font-mono text-[11px] text-rose-500 dark:text-rose-400">
                   {{ selectedCpsForAssign.problem || selectedCpsForAssign.cpsr?.problem || '-' }}
                 </p>
               </div>
-              <div><span class="text-slate-400 block text-[10px] font-bold">NGƯỜI YÊU CẦU:</span> {{ selectedCpsForAssign.reqBy || selectedCpsForAssign.cpsr?.reqBy || '-' }}</div>
+              <div><span class="text-slate-400 block text-[10px] font-bold">{{ t('REQUESTER:', 'NGƯỜI YÊU CẦU:') }}</span> {{ selectedCpsForAssign.reqBy || selectedCpsForAssign.cpsr?.reqBy || '-' }}</div>
               <div>
-                <span class="text-slate-400 block text-[10px] font-bold">ƯU TIÊN:</span>
+                <span class="text-slate-400 block text-[10px] font-bold">{{ t('PRIORITY:', 'ƯU TIÊN:') }}</span>
                 <span :class="(selectedCpsForAssign.priority || selectedCpsForAssign.cpsr?.priority) === 'Hỗ trợ ngay' ? 'text-rose-500 font-bold' : 'text-amber-500 font-bold'">
                   {{ selectedCpsForAssign.priority || selectedCpsForAssign.cpsr?.priority || 'Bình thường' }}
                 </span>
@@ -56,14 +56,14 @@ export const CP_ASSIGN_MODAL_HTML = `    <!-- ==================================
             <!-- 1. Dropdown Technician -->
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Technician tiếp nhận <span class="text-rose-500">*</span>
+                {{ t('Receiving Technician', 'Technician tiếp nhận') }} <span class="text-rose-500">*</span>
               </label>
               <select
                 v-model="assignForm.employee"
                 required
                 class="input-box w-full px-3.5 py-2.5 rounded-xl text-xs outline-none cursor-pointer"
               >
-                <option value="" disabled>-- Chọn Technician từ danh sách --</option>
+                <option value="" disabled>{{ t('-- Select Technician from list --', '-- Chọn Technician từ danh sách --') }}</option>
                 <option
                   v-for="emp in employeesList"
                   :key="emp.id || emp.mnv"
@@ -78,9 +78,9 @@ export const CP_ASSIGN_MODAL_HTML = `    <!-- ==================================
             <div>
               <div class="flex items-center justify-between mb-1.5">
                 <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
-                  Thời hạn hoàn thành (Deadline)
+                  {{ t('Deadline', 'Thời hạn hoàn thành (Deadline)') }}
                 </label>
-                <span class="text-[10px] text-slate-400 italic">Mặc định để trống</span>
+                <span class="text-[10px] text-slate-400 italic">{{ t('Default empty', 'Mặc định để trống') }}</span>
               </div>
               <input
                 type="datetime-local"
@@ -92,12 +92,12 @@ export const CP_ASSIGN_MODAL_HTML = `    <!-- ==================================
             <!-- 3. Ghi chú phân công (Optional) -->
             <div>
               <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-                Ghi chú phân công (Tùy chọn)
+                {{ t('Assignment Notes (Optional)', 'Ghi chú phân công (Tùy chọn)') }}
               </label>
               <textarea
                 v-model="assignForm.notes"
                 rows="2"
-                placeholder="Nhập ghi chú yêu cầu xử lý, lưu ý kỹ thuật..."
+                :placeholder="t('Enter task request notes, technical reminders...', 'Nhập ghi chú yêu cầu xử lý, lưu ý kỹ thuật...')"
                 class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"
               ></textarea>
             </div>
@@ -109,7 +109,7 @@ export const CP_ASSIGN_MODAL_HTML = `    <!-- ==================================
                 @click="closeAssignModal"
                 class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
               >
-                Hủy bỏ
+                {{ t('Cancel', 'Hủy bỏ') }}
               </button>
               <button
                 type="submit"
@@ -118,7 +118,7 @@ export const CP_ASSIGN_MODAL_HTML = `    <!-- ==================================
               >
                 <i v-if="isAssigning" class="fa-solid fa-spinner fa-spin"></i>
                 <i v-else class="fa-solid fa-check"></i>
-                <span>Lưu Phân Công (IN_PROGRESS)</span>
+                <span>{{ t('Save Assignment (IN_PROGRESS)', 'Lưu Phân Công (IN_PROGRESS)') }}</span>
               </button>
             </div>
           </form>

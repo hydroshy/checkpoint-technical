@@ -198,6 +198,7 @@ export class CpsService {
         record.cpsfId = cpsf.id;
         record.cpsfDocNo = cpsf.docNo;
         record.chkQuality = cpsf.chkQuality || null;
+        if (cpsf.notes && !record.notes) record.notes = cpsf.notes;
         record.workOrder = cpsf.workOrder || null;
         record.woTotalQty = cpsf.woTotalQty || 0;
         record.wasteQty = cpsf.wasteQty || 0;
@@ -332,6 +333,7 @@ export class CpsService {
           updates.cpsfId = cpsf.id;
           updates.cpsfDocNo = cpsf.docNo;
           if (!updates.chkQuality) updates.chkQuality = cpsf.chkQuality || existing.chkQuality || null;
+          if (!updates.notes && cpsf.notes && !existing.notes) updates.notes = cpsf.notes;
           if (!updates.workOrder) updates.workOrder = cpsf.workOrder || existing.workOrder || null;
           if (updates.woTotalQty === undefined) updates.woTotalQty = cpsf.woTotalQty !== undefined ? cpsf.woTotalQty : existing.woTotalQty;
           if (updates.wasteQty === undefined) updates.wasteQty = cpsf.wasteQty !== undefined ? cpsf.wasteQty : existing.wasteQty;
@@ -497,6 +499,7 @@ export class CpsService {
       updates.cpsfId = cpsf.id;
       updates.cpsfDocNo = cpsf.docNo;
       updates.chkQuality = cpsf.chkQuality || existing.chkQuality || null;
+      if (!updates.notes && cpsf.notes && !existing.notes) updates.notes = cpsf.notes;
       updates.workOrder = cpsf.workOrder || existing.workOrder || null;
       updates.woTotalQty = cpsf.woTotalQty !== undefined ? cpsf.woTotalQty : existing.woTotalQty;
       updates.wasteQty = cpsf.wasteQty !== undefined ? cpsf.wasteQty : existing.wasteQty;

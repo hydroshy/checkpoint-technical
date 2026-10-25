@@ -4,18 +4,18 @@ export const DASHBOARD_RECENT_RECORDS_HTML = `        <!-- Recent Records Previe
           <div class="glass-card rounded-2xl p-5">
             <div class="flex items-center justify-between mb-3">
               <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-sky-500"></i> Phiếu Kỹ Thuật Gần Đây
+                <i class="fa-solid fa-clock-rotate-left text-sky-500"></i> {{ t('Recent Technical Requests', 'Phiếu Kỹ Thuật Gần Đây') }}
               </h4>
-              <button @click="switchTab('weekly-requests')" class="text-xs text-sky-500 hover:underline font-semibold">Xem tất cả ({{ weeklyRequests.length }}) &rarr;</button>
+              <button @click="switchTab('weekly-requests')" class="text-xs text-sky-500 hover:underline font-semibold">{{ t('View all', 'Xem tất cả') }} ({{ weeklyRequests.length }}) &rarr;</button>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-xs data-table">
                 <thead>
                   <tr class="text-left font-semibold">
-                    <th class="py-2 px-3">Người Yêu Cầu</th>
-                    <th class="py-2 px-3">Thiết Bị</th>
-                    <th class="py-2 px-3">Mức Độ</th>
-                    <th class="py-2 px-3">Trạng Thái</th>
+                    <th class="py-2 px-3">{{ t('Requester', 'Người Yêu Cầu') }}</th>
+                    <th class="py-2 px-3">{{ t('Equipment', 'Thiết Bị') }}</th>
+                    <th class="py-2 px-3">{{ t('Severity', 'Mức Độ') }}</th>
+                    <th class="py-2 px-3">{{ t('Status', 'Trạng Thái') }}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -38,18 +38,18 @@ export const DASHBOARD_RECENT_RECORDS_HTML = `        <!-- Recent Records Previe
           <div class="glass-card rounded-2xl p-5">
             <div class="flex items-center justify-between mb-3">
               <h4 class="text-sm font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <i class="fa-solid fa-shield-halved text-red-500"></i> Danh Sách Sự Cố Defect
+                <i class="fa-solid fa-shield-halved text-red-500"></i> {{ t('Defect Incident Logs', 'Danh Sách Sự Cố Defect') }}
               </h4>
-              <button @click="switchTab('defect-logs')" class="text-xs text-sky-500 hover:underline font-semibold">Xem tất cả ({{ defectLogs.length }}) &rarr;</button>
+              <button @click="switchTab('defect-logs')" class="text-xs text-sky-500 hover:underline font-semibold">{{ t('View all', 'Xem tất cả') }} ({{ defectLogs.length }}) &rarr;</button>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full text-xs data-table">
                 <thead>
                   <tr class="text-left font-semibold">
-                    <th class="py-2 px-3">Mã Defect</th>
-                    <th class="py-2 px-3">Xưởng</th>
-                    <th class="py-2 px-3">Nguyên Nhân</th>
-                    <th class="py-2 px-3">Cần 8D?</th>
+                    <th class="py-2 px-3">{{ t('Defect ID', 'Mã Defect') }}</th>
+                    <th class="py-2 px-3">{{ t('Workshop', 'Xưởng') }}</th>
+                    <th class="py-2 px-3">{{ t('Root Cause', 'Nguyên Nhân') }}</th>
+                    <th class="py-2 px-3">{{ t('8D Required?', 'Cần 8D?') }}</th>
                   </tr>
                 </thead>
                 <tbody>

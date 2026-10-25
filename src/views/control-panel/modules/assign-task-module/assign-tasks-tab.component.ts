@@ -7,7 +7,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
             <div>
               <h1 class="text-xl font-bold tracking-tight flex items-center gap-2 text-slate-800 dark:text-slate-100">
                 <i class="fa-solid fa-list-check text-amber-500"></i>
-                <span>Phân Công Kỹ Thuật</span>
+                <span>{{ t('Task Assignment', 'Phân Công Kỹ Thuật') }}</span>
               </h1>
             </div>
           </div>
@@ -19,7 +19,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
               :class="assignCardStatus === 'ALL' ? 'ring-2 ring-sky-500 bg-sky-50/80 dark:bg-sky-500/10' : 'bg-white hover:bg-slate-50 dark:bg-slate-900/40 dark:hover:bg-slate-800/60'"
               class="glass-card rounded-2xl p-3 border border-slate-200 dark:border-slate-700/60 cursor-pointer transition text-center"
             >
-              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">Tất Cả CPS</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 block">{{ t('All CPS', 'Tất Cả CPS') }}</span>
               <span class="font-mono text-xl font-extrabold text-slate-800 dark:text-slate-100">{{ cpsList.length }}</span>
             </div>
             <div
@@ -27,7 +27,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
               :class="assignCardStatus === 'TO_ASSIGN' ? 'ring-2 ring-amber-500 bg-amber-50/80 dark:bg-amber-500/10' : 'bg-white hover:bg-slate-50 dark:bg-slate-900/40 dark:hover:bg-slate-800/60'"
               class="glass-card rounded-2xl p-3 border border-amber-300 dark:border-amber-500/40 cursor-pointer transition text-center"
             >
-              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">Chờ Phân Công</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400 block">{{ t('Pending Assignment', 'Chờ Phân Công') }}</span>
               <span class="font-mono text-xl font-extrabold text-amber-600 dark:text-amber-400">{{ cpsCountByStatus('TO_ASSIGN') }}</span>
             </div>
             <div
@@ -35,7 +35,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
               :class="assignCardStatus === 'IN_PROGRESS' ? 'ring-2 ring-sky-500 bg-sky-50/80 dark:bg-sky-500/10' : 'bg-white hover:bg-slate-50 dark:bg-slate-900/40 dark:hover:bg-slate-800/60'"
               class="glass-card rounded-2xl p-3 border border-sky-300 dark:border-sky-500/40 cursor-pointer transition text-center"
             >
-              <span class="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">Đang Xử Lý</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-sky-600 dark:text-sky-400 block">{{ t('In Progress', 'Đang Xử Lý') }}</span>
               <span class="font-mono text-xl font-extrabold text-sky-600 dark:text-sky-400">{{ cpsCountByStatus('IN_PROGRESS') }}</span>
             </div>
             <div
@@ -43,7 +43,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
               :class="assignCardStatus === 'OVER_DUE' ? 'ring-2 ring-rose-500 bg-rose-50/80 dark:bg-rose-500/10' : 'bg-white hover:bg-slate-50 dark:bg-slate-900/40 dark:hover:bg-slate-800/60'"
               class="glass-card rounded-2xl p-3 border border-rose-300 dark:border-rose-500/40 cursor-pointer transition text-center"
             >
-              <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 block">Quá Hạn</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-rose-600 dark:text-rose-400 block">{{ t('Overdue', 'Quá Hạn') }}</span>
               <span class="font-mono text-xl font-extrabold text-rose-600 dark:text-rose-400">{{ cpsCountByStatus('OVER_DUE') }}</span>
             </div>
             <div
@@ -51,7 +51,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
               :class="assignCardStatus === 'CLOSED' ? 'ring-2 ring-emerald-500 bg-emerald-50/80 dark:bg-emerald-500/10' : 'bg-white hover:bg-slate-50 dark:bg-slate-900/40 dark:hover:bg-slate-800/60'"
               class="glass-card rounded-2xl p-3 border border-emerald-300 dark:border-emerald-500/40 cursor-pointer transition text-center"
             >
-              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">Đã Đóng</span>
+              <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 block">{{ t('Closed', 'Đã Đóng') }}</span>
               <span class="font-mono text-xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ cpsCountByStatus('CLOSED') }}</span>
             </div>
           </div>
@@ -63,7 +63,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
               <input
                 type="text"
                 v-model="assignCardSearch"
-                placeholder="🔍 Tìm kiếm mã CPS, tên máy, sự cố, người yêu cầu, technician..."
+                :placeholder="t('Search CPS code, machine, issue, requester, technician...', '🔍 Tìm kiếm mã CPS, tên máy, sự cố, người yêu cầu, technician...')"
                 class="input-box w-full pl-9 pr-4 py-2 rounded-xl text-xs outline-none"
               />
             </div>
@@ -72,15 +72,15 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
                 v-model="assignCardStatus"
                 class="input-box px-3 py-2 rounded-xl text-xs outline-none cursor-pointer"
               >
-                <option value="ALL">— Tất cả trạng thái —</option>
-                <option value="TO_ASSIGN">⏳ Chờ phân công (TO_ASSIGN)</option>
-                <option value="IN_PROGRESS">⚡ Đang xử lý (IN_PROGRESS)</option>
-                <option value="OVER_DUE">⚠️ Quá hạn (OVER_DUE)</option>
-                <option value="CLOSED">✅ Đã đóng (CLOSED)</option>
-                <option value="OPEN_TASK">📋 Mở (OPEN_TASK)</option>
+                <option value="ALL">— {{ t('All Statuses', 'Tất cả trạng thái') }} —</option>
+                <option value="TO_ASSIGN">⏳ {{ t('Pending Assignment (TO_ASSIGN)', 'Chờ phân công (TO_ASSIGN)') }}</option>
+                <option value="IN_PROGRESS">⚡ {{ t('In Progress (IN_PROGRESS)', 'Đang xử lý (IN_PROGRESS)') }}</option>
+                <option value="OVER_DUE">⚠️ {{ t('Overdue (OVER_DUE)', 'Quá hạn (OVER_DUE)') }}</option>
+                <option value="CLOSED">✅ {{ t('Closed (CLOSED)', 'Đã đóng (CLOSED)') }}</option>
+                <option value="OPEN_TASK">📋 {{ t('Open (OPEN_TASK)', 'Mở (OPEN_TASK)') }}</option>
               </select>
               <span class="text-xs text-slate-500 dark:text-slate-400 font-mono whitespace-nowrap pl-1">
-                Hiển thị: <b class="text-sky-600 dark:text-sky-400">{{ filteredCpsCards.length }}</b> / {{ cpsList.length }}
+                {{ t('Showing:', 'Hiển thị:') }} <b class="text-sky-600 dark:text-sky-400">{{ filteredCpsCards.length }}</b> / {{ cpsList.length }}
               </span>
             </div>
           </div>
@@ -88,8 +88,8 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
           <!-- Empty State -->
           <div v-if="filteredCpsCards.length === 0" class="glass-card rounded-2xl p-12 text-center text-slate-500 dark:text-slate-400 space-y-3 border border-slate-200 dark:border-slate-800">
             <i class="fa-solid fa-clipboard-check text-4xl text-slate-400 dark:text-slate-500"></i>
-            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">Không có phiếu CPS nào phù hợp với bộ lọc</p>
-            <p class="text-xs text-slate-400 dark:text-slate-500">Thử xóa bộ lọc tìm kiếm để xem lại toàn bộ phiếu</p>
+            <p class="text-sm font-semibold text-slate-700 dark:text-slate-300">{{ t('No CPS tickets match the filter', 'Không có phiếu CPS nào phù hợp với bộ lọc') }}</p>
+            <p class="text-xs text-slate-400 dark:text-slate-500">{{ t('Try clearing search filter to see all tickets', 'Thử xóa bộ lọc tìm kiếm để xem lại toàn bộ phiếu') }}</p>
           </div>
 
           <!-- Cards Grid -->
@@ -115,7 +115,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
                       type="button"
                       @click.stop="deleteCpsRecord(item)"
                       class="text-slate-400 hover:text-rose-500 transition p-1 cursor-pointer"
-                      title="Xóa phiếu CPS này"
+                      :title="t('Delete this CPS ticket', 'Xóa phiếu CPS này')"
                     >
                       <i class="fa-solid fa-trash-can text-xs"></i>
                     </button>
@@ -126,31 +126,31 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
                 <div class="space-y-1.5 mb-2.5">
                   <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800 dark:text-slate-200">
                     <i class="fa-solid fa-print text-indigo-500 dark:text-indigo-400 text-[11px]"></i>
-                    <span class="truncate">{{ item.machineName || item.cpsr?.machineName || 'Chưa xác định máy' }}</span>
+                    <span class="truncate">{{ item.machineName || item.cpsr?.machineName || t('Machine not specified', 'Chưa xác định máy') }}</span>
                     <span v-if="item.printTech || item.cpsr?.printTech" class="ml-auto text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-transparent">
                       {{ item.printTech || item.cpsr?.printTech }}
                     </span>
                   </div>
                   <!-- Problem summary -->
                   <p class="text-xs text-slate-700 dark:text-slate-300 line-clamp-2 bg-slate-50 dark:bg-slate-800/40 p-2 rounded-lg border border-slate-200 dark:border-slate-700/50 min-h-[38px]">
-                    {{ item.problem || item.cpsr?.problem || 'Không có mô tả sự cố' }}
+                    {{ item.problem || item.cpsr?.problem || t('No problem description', 'Không có mô tả sự cố') }}
                   </p>
                 </div>
 
                 <!-- Requester & Time -->
                 <div class="text-[11px] text-slate-500 dark:text-slate-400 space-y-1 mb-2.5">
                   <div class="flex items-center justify-between">
-                    <span class="text-slate-500 dark:text-slate-400">Người YC:</span>
+                    <span class="text-slate-500 dark:text-slate-400">{{ t('Requester:', 'Người YC:') }}</span>
                     <span class="text-slate-800 dark:text-slate-200 font-medium truncate max-w-[150px]">{{ item.reqBy || item.cpsr?.reqBy || '-' }}</span>
                   </div>
                   <div class="flex items-center justify-between font-mono text-[10px]">
-                    <span class="text-slate-500 dark:text-slate-400">Thời gian:</span>
+                    <span class="text-slate-500 dark:text-slate-400">{{ t('Time:', 'Thời gian:') }}</span>
                     <span class="text-slate-600 dark:text-slate-400">{{ (item.reqDate || item.cpsr?.reqDate || '') + ' ' + (item.reqTime || item.cpsr?.reqTime || '') }}</span>
                   </div>
                   <div v-if="item.priority || item.cpsr?.priority" class="flex items-center justify-between">
-                    <span class="text-slate-500 dark:text-slate-400">Ưu tiên:</span>
+                    <span class="text-slate-500 dark:text-slate-400">{{ t('Priority:', 'Ưu tiên:') }}</span>
                     <span :class="(item.priority || item.cpsr?.priority) === 'Hỗ trợ ngay' ? 'text-rose-600 dark:text-rose-400 font-bold' : 'text-amber-600 dark:text-amber-400 font-medium'">
-                      {{ item.priority || item.cpsr?.priority }}
+                      {{ (item.priority || item.cpsr?.priority) === 'Hỗ trợ ngay' ? t('Urgent support', 'Hỗ trợ ngay') : (item.priority || item.cpsr?.priority) }}
                     </span>
                   </div>
                 </div>
@@ -171,11 +171,11 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
                 <!-- Metrics (Downtime & Scrap Rate) -->
                 <div v-if="(item.downtime != null && item.downtime > 0) || item.wastePercent" class="grid grid-cols-2 gap-2 text-[10px] font-mono bg-slate-50 dark:bg-slate-900/60 p-2 rounded-xl border border-slate-200 dark:border-slate-800 mb-2.5">
                   <div>
-                    <span class="text-slate-500 dark:text-slate-400 block text-[9px]">Downtime</span>
-                    <span class="text-amber-600 dark:text-amber-400 font-bold">{{ item.downtime }} phút</span>
+                    <span class="text-slate-500 dark:text-slate-400 block text-[9px]">{{ t('Downtime', 'Downtime') }}</span>
+                    <span class="text-amber-600 dark:text-amber-400 font-bold">{{ item.downtime }} {{ t('min', 'phút') }}</span>
                   </div>
                   <div>
-                    <span class="text-slate-500 dark:text-slate-400 block text-[9px]">Tỉ lệ phế</span>
+                    <span class="text-slate-500 dark:text-slate-400 block text-[9px]">{{ t('Scrap Rate', 'Tỉ lệ phế') }}</span>
                     <span class="text-rose-600 dark:text-rose-400 font-bold">{{ item.wastePercent || '-' }}</span>
                   </div>
                 </div>
@@ -189,7 +189,7 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
                     <i class="fa-solid fa-user-check text-[10px]"></i> {{ getTechnicianDisplayName(item) }}
                   </span>
                   <span v-else class="text-amber-600 dark:text-amber-400/80 italic text-[11px] flex items-center gap-1">
-                    <i class="fa-regular fa-clock text-[10px]"></i> Chưa giao
+                    <i class="fa-regular fa-clock text-[10px]"></i> {{ t('Unassigned', 'Chưa giao') }}
                   </span>
                 </div>
 
@@ -205,28 +205,28 @@ export const CP_ASSIGN_TASKS_TAB_HTML = `        <!-- ==========================
                     @click.stop="openAssignModal(item)"
                     class="col-span-2 py-1.5 px-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1 shadow-sm cursor-pointer"
                     :class="item.status === 'TO_ASSIGN' || !item.assignedTo ? 'bg-amber-600 hover:bg-amber-500 text-white' : 'bg-slate-700 hover:bg-slate-600 text-white'"
-                    title="Phân công Technician"
+                    :title="t('Assign Technician', 'Phân công Technician')"
                   >
                     <i class="fa-solid fa-user-gear text-[11px]"></i>
-                    <span class="truncate">{{ item.status === 'TO_ASSIGN' || !item.assignedTo ? 'Phân công' : 'Đổi Technician' }}</span>
+                    <span class="truncate">{{ item.status === 'TO_ASSIGN' || !item.assignedTo ? t('Assign', 'Phân công') : t('Reassign', 'Đổi Technician') }}</span>
                   </button>
                   <button
                     type="button"
                     @click.stop="openEditModal('cps', item)"
                     class="py-1.5 px-2 rounded-xl text-xs font-bold bg-sky-600 hover:bg-sky-500 text-white transition flex items-center justify-center gap-1 shadow-sm cursor-pointer"
-                    title="Chỉnh sửa phiếu CPS"
+                    :title="t('Edit CPS ticket', 'Chỉnh sửa phiếu CPS')"
                   >
                     <i class="fa-solid fa-pen-to-square text-[11px]"></i>
-                    <span>Sửa</span>
+                    <span>{{ t('Edit', 'Sửa') }}</span>
                   </button>
                   <button
                     type="button"
                     @click.stop="openLinkModal(item)"
                     class="py-1.5 px-2 rounded-xl text-xs font-bold bg-purple-600 hover:bg-purple-500 text-white transition flex items-center justify-center gap-1 shadow-sm cursor-pointer"
-                    title="Ghép nối với CPST/CPSF"
+                    :title="t('Link with CPST/CPSF', 'Ghép nối với CPST/CPSF')"
                   >
                     <i class="fa-solid fa-link text-[11px]"></i>
-                    <span>Ghép</span>
+                    <span>{{ t('Link', 'Ghép') }}</span>
                   </button>
                 </div>
               </div>

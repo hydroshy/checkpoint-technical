@@ -1,13 +1,13 @@
 [
   {
-    "id": "d9af74f6-f724-4ce6-8e9a-e92bd74be5ca",
-    "docNo": "CPS-20261015-005",
-    "cpsrId": "8acc3ce7-2858-4e83-9a8e-6d266bf872a0",
-    "cpsrDocNo": "CPSR-20261015-004",
-    "cpstId": "97b77aab-b1d9-4e46-b6a7-0139867e5ad7",
-    "cpstDocNo": "CPST-20261015-004",
-    "cpsfId": "581006ab-7752-48a3-8444-9c8f35a71f03",
-    "cpsfDocNo": "CPSF-20261015-001",
+    "id": "e0f67b4f-a6f5-429c-ad10-b3ddc9f5cd33",
+    "docNo": "CPS-20261025-001",
+    "cpsrId": "5a6143a0-0c75-43ef-b122-601eb21623d5",
+    "cpsrDocNo": "CPSR-20261025-001",
+    "cpstId": "4d8193af-b4bb-486b-b212-564a8f096548",
+    "cpstDocNo": "CPST-20261025-001",
+    "cpsfId": "54cef220-5f1c-4125-b855-291ad6bbf690",
+    "cpsfDocNo": "CPSF-20261025-001",
     "status": "CLOSED",
     "assignedTo": "KTV Trần QA",
     "assignedToId": null,
@@ -30,12 +30,114 @@
     "chkStatus": "Đã xử lý xong",
     "chkQuality": "Đạt",
     "notes": null,
-    "closedAt": "2026-10-15T17:09:15.645Z",
-    "createdAt": "2026-10-15T17:09:15.445Z",
-    "updatedAt": "2026-10-15T17:09:15.655Z",
+    "closedAt": "2026-10-25T13:08:19.704Z",
+    "createdAt": "2026-10-25T13:08:19.420Z",
+    "updatedAt": "2026-10-25T13:08:19.726Z",
     "wo": "WO-QA-20261007",
     "totalQty": 1000,
     "scrapQty": 25
+  },
+  {
+    "id": "7aa78cf5-766c-4d9f-a10c-5a11a353986f",
+    "docNo": "CPS-20261023-003",
+    "cpsrId": "ab2c81b1-0292-47e6-873a-208aaff77972",
+    "cpsrDocNo": "CPSR-20261023-003",
+    "cpstId": "c7750da5-c162-4e09-881a-c331fda751aa",
+    "cpstDocNo": "CPST-20261023-003",
+    "cpsfId": null,
+    "cpsfDocNo": null,
+    "status": "TO_CONFIRM",
+    "assignedTo": "Lâm Hữu Phước - VN6173",
+    "assignedToId": null,
+    "assignedToName": null,
+    "assignedBy": null,
+    "assignedAt": null,
+    "deadline": null,
+    "priority": "Chạy tạm",
+    "printTech": "HTL",
+    "machineName": "Máy chụp Bảng",
+    "problem": "Kiểm soát độ căng lưới",
+    "reqBy": "Đỗ Đức Nhật - VN5944",
+    "reqDate": "2026-10-22",
+    "reqTime": "09:00",
+    "downtime": 0,
+    "woTotalQty": 0,
+    "totalQty": 0,
+    "wasteQty": 0,
+    "scrapQty": 0,
+    "wastePercent": "0%",
+    "chkStatus": "Theo dõi thêm",
+    "closedAt": null,
+    "createdAt": "2026-10-23T06:12:09.086Z",
+    "updatedAt": "2026-10-23T06:14:47.361Z"
+  },
+  {
+    "id": "45247d26-11fe-4b99-9640-a800132bc616",
+    "docNo": "CPS-20261023-002",
+    "cpsrId": "580b5598-d1f3-4cdf-80b2-c63ad9cf9ab2",
+    "cpsrDocNo": "CPSR-20261023-002",
+    "cpstId": "e9be3ba0-8c0d-4556-ba9a-978f6de18903",
+    "cpstDocNo": "CPST-20261023-002",
+    "cpsfId": null,
+    "cpsfDocNo": null,
+    "status": "TO_CONFIRM",
+    "assignedTo": "Lâm Hữu Phước - VN6173",
+    "assignedToId": null,
+    "assignedToName": null,
+    "assignedBy": null,
+    "assignedAt": null,
+    "deadline": null,
+    "priority": "Chạy tạm",
+    "printTech": "HTL",
+    "machineName": "ATMA",
+    "problem": "Cải thiện độ nhớt mực",
+    "reqBy": "Đỗ Đức Nhật - VN5944",
+    "reqDate": "2026-10-19",
+    "reqTime": "10:30",
+    "downtime": 0,
+    "woTotalQty": 0,
+    "totalQty": 0,
+    "wasteQty": 0,
+    "scrapQty": 0,
+    "wastePercent": "0%",
+    "chkStatus": "Theo dõi thêm",
+    "closedAt": null,
+    "createdAt": "2026-10-23T06:03:14.472Z",
+    "updatedAt": "2026-10-23T06:07:57.048Z"
+  },
+  {
+    "id": "aa02559e-0fce-4fa9-b4f6-b51d0e604259",
+    "docNo": "CPS-20261023-001",
+    "cpsrId": "0d5b4725-5988-41c6-b386-29e94254d55b",
+    "cpsrDocNo": "CPSR-20261023-001",
+    "cpstId": "d614aca5-0c8e-408d-bd5b-b08ab391c0e2",
+    "cpstDocNo": "CPST-20261023-001",
+    "cpsfId": null,
+    "cpsfDocNo": null,
+    "status": "TO_CONFIRM",
+    "assignedTo": "Đỗ Đức Nhật - VN5944",
+    "assignedToId": null,
+    "assignedToName": null,
+    "assignedBy": null,
+    "assignedAt": null,
+    "deadline": null,
+    "priority": "Hỗ trợ ngay",
+    "printTech": "HTL",
+    "machineName": "HTL UV",
+    "problem": "Theo dõi chất lượng khung lưới",
+    "reqBy": "Đỗ Đức Nhật - VN5944",
+    "reqDate": "2026-10-16",
+    "reqTime": "21:00",
+    "downtime": 0,
+    "woTotalQty": 0,
+    "totalQty": 0,
+    "wasteQty": 0,
+    "scrapQty": 0,
+    "wastePercent": "0%",
+    "chkStatus": "Theo dõi thêm",
+    "closedAt": null,
+    "createdAt": "2026-10-23T05:12:20.394Z",
+    "updatedAt": "2026-10-23T05:13:39.868Z"
   },
   {
     "id": "4f3da625-6cd1-40f5-9a88-736f59e0261b",
@@ -44,9 +146,9 @@
     "cpsrDocNo": "CPSR-20261015-003",
     "cpstId": "b109ba9a-2c28-4b93-8287-feb6e24695cb",
     "cpstDocNo": "CPST-20261015-003",
-    "cpsfId": null,
-    "cpsfDocNo": null,
-    "status": "TO_CONFIRM",
+    "cpsfId": "dcba515f-7e7d-45af-8c34-014f1e7b1a68",
+    "cpsfDocNo": "CPSF-20261022-002",
+    "status": "CLOSED",
     "assignedTo": "Đỗ Đức Nhật - VN5944",
     "assignedToId": null,
     "assignedToName": null,
@@ -65,11 +167,13 @@
     "totalQty": 0,
     "wasteQty": 0,
     "scrapQty": 0,
-    "wastePercent": "0%",
+    "wastePercent": "0.00%",
+    "wasteUnit": "PCS",
     "chkStatus": "Theo dõi thêm",
-    "closedAt": null,
+    "chkQuality": "Đạt",
+    "closedAt": "2026-10-22T01:22:56.557Z",
     "createdAt": "2026-10-15T02:52:13.863Z",
-    "updatedAt": "2026-10-15T02:52:54.694Z"
+    "updatedAt": "2026-10-25T12:44:43.038Z"
   },
   {
     "id": "0bee655a-0261-48c8-a8bf-ea5a371dde7d",
@@ -78,9 +182,9 @@
     "cpsrDocNo": "CPSR-20261015-002",
     "cpstId": "fe0e6628-ff3c-4358-93af-09f4707da720",
     "cpstDocNo": "CPST-20261015-002",
-    "cpsfId": null,
-    "cpsfDocNo": null,
-    "status": "TO_CONFIRM",
+    "cpsfId": "dee79c39-31a4-4323-9913-b820d1031eca",
+    "cpsfDocNo": "CPSF-20261022-001",
+    "status": "CLOSED",
     "assignedTo": "Đỗ Đức Nhật - VN5944",
     "assignedToId": null,
     "assignedToName": null,
@@ -99,11 +203,13 @@
     "totalQty": 0,
     "wasteQty": 0,
     "scrapQty": 0,
-    "wastePercent": "0%",
+    "wastePercent": "0.00%",
+    "wasteUnit": "PCS",
     "chkStatus": "Đã khắc phục",
-    "closedAt": null,
+    "chkQuality": "Đạt",
+    "closedAt": "2026-10-22T01:22:44.685Z",
     "createdAt": "2026-10-15T02:42:20.405Z",
-    "updatedAt": "2026-10-15T02:44:44.528Z"
+    "updatedAt": "2026-10-25T12:44:43.042Z"
   },
   {
     "id": "eb3c9285-a91c-4a39-9d56-a1fe6ce365a0",
@@ -639,7 +745,7 @@
     "updatedAt": "2026-10-15T16:36:18.109Z"
   },
   {
-    "id": "0bca00d2-47c9-4b2f-af96-030b300fc873",
+    "id": "dc5679e0-efbd-4d9a-8f12-7bd8e15e280e",
     "docNo": "CPS-20261007-006",
     "cpsrId": "d7faa69d-3c2a-4733-af87-9f20264e037d",
     "cpsrDocNo": "CPSR-20261007-006",
@@ -668,10 +774,10 @@
     "wastePercent": "0%",
     "closedAt": null,
     "createdAt": "2026-10-07T12:20:56.994Z",
-    "updatedAt": "2026-10-15T16:36:18.115Z"
+    "updatedAt": "2026-10-25T12:44:43.049Z"
   },
   {
-    "id": "7f16c82e-16d2-4917-bd0b-695b484f37d7",
+    "id": "58d3783d-d871-4d89-82d7-3aab0b0ea54b",
     "docNo": "CPS-20261007-005",
     "cpsrId": "af225133-394f-4834-99a6-ab8eff8cb1f4",
     "cpsrDocNo": "CPSR-20261007-005",
@@ -705,10 +811,10 @@
     "chkQuality": "Đạt",
     "closedAt": "2026-10-07T12:20:56.984Z",
     "createdAt": "2026-10-07T12:20:56.950Z",
-    "updatedAt": "2026-10-15T16:36:18.117Z"
+    "updatedAt": "2026-10-25T12:44:43.052Z"
   },
   {
-    "id": "adeb9a3e-7a6d-4ff8-b7d1-fcf9ce8ccde9",
+    "id": "a9e08ab3-e09e-49a6-b5f8-9f49044f4b39",
     "docNo": "CPS-20261007-004",
     "cpsrId": "b4b699ca-f22d-4698-8f14-29bd19d14a90",
     "cpsrDocNo": "CPSR-20261007-004",
@@ -737,10 +843,10 @@
     "wastePercent": "0%",
     "closedAt": null,
     "createdAt": "2026-10-07T12:19:16.660Z",
-    "updatedAt": "2026-10-15T16:36:18.119Z"
+    "updatedAt": "2026-10-25T12:44:43.057Z"
   },
   {
-    "id": "f9bfe243-54df-43d2-b302-3d1b03afaf05",
+    "id": "821fd34b-6df8-44f9-bc79-5b186a4388f5",
     "docNo": "CPS-20261007-003",
     "cpsrId": "ce932134-bd46-483b-948a-387549b69d0e",
     "cpsrDocNo": "CPSR-20261007-003",
@@ -774,10 +880,10 @@
     "chkQuality": "Đạt",
     "closedAt": "2026-10-07T12:19:16.650Z",
     "createdAt": "2026-10-07T12:19:16.609Z",
-    "updatedAt": "2026-10-15T16:36:18.122Z"
+    "updatedAt": "2026-10-25T12:44:43.059Z"
   },
   {
-    "id": "cb87d2e4-a0f4-4881-b10b-6f9037862d35",
+    "id": "32032c4d-9735-4ead-9b2f-b8ae2ec667f5",
     "docNo": "CPS-20261007-002",
     "cpsrId": "39769f0b-0ca9-4672-aca9-4f70ec11f253",
     "cpsrDocNo": "CPSR-20261007-002",
@@ -806,10 +912,10 @@
     "wastePercent": "0%",
     "closedAt": null,
     "createdAt": "2026-10-07T12:06:00.865Z",
-    "updatedAt": "2026-10-15T16:36:18.124Z"
+    "updatedAt": "2026-10-25T12:44:43.063Z"
   },
   {
-    "id": "f61f61e0-3158-4a50-a812-cf5207e5ceaf",
+    "id": "9324e92c-1451-435d-b2e6-f68dd71fc076",
     "docNo": "CPS-20261007-001",
     "cpsrId": "a3554e1f-0080-4a60-9058-15e0faefc748",
     "cpsrDocNo": "CPSR-20261007-001",
@@ -843,10 +949,10 @@
     "chkQuality": "Đạt",
     "closedAt": "2026-10-07T12:06:00.857Z",
     "createdAt": "2026-10-07T12:06:00.824Z",
-    "updatedAt": "2026-10-15T16:36:18.127Z"
+    "updatedAt": "2026-10-25T12:44:43.065Z"
   },
   {
-    "id": "7bd63963-a577-4198-b373-482ea2e1abd2",
+    "id": "2eb53054-63f4-44a2-b006-db364f590b19",
     "docNo": "CPS-20261006-005",
     "cpsrId": "3e9f1956-f3fb-41dc-9b3e-43a697598d10",
     "cpsrDocNo": "CPSR-20261006-005",
@@ -880,10 +986,10 @@
     "chkQuality": "Đạt",
     "closedAt": "2026-10-06T14:57:09.959Z",
     "createdAt": "2026-10-06T11:42:53.807Z",
-    "updatedAt": "2026-10-15T16:36:18.129Z"
+    "updatedAt": "2026-10-25T12:44:43.068Z"
   },
   {
-    "id": "a24bafc5-0c99-42e5-bff0-6aae988dc75f",
+    "id": "ae9e7126-162a-41db-b18c-d8ab13a30f7e",
     "docNo": "CPS-20261006-004",
     "cpsrId": "e98e7fc8-5fd7-4fd9-b68d-2ba715d64a60",
     "cpsrDocNo": "CPSR-20261006-004",
@@ -918,10 +1024,10 @@
     "chkQuality": "Đạt",
     "closedAt": "2026-10-06T14:57:23.382Z",
     "createdAt": "2026-10-06T11:40:40.013Z",
-    "updatedAt": "2026-10-15T16:36:18.133Z"
+    "updatedAt": "2026-10-25T12:44:43.070Z"
   },
   {
-    "id": "81268b95-4781-43f8-b49e-e0d0e3272120",
+    "id": "15de4264-e8d8-4829-bd3e-b430bf4e90f6",
     "docNo": "CPS-20261006-003",
     "cpsrId": "53c75990-7af3-4fb5-a787-b4e9a61b011f",
     "cpsrDocNo": "CPSR-20261006-003",
@@ -951,10 +1057,10 @@
     "wastePercent": "0%",
     "closedAt": null,
     "createdAt": "2026-10-06T10:35:32.365Z",
-    "updatedAt": "2026-10-15T16:36:18.138Z"
+    "updatedAt": "2026-10-25T12:44:43.073Z"
   },
   {
-    "id": "b2fc7c69-dcf5-496b-bb3f-6dda64fdb0bd",
+    "id": "5ff90207-1757-4f43-8b29-9662c1f70f20",
     "docNo": "CPS-20261006-002",
     "cpsrId": "d76f34f2-39e1-4d13-96ea-0bfde9a0c70d",
     "cpsrDocNo": "CPSR-20261006-002",
@@ -985,10 +1091,10 @@
     "chkStatus": "Đã khắc phục",
     "closedAt": null,
     "createdAt": "2026-10-06T10:22:47.037Z",
-    "updatedAt": "2026-10-15T16:36:18.140Z"
+    "updatedAt": "2026-10-25T12:44:43.079Z"
   },
   {
-    "id": "b5d72c32-5963-4ca0-85a3-c17c66043978",
+    "id": "997b8791-ef3c-4b05-a6d1-a2fdbb951f66",
     "docNo": "CPS-20261006-001",
     "cpsrId": "14cf7016-0ee7-4668-b682-712fc7cff04b",
     "cpsrDocNo": "CPSR-20261006-001",
@@ -1018,6 +1124,6 @@
     "wastePercent": "0%",
     "closedAt": null,
     "createdAt": "2026-10-06T10:22:33.025Z",
-    "updatedAt": "2026-10-15T16:36:18.143Z"
+    "updatedAt": "2026-10-25T12:44:43.082Z"
   }
 ]

@@ -63,12 +63,36 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             nextTick(() => {
               renderReportChart();
               renderReport4MChart();
+              initOrUpdateReportTable();
+            });
+          } else if (activeTab.value === 'management-tasks') {
+            nextTick(() => {
+              initOrUpdateSplitTable();
+            });
+          } else if (activeTab.value === 'machines') {
+            nextTick(() => {
+              initOrUpdateMachinesTable();
+            });
+          } else if (activeTab.value === 'employees') {
+            nextTick(() => {
+              initOrUpdateEmployeesTable();
+            });
+          } else if (activeTab.value === 'users') {
+            nextTick(() => {
+              initOrUpdateUsersTable();
+            });
+          } else if (activeTab.value === 'database') {
+            nextTick(() => {
+              initOrUpdateExistingDataTable();
             });
           }
           safeRedraw(usersTable);
           safeRedraw(machinesTable);
           safeRedraw(empTable);
           safeRedraw(splitTable);
+          safeRedraw(reportTableInstance);
+          safeRedraw(existingDataTable);
+          safeRedraw(reqTable);
         };
         const t = (en, vi) => {
           if (vi !== undefined) {
@@ -1213,7 +1237,8 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             woTotalQty: raw.woTotalQty != null ? raw.woTotalQty : (raw.cpsf?.woTotalQty != null ? raw.cpsf.woTotalQty : 0),
             wasteQty: raw.wasteQty != null ? raw.wasteQty : (raw.cpsf?.wasteQty != null ? raw.cpsf.wasteQty : 0),
             wasteUnit: raw.wasteUnit || raw.cpsf?.wasteUnit || 'PCS',
-            prodMgr: raw.prodMgr || raw.cpsf?.prodMgr || ''
+            prodMgr: raw.prodMgr || raw.cpsf?.prodMgr || '',
+            notes: raw.notes || raw.cpsf?.notes || ''
           };
           showEditModal.value = true;
         };
@@ -1265,7 +1290,8 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 woTotalQty: Number(editForm.value.woTotalQty) || 0,
                 wasteQty: Number(editForm.value.wasteQty) || 0,
                 wasteUnit: editForm.value.wasteUnit,
-                prodMgr: editForm.value.prodMgr
+                prodMgr: editForm.value.prodMgr,
+                notes: editForm.value.notes || ''
               };
             }
 
@@ -1591,6 +1617,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           const columns = [
             {
               title: 'Mã CPS',
+              titleFormatter: () => t('CPS Code', 'Mã CPS'),
               field: 'docNo',
               minWidth: 140,
               formatter: cell => {
@@ -1601,6 +1628,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             },
             {
               title: 'Ngày khởi tạo',
+              titleFormatter: () => t('Request Date', 'Ngày khởi tạo'),
               minWidth: 130,
               formatter: cell => {
                 const r = cell.getRow().getData();
@@ -1611,6 +1639,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             },
             {
               title: 'Người yêu cầu',
+              titleFormatter: () => t('Requester', 'Người yêu cầu'),
               minWidth: 140,
               formatter: cell => {
                 const r = cell.getRow().getData();
@@ -1620,6 +1649,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             },
             {
               title: 'Máy',
+              titleFormatter: () => t('Machine', 'Máy'),
               minWidth: 150,
               formatter: cell => {
                 const r = cell.getRow().getData();
@@ -1630,6 +1660,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             },
             {
               title: 'Sự cố',
+              titleFormatter: () => t('Issue', 'Sự cố'),
               minWidth: 180,
               formatter: cell => {
                 const r = cell.getRow().getData();
@@ -1639,17 +1670,19 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             },
             {
               title: 'Technician',
+              titleFormatter: () => t('Technician', 'Technician'),
               minWidth: 140,
               formatter: cell => {
                 const r = cell.getRow().getData();
                 const ass = r.assignedTo || r.cpst?.recvBy;
                 const techName = formatTechnicianName(r.assignedToName || ass);
-                if (!techName) return '<span class="text-amber-600 dark:text-amber-400 italic text-[11px]">Chưa giao</span>';
+                if (!techName) return '<span class="text-amber-600 dark:text-amber-400 italic text-[11px]">' + t('Unassigned', 'Chưa giao') + '</span>';
                 return '<div class="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1"><i class="fa-solid fa-user-check text-[10px] text-emerald-600 dark:text-emerald-400"></i> ' + techName + '</div>';
               }
             },
             {
               title: 'Trạng thái',
+              titleFormatter: () => t('Status', 'Trạng thái'),
               field: 'status',
               minWidth: 130,
               hozAlign: 'center',
@@ -1665,6 +1698,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             },
             {
               title: 'Downtime',
+              titleFormatter: () => t('Downtime', 'Downtime'),
               minWidth: 90,
               hozAlign: 'center',
               formatter: cell => {
@@ -1676,10 +1710,11 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             },
             {
               title: 'Xem chi tiết',
+              titleFormatter: () => t('Action', 'Xem chi tiết'),
               hozAlign: 'center',
               minWidth: 120,
               headerSort: false,
-              formatter: () => '<button class="btn-report-view px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold cursor-pointer transition flex items-center gap-1 mx-auto"><i class="fa-solid fa-eye"></i> Xem chi tiết</button>',
+              formatter: () => '<button class="btn-report-view px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold cursor-pointer transition flex items-center gap-1 mx-auto"><i class="fa-solid fa-eye"></i> ' + t('View details', 'Xem chi tiết') + '</button>',
               cellClick: (e, cell) => {
                 const r = cell.getRow().getData();
                 if (e.target.closest('.btn-report-view')) {
@@ -1704,7 +1739,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               paginationSize: 15,
               paginationSizeSelector: [10, 15, 25, 50],
               height: 'auto',
-              placeholder: '<div class="p-8 text-center text-slate-400 text-xs">Không tìm thấy phiếu kỹ thuật nào trong khoảng thời gian đã chọn</div>'
+              placeholder: '<div class="p-8 text-center text-slate-400 text-xs">' + t('No technical tickets found in selected period', 'Không tìm thấy phiếu kỹ thuật nào trong khoảng thời gian đã chọn') + '</div>'
             });
             if (window.__CP_DEBUG__) {
               window.__CP_DEBUG__.markMounted('report-technical', 'mounted');
@@ -1921,6 +1956,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             columns = [
               {
                 title: 'Mã CPS',
+                titleFormatter: () => t('CPS Code', 'Mã CPS'),
                 field: 'docNo',
                 minWidth: 140,
                 formatter: cell => {
@@ -1931,6 +1967,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Mã CPSR',
+                titleFormatter: () => t('CPSR Code', 'Mã CPSR'),
                 field: 'cpsr.docNo',
                 minWidth: 160,
                 formatter: cell => {
@@ -1938,8 +1975,8 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   const doc = r.cpsr?.docNo || r.cpsrDocNo || '';
                   if (!doc) return '<span class="text-slate-400">-</span>';
                   return '<div class="flex items-center gap-1.5">' +
-                    '<button class="btn-cps-view-cpsr font-mono font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer" title="Xem chi tiết CPSR ' + doc + '">' + doc + '</button>' +
-                    '<button class="btn-cps-edit-cpsr p-1 text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition cursor-pointer" title="Sửa CPSR ' + doc + '"><i class="fa-solid fa-pen-to-square"></i></button>' +
+                    '<button class="btn-cps-view-cpsr font-mono font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer" title="' + t('View details CPSR', 'Xem chi tiết CPSR') + ' ' + doc + '">' + doc + '</button>' +
+                    '<button class="btn-cps-edit-cpsr p-1 text-slate-400 hover:text-sky-600 dark:hover:text-sky-400 transition cursor-pointer" title="' + t('Edit CPSR', 'Sửa CPSR') + ' ' + doc + '"><i class="fa-solid fa-pen-to-square"></i></button>' +
                   '</div>';
                 },
                 cellClick: (e, cell) => {
@@ -1956,28 +1993,31 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Mã CPST',
+                titleFormatter: () => t('CPST Code', 'Mã CPST'),
                 field: 'cpst.docNo',
                 minWidth: 130,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   const doc = r.cpst?.docNo || r.cpstDocNo;
-                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">Chưa phản hồi</span>';
+                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">' + t('Pending feedback', 'Chưa phản hồi') + '</span>';
                   return '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + doc + '</span>';
                 }
               },
               {
                 title: 'Mã CPSF',
+                titleFormatter: () => t('CPSF Code', 'Mã CPSF'),
                 field: 'cpsf.docNo',
                 minWidth: 130,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   const doc = r.cpsf?.docNo || r.cpsfDocNo;
-                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">Chưa bàn giao</span>';
+                  if (!doc) return '<span class="px-2 py-0.5 rounded text-[10px] bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">' + t('Not handed over', 'Chưa bàn giao') + '</span>';
                   return '<span class="font-mono font-bold text-purple-700 dark:text-purple-400">' + doc + '</span>';
                 }
               },
               {
                 title: 'Trạng Thái Chuỗi',
+                titleFormatter: () => t('Chain Status', 'Trạng Thái Chuỗi'),
                 field: 'status',
                 minWidth: 130,
                 hozAlign: 'center',
@@ -1994,17 +2034,19 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Thời Gian',
+                titleFormatter: () => t('Time', 'Thời Gian'),
                 field: 'cpsr.reqDate',
                 minWidth: 120,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   const d = r.cpsr?.reqDate || r.reqDate || '';
-                  const t = r.cpsr?.reqTime || r.reqTime || '';
-                  return '<div class="text-[11px] text-slate-800 dark:text-slate-300 font-medium">' + d + ' <span class="font-mono text-slate-500 block text-[10px]">' + t + '</span></div>';
+                  const tStr = r.cpsr?.reqTime || r.reqTime || '';
+                  return '<div class="text-[11px] text-slate-800 dark:text-slate-300 font-medium">' + d + ' <span class="font-mono text-slate-500 block text-[10px]">' + tStr + '</span></div>';
                 }
               },
               {
                 title: 'Người YC / Máy In',
+                titleFormatter: () => t('Requester / Machine', 'Người YC / Máy In'),
                 field: 'cpsr.reqBy',
                 minWidth: 160,
                 formatter: cell => {
@@ -2017,17 +2059,19 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Nhân Viên KT',
+                titleFormatter: () => t('Technician', 'Nhân Viên KT'),
                 field: 'assignedTo',
                 minWidth: 140,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   const name = formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy);
-                  if (!name) return '<span class="text-amber-600 dark:text-amber-400/80 italic text-[11px] font-semibold">Chưa giao</span>';
+                  if (!name) return '<span class="text-amber-600 dark:text-amber-400/80 italic text-[11px] font-semibold">' + t('Unassigned', 'Chưa giao') + '</span>';
                   return '<div class="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1"><i class="fa-solid fa-user-check text-[10px] text-emerald-600 dark:text-emerald-400"></i> ' + name + '</div>';
                 }
               },
               {
                 title: 'Deadline',
+                titleFormatter: () => t('Deadline', 'Deadline'),
                 field: 'deadline',
                 minWidth: 120,
                 hozAlign: 'center',
@@ -2039,6 +2083,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Downtime',
+                titleFormatter: () => t('Downtime', 'Downtime'),
                 field: 'downtime',
                 minWidth: 95,
                 hozAlign: 'center',
@@ -2046,11 +2091,12 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   const r = cell.getRow().getData();
                   const dt = r.downtime != null ? r.downtime : r.cpst?.downtime;
                   if (dt == null || dt === '') return '<span class="text-slate-400 dark:text-slate-500">-</span>';
-                  return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + ' phút</span>';
+                  return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + ' ' + t('mins', 'phút') + '</span>';
                 }
               },
               {
                 title: 'Tỉ Lệ Phế',
+                titleFormatter: () => t('Scrap Rate', 'Tỉ Lệ Phế'),
                 field: 'wastePercent',
                 minWidth: 90,
                 hozAlign: 'center',
@@ -2063,6 +2109,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Trạng Thái KT',
+                titleFormatter: () => t('Tech Status', 'Trạng Thái KT'),
                 field: 'cpst.chkStatus',
                 minWidth: 110,
                 hozAlign: 'center',
@@ -2070,42 +2117,46 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   const r = cell.getRow().getData();
                   const s = r.chkStatus || r.cpst?.chkStatus || '';
                   if (!s) return '<span class="text-slate-400 dark:text-slate-500">-</span>';
-                  if (s === 'Đã khắc phục') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">Đã khắc phục</span>';
-                  if (s === 'Hư hỏng nặng') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20">Hư hỏng nặng</span>';
+                  if (s === 'Đã khắc phục') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">' + t('Resolved', 'Đã khắc phục') + '</span>';
+                  if (s === 'Hư hỏng nặng') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20">' + t('Severe damage', 'Hư hỏng nặng') + '</span>';
                   return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">' + s + '</span>';
                 }
               },
               {
                 title: 'Chất Lượng In',
+                titleFormatter: () => t('Print Quality', 'Chất Lượng In'),
                 field: 'cpsf.chkQuality',
-                minWidth: 90,
+                minWidth: 100,
                 hozAlign: 'center',
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   const q = r.chkQuality || r.cpsf?.chkQuality || '';
                   if (!q) return '<span class="text-slate-400 dark:text-slate-500">-</span>';
-                  return q === 'Đạt' ? '<span class="text-emerald-700 dark:text-emerald-400 font-bold">ĐẠT</span>' : '<span class="text-rose-700 dark:text-rose-400 font-bold">CHƯA ĐẠT</span>';
+                  if (q === 'Đạt') return '<span class="text-emerald-700 dark:text-emerald-400 font-bold">' + t('PASS', 'ĐẠT') + '</span>';
+                  if (q === 'Chạy tạm, tiếp tục theo dõi') return '<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">' + t('CONDITIONAL', 'CHẠY TẠM') + '</span>';
+                  return '<span class="text-rose-700 dark:text-rose-400 font-bold">' + t('FAIL', 'CHƯA ĐẠT') + '</span>';
                 }
               },
               {
                 title: 'Thao Tác',
+                titleFormatter: () => t('Action', 'Thao Tác'),
                 hozAlign: 'right',
                 minWidth: 320,
                 headerSort: false,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   let h = '<div class="flex items-center justify-end gap-1">';
-                  h += '<button class="btn-chain-assign px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-[11px] font-bold transition cursor-pointer" title="Phân công Technician"><i class="fa-solid fa-user-gear"></i> Giao</button>';
-                  h += '<button class="btn-chain-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="Chỉnh sửa phiếu CPS"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>';
-                  h += '<button class="btn-chain-edit-cpsr px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="Chỉnh sửa CPSR gốc"><i class="fa-solid fa-pen-to-square"></i> Sửa CPSR</button>';
-                  h += '<button class="btn-chain-link px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30 text-[11px] font-bold transition cursor-pointer" title="Ghép nối CPST/CPSF"><i class="fa-solid fa-link"></i> Ghép</button>';
-                  h += '<button class="btn-chain-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold transition cursor-pointer" title="Xem chi tiết phiếu CPS"><i class="fa-solid fa-eye"></i></button>';
+                  h += '<button class="btn-chain-assign px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-300 dark:border-amber-500/30 text-[11px] font-bold transition cursor-pointer" title="' + t('Assign Technician', 'Phân công Technician') + '"><i class="fa-solid fa-user-gear"></i> ' + t('Assign', 'Giao') + '</button>';
+                  h += '<button class="btn-chain-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="' + t('Edit CPS ticket', 'Chỉnh sửa phiếu CPS') + '"><i class="fa-solid fa-pen-to-square"></i> ' + t('Edit', 'Sửa') + '</button>';
+                  h += '<button class="btn-chain-edit-cpsr px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="' + t('Edit original CPSR', 'Chỉnh sửa CPSR gốc') + '"><i class="fa-solid fa-pen-to-square"></i> ' + t('Edit CPSR', 'Sửa CPSR') + '</button>';
+                  h += '<button class="btn-chain-link px-2 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-500/10 dark:hover:bg-purple-500/20 text-purple-700 dark:text-purple-400 border border-purple-300 dark:border-purple-500/30 text-[11px] font-bold transition cursor-pointer" title="' + t('Link CPST/CPSF', 'Ghép nối CPST/CPSF') + '"><i class="fa-solid fa-link"></i> ' + t('Link', 'Ghép') + '</button>';
+                  h += '<button class="btn-chain-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold transition cursor-pointer" title="' + t('View CPS ticket details', 'Xem chi tiết phiếu CPS') + '"><i class="fa-solid fa-eye"></i></button>';
                   if (!r.cpst && !r.cpstDocNo) {
                     h += '<a href="/technical-feedback?cpsr=' + encodeURIComponent(r.cpsr?.docNo || r.cpsrDocNo || '') + '" target="_blank" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold transition cursor-pointer shadow-xs">+ CPST</a>';
                   } else if (!r.cpsf && !r.cpsfDocNo) {
                     h += '<a href="/confirm-request?cpst=' + encodeURIComponent(r.cpst?.docNo || r.cpstDocNo || '') + '" target="_blank" class="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold transition cursor-pointer shadow-xs">+ CPSF</a>';
                   }
-                  h += '<button class="btn-chain-del p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer" title="Xóa phiếu CPS"><i class="fa-solid fa-trash-can"></i></button>';
+                  h += '<button class="btn-chain-del p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer" title="' + t('Delete CPS ticket', 'Xóa phiếu CPS') + '"><i class="fa-solid fa-trash-can"></i></button>';
                   h += '</div>';
                   return h;
                 },
@@ -2132,28 +2183,29 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           } else if (splitTab.value === 'cpsr') {
             data = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
             columns = [
-              { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Ngày Giờ', field: 'reqDate', minWidth: 120, formatter: cell => { const r = cell.getRow().getData(); return r.reqDate + ' ' + (r.reqTime || ''); } },
-              { title: 'Người Yêu Cầu', field: 'reqBy', minWidth: 150 },
-              { title: 'Công Nghệ / Máy', field: 'machineName', minWidth: 150, formatter: cell => { const r = cell.getRow().getData(); return (r.printTech || '') + ' - ' + (r.machineName || ''); } },
-              { title: 'Mô Tả Sự Cố', field: 'problem', minWidth: 180, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Trạng Thái', field: 'machineStatus', minWidth: 120, hozAlign: 'center', formatter: cell => '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">' + (cell.getValue() || '-') + '</span>' },
-              { title: 'Mức Ưu Tiên', field: 'priority', minWidth: 110, hozAlign: 'center', formatter: cell => {
+              { title: 'Số Phiếu', titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Ngày Giờ', titleFormatter: () => t('Date & Time', 'Ngày Giờ'), field: 'reqDate', minWidth: 120, formatter: cell => { const r = cell.getRow().getData(); return r.reqDate + ' ' + (r.reqTime || ''); } },
+              { title: 'Người Yêu Cầu', titleFormatter: () => t('Requester', 'Người Yêu Cầu'), field: 'reqBy', minWidth: 150 },
+              { title: 'Công Nghệ / Máy', titleFormatter: () => t('Technology / Machine', 'Công Nghệ / Máy'), field: 'machineName', minWidth: 150, formatter: cell => { const r = cell.getRow().getData(); return (r.printTech || '') + ' - ' + (r.machineName || ''); } },
+              { title: 'Mô Tả Sự Cố', titleFormatter: () => t('Problem Description', 'Mô Tả Sự Cố'), field: 'problem', minWidth: 180, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Trạng Thái', titleFormatter: () => t('Status', 'Trạng Thái'), field: 'machineStatus', minWidth: 120, hozAlign: 'center', formatter: cell => '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">' + (cell.getValue() || '-') + '</span>' },
+              { title: 'Mức Ưu Tiên', titleFormatter: () => t('Priority', 'Mức Ưu Tiên'), field: 'priority', minWidth: 110, hozAlign: 'center', formatter: cell => {
                 const p = cell.getValue() || '';
-                return p === 'Hỗ trợ ngay' ? '<span class="text-rose-700 dark:text-rose-400 font-bold">Hỗ trợ ngay</span>' : (p === 'Chạy tạm' ? '<span class="text-amber-700 dark:text-amber-400 font-bold">Chạy tạm</span>' : '<span class="text-slate-600 dark:text-slate-400">' + p + '</span>');
+                return p === 'Hỗ trợ ngay' ? '<span class="text-rose-700 dark:text-rose-400 font-bold">' + t('Urgent', 'Hỗ trợ ngay') + '</span>' : (p === 'Chạy tạm' ? '<span class="text-amber-700 dark:text-amber-400 font-bold">' + t('Temporary', 'Chạy tạm') + '</span>' : '<span class="text-slate-600 dark:text-slate-400">' + p + '</span>');
               }},
               {
                 title: 'Thao Tác',
+                titleFormatter: () => t('Action', 'Thao Tác'),
                 hozAlign: 'right',
                 minWidth: 180,
                 headerSort: false,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   return '<div class="flex items-center justify-end gap-1.5">' +
-                    '<button class="btn-split-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="Chỉnh sửa CPSR"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>' +
-                    '<button class="btn-split-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>' +
+                    '<button class="btn-split-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="' + t('Edit CPSR', 'Chỉnh sửa CPSR') + '"><i class="fa-solid fa-pen-to-square"></i> ' + t('Edit', 'Sửa') + '</button>' +
+                    '<button class="btn-split-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold" title="' + t('View details', 'Xem chi tiết') + '"><i class="fa-solid fa-eye"></i></button>' +
                     '<a href="/technical-feedback?cpsr=' + encodeURIComponent(r.docNo) + '" target="_blank" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold shadow-xs">+ CPST</a>' +
-                    '<button class="btn-split-del p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer" title="Xóa CPSR"><i class="fa-solid fa-trash-can"></i></button>' +
+                    '<button class="btn-split-del p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer" title="' + t('Delete CPSR', 'Xóa CPSR') + '"><i class="fa-solid fa-trash-can"></i></button>' +
                   '</div>';
                 },
                 cellClick: (e, cell) => {
@@ -2168,27 +2220,28 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           } else if (splitTab.value === 'cpst') {
             data = Array.isArray(cpstList.value) ? cpstList.value : (Array.isArray(cpstList.value?.data) ? cpstList.value.data : []);
             columns = [
-              { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Mã CPSR Gốc', field: 'cpsrDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-sky-700 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Technician Tiếp Nhận', field: 'recvBy', minWidth: 140, formatter: cell => formatTechnicianName(cell.getValue()) },
-              { title: 'Trạng Thái', field: 'chkStatus', minWidth: 120, hozAlign: 'center', formatter: cell => {
+              { title: 'Số Phiếu', titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Mã CPSR Gốc', titleFormatter: () => t('Original CPSR Code', 'Mã CPSR Gốc'), field: 'cpsrDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-sky-700 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Technician Tiếp Nhận', titleFormatter: () => t('Receiving Technician', 'Technician Tiếp Nhận'), field: 'recvBy', minWidth: 140, formatter: cell => formatTechnicianName(cell.getValue()) },
+              { title: 'Trạng Thái', titleFormatter: () => t('Status', 'Trạng Thái'), field: 'chkStatus', minWidth: 120, hozAlign: 'center', formatter: cell => {
                 const s = cell.getValue() || '';
-                return s === 'Đã khắc phục' ? '<span class="text-emerald-700 dark:text-emerald-400 font-bold">Đã khắc phục</span>' : (s === 'Hư hỏng nặng' ? '<span class="text-rose-700 dark:text-rose-400 font-bold">Hư hỏng nặng</span>' : '<span class="text-amber-700 dark:text-amber-400 font-bold">' + s + '</span>');
+                return s === 'Đã khắc phục' ? '<span class="text-emerald-700 dark:text-emerald-400 font-bold">' + t('Resolved', 'Đã khắc phục') + '</span>' : (s === 'Hư hỏng nặng' ? '<span class="text-rose-700 dark:text-rose-400 font-bold">' + t('Severe damage', 'Hư hỏng nặng') + '</span>' : '<span class="text-amber-700 dark:text-amber-400 font-bold">' + s + '</span>');
               }},
-              { title: 'Nguyên Nhân Gốc', field: 'rootCause', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Hành Động Khắc Phục', field: 'actionTaken', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Nguyên Nhân Gốc', titleFormatter: () => t('Root Cause', 'Nguyên Nhân Gốc'), field: 'rootCause', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Hành Động Khắc Phục', titleFormatter: () => t('Action Taken', 'Hành Động Khắc Phục'), field: 'actionTaken', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
               {
                 title: 'Thao Tác',
+                titleFormatter: () => t('Action', 'Thao Tác'),
                 hozAlign: 'right',
                 minWidth: 180,
                 headerSort: false,
                 formatter: cell => {
                   const r = cell.getRow().getData();
                   return '<div class="flex items-center justify-end gap-1.5">' +
-                    '<button class="btn-split-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="Chỉnh sửa CPST"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>' +
-                    '<button class="btn-split-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>' +
+                    '<button class="btn-split-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="' + t('Edit CPST', 'Chỉnh sửa CPST') + '"><i class="fa-solid fa-pen-to-square"></i> ' + t('Edit', 'Sửa') + '</button>' +
+                    '<button class="btn-split-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold" title="' + t('View details', 'Xem chi tiết') + '"><i class="fa-solid fa-eye"></i></button>' +
                     '<a href="/confirm-request?cpst=' + encodeURIComponent(r.docNo) + '" target="_blank" class="px-2 py-1 rounded-lg bg-purple-600 hover:bg-purple-500 text-white text-[11px] font-bold shadow-xs">+ CPSF</a>' +
-                    '<button class="btn-split-del p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer" title="Xóa CPST"><i class="fa-solid fa-trash-can"></i></button>' +
+                    '<button class="btn-split-del p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer" title="' + t('Delete CPST', 'Xóa CPST') + '"><i class="fa-solid fa-trash-can"></i></button>' +
                   '</div>';
                 },
                 cellClick: (e, cell) => {
@@ -2203,23 +2256,46 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           } else if (splitTab.value === 'cpsf') {
             data = Array.isArray(cpsfList.value) ? cpsfList.value : (Array.isArray(cpsfList.value?.data) ? cpsfList.value.data : []);
             columns = [
-              { title: 'Số Phiếu', field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-purple-700 dark:text-purple-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Mã CPST', field: 'cpstDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Chất Lượng', field: 'chkQuality', minWidth: 100, hozAlign: 'center', formatter: cell => (cell.getValue() === 'Đạt' ? '<span class="text-emerald-700 dark:text-emerald-400 font-bold">ĐẠT</span>' : '<span class="text-rose-700 dark:text-rose-400 font-bold">CHƯA ĐẠT</span>') },
-              { title: 'Work Order', field: 'workOrder', minWidth: 110, formatter: cell => '<span class="font-mono">' + (cell.getValue() || '-') + '</span>' },
-              { title: 'Tổng SL', field: 'woTotalQty', minWidth: 90, hozAlign: 'right', formatter: cell => Number(cell.getValue() || 0).toLocaleString() },
-              { title: 'Phế & Tỷ Lệ', field: 'wasteQty', minWidth: 110, hozAlign: 'right', formatter: cell => { const r = cell.getRow().getData(); return r.wasteQty + ' (' + (r.wastePercent || '0%') + ')'; } },
-              { title: 'Đơn Vị', field: 'wasteUnit', minWidth: 70, hozAlign: 'center' },
-              { title: 'Đại Diện SX', field: 'prodMgr', minWidth: 140 },
+              { title: 'Số Phiếu', titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-purple-700 dark:text-purple-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Mã CPST', titleFormatter: () => t('CPST Code', 'Mã CPST'), field: 'cpstDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
+              {
+                title: 'Chất Lượng',
+                titleFormatter: () => t('Quality', 'Chất Lượng'),
+                field: 'chkQuality',
+                minWidth: 110,
+                hozAlign: 'center',
+                formatter: cell => {
+                  const val = cell.getValue();
+                  if (val === 'Đạt') return '<span class="text-emerald-700 dark:text-emerald-400 font-bold">' + t('PASS', 'ĐẠT') + '</span>';
+                  if (val === 'Chạy tạm, tiếp tục theo dõi') return '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/20">' + t('CONDITIONAL', 'CHẠY TẠM') + '</span>';
+                  return '<span class="text-rose-700 dark:text-rose-400 font-bold">' + t('FAIL', 'CHƯA ĐẠT') + '</span>';
+                }
+              },
+              {
+                title: 'Ghi Chú',
+                titleFormatter: () => t('Notes', 'Ghi Chú'),
+                field: 'notes',
+                minWidth: 140,
+                formatter: cell => {
+                  const val = cell.getValue();
+                  return val ? '<span class="truncate block max-w-xs text-slate-700 dark:text-slate-300" title="' + val + '">' + val + '</span>' : '<span class="text-slate-400 dark:text-slate-500">-</span>';
+                }
+              },
+              { title: 'Work Order', titleFormatter: () => t('Work Order', 'Work Order'), field: 'workOrder', minWidth: 110, formatter: cell => '<span class="font-mono">' + (cell.getValue() || '-') + '</span>' },
+              { title: 'Tổng SL', titleFormatter: () => t('Total Qty', 'Tổng SL'), field: 'woTotalQty', minWidth: 90, hozAlign: 'right', formatter: cell => Number(cell.getValue() || 0).toLocaleString() },
+              { title: 'Phế & Tỷ Lệ', titleFormatter: () => t('Scrap & Rate', 'Phế & Tỷ Lệ'), field: 'wasteQty', minWidth: 110, hozAlign: 'right', formatter: cell => { const r = cell.getRow().getData(); return r.wasteQty + ' (' + (r.wastePercent || '0%') + ')'; } },
+              { title: 'Đơn Vị', titleFormatter: () => t('Unit', 'Đơn Vị'), field: 'wasteUnit', minWidth: 70, hozAlign: 'center' },
+              { title: 'Đại Diện SX', titleFormatter: () => t('Production Rep', 'Đại Diện SX'), field: 'prodMgr', minWidth: 140 },
               {
                 title: 'Thao Tác',
+                titleFormatter: () => t('Action', 'Thao Tác'),
                 hozAlign: 'right',
                 minWidth: 140,
                 headerSort: false,
                 formatter: () => '<div class="flex items-center justify-end gap-1.5">' +
-                  '<button class="btn-split-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="Chỉnh sửa CPSF"><i class="fa-solid fa-pen-to-square"></i> Sửa</button>' +
-                  '<button class="btn-split-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>' +
-                  '<button class="btn-split-del p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer" title="Xóa CPSF"><i class="fa-solid fa-trash-can"></i></button>' +
+                  '<button class="btn-split-edit px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold transition cursor-pointer" title="' + t('Edit CPSF', 'Chỉnh sửa CPSF') + '"><i class="fa-solid fa-pen-to-square"></i> ' + t('Edit', 'Sửa') + '</button>' +
+                  '<button class="btn-split-view px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-sky-700 dark:text-sky-400 border border-slate-300 dark:border-slate-700 text-[11px] font-bold" title="' + t('View details', 'Xem chi tiết') + '"><i class="fa-solid fa-eye"></i></button>' +
+                  '<button class="btn-split-del p-1 rounded-lg text-slate-400 hover:text-rose-600 dark:hover:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition cursor-pointer" title="' + t('Delete CPSF', 'Xóa CPSF') + '"><i class="fa-solid fa-trash-can"></i></button>' +
                 '</div>',
                 cellClick: (e, cell) => {
                   e.stopPropagation();
@@ -2257,7 +2333,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               pagination: 'local',
               paginationSize: 10,
               paginationSizeSelector: [10, 20, 50, 100],
-              placeholder: '<span>Không có dữ liệu trong bảng này</span>',
+              placeholder: '<span>' + t('No data available in this table', 'Không có dữ liệu trong bảng này') + '</span>',
               columns: columns
             });
             if (window.__CP_DEBUG__) {
@@ -2468,10 +2544,11 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               pagination: 'local',
               paginationSize: 10,
               paginationSizeSelector: [10, 20, 50, 100],
-              placeholder: '<span>Không có dữ liệu phiếu yêu cầu kỹ thuật</span>',
+              placeholder: '<span>' + t('No request tickets available', 'Không có dữ liệu phiếu yêu cầu kỹ thuật') + '</span>',
               columns: [
                 {
                   title: 'Số Phiếu',
+                  titleFormatter: () => t('Ticket No', 'Số Phiếu'),
                   field: 'docNo',
                   sorter: 'string',
                   minWidth: 120,
@@ -2479,6 +2556,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 },
                 {
                   title: 'Thời Gian',
+                  titleFormatter: () => t('Time', 'Thời Gian'),
                   field: 'reqDate',
                   sorter: 'string',
                   minWidth: 130,
@@ -2489,6 +2567,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 },
                 {
                   title: 'Công Nghệ / Máy',
+                  titleFormatter: () => t('Technology / Machine', 'Công Nghệ / Máy'),
                   field: 'machineName',
                   sorter: 'string',
                   minWidth: 160,
@@ -2499,18 +2578,21 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 },
                 {
                   title: 'Người Yêu Cầu',
+                  titleFormatter: () => t('Requester', 'Người Yêu Cầu'),
                   field: 'reqBy',
                   sorter: 'string',
                   minWidth: 120
                 },
                 {
                   title: 'Sự Cố',
+                  titleFormatter: () => t('Issue', 'Sự Cố'),
                   field: 'problem',
                   minWidth: 180,
                   formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>'
                 },
                 {
                   title: 'Downtime',
+                  titleFormatter: () => t('Downtime', 'Downtime'),
                   field: 'downtime',
                   sorter: 'number',
                   hozAlign: 'center',
@@ -2522,6 +2604,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 },
                 {
                   title: 'Trạng Thái',
+                  titleFormatter: () => t('Status', 'Trạng Thái'),
                   field: 'chkStatus',
                   sorter: 'string',
                   hozAlign: 'center',
@@ -2546,13 +2629,14 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 },
                 {
                   title: 'Thao Tác',
+                  titleFormatter: () => t('Action', 'Thao Tác'),
                   hozAlign: 'right',
                   minWidth: 90,
                   headerSort: false,
                   formatter: () => {
                     return '<div class="flex items-center justify-end gap-1">' +
-                      '<button class="btn-ticket-view p-1.5 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer" title="Xem chi tiết"><i class="fa-solid fa-eye"></i></button>' +
-                      '<button class="btn-ticket-delete p-1.5 rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="Xóa phiếu"><i class="fa-solid fa-trash-can"></i></button>' +
+                      '<button class="btn-ticket-view p-1.5 rounded-lg text-slate-500 hover:text-sky-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer" title="' + t('View details', 'Xem chi tiết') + '"><i class="fa-solid fa-eye"></i></button>' +
+                      '<button class="btn-ticket-delete p-1.5 rounded-lg text-slate-500 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + t('Delete ticket', 'Xóa phiếu') + '"><i class="fa-solid fa-trash-can"></i></button>' +
                     '</div>';
                   },
                   cellClick: (e, cell) => {
@@ -2641,11 +2725,12 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 pagination: 'local',
                 paginationSize: 10,
                 paginationSizeSelector: [10, 25, 50],
-                placeholder: '<span>Không có dữ liệu máy móc</span>',
+                placeholder: '<span>' + t('No machine data available', 'Không có dữ liệu máy móc') + '</span>',
                 columns: [
-                  { title: 'STT', formatter: 'rownum', hozAlign: 'center', width: 60, headerSort: false },
+                  { title: 'STT', titleFormatter: () => t('No.', 'STT'), formatter: 'rownum', hozAlign: 'center', width: 60, headerSort: false },
                   {
                     title: 'Công Nghệ In / Phân Xưởng',
+                    titleFormatter: () => t('Technology / Workshop', 'Công Nghệ In / Phân Xưởng'),
                     field: 'tech',
                     sorter: 'string',
                     minWidth: 160,
@@ -2653,6 +2738,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   },
                   {
                     title: 'Tên Máy / Thiết Bị',
+                    titleFormatter: () => t('Machine / Equipment Name', 'Tên Máy / Thiết Bị'),
                     field: 'name',
                     sorter: 'string',
                     minWidth: 180,
@@ -2660,6 +2746,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   },
                   {
                     title: 'Mã Thiết Bị',
+                    titleFormatter: () => t('Equipment Code', 'Mã Thiết Bị'),
                     field: 'code',
                     sorter: 'string',
                     minWidth: 120,
@@ -2667,17 +2754,19 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   },
                   {
                     title: 'Trạng Thái',
+                    titleFormatter: () => t('Status', 'Trạng Thái'),
                     field: 'isActive',
                     hozAlign: 'center',
                     minWidth: 120,
-                    formatter: () => '<span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-500"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Hoạt động</span>'
+                    formatter: () => '<span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-500"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>' + t('Active', 'Hoạt động') + '</span>'
                   },
                   {
                     title: 'Thao Tác',
+                    titleFormatter: () => t('Action', 'Thao Tác'),
                     hozAlign: 'right',
                     minWidth: 90,
                     headerSort: false,
-                    formatter: () => '<button class="btn-machine-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="Xóa máy này"><i class="fa-solid fa-trash-can"></i></button>',
+                    formatter: () => '<button class="btn-machine-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + t('Delete machine', 'Xóa máy này') + '"><i class="fa-solid fa-trash-can"></i></button>',
                     cellClick: (e, cell) => {
                       const target = e.target.closest('.btn-machine-delete');
                       if (!target) return;
@@ -2738,10 +2827,11 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 pagination: 'local',
                 paginationSize: 10,
                 paginationSizeSelector: [10, 25, 50, 100],
-                placeholder: '<span>Không có dữ liệu nhân sự</span>',
+                placeholder: '<span>' + t('No employee data available', 'Không có dữ liệu nhân sự') + '</span>',
                 columns: [
                   {
                     title: 'Mã NV',
+                    titleFormatter: () => t('Emp ID', 'Mã NV'),
                     field: 'mnv',
                     sorter: 'string',
                     minWidth: 100,
@@ -2749,6 +2839,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   },
                   {
                     title: 'Họ và Tên',
+                    titleFormatter: () => t('Full Name', 'Họ và Tên'),
                     field: 'name',
                     sorter: 'string',
                     minWidth: 160,
@@ -2756,6 +2847,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   },
                   {
                     title: 'Bộ Phận / Phòng Ban',
+                    titleFormatter: () => t('Department', 'Bộ Phận / Phòng Ban'),
                     field: 'dept',
                     sorter: 'string',
                     minWidth: 140,
@@ -2763,6 +2855,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   },
                   {
                     title: 'Khu Vực / Chuyền',
+                    titleFormatter: () => t('Area / Line', 'Khu Vực / Chuyền'),
                     field: 'area',
                     sorter: 'string',
                     minWidth: 140,
@@ -2770,6 +2863,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   },
                   {
                     title: 'Chức Vụ',
+                    titleFormatter: () => t('Position / Role', 'Chức Vụ'),
                     field: 'role',
                     sorter: 'string',
                     minWidth: 120,
@@ -2777,10 +2871,11 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   },
                   {
                     title: 'Thao Tác',
+                    titleFormatter: () => t('Action', 'Thao Tác'),
                     hozAlign: 'right',
                     minWidth: 80,
                     headerSort: false,
-                    formatter: () => '<button class="btn-emp-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="Xóa nhân viên"><i class="fa-solid fa-trash-can"></i></button>',
+                    formatter: () => '<button class="btn-emp-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + t('Delete employee', 'Xóa nhân viên') + '"><i class="fa-solid fa-trash-can"></i></button>',
                     cellClick: (e, cell) => {
                       const target = e.target.closest('.btn-emp-delete');
                       if (!target) return;
@@ -2984,17 +3079,19 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         const getDatasetColumns = (type) => {
           if (type === 'weekly-requests') {
             return [
-              { title: 'STT', formatter: 'rownum', width: 60, hozAlign: 'center', headerSort: false },
+              { title: 'STT', titleFormatter: () => t('No.', 'STT'), formatter: 'rownum', width: 60, hozAlign: 'center', headerSort: false },
               {
                 title: 'Mã / Người Yêu Cầu',
+                titleFormatter: () => t('ID / Requester', 'Mã / Người Yêu Cầu'),
                 field: 'requestId',
                 sorter: 'string',
                 minWidth: 160,
                 formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>'
               },
-              { title: 'Loại Yêu Cầu', field: 'requestType', sorter: 'string', minWidth: 130 },
+              { title: 'Loại Yêu Cầu', titleFormatter: () => t('Request Type', 'Loại Yêu Cầu'), field: 'requestType', sorter: 'string', minWidth: 130 },
               {
                 title: 'Thiết Bị',
+                titleFormatter: () => t('Equipment', 'Thiết Bị'),
                 field: 'itemEquipment',
                 sorter: 'string',
                 minWidth: 110,
@@ -3002,6 +3099,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Mức Độ',
+                titleFormatter: () => t('Severity', 'Mức Độ'),
                 field: 'severity',
                 sorter: 'string',
                 minWidth: 100,
@@ -3015,6 +3113,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Trạng Thái',
+                titleFormatter: () => t('Status', 'Trạng Thái'),
                 field: 'status',
                 sorter: 'string',
                 minWidth: 110,
@@ -3033,9 +3132,10 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">' + s + '</span>';
                 }
               },
-              { title: 'SLA (Giờ)', field: 'slaTargetHours', sorter: 'number', hozAlign: 'center', minWidth: 90 },
+              { title: 'SLA (Giờ)', titleFormatter: () => t('SLA (Hours)', 'SLA (Giờ)'), field: 'slaTargetHours', sorter: 'number', hozAlign: 'center', minWidth: 90 },
               {
                 title: 'Thực Tế',
+                titleFormatter: () => t('Actual', 'Thực Tế'),
                 field: 'actualHours',
                 sorter: 'number',
                 hozAlign: 'center',
@@ -3044,38 +3144,40 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               },
               {
                 title: 'Đạt SLA',
+                titleFormatter: () => t('Met SLA', 'Đạt SLA'),
                 field: 'metSla',
                 sorter: 'string',
                 hozAlign: 'center',
                 minWidth: 90,
-                formatter: cell => cell.getValue() === 'Yes' ? '<span class="text-emerald-500 font-bold">✓ Đạt</span>' : '<span class="text-red-500 font-bold">✗ Chưa</span>'
+                formatter: cell => cell.getValue() === 'Yes' ? '<span class="text-emerald-500 font-bold">✓ ' + t('Met', 'Đạt') + '</span>' : '<span class="text-red-500 font-bold">✗ ' + t('Not yet', 'Chưa') + '</span>'
               }
             ];
           }
           if (type === 'defect-logs') {
             return [
-              { title: 'Defect ID', field: 'defectId', sorter: 'number', width: 90, hozAlign: 'center', formatter: cell => '<span class="font-mono font-bold text-amber-600 dark:text-amber-400">#' + (cell.getValue() || '') + '</span>' },
-              { title: 'Ngày', field: 'defectDate', sorter: 'string', minWidth: 100 },
-              { title: 'Phân Xưởng', field: 'facility', sorter: 'string', minWidth: 110, formatter: cell => '<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Nguyên Nhân Gốc', field: 'rootCauseCategory', sorter: 'string', minWidth: 130 },
-              { title: 'Chi Tiết Sự Cố', field: 'specificIssue', minWidth: 200, formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Sản Phẩm Ảnh Hưởng', field: 'affectedProduct', minWidth: 140 },
-              { title: 'Lặp Lại', field: 'recurringIssue', hozAlign: 'center', minWidth: 90, formatter: cell => cell.getValue() === 'Yes' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500">Có</span>' : '<span class="text-slate-400">Không</span>' },
-              { title: 'Yêu Cầu 8D', field: 'eightDRequired', hozAlign: 'center', minWidth: 100, formatter: cell => cell.getValue() === 'Yes' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-500">8D Required</span>' : '<span class="text-slate-400">Không</span>' }
+              { title: 'Defect ID', titleFormatter: () => t('Defect ID', 'Defect ID'), field: 'defectId', sorter: 'number', width: 90, hozAlign: 'center', formatter: cell => '<span class="font-mono font-bold text-amber-600 dark:text-amber-400">#' + (cell.getValue() || '') + '</span>' },
+              { title: 'Ngày', titleFormatter: () => t('Date', 'Ngày'), field: 'defectDate', sorter: 'string', minWidth: 100 },
+              { title: 'Phân Xưởng', titleFormatter: () => t('Workshop', 'Phân Xưởng'), field: 'facility', sorter: 'string', minWidth: 110, formatter: cell => '<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Nguyên Nhân Gốc', titleFormatter: () => t('Root Cause', 'Nguyên Nhân Gốc'), field: 'rootCauseCategory', sorter: 'string', minWidth: 130 },
+              { title: 'Chi Tiết Sự Cố', titleFormatter: () => t('Specific Issue', 'Chi Tiết Sự Cố'), field: 'specificIssue', minWidth: 200, formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Sản Phẩm Ảnh Hưởng', titleFormatter: () => t('Affected Product', 'Sản Phẩm Ảnh Hưởng'), field: 'affectedProduct', minWidth: 140 },
+              { title: 'Lặp Lại', titleFormatter: () => t('Recurring', 'Lặp Lại'), field: 'recurringIssue', hozAlign: 'center', minWidth: 90, formatter: cell => cell.getValue() === 'Yes' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500">' + t('Yes', 'Có') + '</span>' : '<span class="text-slate-400">' + t('No', 'Không') + '</span>' },
+              { title: 'Yêu Cầu 8D', titleFormatter: () => t('8D Required', 'Yêu Cầu 8D'), field: 'eightDRequired', hozAlign: 'center', minWidth: 100, formatter: cell => cell.getValue() === 'Yes' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-500">8D Required</span>' : '<span class="text-slate-400">' + t('No', 'Không') + '</span>' }
             ];
           }
           if (type === 'action-plans') {
             return [
-              { title: 'Action ID', field: 'actionId', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Ngày Tạo', field: 'dateLogged', sorter: 'string', minWidth: 100 },
-              { title: 'Phân Xưởng', field: 'facility', sorter: 'string', minWidth: 110 },
-              { title: 'Defect ID', field: 'relatedDefectId', minWidth: 90, hozAlign: 'center', formatter: cell => cell.getValue() ? '<span class="font-mono text-amber-500 font-bold">#' + cell.getValue() + '</span>' : '—' },
-              { title: 'Loại Hành Động', field: 'fixType', minWidth: 130 },
-              { title: 'Nội Dung', field: 'description', minWidth: 200, formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Người Phụ Trách', field: 'pic', sorter: 'string', minWidth: 120, formatter: cell => '<strong class="text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</strong>' },
-              { title: 'Hạn Chót', field: 'deadline', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono text-red-500 font-medium">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Action ID', titleFormatter: () => t('Action ID', 'Action ID'), field: 'actionId', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Ngày Tạo', titleFormatter: () => t('Date Created', 'Ngày Tạo'), field: 'dateLogged', sorter: 'string', minWidth: 100 },
+              { title: 'Phân Xưởng', titleFormatter: () => t('Workshop', 'Phân Xưởng'), field: 'facility', sorter: 'string', minWidth: 110 },
+              { title: 'Defect ID', titleFormatter: () => t('Defect ID', 'Defect ID'), field: 'relatedDefectId', minWidth: 90, hozAlign: 'center', formatter: cell => cell.getValue() ? '<span class="font-mono text-amber-500 font-bold">#' + cell.getValue() + '</span>' : '—' },
+              { title: 'Loại Hành Động', titleFormatter: () => t('Action Type', 'Loại Hành Động'), field: 'fixType', minWidth: 130 },
+              { title: 'Nội Dung', titleFormatter: () => t('Description', 'Nội Dung'), field: 'description', minWidth: 200, formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>' },
+              { title: 'Người Phụ Trách', titleFormatter: () => t('Person In Charge', 'Người Phụ Trách'), field: 'pic', sorter: 'string', minWidth: 120, formatter: cell => '<strong class="text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</strong>' },
+              { title: 'Hạn Chót', titleFormatter: () => t('Deadline', 'Hạn Chót'), field: 'deadline', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono text-red-500 font-medium">' + (cell.getValue() || '') + '</span>' },
               {
                 title: 'Trạng Thái',
+                titleFormatter: () => t('Status', 'Trạng Thái'),
                 field: 'status',
                 sorter: 'string',
                 minWidth: 110,
@@ -3090,12 +3192,12 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           }
           // requesters
           return [
-            { title: 'STT', field: 'stt', sorter: 'number', width: 60, hozAlign: 'center' },
-            { title: 'Mã NV', field: 'mnv', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
-            { title: 'Họ và Tên', field: 'fullName', sorter: 'string', minWidth: 160, formatter: cell => '<strong class="text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</strong>' },
-            { title: 'Bộ Phận', field: 'department', sorter: 'string', minWidth: 130 },
-            { title: 'Khu Vực', field: 'area', sorter: 'string', minWidth: 120 },
-            { title: 'Chức Danh', field: 'position', sorter: 'string', minWidth: 160 }
+            { title: 'STT', titleFormatter: () => t('No.', 'STT'), field: 'stt', sorter: 'number', width: 60, hozAlign: 'center' },
+            { title: 'Mã NV', titleFormatter: () => t('Emp ID', 'Mã NV'), field: 'mnv', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
+            { title: 'Họ và Tên', titleFormatter: () => t('Full Name', 'Họ và Tên'), field: 'fullName', sorter: 'string', minWidth: 160, formatter: cell => '<strong class="text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</strong>' },
+            { title: 'Bộ Phận', titleFormatter: () => t('Department', 'Bộ Phận'), field: 'department', sorter: 'string', minWidth: 130 },
+            { title: 'Khu Vực', titleFormatter: () => t('Area', 'Khu Vực'), field: 'area', sorter: 'string', minWidth: 120 },
+            { title: 'Chức Danh', titleFormatter: () => t('Position', 'Chức Danh'), field: 'position', sorter: 'string', minWidth: 160 }
           ];
         };
 
@@ -3127,7 +3229,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               pagination: 'local',
               paginationSize: 10,
               paginationSizeSelector: [10, 25, 50, 100],
-              placeholder: '<span>Không có dữ liệu trong tập này</span>',
+              placeholder: '<span>' + t('No data available in this dataset', 'Không có dữ liệu trong tập này') + '</span>',
               columns: columns
             });
             applyDatasetFilter();
