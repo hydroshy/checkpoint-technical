@@ -407,6 +407,7 @@ async function runTests() {
     process.exitCode = 1;
   } finally {
     await app.close();
+    process.exit(process.exitCode || 0);
   }
 }
 

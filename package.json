@@ -14,6 +14,7 @@
     "test:clean-db": "ts-node test/empty-db-clean-run.spec.ts",
     "test:frontend": "ts-node test/frontend-navigation-modals.spec.ts",
     "test:qa": "ts-node test/qa-system-verification.spec.ts",
+    "test:i18n-residual": "ts-node test/qa-i18n-residual-verification.spec.ts",
     "test:backend": "ts-node test/backend-ticket-mgmt.spec.ts",
     "test:e2e": "ts-node test/report-and-control-panel.e2e.ts",
     "start": "node dist/main",

@@ -198,7 +198,9 @@ async function runEmptyDbCleanRunTest() {
   }
 }
 
-runEmptyDbCleanRunTest().catch((err) => {
-  console.error('❌ Lỗi kiểm thử empty db clean run:', err);
-  process.exit(1);
-});
+runEmptyDbCleanRunTest()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error('❌ Lỗi kiểm thử empty db clean run:', err);
+    process.exit(1);
+  });

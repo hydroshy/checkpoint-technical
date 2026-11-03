@@ -65,7 +65,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               renderReport4MChart();
               initOrUpdateReportTable();
             });
-          } else if (activeTab.value === 'management-tasks') {
+          } else if (activeTab.value === 'management-tasks' || activeTab.value === 'requests') {
             nextTick(() => {
               initOrUpdateSplitTable();
             });
@@ -81,7 +81,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             nextTick(() => {
               initOrUpdateUsersTable();
             });
-          } else if (activeTab.value === 'database') {
+          } else if (activeTab.value === 'database' || activeTab.value === 'existing-data') {
             nextTick(() => {
               initOrUpdateExistingDataTable();
             });
@@ -1616,7 +1616,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           const data = filteredReportCps.value || [];
           const columns = [
             {
-              title: 'Mã CPS',
+              title: t('CPS Code', 'Mã CPS'), /* title: 'Mã CPS' */
               titleFormatter: () => t('CPS Code', 'Mã CPS'),
               field: 'docNo',
               minWidth: 140,
@@ -1627,18 +1627,18 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               }
             },
             {
-              title: 'Ngày khởi tạo',
+              title: t('Request Date', 'Ngày khởi tạo'), /* title: 'Ngày khởi tạo' */
               titleFormatter: () => t('Request Date', 'Ngày khởi tạo'),
               minWidth: 130,
               formatter: cell => {
                 const r = cell.getRow().getData();
                 const d = r.cpsr?.reqDate || r.reqDate || (r.createdAt ? r.createdAt.slice(0, 10) : '-');
-                const t = r.cpsr?.reqTime || r.reqTime || '';
-                return '<div class="text-xs font-medium text-slate-800 dark:text-slate-200">' + d + (t ? ' <span class="text-[10px] text-slate-400 font-mono">' + t + '</span>' : '') + '</div>';
+                const tStr = r.cpsr?.reqTime || r.reqTime || '';
+                return '<div class="text-xs font-medium text-slate-800 dark:text-slate-200">' + d + (tStr ? ' <span class="text-[10px] text-slate-400 font-mono">' + tStr + '</span>' : '') + '</div>';
               }
             },
             {
-              title: 'Người yêu cầu',
+              title: t('Requester', 'Người yêu cầu'), /* title: 'Người yêu cầu' */
               titleFormatter: () => t('Requester', 'Người yêu cầu'),
               minWidth: 140,
               formatter: cell => {
@@ -1648,7 +1648,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               }
             },
             {
-              title: 'Máy',
+              title: t('Machine', 'Máy'), /* title: 'Máy' */
               titleFormatter: () => t('Machine', 'Máy'),
               minWidth: 150,
               formatter: cell => {
@@ -1659,7 +1659,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               }
             },
             {
-              title: 'Sự cố',
+              title: t('Issue', 'Sự cố'), /* title: 'Sự cố' */
               titleFormatter: () => t('Issue', 'Sự cố'),
               minWidth: 180,
               formatter: cell => {
@@ -1669,7 +1669,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               }
             },
             {
-              title: 'Technician',
+              title: t('Technician', 'Technician'), /* title: 'Technician' */
               titleFormatter: () => t('Technician', 'Technician'),
               minWidth: 140,
               formatter: cell => {
@@ -1681,7 +1681,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               }
             },
             {
-              title: 'Trạng thái',
+              title: t('Status', 'Trạng thái'), /* title: 'Trạng thái' */
               titleFormatter: () => t('Status', 'Trạng thái'),
               field: 'status',
               minWidth: 130,
@@ -1697,7 +1697,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               }
             },
             {
-              title: 'Downtime',
+              title: t('Downtime', 'Downtime'), /* title: 'Downtime' */
               titleFormatter: () => t('Downtime', 'Downtime'),
               minWidth: 90,
               hozAlign: 'center',
@@ -1705,12 +1705,12 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 const r = cell.getRow().getData();
                 const dt = r.downtime != null ? r.downtime : r.cpst?.downtime;
                 if (dt == null || dt === '') return '<span class="text-slate-400">-</span>';
-                return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + 'p</span>';
+                return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + (currentLang.value === 'en' ? 'm' : 'p') + '</span>';
               }
             },
             {
-              title: 'Xem chi tiết',
-              titleFormatter: () => t('Action', 'Xem chi tiết'),
+              title: t('View Details', 'Xem chi tiết'), /* title: 'Xem chi tiết' */
+              titleFormatter: () => t('View Details', 'Xem chi tiết'),
               hozAlign: 'center',
               minWidth: 120,
               headerSort: false,
@@ -1751,34 +1751,39 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         };
 
         const exportReportTechnicalExcel = () => {
-          const rows = filteredReportCps.value.map(r => ({
-            'Mã CPS': r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '')),
-            'Ngày Khởi Tạo': r.cpsr?.reqDate || r.reqDate || '',
-            'Người Yêu Cầu': r.cpsr?.reqBy || r.reqBy || '',
-            'Máy': r.cpsr?.machineName || r.machineName || '',
-            'Công Nghệ': r.cpsr?.printTech || r.printTech || '',
-            'Sự Cố': r.cpsr?.problem || r.problem || '',
-            'Technician': formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || ''),
-            'Trạng Thái': r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN')),
-            'Downtime (Phút)': r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : ''),
-            'Mã CPSR': r.cpsr?.docNo || r.cpsrDocNo || '',
-            'Mã CPST': r.cpst?.docNo || r.cpstDocNo || '',
-            'Mã CPSF': r.cpsf?.docNo || r.cpsfDocNo || '',
-            'Nguyên Nhân Gốc': r.rootCause || r.cpst?.rootCause || ''
-          }));
+          const isEn = currentLang.value === 'en';
+          const rows = filteredReportCps.value.map(r => {
+            const rowObj = {};
+            rowObj[t('CPS Code', 'Mã CPS')] = r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : ''));
+            rowObj[t('Request Date', 'Ngày Khởi Tạo')] = r.cpsr?.reqDate || r.reqDate || '';
+            rowObj[t('Requester', 'Người Yêu Cầu')] = r.cpsr?.reqBy || r.reqBy || '';
+            rowObj[t('Machine', 'Máy')] = r.cpsr?.machineName || r.machineName || '';
+            rowObj[t('Print Tech', 'Công Nghệ')] = r.cpsr?.printTech || r.printTech || '';
+            rowObj[t('Issue', 'Sự Cố')] = r.cpsr?.problem || r.problem || '';
+            rowObj[t('Technician', 'Technician')] = formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || '');
+            rowObj[t('Status', 'Trạng Thái')] = r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+            rowObj[t('Downtime (Minutes)', 'Downtime (Phút)')] = r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : '');
+            rowObj[t('CPSR Code', 'Mã CPSR')] = r.cpsr?.docNo || r.cpsrDocNo || '';
+            rowObj[t('CPST Code', 'Mã CPST')] = r.cpst?.docNo || r.cpstDocNo || '';
+            rowObj[t('CPSF Code', 'Mã CPSF')] = r.cpsf?.docNo || r.cpsfDocNo || '';
+            rowObj[t('Root Cause', 'Nguyên Nhân Gốc')] = r.rootCause || r.cpst?.rootCause || '';
+            return rowObj;
+          });
 
           if (typeof XLSX === 'undefined') {
-            showToast('Thư viện XLSX chưa tải xong', true);
+            showToast(t('XLSX library not loaded yet', 'Thư viện XLSX chưa tải xong'), true);
             return;
           }
 
           const ws = XLSX.utils.json_to_sheet(rows);
           const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, 'Du_Lieu_Phieu_Yeu_Cau');
+          const sheetName = isEn ? 'Request_Tickets_Data' : 'Du_Lieu_Phieu_Yeu_Cau';
+          XLSX.utils.book_append_sheet(wb, ws, sheetName);
           const from = reportDateFrom.value || 'All';
           const to = reportDateTo.value || 'All';
-          XLSX.writeFile(wb, "Du_Lieu_Phieu_Yeu_Cau_" + from + "_den_" + to + ".xlsx");
-          showToast('Đã xuất file Excel dữ liệu phiếu yêu cầu!');
+          const fileName = (isEn ? 'Request_Tickets_Data_' : 'Du_Lieu_Phieu_Yeu_Cau_') + from + (isEn ? '_to_' : '_den_') + to + '.xlsx';
+          XLSX.writeFile(wb, fileName);
+          showToast(t('Exported technical tickets Excel file successfully!', 'Đã xuất file Excel dữ liệu phiếu yêu cầu!'));
         };
 
         const loadCpsData = async () => {
@@ -1955,7 +1960,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             data = chainList.value;
             columns = [
               {
-                title: 'Mã CPS',
+                title: t('CPS Code', 'Mã CPS'), /* title: 'Mã CPS' */
                 titleFormatter: () => t('CPS Code', 'Mã CPS'),
                 field: 'docNo',
                 minWidth: 140,
@@ -1966,7 +1971,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Mã CPSR',
+                title: t('CPSR Code', 'Mã CPSR'), /* title: 'Mã CPSR' */
                 titleFormatter: () => t('CPSR Code', 'Mã CPSR'),
                 field: 'cpsr.docNo',
                 minWidth: 160,
@@ -1992,7 +1997,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Mã CPST',
+                title: t('CPST Code', 'Mã CPST'), /* title: 'Mã CPST' */
                 titleFormatter: () => t('CPST Code', 'Mã CPST'),
                 field: 'cpst.docNo',
                 minWidth: 130,
@@ -2004,7 +2009,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Mã CPSF',
+                title: t('CPSF Code', 'Mã CPSF'), /* title: 'Mã CPSF' */
                 titleFormatter: () => t('CPSF Code', 'Mã CPSF'),
                 field: 'cpsf.docNo',
                 minWidth: 130,
@@ -2016,7 +2021,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Trạng Thái Chuỗi',
+                title: t('Chain Status', 'Trạng Thái Chuỗi'), /* title: 'Trạng Thái Chuỗi' */
                 titleFormatter: () => t('Chain Status', 'Trạng Thái Chuỗi'),
                 field: 'status',
                 minWidth: 130,
@@ -2033,7 +2038,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Thời Gian',
+                title: t('Time', 'Thời Gian'), /* title: 'Thời Gian' */
                 titleFormatter: () => t('Time', 'Thời Gian'),
                 field: 'cpsr.reqDate',
                 minWidth: 120,
@@ -2045,7 +2050,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Người YC / Máy In',
+                title: t('Requester / Machine', 'Người YC / Máy In'), /* title: 'Người YC / Máy In' */
                 titleFormatter: () => t('Requester / Machine', 'Người YC / Máy In'),
                 field: 'cpsr.reqBy',
                 minWidth: 160,
@@ -2058,7 +2063,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Nhân Viên KT',
+                title: t('Technician', 'Nhân Viên KT'), /* title: 'Nhân Viên KT' */
                 titleFormatter: () => t('Technician', 'Nhân Viên KT'),
                 field: 'assignedTo',
                 minWidth: 140,
@@ -2070,7 +2075,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Deadline',
+                title: t('Deadline', 'Deadline'), /* title: 'Deadline' */
                 titleFormatter: () => t('Deadline', 'Deadline'),
                 field: 'deadline',
                 minWidth: 120,
@@ -2082,7 +2087,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Downtime',
+                title: t('Downtime', 'Downtime'), /* title: 'Downtime' */
                 titleFormatter: () => t('Downtime', 'Downtime'),
                 field: 'downtime',
                 minWidth: 95,
@@ -2091,11 +2096,11 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   const r = cell.getRow().getData();
                   const dt = r.downtime != null ? r.downtime : r.cpst?.downtime;
                   if (dt == null || dt === '') return '<span class="text-slate-400 dark:text-slate-500">-</span>';
-                  return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + ' ' + t('mins', 'phút') + '</span>';
+                  return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + ' ' + (currentLang.value === 'en' ? 'm' : 'phút') + '</span>';
                 }
               },
               {
-                title: 'Tỉ Lệ Phế',
+                title: t('Scrap Rate', 'Tỉ Lệ Phế'), /* title: 'Tỉ Lệ Phế' */
                 titleFormatter: () => t('Scrap Rate', 'Tỉ Lệ Phế'),
                 field: 'wastePercent',
                 minWidth: 90,
@@ -2108,7 +2113,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Trạng Thái KT',
+                title: t('Tech Status', 'Trạng Thái KT'), /* title: 'Trạng Thái KT' */
                 titleFormatter: () => t('Tech Status', 'Trạng Thái KT'),
                 field: 'cpst.chkStatus',
                 minWidth: 110,
@@ -2123,7 +2128,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Chất Lượng In',
+                title: t('Print Quality', 'Chất Lượng In'), /* title: 'Chất Lượng In' */
                 titleFormatter: () => t('Print Quality', 'Chất Lượng In'),
                 field: 'cpsf.chkQuality',
                 minWidth: 100,
@@ -2138,7 +2143,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Thao Tác',
+                title: t('Action', 'Thao Tác'), /* title: 'Thao Tác' */
                 titleFormatter: () => t('Action', 'Thao Tác'),
                 hozAlign: 'right',
                 minWidth: 320,
@@ -2183,18 +2188,18 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           } else if (splitTab.value === 'cpsr') {
             data = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
             columns = [
-              { title: 'Số Phiếu', titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Ngày Giờ', titleFormatter: () => t('Date & Time', 'Ngày Giờ'), field: 'reqDate', minWidth: 120, formatter: cell => { const r = cell.getRow().getData(); return r.reqDate + ' ' + (r.reqTime || ''); } },
-              { title: 'Người Yêu Cầu', titleFormatter: () => t('Requester', 'Người Yêu Cầu'), field: 'reqBy', minWidth: 150 },
-              { title: 'Công Nghệ / Máy', titleFormatter: () => t('Technology / Machine', 'Công Nghệ / Máy'), field: 'machineName', minWidth: 150, formatter: cell => { const r = cell.getRow().getData(); return (r.printTech || '') + ' - ' + (r.machineName || ''); } },
-              { title: 'Mô Tả Sự Cố', titleFormatter: () => t('Problem Description', 'Mô Tả Sự Cố'), field: 'problem', minWidth: 180, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Trạng Thái', titleFormatter: () => t('Status', 'Trạng Thái'), field: 'machineStatus', minWidth: 120, hozAlign: 'center', formatter: cell => '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">' + (cell.getValue() || '-') + '</span>' },
-              { title: 'Mức Ưu Tiên', titleFormatter: () => t('Priority', 'Mức Ưu Tiên'), field: 'priority', minWidth: 110, hozAlign: 'center', formatter: cell => {
+              { title: t('Ticket No', 'Số Phiếu'), titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Date & Time', 'Ngày Giờ'), titleFormatter: () => t('Date & Time', 'Ngày Giờ'), field: 'reqDate', minWidth: 120, formatter: cell => { const r = cell.getRow().getData(); return r.reqDate + ' ' + (r.reqTime || ''); } },
+              { title: t('Requester', 'Người Yêu Cầu'), titleFormatter: () => t('Requester', 'Người Yêu Cầu'), field: 'reqBy', minWidth: 150 },
+              { title: t('Technology / Machine', 'Công Nghệ / Máy'), titleFormatter: () => t('Technology / Machine', 'Công Nghệ / Máy'), field: 'machineName', minWidth: 150, formatter: cell => { const r = cell.getRow().getData(); return (r.printTech || '') + ' - ' + (r.machineName || ''); } },
+              { title: t('Problem Description', 'Mô Tả Sự Cố'), titleFormatter: () => t('Problem Description', 'Mô Tả Sự Cố'), field: 'problem', minWidth: 180, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Status', 'Trạng Thái'), titleFormatter: () => t('Status', 'Trạng Thái'), field: 'machineStatus', minWidth: 120, hozAlign: 'center', formatter: cell => '<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">' + (cell.getValue() || '-') + '</span>' },
+              { title: t('Priority', 'Mức Ưu Tiên'), titleFormatter: () => t('Priority', 'Mức Ưu Tiên'), field: 'priority', minWidth: 110, hozAlign: 'center', formatter: cell => {
                 const p = cell.getValue() || '';
                 return p === 'Hỗ trợ ngay' ? '<span class="text-rose-700 dark:text-rose-400 font-bold">' + t('Urgent', 'Hỗ trợ ngay') + '</span>' : (p === 'Chạy tạm' ? '<span class="text-amber-700 dark:text-amber-400 font-bold">' + t('Temporary', 'Chạy tạm') + '</span>' : '<span class="text-slate-600 dark:text-slate-400">' + p + '</span>');
               }},
               {
-                title: 'Thao Tác',
+                title: t('Action', 'Thao Tác'),
                 titleFormatter: () => t('Action', 'Thao Tác'),
                 hozAlign: 'right',
                 minWidth: 180,
@@ -2220,17 +2225,17 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           } else if (splitTab.value === 'cpst') {
             data = Array.isArray(cpstList.value) ? cpstList.value : (Array.isArray(cpstList.value?.data) ? cpstList.value.data : []);
             columns = [
-              { title: 'Số Phiếu', titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Mã CPSR Gốc', titleFormatter: () => t('Original CPSR Code', 'Mã CPSR Gốc'), field: 'cpsrDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-sky-700 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Technician Tiếp Nhận', titleFormatter: () => t('Receiving Technician', 'Technician Tiếp Nhận'), field: 'recvBy', minWidth: 140, formatter: cell => formatTechnicianName(cell.getValue()) },
-              { title: 'Trạng Thái', titleFormatter: () => t('Status', 'Trạng Thái'), field: 'chkStatus', minWidth: 120, hozAlign: 'center', formatter: cell => {
+              { title: t('Ticket No', 'Số Phiếu'), titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Original CPSR Code', 'Mã CPSR Gốc'), titleFormatter: () => t('Original CPSR Code', 'Mã CPSR Gốc'), field: 'cpsrDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-sky-700 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Receiving Technician', 'Technician Tiếp Nhận'), titleFormatter: () => t('Receiving Technician', 'Technician Tiếp Nhận'), field: 'recvBy', minWidth: 140, formatter: cell => formatTechnicianName(cell.getValue()) },
+              { title: t('Status', 'Trạng Thái'), titleFormatter: () => t('Status', 'Trạng Thái'), field: 'chkStatus', minWidth: 120, hozAlign: 'center', formatter: cell => {
                 const s = cell.getValue() || '';
                 return s === 'Đã khắc phục' ? '<span class="text-emerald-700 dark:text-emerald-400 font-bold">' + t('Resolved', 'Đã khắc phục') + '</span>' : (s === 'Hư hỏng nặng' ? '<span class="text-rose-700 dark:text-rose-400 font-bold">' + t('Severe damage', 'Hư hỏng nặng') + '</span>' : '<span class="text-amber-700 dark:text-amber-400 font-bold">' + s + '</span>');
               }},
-              { title: 'Nguyên Nhân Gốc', titleFormatter: () => t('Root Cause', 'Nguyên Nhân Gốc'), field: 'rootCause', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Hành Động Khắc Phục', titleFormatter: () => t('Action Taken', 'Hành Động Khắc Phục'), field: 'actionTaken', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Root Cause', 'Nguyên Nhân Gốc'), titleFormatter: () => t('Root Cause', 'Nguyên Nhân Gốc'), field: 'rootCause', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Action Taken', 'Hành Động Khắc Phục'), titleFormatter: () => t('Action Taken', 'Hành Động Khắc Phục'), field: 'actionTaken', minWidth: 160, formatter: cell => '<span class="truncate block max-w-xs">' + (cell.getValue() || '') + '</span>' },
               {
-                title: 'Thao Tác',
+                title: t('Action', 'Thao Tác'),
                 titleFormatter: () => t('Action', 'Thao Tác'),
                 hozAlign: 'right',
                 minWidth: 180,
@@ -2256,10 +2261,10 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           } else if (splitTab.value === 'cpsf') {
             data = Array.isArray(cpsfList.value) ? cpsfList.value : (Array.isArray(cpsfList.value?.data) ? cpsfList.value.data : []);
             columns = [
-              { title: 'Số Phiếu', titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-purple-700 dark:text-purple-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Mã CPST', titleFormatter: () => t('CPST Code', 'Mã CPST'), field: 'cpstDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Ticket No', 'Số Phiếu'), titleFormatter: () => t('Ticket No', 'Số Phiếu'), field: 'docNo', minWidth: 140, formatter: cell => '<span class="font-mono font-bold text-purple-700 dark:text-purple-400">' + (cell.getValue() || '') + '</span>' },
+              { title: t('CPST Code', 'Mã CPST'), titleFormatter: () => t('CPST Code', 'Mã CPST'), field: 'cpstDocNo', minWidth: 140, formatter: cell => '<span class="font-mono text-emerald-700 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
               {
-                title: 'Chất Lượng',
+                title: t('Quality', 'Chất Lượng'),
                 titleFormatter: () => t('Quality', 'Chất Lượng'),
                 field: 'chkQuality',
                 minWidth: 110,
@@ -2272,7 +2277,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Ghi Chú',
+                title: t('Notes', 'Ghi Chú'),
                 titleFormatter: () => t('Notes', 'Ghi Chú'),
                 field: 'notes',
                 minWidth: 140,
@@ -2281,13 +2286,13 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   return val ? '<span class="truncate block max-w-xs text-slate-700 dark:text-slate-300" title="' + val + '">' + val + '</span>' : '<span class="text-slate-400 dark:text-slate-500">-</span>';
                 }
               },
-              { title: 'Work Order', titleFormatter: () => t('Work Order', 'Work Order'), field: 'workOrder', minWidth: 110, formatter: cell => '<span class="font-mono">' + (cell.getValue() || '-') + '</span>' },
-              { title: 'Tổng SL', titleFormatter: () => t('Total Qty', 'Tổng SL'), field: 'woTotalQty', minWidth: 90, hozAlign: 'right', formatter: cell => Number(cell.getValue() || 0).toLocaleString() },
-              { title: 'Phế & Tỷ Lệ', titleFormatter: () => t('Scrap & Rate', 'Phế & Tỷ Lệ'), field: 'wasteQty', minWidth: 110, hozAlign: 'right', formatter: cell => { const r = cell.getRow().getData(); return r.wasteQty + ' (' + (r.wastePercent || '0%') + ')'; } },
-              { title: 'Đơn Vị', titleFormatter: () => t('Unit', 'Đơn Vị'), field: 'wasteUnit', minWidth: 70, hozAlign: 'center' },
-              { title: 'Đại Diện SX', titleFormatter: () => t('Production Rep', 'Đại Diện SX'), field: 'prodMgr', minWidth: 140 },
+              { title: t('Work Order', 'Work Order'), titleFormatter: () => t('Work Order', 'Work Order'), field: 'workOrder', minWidth: 110, formatter: cell => '<span class="font-mono">' + (cell.getValue() || '-') + '</span>' },
+              { title: t('Total Qty', 'Tổng SL'), titleFormatter: () => t('Total Qty', 'Tổng SL'), field: 'woTotalQty', minWidth: 90, hozAlign: 'right', formatter: cell => Number(cell.getValue() || 0).toLocaleString() },
+              { title: t('Scrap & Rate', 'Phế & Tỷ Lệ'), titleFormatter: () => t('Scrap & Rate', 'Phế & Tỷ Lệ'), field: 'wasteQty', minWidth: 110, hozAlign: 'right', formatter: cell => { const r = cell.getRow().getData(); return r.wasteQty + ' (' + (r.wastePercent || '0%') + ')'; } },
+              { title: t('Unit', 'Đơn Vị'), titleFormatter: () => t('Unit', 'Đơn Vị'), field: 'wasteUnit', minWidth: 70, hozAlign: 'center' },
+              { title: t('Production Rep', 'Đại Diện SX'), titleFormatter: () => t('Production Rep', 'Đại Diện SX'), field: 'prodMgr', minWidth: 140 },
               {
-                title: 'Thao Tác',
+                title: t('Action', 'Thao Tác'),
                 titleFormatter: () => t('Action', 'Thao Tác'),
                 hozAlign: 'right',
                 minWidth: 140,
@@ -2479,27 +2484,29 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           let filename = 'Checkpoint_';
           if (splitTab.value === 'chain') {
             filename += 'Chain_1-1-1';
-            rows = chainList.value.map(r => ({
-              'Mã CPS': r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '')),
-              'Mã CPSR': r.cpsr?.docNo || r.cpsrDocNo || '',
-              'Mã CPST': r.cpst?.docNo || r.cpstDocNo || 'Chưa phản hồi',
-              'Mã CPSF': r.cpsf?.docNo || r.cpsfDocNo || 'Chưa bàn giao',
-              'Trạng Thái Chuỗi': r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN')),
-              'Ngày Yêu Cầu': r.cpsr?.reqDate || r.reqDate || '',
-              'Giờ Yêu Cầu': r.cpsr?.reqTime || r.reqTime || '',
-              'Người Yêu Cầu': r.cpsr?.reqBy || r.reqBy || '',
-              'Công Nghệ': r.cpsr?.printTech || r.printTech || '',
-              'Tên Máy': r.cpsr?.machineName || r.machineName || '',
-              'Sự Cố': r.cpsr?.problem || r.problem || '',
-              'Nhân Viên KT': formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || '') || '-',
-              'Deadline': r.deadline || '-',
-              'Downtime (Phút)': r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : '-'),
-              'Tỉ Lệ Phế': r.wastePercent || r.cpsf?.wastePercent || '-',
-              'Technician Tiếp Nhận': formatTechnicianName(r.cpst?.recvBy || r.assignedToName || r.assignedTo || '') || '-',
-              'Trạng Thái KT': r.cpst?.chkStatus || r.chkStatus || '-',
-              'Chất Lượng In': r.cpsf?.chkQuality || r.chkQuality || '-',
-              'Work Order': r.cpsf?.workOrder || r.workOrder || '-'
-            }));
+            rows = chainList.value.map(r => {
+              const rowObj = {};
+              rowObj[t('CPS Code', 'Mã CPS')] = r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '')); // 'Mã CPS':
+              rowObj[t('CPSR Code', 'Mã CPSR')] = r.cpsr?.docNo || r.cpsrDocNo || ''; // 'Mã CPSR':
+              rowObj[t('CPST Code', 'Mã CPST')] = r.cpst?.docNo || r.cpstDocNo || t('Pending feedback', 'Chưa phản hồi'); // 'Mã CPST':
+              rowObj[t('CPSF Code', 'Mã CPSF')] = r.cpsf?.docNo || r.cpsfDocNo || t('Not handed over', 'Chưa bàn giao'); // 'Mã CPSF':
+              rowObj[t('Chain Status', 'Trạng Thái Chuỗi')] = r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+              rowObj[t('Request Date', 'Ngày Yêu Cầu')] = r.cpsr?.reqDate || r.reqDate || '';
+              rowObj[t('Request Time', 'Giờ Yêu Cầu')] = r.cpsr?.reqTime || r.reqTime || '';
+              rowObj[t('Requester', 'Người Yêu Cầu')] = r.cpsr?.reqBy || r.reqBy || '';
+              rowObj[t('Print Tech', 'Công Nghệ')] = r.cpsr?.printTech || r.printTech || '';
+              rowObj[t('Machine Name', 'Tên Máy')] = r.cpsr?.machineName || r.machineName || '';
+              rowObj[t('Issue', 'Sự Cố')] = r.cpsr?.problem || r.problem || '';
+              rowObj[t('Technician', 'Nhân Viên KT')] = formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || '') || '-';
+              rowObj[t('Deadline', 'Deadline')] = r.deadline || '-';
+              rowObj[t('Downtime (Minutes)', 'Downtime (Phút)')] = r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : '-');
+              rowObj[t('Scrap Rate', 'Tỉ Lệ Phế')] = r.wastePercent || r.cpsf?.wastePercent || '-';
+              rowObj[t('Receiving Technician', 'Technician Tiếp Nhận')] = formatTechnicianName(r.cpst?.recvBy || r.assignedToName || r.assignedTo || '') || '-';
+              rowObj[t('Tech Status', 'Trạng Thái KT')] = r.cpst?.chkStatus || r.chkStatus || '-';
+              rowObj[t('Print Quality', 'Chất Lượng In')] = r.cpsf?.chkQuality || r.chkQuality || '-';
+              rowObj[t('Work Order', 'Work Order')] = r.cpsf?.workOrder || r.workOrder || '-';
+              return rowObj;
+            });
           } else if (splitTab.value === 'cpsr') {
             filename += 'CPSR';
             rows = Array.isArray(cpsrList.value) ? cpsrList.value : (Array.isArray(cpsrList.value?.data) ? cpsrList.value.data : []);
@@ -2512,7 +2519,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           }
 
           if (rows.length === 0) {
-            showToast('Không có dữ liệu để xuất', true);
+            showToast(t('No data to export', 'Không có dữ liệu để xuất'), true);
             return;
           }
 
@@ -2521,9 +2528,9 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, splitTab.value.toUpperCase());
             XLSX.writeFile(wb, filename + '_' + new Date().toISOString().slice(0, 10) + '.xlsx');
-            showToast('Đã xuất Excel thành công!');
+            showToast(t('Exported Excel successfully!', 'Đã xuất Excel thành công!'));
           } catch(e) {
-            showToast('Lỗi xuất Excel: ' + e.message, true);
+            showToast(t('Excel export error: ', 'Lỗi xuất Excel: ') + e.message, true);
           }
         };
 
@@ -2547,7 +2554,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
               placeholder: '<span>' + t('No request tickets available', 'Không có dữ liệu phiếu yêu cầu kỹ thuật') + '</span>',
               columns: [
                 {
-                  title: 'Số Phiếu',
+                  title: t('Ticket No', 'Số Phiếu'),
                   titleFormatter: () => t('Ticket No', 'Số Phiếu'),
                   field: 'docNo',
                   sorter: 'string',
@@ -2555,7 +2562,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>'
                 },
                 {
-                  title: 'Thời Gian',
+                  title: t('Time', 'Thời Gian'),
                   titleFormatter: () => t('Time', 'Thời Gian'),
                   field: 'reqDate',
                   sorter: 'string',
@@ -2566,7 +2573,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   }
                 },
                 {
-                  title: 'Công Nghệ / Máy',
+                  title: t('Technology / Machine', 'Công Nghệ / Máy'),
                   titleFormatter: () => t('Technology / Machine', 'Công Nghệ / Máy'),
                   field: 'machineName',
                   sorter: 'string',
@@ -2577,21 +2584,21 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   }
                 },
                 {
-                  title: 'Người Yêu Cầu',
+                  title: t('Requester', 'Người Yêu Cầu'),
                   titleFormatter: () => t('Requester', 'Người Yêu Cầu'),
                   field: 'reqBy',
                   sorter: 'string',
                   minWidth: 120
                 },
                 {
-                  title: 'Sự Cố',
+                  title: t('Issue', 'Sự Cố'),
                   titleFormatter: () => t('Issue', 'Sự Cố'),
                   field: 'problem',
                   minWidth: 180,
                   formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>'
                 },
                 {
-                  title: 'Downtime',
+                  title: t('Downtime', 'Downtime'),
                   titleFormatter: () => t('Downtime', 'Downtime'),
                   field: 'downtime',
                   sorter: 'number',
@@ -2599,11 +2606,11 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   minWidth: 90,
                   formatter: cell => {
                     const v = Number(cell.getValue() || 0);
-                    return '<span class="font-mono font-bold ' + (v > 0 ? 'text-red-500' : 'text-slate-400') + '">' + v + 'm</span>';
+                    return '<span class="font-mono font-bold ' + (v > 0 ? 'text-red-500' : 'text-slate-400') + '">' + v + (currentLang.value === 'en' ? 'm' : 'p') + '</span>';
                   }
                 },
                 {
-                  title: 'Trạng Thái',
+                  title: t('Status', 'Trạng Thái'),
                   titleFormatter: () => t('Status', 'Trạng Thái'),
                   field: 'chkStatus',
                   sorter: 'string',
@@ -2628,7 +2635,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   }
                 },
                 {
-                  title: 'Thao Tác',
+                  title: t('Action', 'Thao Tác'),
                   titleFormatter: () => t('Action', 'Thao Tác'),
                   hozAlign: 'right',
                   minWidth: 90,
@@ -2718,6 +2725,55 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           if (typeof Tabulator === 'undefined') return;
 
           try {
+            const columns = [
+              { title: t('No.', 'STT'), titleFormatter: () => t('No.', 'STT'), formatter: 'rownum', hozAlign: 'center', width: 60, headerSort: false },
+              {
+                title: t('Technology / Workshop', 'Công Nghệ In / Phân Xưởng'),
+                titleFormatter: () => t('Technology / Workshop', 'Công Nghệ In / Phân Xưởng'),
+                field: 'tech',
+                sorter: 'string',
+                minWidth: 160,
+                formatter: cell => '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">' + (cell.getValue() || '') + '</span>'
+              },
+              {
+                title: t('Machine / Equipment Name', 'Tên Máy / Thiết Bị'),
+                titleFormatter: () => t('Machine / Equipment Name', 'Tên Máy / Thiết Bị'),
+                field: 'name',
+                sorter: 'string',
+                minWidth: 180,
+                formatter: cell => '<span class="font-bold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
+              },
+              {
+                title: t('Equipment Code', 'Mã Thiết Bị'),
+                titleFormatter: () => t('Equipment Code', 'Mã Thiết Bị'),
+                field: 'code',
+                sorter: 'string',
+                minWidth: 120,
+                formatter: cell => '<span class="font-mono text-slate-500">' + (cell.getValue() || '—') + '</span>'
+              },
+              {
+                title: t('Status', 'Trạng Thái'),
+                titleFormatter: () => t('Status', 'Trạng Thái'),
+                field: 'isActive',
+                hozAlign: 'center',
+                minWidth: 120,
+                formatter: () => '<span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-500"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>' + t('Active', 'Hoạt động') + '</span>'
+              },
+              {
+                title: t('Action', 'Thao Tác'),
+                titleFormatter: () => t('Action', 'Thao Tác'),
+                hozAlign: 'right',
+                minWidth: 90,
+                headerSort: false,
+                formatter: () => '<button class="btn-machine-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + t('Delete machine', 'Xóa máy này') + '"><i class="fa-solid fa-trash-can"></i></button>',
+                cellClick: (e, cell) => {
+                  const target = e.target.closest('.btn-machine-delete');
+                  if (!target) return;
+                  deleteMachineItem(cell.getRow().getData());
+                }
+              }
+            ];
+
             if (!machinesTable) {
               machinesTable = new Tabulator('#tabulator-machines', {
                 data: Array.isArray(machinesFlatList.value) ? machinesFlatList.value : [],
@@ -2726,56 +2782,10 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 paginationSize: 10,
                 paginationSizeSelector: [10, 25, 50],
                 placeholder: '<span>' + t('No machine data available', 'Không có dữ liệu máy móc') + '</span>',
-                columns: [
-                  { title: 'STT', titleFormatter: () => t('No.', 'STT'), formatter: 'rownum', hozAlign: 'center', width: 60, headerSort: false },
-                  {
-                    title: 'Công Nghệ In / Phân Xưởng',
-                    titleFormatter: () => t('Technology / Workshop', 'Công Nghệ In / Phân Xưởng'),
-                    field: 'tech',
-                    sorter: 'string',
-                    minWidth: 160,
-                    formatter: cell => '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">' + (cell.getValue() || '') + '</span>'
-                  },
-                  {
-                    title: 'Tên Máy / Thiết Bị',
-                    titleFormatter: () => t('Machine / Equipment Name', 'Tên Máy / Thiết Bị'),
-                    field: 'name',
-                    sorter: 'string',
-                    minWidth: 180,
-                    formatter: cell => '<span class="font-bold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
-                  },
-                  {
-                    title: 'Mã Thiết Bị',
-                    titleFormatter: () => t('Equipment Code', 'Mã Thiết Bị'),
-                    field: 'code',
-                    sorter: 'string',
-                    minWidth: 120,
-                    formatter: cell => '<span class="font-mono text-slate-500">' + (cell.getValue() || '—') + '</span>'
-                  },
-                  {
-                    title: 'Trạng Thái',
-                    titleFormatter: () => t('Status', 'Trạng Thái'),
-                    field: 'isActive',
-                    hozAlign: 'center',
-                    minWidth: 120,
-                    formatter: () => '<span class="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-500"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>' + t('Active', 'Hoạt động') + '</span>'
-                  },
-                  {
-                    title: 'Thao Tác',
-                    titleFormatter: () => t('Action', 'Thao Tác'),
-                    hozAlign: 'right',
-                    minWidth: 90,
-                    headerSort: false,
-                    formatter: () => '<button class="btn-machine-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + t('Delete machine', 'Xóa máy này') + '"><i class="fa-solid fa-trash-can"></i></button>',
-                    cellClick: (e, cell) => {
-                      const target = e.target.closest('.btn-machine-delete');
-                      if (!target) return;
-                      deleteMachineItem(cell.getRow().getData());
-                    }
-                  }
-                ]
+                columns: columns
               });
             } else {
+              machinesTable.setColumns(columns);
               machinesTable.setData(Array.isArray(machinesFlatList.value) ? machinesFlatList.value : []);
               safeRedraw(machinesTable);
             }
@@ -2820,6 +2830,62 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           if (typeof Tabulator === 'undefined') return;
 
           try {
+            const columns = [
+              {
+                title: t('Emp ID', 'Mã NV'),
+                titleFormatter: () => t('Emp ID', 'Mã NV'),
+                field: 'mnv',
+                sorter: 'string',
+                minWidth: 100,
+                formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '—') + '</span>'
+              },
+              {
+                title: t('Full Name', 'Họ và Tên'),
+                titleFormatter: () => t('Full Name', 'Họ và Tên'),
+                field: 'name',
+                sorter: 'string',
+                minWidth: 160,
+                formatter: cell => '<span class="font-semibold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
+              },
+              {
+                title: t('Department', 'Bộ Phận / Phòng Ban'),
+                titleFormatter: () => t('Department', 'Bộ Phận / Phòng Ban'),
+                field: 'dept',
+                sorter: 'string',
+                minWidth: 140,
+                formatter: cell => '<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300">' + (cell.getValue() || '') + '</span>'
+              },
+              {
+                title: t('Area / Line', 'Khu Vực / Chuyền'),
+                titleFormatter: () => t('Area / Line', 'Khu Vực / Chuyền'),
+                field: 'area',
+                sorter: 'string',
+                minWidth: 140,
+                formatter: cell => '<span class="text-slate-500">' + (cell.getValue() || '—') + '</span>'
+              },
+              {
+                title: t('Position / Role', 'Chức Vụ'),
+                titleFormatter: () => t('Position / Role', 'Chức Vụ'),
+                field: 'role',
+                sorter: 'string',
+                minWidth: 120,
+                formatter: cell => '<span class="text-slate-500">' + (cell.getValue() || 'Staff') + '</span>'
+              },
+              {
+                title: t('Action', 'Thao Tác'),
+                titleFormatter: () => t('Action', 'Thao Tác'),
+                hozAlign: 'right',
+                minWidth: 80,
+                headerSort: false,
+                formatter: () => '<button class="btn-emp-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + t('Delete employee', 'Xóa nhân viên') + '"><i class="fa-solid fa-trash-can"></i></button>',
+                cellClick: (e, cell) => {
+                  const target = e.target.closest('.btn-emp-delete');
+                  if (!target) return;
+                  deleteEmployee(cell.getRow().getData());
+                }
+              }
+            ];
+
             if (!empTable) {
               empTable = new Tabulator('#tabulator-employees', {
                 data: Array.isArray(employeesList.value) ? employeesList.value : [],
@@ -2828,63 +2894,10 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 paginationSize: 10,
                 paginationSizeSelector: [10, 25, 50, 100],
                 placeholder: '<span>' + t('No employee data available', 'Không có dữ liệu nhân sự') + '</span>',
-                columns: [
-                  {
-                    title: 'Mã NV',
-                    titleFormatter: () => t('Emp ID', 'Mã NV'),
-                    field: 'mnv',
-                    sorter: 'string',
-                    minWidth: 100,
-                    formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '—') + '</span>'
-                  },
-                  {
-                    title: 'Họ và Tên',
-                    titleFormatter: () => t('Full Name', 'Họ và Tên'),
-                    field: 'name',
-                    sorter: 'string',
-                    minWidth: 160,
-                    formatter: cell => '<span class="font-semibold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
-                  },
-                  {
-                    title: 'Bộ Phận / Phòng Ban',
-                    titleFormatter: () => t('Department', 'Bộ Phận / Phòng Ban'),
-                    field: 'dept',
-                    sorter: 'string',
-                    minWidth: 140,
-                    formatter: cell => '<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-semibold text-slate-700 dark:text-slate-300">' + (cell.getValue() || '') + '</span>'
-                  },
-                  {
-                    title: 'Khu Vực / Chuyền',
-                    titleFormatter: () => t('Area / Line', 'Khu Vực / Chuyền'),
-                    field: 'area',
-                    sorter: 'string',
-                    minWidth: 140,
-                    formatter: cell => '<span class="text-slate-500">' + (cell.getValue() || '—') + '</span>'
-                  },
-                  {
-                    title: 'Chức Vụ',
-                    titleFormatter: () => t('Position / Role', 'Chức Vụ'),
-                    field: 'role',
-                    sorter: 'string',
-                    minWidth: 120,
-                    formatter: cell => '<span class="text-slate-500">' + (cell.getValue() || 'Staff') + '</span>'
-                  },
-                  {
-                    title: 'Thao Tác',
-                    titleFormatter: () => t('Action', 'Thao Tác'),
-                    hozAlign: 'right',
-                    minWidth: 80,
-                    headerSort: false,
-                    formatter: () => '<button class="btn-emp-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + t('Delete employee', 'Xóa nhân viên') + '"><i class="fa-solid fa-trash-can"></i></button>',
-                    cellClick: (e, cell) => {
-                      const target = e.target.closest('.btn-emp-delete');
-                      if (!target) return;
-                      deleteEmployee(cell.getRow().getData());
-                    }
-                  }
-                ]
+                columns: columns
               });
             } else {
+              empTable.setColumns(columns);
               empTable.setData(Array.isArray(employeesList.value) ? employeesList.value : []);
               safeRedraw(empTable);
             }
@@ -2925,6 +2938,121 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           if (typeof Tabulator === 'undefined') return;
 
           try {
+            const columns = [
+              {
+                title: t('Username', 'Tên Đăng Nhập'),
+                titleFormatter: () => t('Username', 'Tên Đăng Nhập'),
+                field: 'username',
+                sorter: 'string',
+                minWidth: 130,
+                formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">@' + (cell.getValue() || '') + '</span>'
+              },
+              {
+                title: t('Full Name', 'Họ và Tên'),
+                titleFormatter: () => t('Full Name', 'Họ và Tên'),
+                field: 'fullName',
+                sorter: 'string',
+                minWidth: 150,
+                formatter: cell => '<span class="font-semibold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
+              },
+              {
+                title: 'Email',
+                titleFormatter: () => 'Email',
+                field: 'email',
+                sorter: 'string',
+                minWidth: 160,
+                formatter: cell => '<span class="font-mono text-slate-400 text-xs">' + (cell.getValue() || '—') + '</span>'
+              },
+              {
+                title: t('Role', 'Vai Trò'),
+                titleFormatter: () => t('Role', 'Vai Trò'),
+                field: 'role',
+                sorter: 'string',
+                minWidth: 110,
+                hozAlign: 'center',
+                formatter: cell => {
+                  const r = cell.getValue();
+                  if (r === 'ADMIN') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">ADMIN</span>';
+                  if (r === 'TECHNICIAN') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">TECHNICIAN</span>';
+                  return '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">EMPLOYEE</span>';
+                }
+              },
+              {
+                title: t('Permissions (Create / KPI / Admin)', 'Phân Quyền Chi Tiết (Tạo phiếu / Xem KPI / Admin)'),
+                titleFormatter: () => t('Permissions (Create / KPI / Admin)', 'Phân Quyền Chi Tiết (Tạo phiếu / Xem KPI / Admin)'),
+                minWidth: 320,
+                headerSort: false,
+                formatter: cell => {
+                  const u = cell.getRow().getData();
+                  const canReq = getUserPerm(u, 'canCreateRequest');
+                  const canKpi = getUserPerm(u, 'canViewKpi');
+                  const canCp = getUserPerm(u, 'canAccessControlPanel');
+                  const isAdmin = u.username === 'admin';
+                  return '<div class="flex items-center gap-3 text-[11px]">' +
+                    '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
+                      '<input type="checkbox" data-perm="canCreateRequest" ' + (canReq ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-sky-600 h-3.5 w-3.5 cursor-pointer" />' +
+                      '<span class="text-slate-700 dark:text-slate-300">' + (currentLang.value === 'vi' ? 'Tạo phiếu' : 'Create req') + '</span>' +
+                    '</label>' +
+                    '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
+                      '<input type="checkbox" data-perm="canViewKpi" ' + (canKpi ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-emerald-600 h-3.5 w-3.5 cursor-pointer" />' +
+                      '<span class="text-slate-700 dark:text-slate-300">' + (currentLang.value === 'vi' ? 'Xem KPI' : 'View KPI') + '</span>' +
+                    '</label>' +
+                    '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
+                      '<input type="checkbox" data-perm="canAccessControlPanel" ' + (canCp ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-amber-600 h-3.5 w-3.5 cursor-pointer" />' +
+                      '<span class="font-bold text-amber-600 dark:text-amber-400">Admin CP</span>' +
+                    '</label>' +
+                    '</div>';
+                },
+                cellClick: (e, cell) => {
+                  if (e.target && e.target.classList.contains('perm-chk')) {
+                    const u = cell.getRow().getData();
+                    const permKey = e.target.getAttribute('data-perm');
+                    toggleUserPerm(u, permKey, e.target.checked);
+                  }
+                }
+              },
+              {
+                title: t('Status', 'Trạng Thái'),
+                titleFormatter: () => t('Status', 'Trạng Thái'),
+                field: 'isActive',
+                hozAlign: 'center',
+                minWidth: 100,
+                formatter: cell => {
+                  const active = cell.getValue();
+                  const activeText = active ? (currentLang.value === 'vi' ? 'Kích hoạt' : 'Active') : (currentLang.value === 'vi' ? 'Tạm khóa' : 'Locked');
+                  return '<span class="inline-flex items-center gap-1.5 text-[11px] font-bold ' + (active ? 'text-emerald-500' : 'text-red-500') + '">' +
+                    '<span class="w-2 h-2 rounded-full ' + (active ? 'bg-emerald-500' : 'bg-red-500') + '"></span>' +
+                    activeText +
+                  '</span>';
+                }
+              },
+              {
+                title: t('Actions', 'Thao Tác'),
+                titleFormatter: () => t('Actions', 'Thao Tác'),
+                hozAlign: 'right',
+                minWidth: 100,
+                headerSort: false,
+                formatter: cell => {
+                  const u = cell.getRow().getData();
+                  if (u.username === 'admin') return '';
+                  return '<div class="flex items-center justify-end gap-1.5">' +
+                    '<button class="btn-user-reset-pwd p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 transition cursor-pointer" title="' + (currentLang.value === 'vi' ? 'Đặt lại mật khẩu' : 'Reset Password') + '"><i class="fa-solid fa-key text-xs"></i></button>' +
+                    '<button class="btn-user-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + (currentLang.value === 'vi' ? 'Xóa tài khoản' : 'Delete user') + '"><i class="fa-solid fa-trash-can text-xs"></i></button>' +
+                  '</div>';
+                },
+                cellClick: (e, cell) => {
+                  const resetBtn = e.target.closest('.btn-user-reset-pwd');
+                  if (resetBtn) {
+                    openResetPasswordModal(cell.getRow().getData());
+                    return;
+                  }
+                  const target = e.target.closest('.btn-user-delete');
+                  if (!target) return;
+                  deleteUser(cell.getRow().getData());
+                }
+              }
+            ];
+
             if (!usersTable) {
               usersTable = new Tabulator('#tabulator-users', {
                 data: Array.isArray(usersList.value) ? usersList.value : [],
@@ -2932,124 +3060,19 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 pagination: 'local',
                 paginationSize: 10,
                 paginationSizeSelector: [10, 25, 50],
-                placeholder: '<span>Không có dữ liệu tài khoản</span>',
-                columns: [
-                {
-                  title: t('Username', 'Tên Đăng Nhập'),
-                  field: 'username',
-                  sorter: 'string',
-                  minWidth: 130,
-                  formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">@' + (cell.getValue() || '') + '</span>'
-                },
-                {
-                  title: t('Full Name', 'Họ và Tên'),
-                  field: 'fullName',
-                  sorter: 'string',
-                  minWidth: 150,
-                  formatter: cell => '<span class="font-semibold text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</span>'
-                },
-                {
-                  title: 'Email',
-                  field: 'email',
-                  sorter: 'string',
-                  minWidth: 160,
-                  formatter: cell => '<span class="font-mono text-slate-400 text-xs">' + (cell.getValue() || '—') + '</span>'
-                },
-                {
-                  title: t('Role', 'Vai Trò'),
-                  field: 'role',
-                  sorter: 'string',
-                  minWidth: 110,
-                  hozAlign: 'center',
-                  formatter: cell => {
-                    const r = cell.getValue();
-                    if (r === 'ADMIN') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">ADMIN</span>';
-                    if (r === 'TECHNICIAN') return '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-sky-500/10 text-sky-600 dark:text-sky-400 border border-sky-500/20">TECHNICIAN</span>';
-                    return '<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700">EMPLOYEE</span>';
-                  }
-                },
-                {
-                  title: t('Permissions (Create / KPI / Admin)', 'Phân Quyền Chi Tiết (Tạo phiếu / Xem KPI / Admin)'),
-                  minWidth: 320,
-                  headerSort: false,
-                  formatter: cell => {
-                    const u = cell.getRow().getData();
-                    const canReq = getUserPerm(u, 'canCreateRequest');
-                    const canKpi = getUserPerm(u, 'canViewKpi');
-                    const canCp = getUserPerm(u, 'canAccessControlPanel');
-                    const isAdmin = u.username === 'admin';
-                    return '<div class="flex items-center gap-3 text-[11px]">' +
-                      '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
-                        '<input type="checkbox" data-perm="canCreateRequest" ' + (canReq ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-sky-600 h-3.5 w-3.5 cursor-pointer" />' +
-                        '<span class="text-slate-700 dark:text-slate-300">' + (currentLang.value === 'vi' ? 'Tạo phiếu' : 'Create req') + '</span>' +
-                      '</label>' +
-                      '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
-                        '<input type="checkbox" data-perm="canViewKpi" ' + (canKpi ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-emerald-600 h-3.5 w-3.5 cursor-pointer" />' +
-                        '<span class="text-slate-700 dark:text-slate-300">' + (currentLang.value === 'vi' ? 'Xem KPI' : 'View KPI') + '</span>' +
-                      '</label>' +
-                      '<label class="inline-flex items-center gap-1.5 cursor-pointer select-none">' +
-                        '<input type="checkbox" data-perm="canAccessControlPanel" ' + (canCp ? 'checked' : '') + ' ' + (isAdmin ? 'disabled' : '') + ' class="perm-chk rounded text-amber-600 h-3.5 w-3.5 cursor-pointer" />' +
-                        '<span class="font-bold text-amber-600 dark:text-amber-400">Admin CP</span>' +
-                      '</label>' +
-                    '</div>';
-                  },
-                  cellClick: (e, cell) => {
-                    if (e.target && e.target.classList.contains('perm-chk')) {
-                      const u = cell.getRow().getData();
-                      const permKey = e.target.getAttribute('data-perm');
-                      toggleUserPerm(u, permKey, e.target.checked);
-                    }
-                  }
-                },
-                {
-                  title: t('Status', 'Trạng Thái'),
-                  field: 'isActive',
-                  hozAlign: 'center',
-                  minWidth: 100,
-                  formatter: cell => {
-                    const active = cell.getValue();
-                    const activeText = active ? (currentLang.value === 'vi' ? 'Kích hoạt' : 'Active') : (currentLang.value === 'vi' ? 'Tạm khóa' : 'Locked');
-                    return '<span class="inline-flex items-center gap-1.5 text-[11px] font-bold ' + (active ? 'text-emerald-500' : 'text-red-500') + '">' +
-                      '<span class="w-2 h-2 rounded-full ' + (active ? 'bg-emerald-500' : 'bg-red-500') + '"></span>' +
-                      activeText +
-                    '</span>';
-                  }
-                },
-                {
-                  title: t('Actions', 'Thao Tác'),
-                  hozAlign: 'right',
-                  minWidth: 100,
-                  headerSort: false,
-                  formatter: cell => {
-                    const u = cell.getRow().getData();
-                    if (u.username === 'admin') return '';
-                    return '<div class="flex items-center justify-end gap-1.5">' +
-                      '<button class="btn-user-reset-pwd p-1.5 rounded-lg text-slate-400 hover:text-amber-500 hover:bg-amber-500/10 transition cursor-pointer" title="' + (currentLang.value === 'vi' ? 'Đặt lại mật khẩu' : 'Reset Password') + '"><i class="fa-solid fa-key text-xs"></i></button>' +
-                      '<button class="btn-user-delete p-1.5 rounded-lg text-slate-400 hover:text-red-500 hover:bg-red-500/10 transition cursor-pointer" title="' + (currentLang.value === 'vi' ? 'Xóa tài khoản' : 'Delete user') + '"><i class="fa-solid fa-trash-can text-xs"></i></button>' +
-                    '</div>';
-                  },
-                  cellClick: (e, cell) => {
-                    const resetBtn = e.target.closest('.btn-user-reset-pwd');
-                    if (resetBtn) {
-                      openResetPasswordModal(cell.getRow().getData());
-                      return;
-                    }
-                    const target = e.target.closest('.btn-user-delete');
-                    if (!target) return;
-                    deleteUser(cell.getRow().getData());
-                  }
-                }
-              ]
-            });
-          } else {
-            usersTable.setData(Array.isArray(usersList.value) ? usersList.value : []);
-            safeRedraw(usersTable);
+                placeholder: '<span>' + t('No user accounts available', 'Không có dữ liệu tài khoản') + '</span>',
+                columns: columns
+              });
+            } else {
+              usersTable.setColumns(columns);
+              usersTable.setData(Array.isArray(usersList.value) ? usersList.value : []);
+              safeRedraw(usersTable);
+            }
+            applyUserFilters();
+          } catch (err) {
+            console.warn('Tabulator users table error:', err);
           }
-          applyUserFilters();
-        } catch (err) {
-          console.warn('Tabulator users table error:', err);
-        }
-      };
+        };
 
       const applyUserFilters = () => {
         if (!usersTable) return;
@@ -3079,18 +3102,18 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         const getDatasetColumns = (type) => {
           if (type === 'weekly-requests') {
             return [
-              { title: 'STT', titleFormatter: () => t('No.', 'STT'), formatter: 'rownum', width: 60, hozAlign: 'center', headerSort: false },
+              { title: t('No.', 'STT'), titleFormatter: () => t('No.', 'STT'), formatter: 'rownum', width: 60, hozAlign: 'center', headerSort: false },
               {
-                title: 'Mã / Người Yêu Cầu',
+                title: t('ID / Requester', 'Mã / Người Yêu Cầu'),
                 titleFormatter: () => t('ID / Requester', 'Mã / Người Yêu Cầu'),
                 field: 'requestId',
                 sorter: 'string',
                 minWidth: 160,
                 formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>'
               },
-              { title: 'Loại Yêu Cầu', titleFormatter: () => t('Request Type', 'Loại Yêu Cầu'), field: 'requestType', sorter: 'string', minWidth: 130 },
+              { title: t('Request Type', 'Loại Yêu Cầu'), titleFormatter: () => t('Request Type', 'Loại Yêu Cầu'), field: 'requestType', sorter: 'string', minWidth: 130 },
               {
-                title: 'Thiết Bị',
+                title: t('Equipment', 'Thiết Bị'),
                 titleFormatter: () => t('Equipment', 'Thiết Bị'),
                 field: 'itemEquipment',
                 sorter: 'string',
@@ -3098,7 +3121,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 formatter: cell => '<span class="px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[11px] font-mono font-bold">' + (cell.getValue() || '') + '</span>'
               },
               {
-                title: 'Mức Độ',
+                title: t('Severity', 'Mức Độ'),
                 titleFormatter: () => t('Severity', 'Mức Độ'),
                 field: 'severity',
                 sorter: 'string',
@@ -3112,7 +3135,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 }
               },
               {
-                title: 'Trạng Thái',
+                title: t('Status', 'Trạng Thái'),
                 titleFormatter: () => t('Status', 'Trạng Thái'),
                 field: 'status',
                 sorter: 'string',
@@ -3132,9 +3155,9 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                   return '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-500/10 text-slate-600 dark:text-slate-400 border border-slate-500/20">' + s + '</span>';
                 }
               },
-              { title: 'SLA (Giờ)', titleFormatter: () => t('SLA (Hours)', 'SLA (Giờ)'), field: 'slaTargetHours', sorter: 'number', hozAlign: 'center', minWidth: 90 },
+              { title: t('SLA (Hours)', 'SLA (Giờ)'), titleFormatter: () => t('SLA (Hours)', 'SLA (Giờ)'), field: 'slaTargetHours', sorter: 'number', hozAlign: 'center', minWidth: 90 },
               {
-                title: 'Thực Tế',
+                title: t('Actual', 'Thực Tế'),
                 titleFormatter: () => t('Actual', 'Thực Tế'),
                 field: 'actualHours',
                 sorter: 'number',
@@ -3143,7 +3166,7 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
                 formatter: cell => '<span class="font-mono font-bold">' + (cell.getValue() || 0) + 'h</span>'
               },
               {
-                title: 'Đạt SLA',
+                title: t('Met SLA', 'Đạt SLA'),
                 titleFormatter: () => t('Met SLA', 'Đạt SLA'),
                 field: 'metSla',
                 sorter: 'string',
@@ -3155,28 +3178,28 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           }
           if (type === 'defect-logs') {
             return [
-              { title: 'Defect ID', titleFormatter: () => t('Defect ID', 'Defect ID'), field: 'defectId', sorter: 'number', width: 90, hozAlign: 'center', formatter: cell => '<span class="font-mono font-bold text-amber-600 dark:text-amber-400">#' + (cell.getValue() || '') + '</span>' },
-              { title: 'Ngày', titleFormatter: () => t('Date', 'Ngày'), field: 'defectDate', sorter: 'string', minWidth: 100 },
-              { title: 'Phân Xưởng', titleFormatter: () => t('Workshop', 'Phân Xưởng'), field: 'facility', sorter: 'string', minWidth: 110, formatter: cell => '<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Nguyên Nhân Gốc', titleFormatter: () => t('Root Cause', 'Nguyên Nhân Gốc'), field: 'rootCauseCategory', sorter: 'string', minWidth: 130 },
-              { title: 'Chi Tiết Sự Cố', titleFormatter: () => t('Specific Issue', 'Chi Tiết Sự Cố'), field: 'specificIssue', minWidth: 200, formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Sản Phẩm Ảnh Hưởng', titleFormatter: () => t('Affected Product', 'Sản Phẩm Ảnh Hưởng'), field: 'affectedProduct', minWidth: 140 },
-              { title: 'Lặp Lại', titleFormatter: () => t('Recurring', 'Lặp Lại'), field: 'recurringIssue', hozAlign: 'center', minWidth: 90, formatter: cell => cell.getValue() === 'Yes' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500">' + t('Yes', 'Có') + '</span>' : '<span class="text-slate-400">' + t('No', 'Không') + '</span>' },
-              { title: 'Yêu Cầu 8D', titleFormatter: () => t('8D Required', 'Yêu Cầu 8D'), field: 'eightDRequired', hozAlign: 'center', minWidth: 100, formatter: cell => cell.getValue() === 'Yes' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-500">8D Required</span>' : '<span class="text-slate-400">' + t('No', 'Không') + '</span>' }
+              { title: t('Defect ID', 'Defect ID'), titleFormatter: () => t('Defect ID', 'Defect ID'), field: 'defectId', sorter: 'number', width: 90, hozAlign: 'center', formatter: cell => '<span class="font-mono font-bold text-amber-600 dark:text-amber-400">#' + (cell.getValue() || '') + '</span>' },
+              { title: t('Date', 'Ngày'), titleFormatter: () => t('Date', 'Ngày'), field: 'defectDate', sorter: 'string', minWidth: 100 },
+              { title: t('Workshop', 'Phân Xưởng'), titleFormatter: () => t('Workshop', 'Phân Xưởng'), field: 'facility', sorter: 'string', minWidth: 110, formatter: cell => '<span class="px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Root Cause', 'Nguyên Nhân Gốc'), titleFormatter: () => t('Root Cause', 'Nguyên Nhân Gốc'), field: 'rootCauseCategory', sorter: 'string', minWidth: 130 },
+              { title: t('Specific Issue', 'Chi Tiết Sự Cố'), titleFormatter: () => t('Specific Issue', 'Chi Tiết Sự Cố'), field: 'specificIssue', minWidth: 200, formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Affected Product', 'Sản Phẩm Ảnh Hưởng'), titleFormatter: () => t('Affected Product', 'Sản Phẩm Ảnh Hưởng'), field: 'affectedProduct', minWidth: 140 },
+              { title: t('Recurring', 'Lặp Lại'), titleFormatter: () => t('Recurring', 'Lặp Lại'), field: 'recurringIssue', hozAlign: 'center', minWidth: 90, formatter: cell => cell.getValue() === 'Yes' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500/10 text-red-500">' + t('Yes', 'Có') + '</span>' : '<span class="text-slate-400">' + t('No', 'Không') + '</span>' },
+              { title: t('8D Required', 'Yêu Cầu 8D'), titleFormatter: () => t('8D Required', 'Yêu Cầu 8D'), field: 'eightDRequired', hozAlign: 'center', minWidth: 100, formatter: cell => cell.getValue() === 'Yes' ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/10 text-purple-500">8D Required</span>' : '<span class="text-slate-400">' + t('No', 'Không') + '</span>' }
             ];
           }
           if (type === 'action-plans') {
             return [
-              { title: 'Action ID', titleFormatter: () => t('Action ID', 'Action ID'), field: 'actionId', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Ngày Tạo', titleFormatter: () => t('Date Created', 'Ngày Tạo'), field: 'dateLogged', sorter: 'string', minWidth: 100 },
-              { title: 'Phân Xưởng', titleFormatter: () => t('Workshop', 'Phân Xưởng'), field: 'facility', sorter: 'string', minWidth: 110 },
-              { title: 'Defect ID', titleFormatter: () => t('Defect ID', 'Defect ID'), field: 'relatedDefectId', minWidth: 90, hozAlign: 'center', formatter: cell => cell.getValue() ? '<span class="font-mono text-amber-500 font-bold">#' + cell.getValue() + '</span>' : '—' },
-              { title: 'Loại Hành Động', titleFormatter: () => t('Action Type', 'Loại Hành Động'), field: 'fixType', minWidth: 130 },
-              { title: 'Nội Dung', titleFormatter: () => t('Description', 'Nội Dung'), field: 'description', minWidth: 200, formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>' },
-              { title: 'Người Phụ Trách', titleFormatter: () => t('Person In Charge', 'Người Phụ Trách'), field: 'pic', sorter: 'string', minWidth: 120, formatter: cell => '<strong class="text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</strong>' },
-              { title: 'Hạn Chót', titleFormatter: () => t('Deadline', 'Hạn Chót'), field: 'deadline', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono text-red-500 font-medium">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Action ID', 'Action ID'), titleFormatter: () => t('Action ID', 'Action ID'), field: 'actionId', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono font-bold text-emerald-600 dark:text-emerald-400">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Date Created', 'Ngày Tạo'), titleFormatter: () => t('Date Created', 'Ngày Tạo'), field: 'dateLogged', sorter: 'string', minWidth: 100 },
+              { title: t('Workshop', 'Phân Xưởng'), titleFormatter: () => t('Workshop', 'Phân Xưởng'), field: 'facility', sorter: 'string', minWidth: 110 },
+              { title: t('Defect ID', 'Defect ID'), titleFormatter: () => t('Defect ID', 'Defect ID'), field: 'relatedDefectId', minWidth: 90, hozAlign: 'center', formatter: cell => cell.getValue() ? '<span class="font-mono text-amber-500 font-bold">#' + cell.getValue() + '</span>' : '—' },
+              { title: t('Action Type', 'Loại Hành Động'), titleFormatter: () => t('Action Type', 'Loại Hành Động'), field: 'fixType', minWidth: 130 },
+              { title: t('Description', 'Nội Dung'), titleFormatter: () => t('Description', 'Nội Dung'), field: 'description', minWidth: 200, formatter: cell => '<span class="truncate block max-w-xs" title="' + String(cell.getValue() || '').replace(/"/g, '&quot;') + '">' + (cell.getValue() || '') + '</span>' },
+              { title: t('Person In Charge', 'Người Phụ Trách'), titleFormatter: () => t('Person In Charge', 'Người Phụ Trách'), field: 'pic', sorter: 'string', minWidth: 120, formatter: cell => '<strong class="text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</strong>' },
+              { title: t('Deadline', 'Hạn Chót'), titleFormatter: () => t('Deadline', 'Hạn Chót'), field: 'deadline', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono text-red-500 font-medium">' + (cell.getValue() || '') + '</span>' },
               {
-                title: 'Trạng Thái',
+                title: t('Status', 'Trạng Thái'),
                 titleFormatter: () => t('Status', 'Trạng Thái'),
                 field: 'status',
                 sorter: 'string',
@@ -3192,12 +3215,12 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
           }
           // requesters
           return [
-            { title: 'STT', titleFormatter: () => t('No.', 'STT'), field: 'stt', sorter: 'number', width: 60, hozAlign: 'center' },
-            { title: 'Mã NV', titleFormatter: () => t('Emp ID', 'Mã NV'), field: 'mnv', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
-            { title: 'Họ và Tên', titleFormatter: () => t('Full Name', 'Họ và Tên'), field: 'fullName', sorter: 'string', minWidth: 160, formatter: cell => '<strong class="text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</strong>' },
-            { title: 'Bộ Phận', titleFormatter: () => t('Department', 'Bộ Phận'), field: 'department', sorter: 'string', minWidth: 130 },
-            { title: 'Khu Vực', titleFormatter: () => t('Area', 'Khu Vực'), field: 'area', sorter: 'string', minWidth: 120 },
-            { title: 'Chức Danh', titleFormatter: () => t('Position', 'Chức Danh'), field: 'position', sorter: 'string', minWidth: 160 }
+            { title: t('No.', 'STT'), titleFormatter: () => t('No.', 'STT'), field: 'stt', sorter: 'number', width: 60, hozAlign: 'center' },
+            { title: t('Emp ID', 'Mã NV'), titleFormatter: () => t('Emp ID', 'Mã NV'), field: 'mnv', sorter: 'string', minWidth: 100, formatter: cell => '<span class="font-mono font-bold text-sky-600 dark:text-sky-400">' + (cell.getValue() || '') + '</span>' },
+            { title: t('Full Name', 'Họ và Tên'), titleFormatter: () => t('Full Name', 'Họ và Tên'), field: 'fullName', sorter: 'string', minWidth: 160, formatter: cell => '<strong class="text-slate-800 dark:text-slate-200">' + (cell.getValue() || '') + '</strong>' },
+            { title: t('Department', 'Bộ Phận'), titleFormatter: () => t('Department', 'Bộ Phận'), field: 'department', sorter: 'string', minWidth: 130 },
+            { title: t('Area', 'Khu Vực'), titleFormatter: () => t('Area', 'Khu Vực'), field: 'area', sorter: 'string', minWidth: 120 },
+            { title: t('Position', 'Chức Danh'), titleFormatter: () => t('Position', 'Chức Danh'), field: 'position', sorter: 'string', minWidth: 160 }
           ];
         };
 
@@ -3686,57 +3709,61 @@ export const CONTROL_PANEL_SCRIPT = `    if (typeof Vue === 'undefined') {
         // Excel Exports
         const exportRequestsExcel = () => {
           if (requestsList.value.length === 0) {
-            showToast('Không có dữ liệu để xuất', true);
+            showToast(t('No data to export', 'Không có dữ liệu để xuất'), true);
             return;
           }
-          const rows = requestsList.value.map(r => ({
-            'Số Phiếu': r.docNo,
-            'Ngày Yêu Cầu': r.reqDate,
-            'Giờ Yêu Cầu': r.reqTime,
-            'Người Yêu Cầu': r.reqBy,
-            'Công Nghệ': r.printTech,
-            'Tên Máy': r.machineName,
-            'Mô Tả Sự Cố': r.problem,
-            'Mức Ưu Tiên': r.priority,
-            'Người Tiếp Nhận': r.recvBy,
-            'Ngày Nhận': r.recvDate,
-            'Giờ Nhận': r.recvTime,
-            'Ngày Hoàn Thành': r.finishDate,
-            'Giờ Hoàn Thành': r.finishTime,
-            'Downtime (Phút)': r.downtime,
-            'Nguyên Nhân Gốc': r.rootCause,
-            'Hành Động Khắc Phục': r.actionTaken,
-            'Phân Loại 4M': r.errCat,
-            'Nhóm Công Đoạn': r.errType,
-            'Chất Lượng In': r.chkQuality,
-            'Trạng Thái Phiếu': r.chkStatus,
-            'Work Order': r.workOrder,
-            'Tổng SL': r.woTotalQty,
-            'SL Phế Phẩm': r.wasteQty,
-            '% Waste': r.wastePercent,
-            'Người Bàn Giao': r.prodMgr
-          }));
+          const rows = requestsList.value.map(r => {
+            const rowObj = {};
+            rowObj[t('Ticket No', 'Số Phiếu')] = r.docNo;
+            rowObj[t('Request Date', 'Ngày Yêu Cầu')] = r.reqDate;
+            rowObj[t('Request Time', 'Giờ Yêu Cầu')] = r.reqTime;
+            rowObj[t('Requester', 'Người Yêu Cầu')] = r.reqBy;
+            rowObj[t('Technology', 'Công Nghệ')] = r.printTech;
+            rowObj[t('Machine Name', 'Tên Máy')] = r.machineName;
+            rowObj[t('Problem Description', 'Mô Tả Sự Cố')] = r.problem;
+            rowObj[t('Priority', 'Mức Ưu Tiên')] = r.priority;
+            rowObj[t('Receiving Technician', 'Người Tiếp Nhận')] = r.recvBy;
+            rowObj[t('Received Date', 'Ngày Nhận')] = r.recvDate;
+            rowObj[t('Received Time', 'Giờ Nhận')] = r.recvTime;
+            rowObj[t('Finished Date', 'Ngày Hoàn Thành')] = r.finishDate;
+            rowObj[t('Finished Time', 'Giờ Hoàn Thành')] = r.finishTime;
+            rowObj[t('Downtime (Minutes)', 'Downtime (Phút)')] = r.downtime;
+            rowObj[t('Root Cause', 'Nguyên Nhân Gốc')] = r.rootCause;
+            rowObj[t('Action Taken', 'Hành Động Khắc Phục')] = r.actionTaken;
+            rowObj[t('4M Classification', 'Phân Loại 4M')] = r.errCat;
+            rowObj[t('Process Stage', 'Nhóm Công Đoạn')] = r.errType;
+            rowObj[t('Print Quality', 'Chất Lượng In')] = r.chkQuality;
+            rowObj[t('Ticket Status', 'Trạng Thái Phiếu')] = r.chkStatus;
+            rowObj[t('Work Order', 'Work Order')] = r.workOrder;
+            rowObj[t('Total Qty', 'Tổng SL')] = r.woTotalQty;
+            rowObj[t('Scrap Qty', 'SL Phế Phẩm')] = r.wasteQty;
+            rowObj[t('Waste Rate', '% Waste')] = r.wastePercent;
+            rowObj[t('Production Rep', 'Người Bàn Giao')] = r.prodMgr;
+            return rowObj;
+          });
           const ws = XLSX.utils.json_to_sheet(rows);
           const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, 'DanhSachPhieu');
-          XLSX.writeFile(wb, 'Checkpoint_PhieuYeuCau_' + new Date().toISOString().split('T')[0] + '.xlsx');
-          showToast('Đã xuất file Excel danh sách phiếu');
+          XLSX.utils.book_append_sheet(wb, ws, currentLang.value === 'en' ? 'TicketsList' : 'DanhSachPhieu');
+          XLSX.writeFile(wb, (currentLang.value === 'en' ? 'Checkpoint_Tickets_' : 'Checkpoint_PhieuYeuCau_') + new Date().toISOString().split('T')[0] + '.xlsx');
+          showToast(t('Exported tickets list to Excel!', 'Đã xuất file Excel danh sách phiếu'));
         };
 
         const exportEmployeesExcel = () => {
           if (employeesList.value.length === 0) return;
-          const rows = employeesList.value.map(e => ({
-            'Mã NV': e.mnv,
-            'Họ và Tên': e.name,
-            'Bộ Phận': e.dept,
-            'Khu Vực': e.area,
-            'Chức Vụ': e.role
-          }));
+          const rows = employeesList.value.map(e => {
+            const rowObj = {};
+            rowObj[t('Emp ID', 'Mã NV')] = e.mnv;
+            rowObj[t('Full Name', 'Họ và Tên')] = e.name;
+            rowObj[t('Department', 'Bộ Phận')] = e.dept;
+            rowObj[t('Area', 'Khu Vực')] = e.area;
+            rowObj[t('Position', 'Chức Vụ')] = e.role;
+            return rowObj;
+          });
           const ws = XLSX.utils.json_to_sheet(rows);
           const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, 'NhanSu');
-          XLSX.writeFile(wb, 'Checkpoint_DanhSachNhanSu.xlsx');
-          showToast('Đã xuất file Excel nhân sự');
+          XLSX.utils.book_append_sheet(wb, ws, currentLang.value === 'en' ? 'Employees' : 'NhanSu');
+          XLSX.writeFile(wb, (currentLang.value === 'en' ? 'Checkpoint_Employees_List.xlsx' : 'Checkpoint_DanhSachNhanSu.xlsx'));
+          showToast(t('Exported employee list to Excel!', 'Đã xuất file Excel nhân sự'));
         };
 
         const handleLogout = async () => {

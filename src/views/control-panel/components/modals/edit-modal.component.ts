@@ -169,11 +169,11 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
               <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Root Cause (4M)', 'Nguyên Nhân Gốc (Root Cause - 4M)') }}</label>
               <select v-model="editForm.rootCause" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
                 <option value="" disabled>-- {{ t('Select root cause (4M)', 'Chọn nguyên nhân gốc rễ (4M)') }} --</option>
-                <option value="Man">Man (Con người)</option>
-                <option value="Machine">Machine (Máy móc / Thiết bị)</option>
-                <option value="Material">Material (Nguyên vật liệu)</option>
-                <option value="Method">Method (Phương pháp / Quy trình)</option>
-                <option value="System / Process">System / Process (Hệ thống / Quy trình)</option>
+                <option value="Man">{{ t('Man (Human)', 'Man (Con người)') }}</option>
+                <option value="Machine">{{ t('Machine (Equipment)', 'Machine (Thiết bị)') }}</option>
+                <option value="Material">{{ t('Material (Raw material)', 'Material (Vật liệu)') }}</option>
+                <option value="Method">{{ t('Method (Procedure)', 'Method (Quy trình)') }}</option>
+                <option value="System / Process">{{ t('System / Process', 'System / Process (Hệ thống / Quy trình)') }}</option>
                 <option v-if="editForm.rootCause && !['Man', 'Machine', 'Material', 'Method', 'System / Process'].includes(editForm.rootCause)" :value="editForm.rootCause">{{ editForm.rootCause }}</option>
               </select>
             </div>
@@ -190,14 +190,14 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
               <div>
                 <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Print Quality', 'Chất Lượng In') }}</label>
                 <select v-model="editForm.chkQuality" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
-                  <option value="Đạt">🟢 {{ t('Pass', 'Đạt') }}</option>
-                  <option value="Chạy tạm, tiếp tục theo dõi">🟡 {{ t('Conditional Run / Monitor', 'Chạy tạm, tiếp tục theo dõi') }}</option>
-                  <option value="Chưa đạt">🔴 {{ t('Fail', 'Chưa đạt') }}</option>
+                  <option value="Đạt">🟢 {{ t('PASS', 'ĐẠT') }}</option>
+                  <option value="Chạy tạm, tiếp tục theo dõi">🟡 {{ t('CONDITIONAL RUN', 'CHẠY TẠM') }}</option>
+                  <option value="Chưa đạt">🔴 {{ t('FAIL', 'CHƯA ĐẠT') }}</option>
                 </select>
               </div>
               <div>
                 <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Work Order ({{ t('WO Code', 'Mã WO') }})</label>
-                <input type="text" v-model="editForm.workOrder" placeholder="VD: WO-20261006-01" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
+                <input type="text" v-model="editForm.workOrder" :placeholder="t('e.g. WO-20261006-01', 'VD: WO-20261006-01')" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none font-mono" />
               </div>
             </div>
 
@@ -214,8 +214,8 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
                 <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Unit', 'Đơn Vị') }}</label>
                 <select v-model="editForm.wasteUnit" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none cursor-pointer">
                   <option value="PCS">PCS</option>
-                  <option value="Mét">{{ t('Meter', 'Mét') }}</option>
-                  <option value="Tờ in">{{ t('Sheet', 'Tờ in') }}</option>
+                  <option value="Mét">{{ t('Meters', 'Mét') }}</option>
+                  <option value="Tờ in">{{ t('Sheets', 'Tờ in') }}</option>
                 </select>
               </div>
             </div>
@@ -227,7 +227,7 @@ export const CP_EDIT_MODAL_HTML = `    <!-- ====================================
 
             <div>
               <label class="block font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">{{ t('Notes / Remarks', 'Ghi Chú / Ghi Nhận') }}</label>
-              <textarea v-model="editForm.notes" rows="2" placeholder="VD: Theo dõi chất lượng in sau xử lý..." class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"></textarea>
+              <textarea v-model="editForm.notes" rows="2" :placeholder="t('e.g. Monitor print quality after fix...', 'VD: Theo dõi chất lượng in sau xử lý...')" class="input-box w-full px-3.5 py-2 rounded-xl text-xs outline-none"></textarea>
             </div>
           </template>
 

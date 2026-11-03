@@ -11,6 +11,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           if (cachedUser) currentUser.value = JSON.parse(cachedUser);
         } catch(e) {}
 
+        let initOrUpdateReportTable = () => {};
         const currentLang = ref(localStorage.getItem('checkpoint_lang') || 'en');
         const setLanguage = (lang) => {
           currentLang.value = lang;
@@ -18,6 +19,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           document.documentElement.setAttribute('lang', lang);
           renderReportChart();
           renderReport4MChart();
+          initOrUpdateReportTable();
         };
         const t = (en, vi) => {
           if (vi !== undefined) {
@@ -479,9 +481,9 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
               const width = Math.max(1.2, Math.min(100 - left, ((clampedEnd - clampedStart) / range.durationMs) * 100));
 
               const doc = item.docNo || (item.cpsr?.docNo ? item.cpsr.docNo.replace('CPSR-', 'CPS-') : (item.cpsrDocNo ? item.cpsrDocNo.replace('CPSR-', 'CPS-') : 'CPS'));
-              const prob = item.problem || item.cpsr?.problem || 'Không có mô tả';
-              const tech = formatTechnicianName(item.assignedToName || item.assignedTo || item.cpst?.recvBy || '') || 'Chưa giao';
-              const tooltip = '[' + doc + '] ' + mach + '\\n' + 'Downtime: ' + (dtVal > 0 ? dtVal + 'p' : 'Đang xử lý') + '\\n' + 'Từ: ' + fmtDt(startMs) + ' → Đến: ' + fmtDt(endMs) + '\\n' + 'Sự cố: ' + prob + '\\n' + 'Technician: ' + tech;
+              const prob = item.problem || item.cpsr?.problem || t('No description', 'Không có mô tả');
+              const tech = formatTechnicianName(item.assignedToName || item.assignedTo || item.cpst?.recvBy || '') || t('Unassigned', 'Chưa giao');
+              const tooltip = '[' + doc + '] ' + mach + '\\n' + 'Downtime: ' + (dtVal > 0 ? dtVal + (currentLang.value === 'en' ? 'm' : 'p') : t('In progress', 'Đang xử lý')) + '\\n' + t('From: ', 'Từ: ') + fmtDt(startMs) + ' → ' + t('To: ', 'Đến: ') + fmtDt(endMs) + '\\n' + t('Issue: ', 'Sự cố: ') + prob + '\\n' + 'Technician: ' + tech;
 
               mData.bars.push({
                 left: Math.round(left * 10) / 10,
@@ -608,14 +610,15 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
           });
         };
 
-        const initOrUpdateReportTable = () => {
+        initOrUpdateReportTable = () => {
           const el = document.getElementById('tabulator-report-technical');
           if (!el || typeof Tabulator === 'undefined') return;
 
           const data = filteredReportCps.value || [];
           const columns = [
             {
-              title: 'Mã CPS',
+              title: t('CPS Code', 'Mã CPS'),
+              titleFormatter: () => t('CPS Code', 'Mã CPS'),
               field: 'docNo',
               minWidth: 140,
               formatter: cell => {
@@ -625,17 +628,19 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
               }
             },
             {
-              title: 'Ngày khởi tạo',
+              title: t('Request Date', 'Ngày khởi tạo'),
+              titleFormatter: () => t('Request Date', 'Ngày khởi tạo'),
               minWidth: 130,
               formatter: cell => {
                 const r = cell.getRow().getData();
                 const d = r.cpsr?.reqDate || r.reqDate || (r.createdAt ? r.createdAt.slice(0, 10) : '-');
-                const t = r.cpsr?.reqTime || r.reqTime || '';
-                return '<div class="text-xs font-medium text-slate-800 dark:text-slate-200">' + d + (t ? ' <span class="text-[10px] text-slate-400 font-mono">' + t + '</span>' : '') + '</div>';
+                const tStr = r.cpsr?.reqTime || r.reqTime || '';
+                return '<div class="text-xs font-medium text-slate-800 dark:text-slate-200">' + d + (tStr ? ' <span class="text-[10px] text-slate-400 font-mono">' + tStr + '</span>' : '') + '</div>';
               }
             },
             {
-              title: 'Người yêu cầu',
+              title: t('Requester', 'Người yêu cầu'),
+              titleFormatter: () => t('Requester', 'Người yêu cầu'),
               minWidth: 140,
               formatter: cell => {
                 const r = cell.getRow().getData();
@@ -644,7 +649,8 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
               }
             },
             {
-              title: 'Máy',
+              title: t('Machine', 'Máy'),
+              titleFormatter: () => t('Machine', 'Máy'),
               minWidth: 150,
               formatter: cell => {
                 const r = cell.getRow().getData();
@@ -654,7 +660,8 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
               }
             },
             {
-              title: 'Sự cố',
+              title: t('Issue', 'Sự cố'),
+              titleFormatter: () => t('Issue', 'Sự cố'),
               minWidth: 180,
               formatter: cell => {
                 const r = cell.getRow().getData();
@@ -663,18 +670,20 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
               }
             },
             {
-              title: 'Technician',
+              title: t('Technician', 'Technician'),
+              titleFormatter: () => t('Technician', 'Technician'),
               minWidth: 140,
               formatter: cell => {
                 const r = cell.getRow().getData();
                 const ass = r.assignedTo || r.cpst?.recvBy;
                 const techName = formatTechnicianName(r.assignedToName || ass);
-                if (!techName) return '<span class="text-amber-600 dark:text-amber-400 italic text-[11px]">Chưa giao</span>';
+                if (!techName) return '<span class="text-amber-600 dark:text-amber-400 italic text-[11px]">' + t('Unassigned', 'Chưa giao') + '</span>';
                 return '<div class="text-xs font-semibold text-slate-800 dark:text-slate-200 flex items-center gap-1"><i class="fa-solid fa-user-check text-[10px] text-emerald-600 dark:text-emerald-400"></i> ' + techName + '</div>';
               }
             },
             {
-              title: 'Trạng thái',
+              title: t('Status', 'Trạng thái'),
+              titleFormatter: () => t('Status', 'Trạng thái'),
               field: 'status',
               minWidth: 130,
               hozAlign: 'center',
@@ -689,22 +698,24 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
               }
             },
             {
-              title: 'Downtime',
+              title: t('Downtime', 'Downtime'),
+              titleFormatter: () => t('Downtime', 'Downtime'),
               minWidth: 90,
               hozAlign: 'center',
               formatter: cell => {
                 const r = cell.getRow().getData();
                 const dt = r.downtime != null ? r.downtime : r.cpst?.downtime;
                 if (dt == null || dt === '') return '<span class="text-slate-400">-</span>';
-                return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + 'p</span>';
+                return '<span class="font-mono font-bold text-amber-700 dark:text-amber-400">' + dt + (currentLang.value === 'en' ? 'm' : 'p') + '</span>';
               }
             },
             {
-              title: 'Xem chi tiết',
+              title: t('View Details', 'Xem chi tiết'),
+              titleFormatter: () => t('View Details', 'Xem chi tiết'),
               hozAlign: 'center',
               minWidth: 120,
               headerSort: false,
-              formatter: () => '<button class="btn-report-view px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold cursor-pointer transition flex items-center gap-1 mx-auto"><i class="fa-solid fa-eye"></i> Xem chi tiết</button>',
+              formatter: () => '<button class="btn-report-view px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 dark:bg-sky-500/10 dark:hover:bg-sky-500/20 text-sky-700 dark:text-sky-400 border border-sky-300 dark:border-sky-500/30 text-[11px] font-bold cursor-pointer transition flex items-center gap-1 mx-auto"><i class="fa-solid fa-eye"></i> ' + t('View details', 'Xem chi tiết') + '</button>',
               cellClick: (e, cell) => {
                 const r = cell.getRow().getData();
                 if (e.target.closest('.btn-report-view')) {
@@ -729,7 +740,7 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
               paginationSize: 15,
               paginationSizeSelector: [10, 15, 25, 50],
               height: 'auto',
-              placeholder: '<div class="p-8 text-center text-slate-400 text-xs">Không tìm thấy phiếu kỹ thuật nào trong khoảng thời gian đã chọn</div>'
+              placeholder: '<div class="p-8 text-center text-slate-400 text-xs">' + t('No technical tickets found in selected period', 'Không tìm thấy phiếu kỹ thuật nào trong khoảng thời gian đã chọn') + '</div>'
             });
           } catch (err) {
             console.warn('Error init report table:', err);
@@ -780,34 +791,39 @@ export const DASHBOARD_SCRIPT = `    const { createApp, ref, computed, onMounted
         };
 
         const exportReportTechnicalExcel = () => {
-          const rows = filteredReportCps.value.map(r => ({
-            'Mã CPS': r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : '')),
-            'Ngày Khởi Tạo': r.cpsr?.reqDate || r.reqDate || '',
-            'Người Yêu Cầu': r.cpsr?.reqBy || r.reqBy || '',
-            'Máy': r.cpsr?.machineName || r.machineName || '',
-            'Công Nghệ': r.cpsr?.printTech || r.printTech || '',
-            'Sự Cố': r.cpsr?.problem || r.problem || '',
-            'Technician': formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || ''),
-            'Trạng Thái': r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN')),
-            'Downtime (Phút)': r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : ''),
-            'Mã CPSR': r.cpsr?.docNo || r.cpsrDocNo || '',
-            'Mã CPST': r.cpst?.docNo || r.cpstDocNo || '',
-            'Mã CPSF': r.cpsf?.docNo || r.cpsfDocNo || '',
-            'Nguyên Nhân Gốc': r.rootCause || r.cpst?.rootCause || ''
-          }));
+          const isEn = currentLang.value === 'en';
+          const rows = filteredReportCps.value.map(r => {
+            const rowObj = {};
+            rowObj[t('CPS Code', 'Mã CPS')] = r.docNo || (r.cpsr?.docNo ? r.cpsr.docNo.replace('CPSR-', 'CPS-') : (r.cpsrDocNo ? r.cpsrDocNo.replace('CPSR-', 'CPS-') : ''));
+            rowObj[t('Request Date', 'Ngày Khởi Tạo')] = r.cpsr?.reqDate || r.reqDate || '';
+            rowObj[t('Requester', 'Người Yêu Cầu')] = r.cpsr?.reqBy || r.reqBy || '';
+            rowObj[t('Machine', 'Máy')] = r.cpsr?.machineName || r.machineName || '';
+            rowObj[t('Print Tech', 'Công Nghệ')] = r.cpsr?.printTech || r.printTech || '';
+            rowObj[t('Issue', 'Sự Cố')] = r.cpsr?.problem || r.problem || '';
+            rowObj[t('Technician', 'Technician')] = formatTechnicianName(r.assignedToName || r.assignedTo || r.cpst?.recvBy || '');
+            rowObj[t('Status', 'Trạng Thái')] = r.status || (r.cpsf ? 'CLOSED' : (r.cpst ? 'IN_PROGRESS' : 'TO_ASSIGN'));
+            rowObj[t('Downtime (Minutes)', 'Downtime (Phút)')] = r.downtime != null ? r.downtime : (r.cpst?.downtime != null ? r.cpst.downtime : '');
+            rowObj[t('CPSR Code', 'Mã CPSR')] = r.cpsr?.docNo || r.cpsrDocNo || '';
+            rowObj[t('CPST Code', 'Mã CPST')] = r.cpst?.docNo || r.cpstDocNo || '';
+            rowObj[t('CPSF Code', 'Mã CPSF')] = r.cpsf?.docNo || r.cpsfDocNo || '';
+            rowObj[t('Root Cause', 'Nguyên Nhân Gốc')] = r.rootCause || r.cpst?.rootCause || '';
+            return rowObj;
+          });
 
           if (typeof XLSX === 'undefined') {
-            showToast('Thư viện XLSX chưa tải xong', true);
+            showToast(t('XLSX library not loaded yet', 'Thư viện XLSX chưa tải xong'), true);
             return;
           }
 
           const ws = XLSX.utils.json_to_sheet(rows);
           const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, 'Du_Lieu_Phieu_Yeu_Cau');
+          const sheetName = isEn ? 'Request_Tickets_Data' : 'Du_Lieu_Phieu_Yeu_Cau';
+          XLSX.utils.book_append_sheet(wb, ws, sheetName);
           const from = reportDateFrom.value || 'All';
           const to = reportDateTo.value || 'All';
-          XLSX.writeFile(wb, "Du_Lieu_Phieu_Yeu_Cau_" + from + "_den_" + to + ".xlsx");
-          showToast('Đã xuất file Excel dữ liệu phiếu yêu cầu!');
+          const fileName = (isEn ? 'Request_Tickets_Data_' : 'Du_Lieu_Phieu_Yeu_Cau_') + from + (isEn ? '_to_' : '_den_') + to + '.xlsx';
+          XLSX.writeFile(wb, fileName);
+          showToast(t('Exported technical tickets Excel file successfully!', 'Đã xuất file Excel dữ liệu phiếu yêu cầu!'));
         };
 
         const loadChainData = async () => {

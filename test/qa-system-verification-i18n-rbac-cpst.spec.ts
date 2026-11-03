@@ -385,7 +385,9 @@ async function runE2ETests() {
   }
 }
 
-runE2ETests().catch((err) => {
-  console.error('❌ Kiểm thử QA thất bại:', err);
-  process.exit(1);
-});
+runE2ETests()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error('❌ Kiểm thử QA thất bại:', err);
+    process.exit(1);
+  });

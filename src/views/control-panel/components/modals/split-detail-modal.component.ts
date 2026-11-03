@@ -38,7 +38,9 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               </div>
               <div>
                 <span class="text-slate-400 block text-[10px] font-bold">{{ t('PRIORITY', 'ƯU TIÊN') }}</span>
-                <span class="font-bold" :class="(selectedChain.cpsr || selectedChain).priority === 'Hỗ trợ ngay' ? 'text-rose-500' : 'text-amber-500'">{{ (selectedChain.cpsr || selectedChain).priority || 'N/A' }}</span>
+                <span class="font-bold" :class="(selectedChain.cpsr || selectedChain).priority === 'Hỗ trợ ngay' ? 'text-rose-500' : 'text-amber-500'">
+                  {{ (selectedChain.cpsr || selectedChain).priority === 'Hỗ trợ ngay' ? t('Immediate Support', 'Hỗ trợ ngay') : ((selectedChain.cpsr || selectedChain).priority === 'Chạy tạm' ? t('Temporary Run', 'Chạy tạm') : ((selectedChain.cpsr || selectedChain).priority === 'Khác' ? t('Other', 'Khác') : ((selectedChain.cpsr || selectedChain).priority || 'N/A'))) }}
+                </span>
               </div>
             </div>
             <div>
@@ -63,7 +65,9 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
                 </div>
                 <div>
                   <span class="text-slate-400 block text-[10px] font-bold">{{ t('TECH STATUS', 'TRẠNG THÁI KT') }}</span>
-                  <span class="font-bold text-emerald-500">{{ selectedChain.cpst.chkStatus }}</span>
+                  <span class="font-bold text-emerald-500">
+                    {{ selectedChain.cpst.chkStatus === 'Đã khắc phục' ? t('Resolved', 'Đã khắc phục') : (selectedChain.cpst.chkStatus === 'Hư hỏng nặng' ? t('Severe Defect', 'Hư hỏng nặng') : (selectedChain.cpst.chkStatus === 'Theo dõi thêm' ? t('Monitoring', 'Theo dõi thêm') : selectedChain.cpst.chkStatus)) }}
+                  </span>
                 </div>
                 <div>
                   <span class="text-slate-400 block text-[10px] font-bold">{{ t('SUBMITTED TIME', 'THỜI GIAN GỬI') }}</span>
@@ -73,7 +77,9 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <span class="text-slate-400 block text-[10px] font-bold">{{ t('ROOT CAUSE:', 'NGUYÊN NHÂN GỐC:') }}</span>
-                  <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">{{ selectedChain.cpst.rootCause || 'N/A' }}</p>
+                  <p class="mt-1 p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-[11px]">
+                    {{ selectedChain.cpst.rootCause === 'Man' ? t('Man (Human)', 'Man (Con người)') : (selectedChain.cpst.rootCause === 'Machine' ? t('Machine (Equipment)', 'Machine (Thiết bị)') : (selectedChain.cpst.rootCause === 'Material' ? t('Material (Raw material)', 'Material (Vật liệu)') : (selectedChain.cpst.rootCause === 'Method' ? t('Method (Procedure)', 'Method (Quy trình)') : (selectedChain.cpst.rootCause === 'System / Process' ? t('System / Process', 'System / Process (Hệ thống / Quy trình)') : (selectedChain.cpst.rootCause || 'N/A'))))) }}
+                  </p>
                 </div>
                 <div>
                   <span class="text-slate-400 block text-[10px] font-bold">{{ t('ACTION TAKEN:', 'HÀNH ĐỘNG KHẮC PHỤC:') }}</span>
@@ -166,11 +172,19 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
             <div v-if="selectedChain.cpsf" class="space-y-3">
               <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
-                  <span class="text-slate-400 block text-[10px] font-bold">{{ t('PRINT QUALITY', 'CHẤT LƯỢNG IN') }}</span>
-                  <span v-if="selectedChain.cpsf.chkQuality === 'Chạy tạm, tiếp tục theo dõi'" class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-xs bg-amber-500/10 text-amber-500 border border-amber-500/20">
-                    🟡 {{ t('Conditional Run / Monitor', 'Chạy tạm, tiếp tục theo dõi') }}
+                  <span class="text-slate-400 block text-[10px] font-bold mb-1">{{ t('PRINT QUALITY', 'CHẤT LƯỢNG IN') }}</span>
+                  <span v-if="selectedChain.cpsf.chkQuality === 'Chạy tạm, tiếp tục theo dõi' || selectedChain.cpsf.chkQuality === 'CONDITIONAL' || selectedChain.cpsf.chkQuality === 'CONDITIONAL RUN'" class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-xs bg-amber-500/10 text-amber-500 border border-amber-500/20">
+                    🟡 {{ t('CONDITIONAL RUN', 'CHẠY TẠM') }}
                   </span>
-                  <span v-else class="font-bold text-xs" :class="selectedChain.cpsf.chkQuality === 'Đạt' ? 'text-emerald-500' : 'text-rose-500'">{{ selectedChain.cpsf.chkQuality }}</span>
+                  <span v-else-if="selectedChain.cpsf.chkQuality === 'Đạt' || selectedChain.cpsf.chkQuality === 'PASS'" class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-xs bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                    🟢 {{ t('PASS', 'ĐẠT') }}
+                  </span>
+                  <span v-else-if="selectedChain.cpsf.chkQuality === 'Chưa đạt' || selectedChain.cpsf.chkQuality === 'FAIL'" class="inline-flex items-center gap-1 px-2 py-0.5 rounded font-bold text-xs bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                    🔴 {{ t('FAIL', 'CHƯA ĐẠT') }}
+                  </span>
+                  <span v-else class="font-bold text-xs text-slate-500">
+                    {{ selectedChain.cpsf.chkQuality || 'N/A' }}
+                  </span>
                 </div>
                 <div>
                   <span class="text-slate-400 block text-[10px] font-bold">WORK ORDER</span>
@@ -219,7 +233,7 @@ export const CP_SPLIT_DETAIL_MODAL_HTML = `    <!-- 1-1-1 CHAIN & SPLIT FORM DET
           type="button"
           @click="closeLightbox"
           class="absolute -top-10 right-0 text-white hover:text-slate-300 text-2xl font-bold p-1 cursor-pointer transition"
-          title="Đóng (Esc)"
+          :title="t('Close (Esc)', 'Đóng (Esc)')"
         >
           ✕
         </button>

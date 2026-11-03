@@ -6,7 +6,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CPSR - Phiếu Yêu Cầu Kỹ Thuật | Checkpoint Systems</title>
+  <title>CPSR - {{ t('Technical Request', 'Phiếu Yêu Cầu Kỹ Thuật') }} | Checkpoint Systems</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png" />
   <link rel="shortcut icon" href="/images/favicon.ico" />
@@ -301,7 +301,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
             <!-- Line 2: MNV -->
             <div class="text-xs font-mono font-semibold text-sky-600">{{ t('Emp Code:', 'Mã NV:') }} {{ emp.mnv }}</div>
             <!-- Line 3: Department & Role -->
-            <div class="text-xs text-slate-500">{{ emp.dept || 'Sản xuất' }} • {{ emp.role || emp.area || 'Nhân viên' }}</div>
+            <div class="text-xs text-slate-500">{{ emp.dept || t('Production', 'Sản xuất') }} • {{ emp.role || emp.area || t('Staff', 'Nhân viên') }}</div>
           </div>
         </div>
 
@@ -637,7 +637,7 @@ export const FORM_REQUEST_HTML = `<!DOCTYPE html>
 
             if (!res.ok) {
               const err = await res.json().catch(() => ({}));
-              throw new Error(err.message || ('Lỗi máy chủ (' + res.status + ')'));
+              throw new Error(err.message || (currentLang.value === 'vi' ? ('Lỗi máy chủ (' + res.status + ')') : ('Server error (' + res.status + ')')));
             }
 
             const result = await res.json();

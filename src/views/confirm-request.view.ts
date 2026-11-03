@@ -6,7 +6,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CPSF - Xác Nhận Bàn Giao | Checkpoint Systems</title>
+  <title>CPSF - {{ t('Handover Acceptance', 'Xác Nhận Bàn Giao') }} | Checkpoint Systems</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png" />
   <link rel="shortcut icon" href="/images/favicon.ico" />
@@ -164,7 +164,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           <div class="flex justify-between items-center">
             <span class="text-slate-500">{{ t('Print Quality:', 'Chất lượng in:') }}</span>
             <span class="font-bold text-xs" :class="form.chkQuality === 'Đạt' ? 'text-emerald-600' : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? 'text-amber-600' : 'text-rose-600')">
-              {{ form.chkQuality === 'Đạt' ? ('🟢 ' + t('Pass', 'Đạt')) : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? ('🟡 ' + t('Conditional Run / Monitor', 'Chạy tạm, tiếp tục theo dõi')) : ('🔴 ' + t('Fail', 'Chưa đạt'))) }}
+              {{ form.chkQuality === 'Đạt' ? ('🟢 ' + t('PASS', 'ĐẠT')) : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? ('🟡 ' + t('CONDITIONAL RUN', 'CHẠY TẠM')) : ('🔴 ' + t('FAIL', 'CHƯA ĐẠT'))) }}
             </span>
           </div>
           <div class="flex justify-between items-center">
@@ -173,7 +173,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-slate-500">{{ t('Total / Scrap Qty:', 'Tổng SL / Phế:') }}</span>
-            <span class="text-slate-800 font-mono font-medium">{{ form.woTotalQty || 0 }} / {{ form.wasteQty || 0 }} {{ form.wasteUnit }} ({{ calculatedWastePercent }})</span>
+            <span class="text-slate-800 font-mono font-medium">{{ form.woTotalQty || 0 }} / {{ form.wasteQty || 0 }} {{ form.wasteUnit === 'Mét' ? t('Meters', 'Mét') : (form.wasteUnit === 'Tờ in' ? t('Sheets', 'Tờ in') : form.wasteUnit) }} ({{ calculatedWastePercent }})</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-slate-500">{{ t('Production Representative:', 'Đại diện sản xuất:') }}</span>
@@ -190,7 +190,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             @click="showConfirmModal = false"
             class="w-full py-3 px-4 rounded-xl text-sm font-bold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 transition"
           >
-            {{ t('Cancel', 'Hủy / Cancel') }}
+            {{ t('Cancel', 'Hủy') }}
           </button>
           <button
             type="button"
@@ -224,7 +224,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           <div class="flex justify-between items-center">
             <span class="text-xs text-slate-500">{{ t('Print Quality:', 'Chất lượng in:') }}</span>
             <span class="text-xs font-bold" :class="form.chkQuality === 'Đạt' ? 'text-emerald-600' : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? 'text-amber-600' : 'text-rose-600')">
-              {{ form.chkQuality === 'Đạt' ? ('🟢 ' + t('Pass', 'Đạt')) : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? ('🟡 ' + t('Conditional Run / Monitor', 'Chạy tạm, tiếp tục theo dõi')) : ('🔴 ' + t('Fail', 'Chưa đạt'))) }}
+              {{ form.chkQuality === 'Đạt' ? ('🟢 ' + t('PASS', 'ĐẠT')) : (form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' ? ('🟡 ' + t('CONDITIONAL RUN', 'CHẠY TẠM')) : ('🔴 ' + t('FAIL', 'CHƯA ĐẠT'))) }}
             </span>
           </div>
           <div class="flex justify-between items-center">
@@ -332,7 +332,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             :class="{ 'active-success': form.chkQuality === 'Đạt' }"
           >
             <span class="text-base">🟢</span>
-            <span>{{ t('PASS / ĐẠT', 'ĐẠT') }}</span>
+            <span>{{ t('PASS', 'ĐẠT') }}</span>
           </button>
           <button
             type="button"
@@ -341,7 +341,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             :class="{ 'active-warning': form.chkQuality === 'Chạy tạm, tiếp tục theo dõi' }"
           >
             <span class="text-base">🟡</span>
-            <span>{{ t('CONDITIONAL RUN / MONITOR', 'CHẠY TẠM, THEO DÕI') }}</span>
+            <span>{{ t('CONDITIONAL RUN', 'CHẠY TẠM') }}</span>
           </button>
           <button
             type="button"
@@ -350,7 +350,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
             :class="{ 'active-danger': form.chkQuality === 'Chưa đạt' }"
           >
             <span class="text-base">🔴</span>
-            <span>{{ t('FAIL / CHƯA ĐẠT', 'CHƯA ĐẠT') }}</span>
+            <span>{{ t('FAIL', 'CHƯA ĐẠT') }}</span>
           </button>
         </div>
       </div>
@@ -477,7 +477,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
           >
             <div class="text-sm font-bold text-slate-900">{{ emp.name }}</div>
             <div class="text-xs font-mono font-semibold text-sky-600">{{ t('Emp Code:', 'Mã NV:') }} {{ emp.mnv }}</div>
-            <div class="text-xs text-slate-500">{{ emp.dept || 'Sản xuất' }} • {{ emp.role || 'Quản lý SX' }}</div>
+            <div class="text-xs text-slate-500">{{ emp.dept || t('Production', 'Sản xuất') }} • {{ emp.role || t('Production Manager', 'Quản lý SX') }}</div>
           </div>
         </div>
 
@@ -694,7 +694,7 @@ export const CONFIRM_REQUEST_HTML = `<!DOCTYPE html>
 
             if (!res.ok) {
               const err = await res.json().catch(() => ({}));
-              throw new Error(err.message || ('Lỗi máy chủ (' + res.status + ')'));
+              throw new Error(err.message || (currentLang.value === 'vi' ? ('Lỗi máy chủ (' + res.status + ')') : ('Server error (' + res.status + ')')));
             }
 
             const result = await res.json();

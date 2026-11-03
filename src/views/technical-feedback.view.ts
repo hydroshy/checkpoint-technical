@@ -6,7 +6,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
-  <title>CPST - Phản Hồi Kỹ Thuật | Checkpoint Systems</title>
+  <title>CPST - {{ t('Technical Feedback', 'Phản Hồi Kỹ Thuật') }} | Checkpoint Systems</title>
   <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon.png" />
   <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon.png" />
   <link rel="shortcut icon" href="/images/favicon.ico" />
@@ -206,7 +206,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-xs text-slate-500">{{ t('Status:', 'Trạng thái:') }}</span>
-            <span class="text-xs font-bold" :class="form.chkStatus === 'Đã khắc phục' ? 'text-emerald-600' : (form.chkStatus === 'Hư hỏng nặng' ? 'text-rose-600' : 'text-amber-600')">{{ form.chkStatus }}</span>
+            <span class="text-xs font-bold" :class="form.chkStatus === 'Đã khắc phục' ? 'text-emerald-600' : (form.chkStatus === 'Hư hỏng nặng' ? 'text-rose-600' : 'text-amber-600')">{{ form.chkStatus === 'Đã khắc phục' ? t('Resolved', 'Đã khắc phục') : (form.chkStatus === 'Hư hỏng nặng' ? t('Severe Defect', 'Hư hỏng nặng') : t('Monitoring', 'Theo dõi thêm')) }}</span>
           </div>
         </div>
         <div class="pt-2">
@@ -291,7 +291,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
       <!-- Field Group 2: Technician Droplist (3-line search) -->
       <div class="relative">
         <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-          Technician tiếp nhận <span class="text-rose-500">*</span>
+          {{ t('Receiving Technician', 'Technician tiếp nhận') }} <span class="text-rose-500">*</span><!-- Technician tiếp nhận <span class="text-rose-500">*</span> -->
         </label>
         <div class="relative">
           <input
@@ -324,12 +324,12 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
           >
             <div class="text-sm font-bold text-slate-900">{{ emp.name }}</div>
             <div class="text-xs font-mono font-semibold text-sky-600">{{ t('Emp Code:', 'Mã NV:') }} {{ emp.mnv }}</div>
-            <div class="text-xs text-slate-500">{{ emp.dept || 'Kỹ thuật' }} • {{ emp.role || 'Kỹ thuật viên' }}</div>
+            <div class="text-xs text-slate-500">{{ emp.dept || t('Technical', 'Kỹ thuật') }} • {{ emp.role || t('Technician', 'Kỹ thuật viên') }}</div>
           </div>
         </div>
 
         <div v-if="form.recvBy" class="mt-2 text-xs text-emerald-600 flex items-center gap-1 font-medium">
-          <span>✓ Technician tiếp nhận:</span>
+          <span>✓ {{ t('Receiving Technician:', 'Technician tiếp nhận:') }}</span>
           <span class="text-slate-800 font-semibold">{{ form.recvBy }}</span>
         </div>
       </div>
@@ -345,12 +345,12 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
             class="input-field w-full px-4 py-3 rounded-xl text-sm font-medium cursor-pointer"
             required
           >
-            <option value="" disabled>-- Chọn nguyên nhân gốc rễ (4M) --</option>
-            <option value="Man">Man (Con người)</option>
-            <option value="Machine">Machine (Máy móc / Thiết bị)</option>
-            <option value="Material">Material (Nguyên vật liệu)</option>
-            <option value="Method">Method (Phương pháp / Quy trình)</option>
-            <option value="System / Process">System / Process (Hệ thống / Quy trình)</option>
+            <option value="" disabled>-- {{ t('Select Root Cause (4M / System & Process)', 'Chọn nguyên nhân gốc rễ (4M)') }} --</option>
+            <option value="Man">{{ t('Man (Human)', 'Man (Con người)') }}</option>
+            <option value="Machine">{{ t('Machine (Equipment)', 'Machine (Thiết bị)') }}</option>
+            <option value="Material">{{ t('Material (Raw material)', 'Material (Vật liệu)') }}</option>
+            <option value="Method">{{ t('Method (Procedure)', 'Method (Quy trình)') }}</option>
+            <option value="System / Process">{{ t('System / Process', 'System / Process (Hệ thống / Quy trình)') }}</option>
             <option v-if="form.rootCause && !['Man', 'Machine', 'Material', 'Method', 'System / Process'].includes(form.rootCause)" :value="form.rootCause">{{ form.rootCause }}</option>
           </select>
         </div>
@@ -745,7 +745,7 @@ export const TECHNICAL_FEEDBACK_HTML = `<!DOCTYPE html>
 
             if (!res.ok) {
               const err = await res.json().catch(() => ({}));
-              throw new Error(err.message || ('Lỗi máy chủ (' + res.status + ')'));
+              throw new Error(err.message || (currentLang.value === 'vi' ? ('Lỗi máy chủ (' + res.status + ')') : ('Server error (' + res.status + ')')));
             }
 
             const result = await res.json();

@@ -26,6 +26,7 @@ const tests = [
   'test/full-system-i18n-verification.spec.ts',
   'test/frontend-cpsf-quality-notes.spec.ts',
   'test/qa-cpsf-quality-and-notes-verification.spec.ts',
+  'test/qa-i18n-residual-verification.spec.ts',
 ];
 
 console.log('================================================================');

@@ -164,7 +164,9 @@ async function runModularBackendTests() {
   }
 }
 
-runModularBackendTests().catch((err) => {
-  console.error('❌ Lỗi kiểm thử modular backend:', err);
-  process.exit(1);
-});
+runModularBackendTests()
+  .then(() => process.exit(0))
+  .catch((err) => {
+    console.error('❌ Lỗi kiểm thử modular backend:', err);
+    process.exit(1);
+  });

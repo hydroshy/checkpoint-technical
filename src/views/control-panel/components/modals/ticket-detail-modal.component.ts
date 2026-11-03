@@ -27,7 +27,7 @@ export const CP_TICKET_DETAIL_MODAL_HTML = `    <!-- TICKET DETAIL MODAL -->
             <div>
               <span class="text-slate-400 block text-[10px] font-bold">{{ t('STATUS', 'TRẠNG THÁI') }}</span>
               <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold inline-block" :class="getStatusBadgeClass(selectedTicket.chkStatus || selectedTicket.status)">
-                {{ selectedTicket.chkStatus || selectedTicket.status || 'Open' }}
+                {{ selectedTicket.chkStatus === 'Đã khắc phục' ? t('Resolved', 'Đã khắc phục') : (selectedTicket.chkStatus === 'Hư hỏng nặng' ? t('Severe Defect', 'Hư hỏng nặng') : (selectedTicket.chkStatus === 'Theo dõi thêm' ? t('Monitoring', 'Theo dõi thêm') : (selectedTicket.chkStatus || selectedTicket.status || 'Open'))) }}
               </span>
             </div>
           </div>
@@ -43,7 +43,7 @@ export const CP_TICKET_DETAIL_MODAL_HTML = `    <!-- TICKET DETAIL MODAL -->
             <div class="space-y-1">
               <span class="text-slate-400 font-bold uppercase text-[10px]">{{ t('Root Cause', 'Nguyên Nhân Gốc (Root Cause)') }}</span>
               <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-100 dark:border-slate-800 leading-relaxed">
-                {{ selectedTicket.rootCause || (currentLang === 'vi' ? 'Chưa ghi nhận' : 'Not recorded') }}
+                {{ selectedTicket.rootCause === 'Man' ? t('Man (Human)', 'Man (Con người)') : (selectedTicket.rootCause === 'Machine' ? t('Machine (Equipment)', 'Machine (Thiết bị)') : (selectedTicket.rootCause === 'Material' ? t('Material (Raw material)', 'Material (Vật liệu)') : (selectedTicket.rootCause === 'Method' ? t('Method (Procedure)', 'Method (Quy trình)') : (selectedTicket.rootCause === 'System / Process' ? t('System / Process', 'System / Process (Hệ thống / Quy trình)') : (selectedTicket.rootCause || (currentLang === 'vi' ? 'Chưa ghi nhận' : 'Not recorded')))))) }}
               </div>
             </div>
             <div class="space-y-1">

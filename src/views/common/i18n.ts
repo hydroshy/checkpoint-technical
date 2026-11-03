@@ -204,10 +204,28 @@ export const I18N_DICTIONARY: Record<string, { en: string; vi: string }> = {
 
   // 4M Categories
   'rootCause.man': { en: 'Man (Human)', vi: 'Man (Con người)' },
-  'rootCause.machine': { en: 'Machine (Equipment)', vi: 'Machine (Máy móc / Thiết bị)' },
-  'rootCause.material': { en: 'Material', vi: 'Material (Nguyên vật liệu)' },
-  'rootCause.method': { en: 'Method (Process)', vi: 'Method (Phương pháp / Quy trình)' },
+  'rootCause.machine': { en: 'Machine (Equipment)', vi: 'Machine (Thiết bị)' },
+  'rootCause.material': { en: 'Material (Raw material)', vi: 'Material (Vật liệu)' },
+  'rootCause.method': { en: 'Method (Procedure)', vi: 'Method (Quy trình)' },
   'rootCause.systemProcess': { en: 'System / Process', vi: 'System / Process (Hệ thống / Quy trình)' },
+
+  // Print Quality & Units
+  'quality.pass': { en: 'PASS', vi: 'ĐẠT' },
+  'quality.fail': { en: 'FAIL', vi: 'CHƯA ĐẠT' },
+  'quality.conditional': { en: 'CONDITIONAL', vi: 'CHẠY TẠM' },
+  'quality.conditionalRun': { en: 'CONDITIONAL RUN', vi: 'CHẠY TẠM' },
+  'unit.meters': { en: 'Meters', vi: 'Mét' },
+  'unit.sheets': { en: 'Sheets', vi: 'Tờ in' },
+  'unit.pcs': { en: 'PCS', vi: 'PCS' },
+
+  // Priorities
+  'priority.immediate': { en: 'Immediate Support', vi: 'Hỗ trợ ngay' },
+  'priority.temporary': { en: 'Temporary Run', vi: 'Chạy tạm' },
+  'priority.other': { en: 'Other', vi: 'Khác' },
+
+  // Technicians & Signatures
+  'tech.receivingTechnician': { en: 'Receiving Technician', vi: 'Technician tiếp nhận' },
+  'tech.receivingTechnicianColon': { en: 'Receiving Technician:', vi: 'Technician tiếp nhận:' },
 
   // Users & Password Management
   'user.username': { en: 'Username', vi: 'Tên Đăng Nhập' },
