@@ -1,41 +1,98 @@
+# ==============================================================================
+# CHECKPOINT SYSTEMS — DOCKER COMPOSE CONFIGURATION
+# ==============================================================================
+# Ngăn xếp triển khai đầy đủ bao gồm:
+# 1) postgres_db: Cơ sở dữ liệu PostgreSQL 16 Alpine với volume initdb SQL tự động
+# 2) app: Checkpoint Technical NestJS Server với EnvValidator tự động kiểm tra biến
+#
+# LƯU Ý MẠNG DOCKER (NETWORKS):
+# - Môi trường sản xuất của Checkpoint Systems sử dụng 2 mạng ngoài (external):
+#     1) iot_postgres_internal_net (Mạng kết nối cơ sở dữ liệu PostgreSQL 192.168.1.35)
+#     2) dockge_default (Mạng quản lý container tập trung qua Dockge)
+# - Khi triển khai trên máy tính cá nhân hoặc máy chủ mới (chưa có 2 mạng trên),
+#   hãy tạo trước:
+#     docker network create iot_postgres_internal_net
+#     docker network create dockge_default
+#   hoặc tạm thời bỏ phần cấu hình networks bên dưới để dùng mạng mặc định.
+# ==============================================================================
+
 version: "3.8"
+
 services:
+  # Service Cơ sở dữ liệu PostgreSQL 16
+  postgres_db:
+    image: postgres:16-alpine
+    container_name: checkpoint_postgres_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-${POSTGRES_DB:-checkpoint_technical}}
+      POSTGRES_USER: ${DB_USERNAME:-${POSTGRES_USER:-admin}}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-${POSTGRES_PASSWORD:-Ph@nloi20031403}}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      # Tự động nạp kịch bản khởi tạo DDL 14 bảng và seed ban đầu khi container chạy lần đầu
+      - ./config/init_database.sql:/docker-entrypoint-initdb.d/01_init_database.sql:ro
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    networks:
+      - checkpoint_network
+      - iot_postgres_internal_net
+      - dockge_default
+
+  # Service Checkpoint Technical Web Application
   app:
     build:
       context: .
       dockerfile: Dockerfile
     container_name: checkpoint_technical_app
     restart: unless-stopped
+    depends_on:
+      - postgres_db
     ports:
       - "${PORT:-3001}:3001"
     environment:
+      # 1. Server Network & Runtime Configuration
       - PORT=${PORT:-3001}
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-production}
       - JWT_SECRET=${JWT_SECRET:-Checkpoint_Systems_Technical_Key_2026_Secure!}
-      # PostgreSQL Server Connection Variables (192.168.1.35:5432/checkpoint_technical)
-      - POSTGRES_HOST=${POSTGRES_HOST:-192.168.1.35}
-      - POSTGRES_PORT=${POSTGRES_PORT:-5432}
-      - POSTGRES_USER=${POSTGRES_USER:-admin}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-Ph@nloi20031403}
-      - POSTGRES_DB=${POSTGRES_DB:-checkpoint_technical}
-      # YAML Environment Direct Aliases
-      - USER=${USER:-admin}
-      - PASSWORD=${PASSWORD:-Ph@nloi20031403}
-      - DB=${DB:-checkpoint_technical}
-      # Compatible DB_* environment variables
-      - DB_HOST=${DB_HOST:-${POSTGRES_HOST:-192.168.1.35}}
+
+      # 2. Canonical PostgreSQL Environment Variables (DB_*)
+      - DB_HOST=${DB_HOST:-${POSTGRES_HOST:-postgres_db}}
       - DB_PORT=${DB_PORT:-${POSTGRES_PORT:-5432}}
       - DB_USERNAME=${DB_USERNAME:-${POSTGRES_USER:-admin}}
+      - DB_USER=${DB_USER:-${DB_USERNAME:-${POSTGRES_USER:-admin}}}
       - DB_PASSWORD=${DB_PASSWORD:-${POSTGRES_PASSWORD:-Ph@nloi20031403}}
       - DB_NAME=${DB_NAME:-${POSTGRES_DB:-checkpoint_technical}}
+      - DB_DATABASE=${DB_DATABASE:-${DB_NAME:-${POSTGRES_DB:-checkpoint_technical}}}
       - DB_AUTO_INIT=${DB_AUTO_INIT:-true}
+      - DB_SSL=${DB_SSL:-false}
+
+      # 3. Compatible Aliases (POSTGRES_* & YAML Aliases)
+      - POSTGRES_HOST=${POSTGRES_HOST:-${DB_HOST:-postgres_db}}
+      - POSTGRES_PORT=${POSTGRES_PORT:-${DB_PORT:-5432}}
+      - POSTGRES_USER=${POSTGRES_USER:-${DB_USERNAME:-admin}}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-${DB_PASSWORD:-Ph@nloi20031403}}
+      - POSTGRES_DB=${POSTGRES_DB:-${DB_NAME:-checkpoint_technical}}
+      - USER=${USER:-${DB_USERNAME:-admin}}
+      - PASSWORD=${PASSWORD:-${DB_PASSWORD:-Ph@nloi20031403}}
+      - DB=${DB:-${DB_NAME:-checkpoint_technical}}
+
+      # 4. Local Persistence Storage Directory
+      - DATA_DIR=${DATA_DIR:-/app/data}
     volumes:
       - ./data:/app/data
     networks:
+      - checkpoint_network
       - iot_postgres_internal_net
       - dockge_default
 
+volumes:
+  pg_data:
+
 networks:
+  checkpoint_network:
+    name: checkpoint_network
+    driver: bridge
   iot_postgres_internal_net:
     external: true
   dockge_default:

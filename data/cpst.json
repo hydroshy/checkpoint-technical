@@ -1,26 +1,5 @@
 [
   {
-    "id": "9641d9da-c8fb-46db-b5be-05d2f4fc6893",
-    "docNo": "CPST-20261103-001",
-    "cpsrId": "52ba52bf-b619-4710-ab9c-3b62e484aa9b",
-    "cpsrDocNo": "CPSR-20261103-001",
-    "recvBy": "KTV Trần QA",
-    "recvDate": "2026-10-07",
-    "recvTime": "10:05",
-    "finishDate": "2026-10-07",
-    "finishTime": "10:45",
-    "downtime": 40,
-    "rootCause": "Lệch trục lô",
-    "actionTaken": "Căn chỉnh lại trục lô",
-    "photosBefore": [],
-    "photosAfter": [],
-    "chkStatus": "Đã xử lý xong",
-    "submittedAt": "2026-11-03T15:30:57.708Z",
-    "createdBy": "public",
-    "createdAt": "2026-11-03T15:30:57.708Z",
-    "updatedAt": "2026-11-03T15:30:57.708Z"
-  },
-  {
     "id": "c7750da5-c162-4e09-881a-c331fda751aa",
     "docNo": "CPST-20261023-003",
     "cpsrId": "ab2c81b1-0292-47e6-873a-208aaff77972",

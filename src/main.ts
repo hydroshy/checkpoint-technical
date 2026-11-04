@@ -7,9 +7,15 @@ import * as cookieParser from 'cookie-parser';
 import * as path from 'path';
 import * as fs from 'fs';
 import { AppModule } from './app.module';
+import { EnvValidator } from './common/utils/env-validator.util';
 
 async function bootstrap() {
   const logger = new Logger('Bootstrap');
+
+  // Kiểm tra toàn diện biến môi trường khi khởi động và in bảng cảnh báo chi tiết
+  const envReport = EnvValidator.validate(true);
+  EnvValidator.logValidationReport(envReport, logger);
+
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     bodyParser: false,
   });
@@ -66,7 +72,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
 
-  const port = process.env.PORT || 3001;
+  const port = EnvValidator.getPort();
   await app.listen(port);
   logger.log(`🚀 Checkpoint Technical Server is running on: http://localhost:${port}`);
   logger.log(`📱 User Dashboard available at: http://localhost:${port}/dashboard`);

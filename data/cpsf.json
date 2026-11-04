@@ -1,25 +1,5 @@
 [
   {
-    "id": "4fd00098-0897-4af7-8b3c-6d63f60f4b61",
-    "docNo": "CPSF-20261103-001",
-    "cpstId": "9641d9da-c8fb-46db-b5be-05d2f4fc6893",
-    "cpstDocNo": "CPST-20261103-001",
-    "cpsrDocNo": "CPSR-20261103-001",
-    "chkQuality": "Đạt",
-    "workOrder": "WO-QA-20261007",
-    "wo": "WO-QA-20261007",
-    "woTotalQty": 1000,
-    "totalQty": 1000,
-    "wasteQty": 25,
-    "scrapQty": 25,
-    "wasteUnit": "tấm",
-    "prodMgr": "Quản Đốc QA Lê",
-    "submittedAt": "2026-11-03T15:30:57.939Z",
-    "createdBy": "public",
-    "createdAt": "2026-11-03T15:30:57.939Z",
-    "updatedAt": "2026-11-03T15:30:57.960Z"
-  },
-  {
     "id": "c2f1473d-1fde-40f9-ad23-3c3fdddc47c8",
     "docNo": "CPSF-20261026-002",
     "cpstId": "c7750da5-c162-4e09-881a-c331fda751aa",

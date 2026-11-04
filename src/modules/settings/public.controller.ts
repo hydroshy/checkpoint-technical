@@ -16,6 +16,7 @@ import { EmployeesService } from '../employees/employees.service';
 import { TechnicalRequestsService } from '../technical-requests/technical-requests.service';
 import { CreateTechnicalRequestDto } from '../technical-requests/dto/create-technical-request.dto';
 import { DatabaseService, UserRecord } from '../database/database.service';
+import { EnvValidator } from '../../common/utils/env-validator.util';
 
 @ApiTags('Public Form APIs')
 @Controller('api/public')
@@ -69,7 +70,7 @@ export class PublicController {
     if (!token) return null;
 
     try {
-      const secret = process.env.JWT_SECRET || 'Checkpoint_Systems_Technical_Key_2026_Secure!';
+      const secret = EnvValidator.getJwtSecret();
       const decoded: any = jwt.verify(token, secret);
       const db = this.dbService || (this.settingsService as any)?.dbService;
       if (!db) return null;

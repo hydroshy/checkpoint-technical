@@ -4,12 +4,13 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
+import { EnvValidator } from '../../common/utils/env-validator.util';
 
 @Module({
   imports: [
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'Checkpoint_Systems_Technical_Key_2026_Secure!',
+      secret: EnvValidator.getJwtSecret(),
       signOptions: { expiresIn: '30d' },
     }),
   ],

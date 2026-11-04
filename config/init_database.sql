@@ -3,18 +3,18 @@
 -- ==============================================================================
 -- Tệp cấu hình: checkpoint_technical/config/init_database.sql
 -- Mục đích: Khởi tạo mới hoặc tái tạo toàn bộ CSDL "checkpoint_technical" cho hệ thống Checkpoint Technical.
--- Khắc phục: Lỗi relation "form_lookup_options" does not exist, tạo đầy đủ 9 bảng.
+-- Khắc phục: Tạo đầy đủ 14 bảng hoàn chỉnh, bao gồm cpsr, cpst, cpsf, cps, cột mới nhất (notes, chk_quality VARCHAR(100), wo, total_qty, scrap_qty) và indexes tương ứng.
 -- Tương thích: PostgreSQL 14, 15, 16+
 -- ==============================================================================
 
 -- ------------------------------------------------------------------------------
 -- 1. TẠO CƠ SỞ DỮ LIỆU CHECKPOINT_TECHNICAL & THIẾT LẬP KẾT NỐI
 -- ------------------------------------------------------------------------------
--- Lưu ý: Chạy lệnh dưới đây với quyền postgres / superuser trên server.
--- Nếu cơ sở dữ liệu đã tồn tại sẵn, có thể bỏ qua lệnh CREATE DATABASE này.
-CREATE DATABASE checkpoint_technical;
+-- Tạo database nếu chưa tồn tại:
+SELECT 'CREATE DATABASE checkpoint_technical'
+WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'checkpoint_technical')\gexec
 
--- Chuyển kết nối tới cơ sở dữ liệu checkpoint_technical vừa tạo:
+-- Chuyển kết nối tới cơ sở dữ liệu checkpoint_technical:
 \c checkpoint_technical;
 
 -- Cấu hình chuẩn cho mã hóa ký tự UTF-8 và xử lý chuỗi:
@@ -28,7 +28,7 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
 
 -- ------------------------------------------------------------------------------
--- 3. TẠO CẤU TRÚC 9 BẢNG DỮ LIỆU & INDEXES (DDL SCHEMA)
+-- 3. TẠO CẤU TRÚC 14 BẢNG DỮ LIỆU & INDEXES (DDL SCHEMA)
 -- ------------------------------------------------------------------------------
 
 -- 3.1. Bảng users (Quản lý người dùng, mật khẩu bcrypt và phân quyền RBAC)
@@ -198,8 +198,8 @@ CREATE TABLE IF NOT EXISTS technical_requests (
   err_type VARCHAR(100),
   photos_before JSONB DEFAULT '[]'::jsonb,
   photos_after JSONB DEFAULT '[]'::jsonb,
-  chk_quality VARCHAR(50),
-  chk_status VARCHAR(50),
+  chk_quality VARCHAR(100),
+  chk_status VARCHAR(100),
   work_order VARCHAR(255),
   wo_total_qty NUMERIC DEFAULT 0,
   waste_qty NUMERIC DEFAULT 0,
@@ -232,8 +232,9 @@ ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS err_cat VARCHAR(100);
 ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS err_type VARCHAR(100);
 ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS photos_before JSONB DEFAULT '[]'::jsonb;
 ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS photos_after JSONB DEFAULT '[]'::jsonb;
-ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(50);
-ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_status VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(100);
+ALTER TABLE technical_requests ALTER COLUMN chk_quality TYPE VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
 ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
 ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
 ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
@@ -253,9 +254,237 @@ CREATE TABLE IF NOT EXISTS system_settings (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_by VARCHAR(255)
 );
+ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS value JSONB;
+ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
 INSERT INTO system_settings (key, value, updated_at, updated_by)
 VALUES ('public_form', '{"isPublicFormEnabled":true}'::jsonb, now(), 'system')
 ON CONFLICT (key) DO NOTHING;
+
+-- 3.11. Bảng cpsr (Checkpoint Service Request)
+CREATE TABLE IF NOT EXISTS cpsr (
+  id VARCHAR(255) PRIMARY KEY,
+  doc_no VARCHAR(255) UNIQUE NOT NULL,
+  req_date VARCHAR(50),
+  req_time VARCHAR(50),
+  req_by VARCHAR(255),
+  print_tech VARCHAR(255),
+  machine_name VARCHAR(255),
+  problem TEXT,
+  machine_status VARCHAR(100),
+  priority VARCHAR(100),
+  priority_other TEXT,
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by VARCHAR(255) DEFAULT 'public',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS problem TEXT;
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS machine_status VARCHAR(100);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS priority_other TEXT;
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_cpsr_doc_no ON cpsr(doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpsr_submitted_at ON cpsr(submitted_at);
+CREATE INDEX IF NOT EXISTS idx_cpsr_req_by ON cpsr(req_by);
+CREATE INDEX IF NOT EXISTS idx_cpsr_created_at ON cpsr(created_at);
+
+-- 3.12. Bảng cpst (Checkpoint Service Technical)
+CREATE TABLE IF NOT EXISTS cpst (
+  id VARCHAR(255) PRIMARY KEY,
+  doc_no VARCHAR(255) UNIQUE NOT NULL,
+  cpsr_id VARCHAR(255) REFERENCES cpsr(id) ON DELETE CASCADE,
+  cpsr_doc_no VARCHAR(255) UNIQUE REFERENCES cpsr(doc_no) ON DELETE CASCADE,
+  recv_by VARCHAR(255),
+  recv_date VARCHAR(50),
+  recv_time VARCHAR(50),
+  finish_date VARCHAR(50),
+  finish_time VARCHAR(50),
+  downtime NUMERIC DEFAULT 0,
+  root_cause TEXT,
+  action_taken TEXT,
+  err_cat VARCHAR(100),
+  err_type VARCHAR(100),
+  photos_before JSONB DEFAULT '[]'::jsonb,
+  photos_after JSONB DEFAULT '[]'::jsonb,
+  chk_status VARCHAR(100),
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by VARCHAR(255) DEFAULT 'public',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS cpsr_id VARCHAR(255);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_by VARCHAR(255);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_date VARCHAR(50);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_time VARCHAR(50);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS finish_date VARCHAR(50);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS finish_time VARCHAR(50);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS root_cause TEXT;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS action_taken TEXT;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS err_cat VARCHAR(100);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS err_type VARCHAR(100);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS photos_before JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS photos_after JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_cpst_doc_no ON cpst(doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpst_cpsr_doc_no ON cpst(cpsr_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpst_cpsr_id ON cpst(cpsr_id);
+CREATE INDEX IF NOT EXISTS idx_cpst_submitted_at ON cpst(submitted_at);
+CREATE INDEX IF NOT EXISTS idx_cpst_recv_by ON cpst(recv_by);
+CREATE INDEX IF NOT EXISTS idx_cpst_created_at ON cpst(created_at);
+
+-- 3.13. Bảng cpsf (Checkpoint Service Final / Feedback)
+CREATE TABLE IF NOT EXISTS cpsf (
+  id VARCHAR(255) PRIMARY KEY,
+  doc_no VARCHAR(255) UNIQUE NOT NULL,
+  cpst_id VARCHAR(255) REFERENCES cpst(id) ON DELETE CASCADE,
+  cpst_doc_no VARCHAR(255) UNIQUE REFERENCES cpst(doc_no) ON DELETE CASCADE,
+  cpsr_doc_no VARCHAR(255),
+  chk_quality VARCHAR(100),
+  work_order VARCHAR(255),
+  wo VARCHAR(255),
+  wo_total_qty NUMERIC DEFAULT 0,
+  total_qty NUMERIC DEFAULT 0,
+  waste_qty NUMERIC DEFAULT 0,
+  scrap_qty NUMERIC DEFAULT 0,
+  waste_unit VARCHAR(50),
+  waste_percent VARCHAR(50),
+  prod_mgr VARCHAR(255),
+  notes TEXT,
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by VARCHAR(255) DEFAULT 'public',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpst_id VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpst_doc_no VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(100);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS prod_mgr VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsf ALTER COLUMN chk_quality TYPE VARCHAR(100);
+CREATE INDEX IF NOT EXISTS idx_cpsf_doc_no ON cpsf(doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_doc_no ON cpsf(cpst_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_id ON cpsf(cpst_id);
+CREATE INDEX IF NOT EXISTS idx_cpsf_cpsr_doc_no ON cpsf(cpsr_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpsf_submitted_at ON cpsf(submitted_at);
+CREATE INDEX IF NOT EXISTS idx_cpsf_created_at ON cpsf(created_at);
+
+-- 3.14. Bảng cps (Checkpoint Service Master & Task Assignment)
+CREATE TABLE IF NOT EXISTS cps (
+  id VARCHAR(255) PRIMARY KEY,
+  doc_no VARCHAR(255) UNIQUE NOT NULL,
+  cpsr_id VARCHAR(255) REFERENCES cpsr(id) ON DELETE SET NULL,
+  cpsr_doc_no VARCHAR(255) REFERENCES cpsr(doc_no) ON DELETE SET NULL,
+  cpst_id VARCHAR(255) REFERENCES cpst(id) ON DELETE SET NULL,
+  cpst_doc_no VARCHAR(255) REFERENCES cpst(doc_no) ON DELETE SET NULL,
+  cpsf_id VARCHAR(255) REFERENCES cpsf(id) ON DELETE SET NULL,
+  cpsf_doc_no VARCHAR(255) REFERENCES cpsf(doc_no) ON DELETE SET NULL,
+  status VARCHAR(50) NOT NULL DEFAULT 'TO_ASSIGN',
+  assigned_to VARCHAR(255),
+  assigned_to_id VARCHAR(255),
+  assigned_to_name VARCHAR(255),
+  assigned_by VARCHAR(255),
+  assigned_at TIMESTAMPTZ,
+  deadline TIMESTAMPTZ,
+  priority VARCHAR(100),
+  print_tech VARCHAR(255),
+  machine_name VARCHAR(255),
+  problem TEXT,
+  req_by VARCHAR(255),
+  req_date VARCHAR(50),
+  req_time VARCHAR(50),
+  downtime NUMERIC DEFAULT 0,
+  wo_total_qty NUMERIC DEFAULT 0,
+  total_qty NUMERIC DEFAULT 0,
+  waste_qty NUMERIC DEFAULT 0,
+  scrap_qty NUMERIC DEFAULT 0,
+  waste_percent VARCHAR(50),
+  waste_unit VARCHAR(50),
+  work_order VARCHAR(255),
+  wo VARCHAR(255),
+  chk_status VARCHAR(100),
+  chk_quality VARCHAR(100),
+  notes TEXT,
+  closed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsr_id VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpst_id VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpst_doc_no VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsf_id VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsf_doc_no VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'TO_ASSIGN';
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to_id VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to_name VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_by VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS deadline TIMESTAMPTZ;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS problem TEXT;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(100);
+ALTER TABLE cps ALTER COLUMN chk_quality TYPE VARCHAR(100);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_cps_doc_no ON cps(doc_no);
+CREATE INDEX IF NOT EXISTS idx_cps_status ON cps(status);
+CREATE INDEX IF NOT EXISTS idx_cps_cpsr_doc_no ON cps(cpsr_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cps_cpst_doc_no ON cps(cpst_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cps_cpsf_doc_no ON cps(cpsf_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cps_deadline ON cps(deadline);
+CREATE INDEX IF NOT EXISTS idx_cps_assigned_to ON cps(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_cps_assigned_to_id ON cps(assigned_to_id);
+CREATE INDEX IF NOT EXISTS idx_cps_created_at ON cps(created_at);
 
 -- ------------------------------------------------------------------------------
 -- 4. DỮ LIỆU MẪU BAN ĐẦU (SEED DATA TỪ HỆ THỐNG GỐC EXCEL & JSON)

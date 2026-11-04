@@ -3,6 +3,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { Request } from 'express';
 import { DatabaseService } from '../database/database.service';
+import { EnvValidator } from '../../common/utils/env-validator.util';
 
 const cookieOrHeaderExtractor = (req: Request): string | null => {
   let token: string | null = null;
@@ -24,7 +25,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([cookieOrHeaderExtractor]),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'Checkpoint_Systems_Technical_Key_2026_Secure!',
+      secretOrKey: EnvValidator.getJwtSecret(),
     });
   }
 

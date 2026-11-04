@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as bcrypt from 'bcryptjs';
 import { Pool, PoolConfig } from 'pg';
 import { v4 as uuidv4 } from 'uuid';
+import { EnvValidator } from '../../common/utils/env-validator.util';
 
 export interface UserPermissions {
   canCreateRequest: boolean;
@@ -541,7 +542,7 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   constructor() {
-    this.dataDir = path.resolve(process.env.DATA_DIR || './data');
+    this.dataDir = EnvValidator.getDataDir();
     if (!fs.existsSync(this.dataDir)) {
       try {
         fs.mkdirSync(this.dataDir, { recursive: true });
@@ -561,21 +562,16 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
    * Gracefully falls back to local JSON persistence if PG is unreachable.
    */
   private async initDatabaseConnection() {
-    const dbHost = process.env.POSTGRES_HOST || process.env.DB_HOST;
-    const dbPort = parseInt(process.env.POSTGRES_PORT || process.env.DB_PORT || '5432', 10);
-    const dbUser = process.env.POSTGRES_USER || process.env.DB_USERNAME || process.env.DB_USER || process.env.USER || 'admin';
-    const dbPassword = process.env.POSTGRES_PASSWORD !== undefined
-      ? process.env.POSTGRES_PASSWORD
-      : (process.env.DB_PASSWORD !== undefined
-        ? process.env.DB_PASSWORD
-        : (process.env.PASSWORD !== undefined ? process.env.PASSWORD : 'Ph@nloi20031403'));
-    const dbName = process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB_DATABASE || process.env.DB || 'checkpoint_technical';
-    const dbSsl = process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false;
-    // Tự động khởi tạo Schema mặc định = true nếu chưa có biến môi trường
-    const autoInitEnv = process.env.DB_AUTO_INIT;
-    const autoInit = autoInitEnv === undefined || autoInitEnv === null || autoInitEnv.trim() === ''
-      ? true
-      : !['false', '0', 'no', 'off'].includes(autoInitEnv.toLowerCase().trim());
+    const dbConfig = EnvValidator.getDatabaseConfig();
+    const dbHost = dbConfig.host;
+    const dbPort = dbConfig.port;
+    const dbUser = dbConfig.user;
+    const dbPassword = dbConfig.password;
+    const dbName = dbConfig.database;
+    const dbSsl = dbConfig.ssl;
+    const autoInit = dbConfig.autoInit;
+
+    this.logger.log(`🔍 [EnvValidator] DB Connection Target: ${dbHost}:${dbPort}/${dbName} (User: ${dbUser}, AutoInit: ${autoInit})`);
 
     const candidateHosts: string[] = [];
     if (dbHost) candidateHosts.push(dbHost);
@@ -982,6 +978,12 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_by VARCHAR(255)
             );
+            ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS value JSONB;
+            ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
+            INSERT INTO system_settings (key, value, updated_at, updated_by)
+            VALUES ('public_form', '{"isPublicFormEnabled":true}'::jsonb, now(), 'system')
+            ON CONFLICT (key) DO NOTHING;
           `,
         },
         {
@@ -1004,8 +1006,24 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS problem TEXT;
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS machine_status VARCHAR(100);
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS priority_other TEXT;
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_cpsr_doc_no ON cpsr(doc_no);
             CREATE INDEX IF NOT EXISTS idx_cpsr_submitted_at ON cpsr(submitted_at);
+            CREATE INDEX IF NOT EXISTS idx_cpsr_req_by ON cpsr(req_by);
+            CREATE INDEX IF NOT EXISTS idx_cpsr_created_at ON cpsr(created_at);
           `,
         },
         {
@@ -1034,9 +1052,32 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS cpsr_id VARCHAR(255);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_by VARCHAR(255);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_date VARCHAR(50);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_time VARCHAR(50);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS finish_date VARCHAR(50);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS finish_time VARCHAR(50);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS root_cause TEXT;
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS action_taken TEXT;
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS err_cat VARCHAR(100);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS err_type VARCHAR(100);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS photos_before JSONB DEFAULT '[]'::jsonb;
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS photos_after JSONB DEFAULT '[]'::jsonb;
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE cpst ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             CREATE INDEX IF NOT EXISTS idx_cpst_doc_no ON cpst(doc_no);
             CREATE INDEX IF NOT EXISTS idx_cpst_cpsr_doc_no ON cpst(cpsr_doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cpst_cpsr_id ON cpst(cpsr_id);
             CREATE INDEX IF NOT EXISTS idx_cpst_submitted_at ON cpst(submitted_at);
+            CREATE INDEX IF NOT EXISTS idx_cpst_recv_by ON cpst(recv_by);
+            CREATE INDEX IF NOT EXISTS idx_cpst_created_at ON cpst(created_at);
           `,
         },
         {
@@ -1050,8 +1091,11 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               cpsr_doc_no VARCHAR(255),
               chk_quality VARCHAR(100),
               work_order VARCHAR(255),
+              wo VARCHAR(255),
               wo_total_qty NUMERIC DEFAULT 0,
+              total_qty NUMERIC DEFAULT 0,
               waste_qty NUMERIC DEFAULT 0,
+              scrap_qty NUMERIC DEFAULT 0,
               waste_unit VARCHAR(50),
               waste_percent VARCHAR(50),
               prod_mgr VARCHAR(255),
@@ -1061,15 +1105,32 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpst_id VARCHAR(255);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpst_doc_no VARCHAR(255);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(100);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
             ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
             ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
             ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS prod_mgr VARCHAR(255);
             ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS notes TEXT;
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+            ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
             ALTER TABLE cpsf ALTER COLUMN chk_quality TYPE VARCHAR(100);
-            ALTER TABLE cps ALTER COLUMN chk_quality TYPE VARCHAR(100);
             CREATE INDEX IF NOT EXISTS idx_cpsf_doc_no ON cpsf(doc_no);
             CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_doc_no ON cpsf(cpst_doc_no);
+            CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_id ON cpsf(cpst_id);
+            CREATE INDEX IF NOT EXISTS idx_cpsf_cpsr_doc_no ON cpsf(cpsr_doc_no);
             CREATE INDEX IF NOT EXISTS idx_cpsf_submitted_at ON cpsf(submitted_at);
+            CREATE INDEX IF NOT EXISTS idx_cpsf_created_at ON cpsf(created_at);
           `,
         },
         {
@@ -1100,17 +1161,21 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
               req_time VARCHAR(50),
               downtime NUMERIC DEFAULT 0,
               wo_total_qty NUMERIC DEFAULT 0,
+              total_qty NUMERIC DEFAULT 0,
               waste_qty NUMERIC DEFAULT 0,
+              scrap_qty NUMERIC DEFAULT 0,
               waste_percent VARCHAR(50),
               waste_unit VARCHAR(50),
               work_order VARCHAR(255),
+              wo VARCHAR(255),
               chk_status VARCHAR(100),
-              chk_quality VARCHAR(50),
+              chk_quality VARCHAR(100),
               notes TEXT,
               closed_at TIMESTAMPTZ,
               created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
               updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             );
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsr_id VARCHAR(255);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpst_id VARCHAR(255);
@@ -1133,15 +1198,16 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
-            ALTER TABLE cps ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
-            ALTER TABLE cps ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
-            ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(50);
+            ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(100);
+            ALTER TABLE cps ALTER COLUMN chk_quality TYPE VARCHAR(100);
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS notes TEXT;
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ;
             ALTER TABLE cps ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
@@ -1152,6 +1218,9 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
             CREATE INDEX IF NOT EXISTS idx_cps_cpst_doc_no ON cps(cpst_doc_no);
             CREATE INDEX IF NOT EXISTS idx_cps_cpsf_doc_no ON cps(cpsf_doc_no);
             CREATE INDEX IF NOT EXISTS idx_cps_deadline ON cps(deadline);
+            CREATE INDEX IF NOT EXISTS idx_cps_assigned_to ON cps(assigned_to);
+            CREATE INDEX IF NOT EXISTS idx_cps_assigned_to_id ON cps(assigned_to_id);
+            CREATE INDEX IF NOT EXISTS idx_cps_created_at ON cps(created_at);
           `,
         },
       ];
@@ -3362,13 +3431,14 @@ export class DatabaseService implements OnModuleInit, OnModuleDestroy {
   }
 
   public getDatabaseInfo() {
+    const dbConfig = EnvValidator.getDatabaseConfig();
     return {
       connected: this.isPgConnected,
       type: this.isPgConnected ? 'postgresql' : 'json_file',
-      host: process.env.POSTGRES_HOST || process.env.DB_HOST || '192.168.1.35',
-      port: parseInt(process.env.POSTGRES_PORT || process.env.DB_PORT || '5432', 10),
-      database: process.env.POSTGRES_DB || process.env.DB_NAME || process.env.DB || 'checkpoint_technical',
-      user: process.env.POSTGRES_USER || process.env.DB_USERNAME || process.env.USER || 'admin',
+      host: dbConfig.host,
+      port: dbConfig.port,
+      database: dbConfig.database,
+      user: dbConfig.user,
     };
   }
 }

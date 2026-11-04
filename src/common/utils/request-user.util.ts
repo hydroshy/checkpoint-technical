@@ -1,4 +1,5 @@
 import * as jwt from 'jsonwebtoken';
+import { EnvValidator } from './env-validator.util';
 
 export function extractUser(req?: any): any {
   if (!req) return null;
@@ -25,7 +26,7 @@ export function extractUser(req?: any): any {
   }
   if (token) {
     try {
-      const secret = process.env.JWT_SECRET || 'Checkpoint_Systems_Technical_Key_2026_Secure!';
+      const secret = EnvValidator.getJwtSecret();
       return jwt.verify(token, secret);
     } catch (_) {}
   }

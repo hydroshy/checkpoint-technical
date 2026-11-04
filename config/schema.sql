@@ -18,10 +18,21 @@ CREATE TABLE IF NOT EXISTS users (
   full_name VARCHAR(255) NOT NULL,
   role VARCHAR(50) NOT NULL DEFAULT 'EMPLOYEE',
   is_active BOOLEAN NOT NULL DEFAULT true,
+  permissions JSONB NOT NULL DEFAULT '{"canCreateRequest":true,"canViewKpi":false,"canAccessControlPanel":false}'::jsonb,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS password_hash VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS full_name VARCHAR(255);
+ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(50) DEFAULT 'EMPLOYEE';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS permissions JSONB DEFAULT '{"canCreateRequest":true,"canViewKpi":false,"canAccessControlPanel":false}'::jsonb;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
+CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 
 -- 2. Requesters Table (Từ Sheet Requester trong Name of reqester.xlsx)
 CREATE TABLE IF NOT EXISTS requesters (
@@ -35,23 +46,45 @@ CREATE TABLE IF NOT EXISTS requesters (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE requesters ADD COLUMN IF NOT EXISTS stt INT;
+ALTER TABLE requesters ADD COLUMN IF NOT EXISTS department VARCHAR(255);
+ALTER TABLE requesters ADD COLUMN IF NOT EXISTS area VARCHAR(255);
+ALTER TABLE requesters ADD COLUMN IF NOT EXISTS mnv VARCHAR(100);
+ALTER TABLE requesters ADD COLUMN IF NOT EXISTS full_name VARCHAR(255);
+ALTER TABLE requesters ADD COLUMN IF NOT EXISTS position VARCHAR(255);
+ALTER TABLE requesters ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE requesters ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 CREATE INDEX IF NOT EXISTS idx_requesters_mnv ON requesters(mnv);
 CREATE INDEX IF NOT EXISTS idx_requesters_area ON requesters(area);
 
 -- 3. Machines Table (Từ Sheet Machine list trong Name of reqester.xlsx)
 CREATE TABLE IF NOT EXISTS machines (
   id VARCHAR(255) PRIMARY KEY,
-  stt INT,
-  area VARCHAR(255) NOT NULL,
-  machine_name VARCHAR(255) NOT NULL,
+  stt INT DEFAULT 0,
+  tech VARCHAR(255),
+  name VARCHAR(255),
+  area VARCHAR(255),
+  machine_name VARCHAR(255),
   code VARCHAR(100),
   note TEXT,
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS stt INT DEFAULT 0;
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS tech VARCHAR(255);
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS name VARCHAR(255);
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS area VARCHAR(255);
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS code VARCHAR(100);
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS note TEXT;
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE machines ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_machines_tech ON machines(tech);
+CREATE INDEX IF NOT EXISTS idx_machines_name ON machines(name);
 CREATE INDEX IF NOT EXISTS idx_machines_area ON machines(area);
-CREATE INDEX IF NOT EXISTS idx_machines_name ON machines(machine_name);
+CREATE INDEX IF NOT EXISTS idx_machines_machine_name ON machines(machine_name);
 
 -- 4. Weekly Technical Requests (Từ Sheet 1_Technical_Requests trong Weekly_Technical_Dashboard_Database.xlsx)
 CREATE TABLE IF NOT EXISTS weekly_technical_requests (
@@ -70,6 +103,19 @@ CREATE TABLE IF NOT EXISTS weekly_technical_requests (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS request_id VARCHAR(255);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS request_date VARCHAR(50);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS request_type VARCHAR(255);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS item_equipment VARCHAR(255);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS severity VARCHAR(100);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS status VARCHAR(100);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS sla_target_hours NUMERIC;
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS actual_hours NUMERIC;
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS met_sla VARCHAR(50);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS reported_by VARCHAR(255);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS resolved_by VARCHAR(255);
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE weekly_technical_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 CREATE INDEX IF NOT EXISTS idx_wtr_req_id ON weekly_technical_requests(request_id);
 CREATE INDEX IF NOT EXISTS idx_wtr_status ON weekly_technical_requests(status);
 CREATE INDEX IF NOT EXISTS idx_wtr_equipment ON weekly_technical_requests(item_equipment);
@@ -90,6 +136,18 @@ CREATE TABLE IF NOT EXISTS defect_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS defect_id INT;
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS defect_date VARCHAR(50);
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS facility VARCHAR(255);
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS source VARCHAR(255);
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS root_cause_category VARCHAR(255);
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS specific_issue TEXT;
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS affected_product TEXT;
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS downtime_minutes VARCHAR(100);
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS recurring_issue VARCHAR(50);
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS eight_d_required VARCHAR(50);
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE defect_logs ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 CREATE INDEX IF NOT EXISTS idx_defect_logs_defect_id ON defect_logs(defect_id);
 CREATE INDEX IF NOT EXISTS idx_defect_logs_facility ON defect_logs(facility);
 
@@ -110,6 +168,19 @@ CREATE TABLE IF NOT EXISTS action_plans (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS action_id VARCHAR(100);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS date_logged VARCHAR(50);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS facility VARCHAR(255);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS related_defect_id VARCHAR(100);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS fix_type VARCHAR(255);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS pic VARCHAR(255);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS deadline VARCHAR(50);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS status VARCHAR(100);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS resource_needed VARCHAR(255);
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS remarks TEXT;
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE action_plans ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 CREATE INDEX IF NOT EXISTS idx_action_plans_action_id ON action_plans(action_id);
 CREATE INDEX IF NOT EXISTS idx_action_plans_status ON action_plans(status);
 
@@ -123,7 +194,14 @@ CREATE TABLE IF NOT EXISTS form_lookup_options (
   is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS category VARCHAR(100);
+ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS item_value VARCHAR(255);
+ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS item_label VARCHAR(255);
+ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS sort_order INT DEFAULT 0;
+ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+ALTER TABLE form_lookup_options ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
 CREATE INDEX IF NOT EXISTS idx_lookup_category ON form_lookup_options(category);
+CREATE INDEX IF NOT EXISTS idx_lookup_active ON form_lookup_options(is_active);
 
 -- 8. Sheet Lists DO NOT DELETE (Lưu nguyên dạng từng dòng của sheet Lists_DO_NOT_DELETE)
 CREATE TABLE IF NOT EXISTS sheet_lists_do_not_delete (
@@ -142,6 +220,20 @@ CREATE TABLE IF NOT EXISTS sheet_lists_do_not_delete (
   resource_needed VARCHAR(255),
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS row_index INT;
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS request_id VARCHAR(255);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS request_type VARCHAR(255);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS item_equipment VARCHAR(255);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS severity VARCHAR(100);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS status_req VARCHAR(100);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS yes_no VARCHAR(50);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS source VARCHAR(255);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS root_cause VARCHAR(255);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS fix_type VARCHAR(255);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS status_act VARCHAR(100);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS resource_needed VARCHAR(255);
+ALTER TABLE sheet_lists_do_not_delete ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_sheet_lists_row ON sheet_lists_do_not_delete(row_index);
 
 -- 9. Phiếu Yêu Cầu Kỹ Thuật Chi Tiết Form V4.1 (Technical Requests Maintenance & 4M)
 CREATE TABLE IF NOT EXISTS technical_requests (
@@ -168,8 +260,8 @@ CREATE TABLE IF NOT EXISTS technical_requests (
   err_type VARCHAR(100),
   photos_before JSONB DEFAULT '[]'::jsonb,
   photos_after JSONB DEFAULT '[]'::jsonb,
-  chk_quality VARCHAR(50),
-  chk_status VARCHAR(50),
+  chk_quality VARCHAR(100),
+  chk_status VARCHAR(100),
   work_order VARCHAR(255),
   wo_total_qty NUMERIC DEFAULT 0,
   waste_qty NUMERIC DEFAULT 0,
@@ -180,27 +272,293 @@ CREATE TABLE IF NOT EXISTS technical_requests (
   created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS problem TEXT;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS machine_status VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS priority_other TEXT;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_by VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_date VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS recv_time VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS finish_date VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS finish_time VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS root_cause TEXT;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS action_taken TEXT;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS err_cat VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS err_type VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS photos_before JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS photos_after JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(100);
+ALTER TABLE technical_requests ALTER COLUMN chk_quality TYPE VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS prod_mgr VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS created_by VARCHAR(255);
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE technical_requests ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
 CREATE INDEX IF NOT EXISTS idx_tech_req_doc_no ON technical_requests(doc_no);
+CREATE INDEX IF NOT EXISTS idx_tech_req_created_at ON technical_requests(created_at);
 
--- System Settings
+-- 10. System Settings (Cấu hình hệ thống, bao gồm Public Form)
 CREATE TABLE IF NOT EXISTS system_settings (
   key VARCHAR(100) PRIMARY KEY,
   value JSONB NOT NULL,
   updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   updated_by VARCHAR(255)
 );
+ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS value JSONB;
+ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE system_settings ADD COLUMN IF NOT EXISTS updated_by VARCHAR(255);
+INSERT INTO system_settings (key, value, updated_at, updated_by)
+VALUES ('public_form', '{"isPublicFormEnabled":true}'::jsonb, now(), 'system')
+ON CONFLICT (key) DO NOTHING;
+
+-- 11. CPSR Table (Checkpoint Service Request)
+CREATE TABLE IF NOT EXISTS cpsr (
+  id VARCHAR(255) PRIMARY KEY,
+  doc_no VARCHAR(255) UNIQUE NOT NULL,
+  req_date VARCHAR(50),
+  req_time VARCHAR(50),
+  req_by VARCHAR(255),
+  print_tech VARCHAR(255),
+  machine_name VARCHAR(255),
+  problem TEXT,
+  machine_status VARCHAR(100),
+  priority VARCHAR(100),
+  priority_other TEXT,
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by VARCHAR(255) DEFAULT 'public',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS problem TEXT;
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS machine_status VARCHAR(100);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS priority_other TEXT;
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsr ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_cpsr_doc_no ON cpsr(doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpsr_submitted_at ON cpsr(submitted_at);
+CREATE INDEX IF NOT EXISTS idx_cpsr_req_by ON cpsr(req_by);
+CREATE INDEX IF NOT EXISTS idx_cpsr_created_at ON cpsr(created_at);
+
+-- 12. CPST Table (Checkpoint Service Technical)
+CREATE TABLE IF NOT EXISTS cpst (
+  id VARCHAR(255) PRIMARY KEY,
+  doc_no VARCHAR(255) UNIQUE NOT NULL,
+  cpsr_id VARCHAR(255) REFERENCES cpsr(id) ON DELETE CASCADE,
+  cpsr_doc_no VARCHAR(255) UNIQUE REFERENCES cpsr(doc_no) ON DELETE CASCADE,
+  recv_by VARCHAR(255),
+  recv_date VARCHAR(50),
+  recv_time VARCHAR(50),
+  finish_date VARCHAR(50),
+  finish_time VARCHAR(50),
+  downtime NUMERIC DEFAULT 0,
+  root_cause TEXT,
+  action_taken TEXT,
+  err_cat VARCHAR(100),
+  err_type VARCHAR(100),
+  photos_before JSONB DEFAULT '[]'::jsonb,
+  photos_after JSONB DEFAULT '[]'::jsonb,
+  chk_status VARCHAR(100),
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by VARCHAR(255) DEFAULT 'public',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS cpsr_id VARCHAR(255);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_by VARCHAR(255);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_date VARCHAR(50);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS recv_time VARCHAR(50);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS finish_date VARCHAR(50);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS finish_time VARCHAR(50);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS root_cause TEXT;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS action_taken TEXT;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS err_cat VARCHAR(100);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS err_type VARCHAR(100);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS photos_before JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS photos_after JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpst ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_cpst_doc_no ON cpst(doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpst_cpsr_doc_no ON cpst(cpsr_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpst_cpsr_id ON cpst(cpsr_id);
+CREATE INDEX IF NOT EXISTS idx_cpst_submitted_at ON cpst(submitted_at);
+CREATE INDEX IF NOT EXISTS idx_cpst_recv_by ON cpst(recv_by);
+CREATE INDEX IF NOT EXISTS idx_cpst_created_at ON cpst(created_at);
+
+-- 13. CPSF Table (Checkpoint Service Final / Feedback)
+CREATE TABLE IF NOT EXISTS cpsf (
+  id VARCHAR(255) PRIMARY KEY,
+  doc_no VARCHAR(255) UNIQUE NOT NULL,
+  cpst_id VARCHAR(255) REFERENCES cpst(id) ON DELETE CASCADE,
+  cpst_doc_no VARCHAR(255) UNIQUE REFERENCES cpst(doc_no) ON DELETE CASCADE,
+  cpsr_doc_no VARCHAR(255),
+  chk_quality VARCHAR(100),
+  work_order VARCHAR(255),
+  wo VARCHAR(255),
+  wo_total_qty NUMERIC DEFAULT 0,
+  total_qty NUMERIC DEFAULT 0,
+  waste_qty NUMERIC DEFAULT 0,
+  scrap_qty NUMERIC DEFAULT 0,
+  waste_unit VARCHAR(50),
+  waste_percent VARCHAR(50),
+  prod_mgr VARCHAR(255),
+  notes TEXT,
+  submitted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_by VARCHAR(255) DEFAULT 'public',
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpst_id VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpst_doc_no VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(100);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS prod_mgr VARCHAR(255);
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS created_by VARCHAR(255) DEFAULT 'public';
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsf ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cpsf ALTER COLUMN chk_quality TYPE VARCHAR(100);
+CREATE INDEX IF NOT EXISTS idx_cpsf_doc_no ON cpsf(doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_doc_no ON cpsf(cpst_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpsf_cpst_id ON cpsf(cpst_id);
+CREATE INDEX IF NOT EXISTS idx_cpsf_cpsr_doc_no ON cpsf(cpsr_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cpsf_submitted_at ON cpsf(submitted_at);
+CREATE INDEX IF NOT EXISTS idx_cpsf_created_at ON cpsf(created_at);
+
+-- 14. CPS Table (Checkpoint Service Master & Task Assignment)
+CREATE TABLE IF NOT EXISTS cps (
+  id VARCHAR(255) PRIMARY KEY,
+  doc_no VARCHAR(255) UNIQUE NOT NULL,
+  cpsr_id VARCHAR(255) REFERENCES cpsr(id) ON DELETE SET NULL,
+  cpsr_doc_no VARCHAR(255) REFERENCES cpsr(doc_no) ON DELETE SET NULL,
+  cpst_id VARCHAR(255) REFERENCES cpst(id) ON DELETE SET NULL,
+  cpst_doc_no VARCHAR(255) REFERENCES cpst(doc_no) ON DELETE SET NULL,
+  cpsf_id VARCHAR(255) REFERENCES cpsf(id) ON DELETE SET NULL,
+  cpsf_doc_no VARCHAR(255) REFERENCES cpsf(doc_no) ON DELETE SET NULL,
+  status VARCHAR(50) NOT NULL DEFAULT 'TO_ASSIGN',
+  assigned_to VARCHAR(255),
+  assigned_to_id VARCHAR(255),
+  assigned_to_name VARCHAR(255),
+  assigned_by VARCHAR(255),
+  assigned_at TIMESTAMPTZ,
+  deadline TIMESTAMPTZ,
+  priority VARCHAR(100),
+  print_tech VARCHAR(255),
+  machine_name VARCHAR(255),
+  problem TEXT,
+  req_by VARCHAR(255),
+  req_date VARCHAR(50),
+  req_time VARCHAR(50),
+  downtime NUMERIC DEFAULT 0,
+  wo_total_qty NUMERIC DEFAULT 0,
+  total_qty NUMERIC DEFAULT 0,
+  waste_qty NUMERIC DEFAULT 0,
+  scrap_qty NUMERIC DEFAULT 0,
+  waste_percent VARCHAR(50),
+  waste_unit VARCHAR(50),
+  work_order VARCHAR(255),
+  wo VARCHAR(255),
+  chk_status VARCHAR(100),
+  chk_quality VARCHAR(100),
+  notes TEXT,
+  closed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS doc_no VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsr_id VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsr_doc_no VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpst_id VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpst_doc_no VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsf_id VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS cpsf_doc_no VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'TO_ASSIGN';
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to_id VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_to_name VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_by VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS assigned_at TIMESTAMPTZ;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS deadline TIMESTAMPTZ;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS priority VARCHAR(100);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS print_tech VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS machine_name VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS problem TEXT;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_by VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_date VARCHAR(50);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS req_time VARCHAR(50);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS downtime NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS wo_total_qty NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS total_qty NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_qty NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS scrap_qty NUMERIC DEFAULT 0;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_percent VARCHAR(50);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS waste_unit VARCHAR(50);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS work_order VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS wo VARCHAR(255);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_status VARCHAR(100);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS chk_quality VARCHAR(100);
+ALTER TABLE cps ALTER COLUMN chk_quality TYPE VARCHAR(100);
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS closed_at TIMESTAMPTZ;
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT now();
+ALTER TABLE cps ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT now();
+CREATE INDEX IF NOT EXISTS idx_cps_doc_no ON cps(doc_no);
+CREATE INDEX IF NOT EXISTS idx_cps_status ON cps(status);
+CREATE INDEX IF NOT EXISTS idx_cps_cpsr_doc_no ON cps(cpsr_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cps_cpst_doc_no ON cps(cpst_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cps_cpsf_doc_no ON cps(cpsf_doc_no);
+CREATE INDEX IF NOT EXISTS idx_cps_deadline ON cps(deadline);
+CREATE INDEX IF NOT EXISTS idx_cps_assigned_to ON cps(assigned_to);
+CREATE INDEX IF NOT EXISTS idx_cps_assigned_to_id ON cps(assigned_to_id);
+CREATE INDEX IF NOT EXISTS idx_cps_created_at ON cps(created_at);
 
 -- ==============================================================================
 -- INITIAL DATA SEEDING (FROM EXCEL SPREADSHEETS)
 -- ==============================================================================
 
 -- Default Users (Password: Checkpoint@123)
-INSERT INTO users (id, username, email, password_hash, full_name, role, is_active)
+INSERT INTO users (id, username, email, password_hash, full_name, role, is_active, permissions)
 VALUES
-  ('user-admin-1', 'admin', 'admin@checkpointsystems.com', 'a0', 'Super Administrator', 'ADMIN', true),
-  ('user-tech-1', 'tech01', 'tech01@checkpointsystems.com', 'a0', 'Kỹ Thuật Viên Trưởng', 'TECHNICIAN', true),
-  ('user-emp-1', 'user01', 'user01@checkpointsystems.com', 'a0', 'Nguyễn Văn A (SX)', 'EMPLOYEE', true)
-ON CONFLICT (id) DO NOTHING;
+  ('user-admin-1', 'admin', 'admin@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Super Administrator', 'ADMIN', true, '{"canCreateRequest":true,"canViewKpi":true,"canAccessControlPanel":true}'::jsonb),
+  ('user-tech-1', 'tech01', 'tech01@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Kỹ Thuật Viên Trưởng', 'TECHNICIAN', true, '{"canCreateRequest":true,"canViewKpi":true,"canAccessControlPanel":false}'::jsonb),
+  ('user-emp-1', 'user01', 'user01@checkpointsystems.com', '$2a$10$d883mgjdQ8gjFw53m1SnRu0LVdyrH1r9ZGf1Ao3lvDgp2hqCI/YAW', 'Nguyễn Văn A (SX)', 'EMPLOYEE', true, '{"canCreateRequest":true,"canViewKpi":false,"canAccessControlPanel":false}'::jsonb)
+ON CONFLICT (id) DO UPDATE SET password_hash = EXCLUDED.password_hash, role = EXCLUDED.role, is_active = EXCLUDED.is_active, permissions = EXCLUDED.permissions;
 
 -- Seed Requesters (30 records)
 INSERT INTO requesters (id, stt, department, area, mnv, full_name, position) VALUES ('req-VN5117', 1, 'Production', 'Production', 'VN5117', 'Lê Minh Hoàng', 'Assistant Production Manager') ON CONFLICT (mnv) DO NOTHING;
